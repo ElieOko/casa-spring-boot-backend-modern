@@ -9,7 +9,7 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 data class CityEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
-    val cityId : Int,
+    val cityId : Long = 0,
     @OneToOne
     @JoinColumn("country_id")
     val country : CountryEntity,
@@ -17,8 +17,8 @@ data class CityEntity(
     val name : String,
     @OneToMany(mappedBy = "city", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val user: List<UserEntity> = emptyList(),
-    @OneToOne(mappedBy = "city")
-    val district: DistrictEntity? = null,
+    @OneToMany(mappedBy = "city", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val district: List<DistrictEntity> = emptyList(),
     @OneToMany(mappedBy = "city")
     val properties : List<PropertyEntity> = emptyList()
 )

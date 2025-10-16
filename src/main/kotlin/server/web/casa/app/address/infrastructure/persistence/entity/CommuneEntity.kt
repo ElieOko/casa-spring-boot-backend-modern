@@ -6,10 +6,11 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEn
 @Entity
 @Table(name = "communes")
 data class CommuneEntity(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
-    val communeId   : Long,
-    @OneToOne
+    val communeId   : Long = 0,
+    @ManyToOne
     @JoinColumn("district_id")
     val district  : DistrictEntity? = null,
     @Column("name")

@@ -44,6 +44,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+    //rate limiting
+    implementation("com.bucket4j:bucket4j-core:8.7.0")
     //swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     // jwt

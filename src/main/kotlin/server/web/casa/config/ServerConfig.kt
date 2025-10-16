@@ -1,4 +1,4 @@
-package server.web.casa.security
+package server.web.casa.config
 
 import jakarta.servlet.DispatcherType
 import org.springframework.context.annotation.Bean
@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import server.web.casa.security.JwtAuthFilter
 import server.web.casa.utils.Mode
 
 @Configuration
