@@ -1,10 +1,12 @@
 package server.web.casa.app.reservation.infrastructure.persistence.mapper
 
+import org.springframework.stereotype.Component
 import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
 import server.web.casa.app.reservation.domain.model.Reservation
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 
+@Component
 class ReservationMapper(
     private val userMapper : UserMapper,
     private val propertyMapper: PropertyMapper
@@ -12,7 +14,7 @@ class ReservationMapper(
     fun toDomain(reservationEntity : ReservationEntity): Reservation {
         return Reservation(
             reservationId = reservationEntity.reservationId,
-            user = userMapper.toDomain(reservationEntity.user),
+            user = userMapper.toDomain(reservationEntity.user)!!,
             message = reservationEntity.message,
             status = reservationEntity.status,
             type = reservationEntity.type,
