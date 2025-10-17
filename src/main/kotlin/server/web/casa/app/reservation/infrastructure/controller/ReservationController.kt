@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.reservation.domain.model.Reservation
@@ -44,6 +45,21 @@ class ReservationController(
             "property" to property,
         )
         return ResponseEntity.status(201).body(response)
-
     }
+    @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getAllReserv(): ResponseEntity<Map<String, List<Reservation>>>
+    {
+        val data = service.findAllReservation()
+        val response = mapOf("reservation" to data)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, Reservation>> {
+        val reservation = service.findId(id)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
 }
+
