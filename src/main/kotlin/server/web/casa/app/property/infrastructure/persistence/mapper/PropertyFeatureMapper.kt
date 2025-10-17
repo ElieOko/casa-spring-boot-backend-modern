@@ -9,6 +9,7 @@ class PropertyFeatureMapper{
     fun toDomain(p : PropertyFeatureEntity): PropertyFeature {
         return PropertyFeature(
             propertyFeatureId = p.propertyFeatureId,
+            name = p.name
            // property = p.property.stream().map { propertyMapper.toDomain(it) }.toList()
         )
     }
@@ -16,6 +17,7 @@ class PropertyFeatureMapper{
     fun toEntity(p : PropertyFeature): PropertyFeatureEntity {
         return PropertyFeatureEntity(
             propertyFeatureId = p.propertyFeatureId,
+            name = p.name
           //  property = p.property.stream().map { propertyMapper.toEntity(it) }.toList()
         )
     }

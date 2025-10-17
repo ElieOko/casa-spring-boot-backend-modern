@@ -14,7 +14,7 @@ import server.web.casa.utils.Mode
 @Profile(Mode.DEV)
 class CommandLinePropertyComponent(
    private val typePropertyRepository: PropertyTypeRepository,
-   private val featureProperty : PropertyFeatureRepository
+   private val feature : FeatureRepository
 ) : CommandLineRunner {
     private val log = LoggerFactory.getLogger(this::class.java)
     override fun run(vararg args: String) {
@@ -60,21 +60,21 @@ class CommandLinePropertyComponent(
     }
 
     fun createFeature(){
-        featureProperty.saveAll(
+        feature.saveAll(
             listOf(
-                PropertyFeatureEntity(name = "Wifi"),
-                PropertyFeatureEntity(name = "Climatisation"),
-                PropertyFeatureEntity(name = "Chauffage"),
-                PropertyFeatureEntity(name = "Cuisine équipé"),
-                PropertyFeatureEntity(name = "Lave-linge"),
-                PropertyFeatureEntity(name = "Parking"),
-                PropertyFeatureEntity(name = "Ascenceur"),
-                PropertyFeatureEntity(name = "Piscine"),
-                PropertyFeatureEntity(name = "Jardin"),
-                PropertyFeatureEntity(name = "Terrasse"),
-                PropertyFeatureEntity(name = "Gym"),
-                PropertyFeatureEntity(name = "Sécurité"),
-                PropertyFeatureEntity(name = "Animaux acceptés"),
+                FeatureEntity(name = "Wifi"),
+                FeatureEntity(name = "Climatisation"),
+                FeatureEntity(name = "Chauffage"),
+                FeatureEntity(name = "Cuisine équipé"),
+                FeatureEntity(name = "Lave-linge"),
+                FeatureEntity(name = "Parking"),
+                FeatureEntity(name = "Ascenceur"),
+                FeatureEntity(name = "Piscine"),
+                FeatureEntity(name = "Jardin"),
+                FeatureEntity(name = "Terrasse"),
+                FeatureEntity(name = "Gym"),
+                FeatureEntity(name = "Sécurité"),
+                FeatureEntity(name = "Animaux acceptés"),
             )
         )
         log.info("save features")
