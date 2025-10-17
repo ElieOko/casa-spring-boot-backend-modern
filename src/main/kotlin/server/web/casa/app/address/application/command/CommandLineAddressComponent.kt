@@ -19,7 +19,7 @@ import server.web.casa.utils.Mode
 import kotlin.jvm.optionals.toList
 
 @Component
-@Order(1)
+@Order(3)
 @Profile(Mode.DEV)
 class CommandLineAddressComponent(
    private val cityRepository: CityRepository,

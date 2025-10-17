@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.user.application.UserService
 import server.web.casa.app.user.domain.model.User
-import server.web.casa.app.user.domain.model.UserAuth
 
 @Tag(name = "Utilisateur", description = "Gestion des utilisateurs")
 @RestController
@@ -49,11 +48,9 @@ class UserController(
     @DeleteMapping("/{id}")
     fun delete(
         @PathVariable("id") id : Long
-    ): ResponseEntity<Any>{
-        return try {
-            ResponseEntity.ok().build()
-        } catch (e : NoSuchElementException){
-            ResponseEntity.status(404).build()
-        }
+    ): ResponseEntity<Map<String, String>> {
+        userService.deleteUser(id)
+        val response = mapOf("message" to "Suppression réussi avec succès")
+        return ResponseEntity.ok().body(response)
     }
 }

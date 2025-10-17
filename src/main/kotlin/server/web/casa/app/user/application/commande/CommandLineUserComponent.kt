@@ -13,7 +13,7 @@ import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEnt
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountRepository
 
 @Component
-@Order(0)
+@Order(4)
 @Profile("dev")
 class CommandLineUserComponent(
     @Value("\${spring.application.version}")  private val version: String,
@@ -26,7 +26,7 @@ class CommandLineUserComponent(
         log.info(this::class.simpleName)
         log.info(version)
         try {
-//            createTypeAccount()
+            createTypeAccount()
             //getAllTypeAccount()
         }
         catch (e : ConstraintViolationException){
@@ -37,8 +37,8 @@ class CommandLineUserComponent(
     fun createTypeAccount(){
         val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(
             listOf(
-                TypeAccountEntity(name= "admin"),
-                TypeAccountEntity(name= "commissionnaire"),
+                TypeAccountEntity(name = "admin"),
+                TypeAccountEntity(name = "commissionnaire"),
                 TypeAccountEntity(name = "bailleur"),
                 TypeAccountEntity(name = "locataire"),
             )

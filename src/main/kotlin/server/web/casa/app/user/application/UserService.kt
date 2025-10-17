@@ -7,7 +7,9 @@ import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.servlet.function.EntityResponse
 import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.Mode
@@ -26,8 +28,6 @@ class UserService(
     fun createUser(user: User) : User? {
 
         val entityToSave = UserEntity(
-            userId = 0,
-            username = user.username,
             password = user.password,
             typeAccount = mapperAccount.toEntity(user.typeAccount) ,
             email = user.email,
@@ -62,7 +62,6 @@ class UserService(
         }
         val entityToUpdate = UserEntity(
             userId = user.userId,
-            username = user.username,
             password = user.password,
             typeAccount = mapperAccount.toEntity(user.typeAccount),
             email = user.email,
@@ -74,15 +73,11 @@ class UserService(
         return mapper.toDomain(updatedUser)
     }
 
-    fun deleteUser(id : Long){
+    fun deleteUser(id : Long) : Boolean{
         if (!repository.existsById(id)){
             EntityNotFoundException("Aucun $name avec cet identifiant $id")
         }
         repository.deleteById(id)
+        return true
     }
-
-    fun login(userAuth : UserAuth) : User? {
-        return null
-    }
-
 }

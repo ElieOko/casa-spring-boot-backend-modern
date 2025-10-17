@@ -47,16 +47,19 @@ class GlobalExceptionHandler {
         IllegalStateException::class,
         MethodArgumentNotValidException::class
     ])
-    fun handleBadRequest(e : Exception) : ResponseEntity<ErrorResponseDto>{
-        logger.error("Handle handleBadRequest", e);
-        val errorDto = ErrorResponseDto(
-            "Bad request",
-            e.message.toString(),
-            LocalDateTime.now()
-        )
+    fun handleBadRequest(e : MethodArgumentNotValidException) : ResponseEntity<MutableMap<String, Any>> {
+        logger.error("Handle handleBadRequest", e)
+        val map = mutableMapOf<String, Any>()
+        e.bindingResult.fieldErrors.forEach { error->
+            map[error.field] = error.defaultMessage ?: "Validation"
+        }
+        val mapList = mutableMapOf<String, Any>()
+        map.forEach { (p0, p1) ->
+            mapList["message"] = p1
+        }
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(errorDto)
+            .body(mapList)
     }
 
 }

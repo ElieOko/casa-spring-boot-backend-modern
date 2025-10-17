@@ -7,12 +7,12 @@ data class Commissionnaire(
     val firstName  : String,
     val lastName   : String,
     val fullName   : String,
-    val address    : String,
-    val images     : String,
-    val cardFront  : String,
-    val cardBack   : String,
+    val address    : String?,
+    val images     : String?,
+    val cardFront  : String?,
+    val cardBack   : String?,
     val parrain    : User? = null,
     val user       : User?,
-    val typeCard   : TypeCard,
+    val typeCard   : TypeCard? = null,
     val numberCard : String? = null
 )

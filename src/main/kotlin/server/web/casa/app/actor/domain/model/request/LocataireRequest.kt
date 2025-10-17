@@ -7,14 +7,14 @@ data class LocataireRequest(
     val lastName: String,
     @NotNull
     val firstName: String,
-    val address : String,
-    @NotNull
-    val images : String,
-    @NotNull
-    val cardFront : String,
-    @NotNull
-    val cardBack : String,
-    val typeCardId : Long,
-    @NotNull
+    val address : String? = "",
+//    @NotNull
+    val images : String? = "",
+//    @NotNull
+    val cardFront : String? = "",
+//    @NotNull
+    val cardBack : String? = "",
+    val typeCardId : Long? = 3,
+//    @NotNull
     val numberCard : String? = null
 )
