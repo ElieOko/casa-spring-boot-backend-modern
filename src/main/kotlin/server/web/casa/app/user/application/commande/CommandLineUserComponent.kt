@@ -37,8 +37,8 @@ class CommandLineUserComponent(
     fun createTypeAccount(){
         val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(
             listOf(
-                TypeAccountEntity(name= "admin"),
-                TypeAccountEntity(name= "commissionnaire"),
+                TypeAccountEntity(name = "admin"),
+                TypeAccountEntity(name = "commissionnaire"),
                 TypeAccountEntity(name = "bailleur"),
                 TypeAccountEntity(name = "locataire"),
             )

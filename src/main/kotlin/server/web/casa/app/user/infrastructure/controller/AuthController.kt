@@ -34,12 +34,22 @@ class AuthController(
     fun register(
         @Valid @RequestBody user: UserRequest
     ): ResponseEntity<Map<String, Any?>> {
+        if (user.cityId == 0L || user.typeAccountId == 0L){
+            val response = mapOf(
+                "message" to "0 n'est ne peut pas être identifiant"
+            )
+           return ResponseEntity.status(404).body(response)
+        }
+        if (user.typeAccountId > 4L){
+            val response = mapOf(
+                "message" to "Ce type de compte n'existe pas"
+            )
+            return ResponseEntity.status(404).body(response)
+        }
         val city = cityService.findByIdCity(user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(user.typeAccountId)
         if (city != null && typeAccount != null){
             val userSystem = User(
-                userId = 0,
-                username = user.username,
                 password = user.password,
                 typeAccount = typeAccount,
                 email = user.email,
@@ -63,7 +73,7 @@ class AuthController(
     fun login(
       @Valid @RequestBody body: UserAuth
     ): ResponseEntity<Map<String, Any?>> {
-      val data = authService.login(body.username, body.password)
+      val data = authService.login(body.identifiant, body.password)
       val response = mapOf(
           "user" to data.second,
           "token" to data.first.accessToken,

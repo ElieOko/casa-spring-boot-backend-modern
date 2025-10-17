@@ -28,15 +28,13 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @Id
     @Column("id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val userId: Long,
-    @OneToOne
+    val userId: Long = 0,
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("typeAccountId")
     val typeAccount: TypeAccountEntity,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cityId")
     val city: CityEntity,
-    @Column("username", unique = true)
-    val username: String,
     @Column("password", nullable = false)
     @JsonIgnore
     val password: String?,
@@ -48,14 +46,14 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     val createdAt: Instant = Clock.System.now(),
     @OneToMany(mappedBy = "user")
     val properties : List<PropertyEntity> = emptyList(),
-    @OneToOne(mappedBy = "user")
-    val bailleur: BailleurEntity? = null,
-    @OneToOne(mappedBy = "user")
-    val commissionnaire: CommissionnaireEntity? = null,
-    @OneToOne(mappedBy = "user")
-    val locataire: LocataireEntity? = null,
-    @OneToOne(mappedBy = "parrain")
-    val parrainBailleur: BailleurEntity? = null,
+    @OneToMany(mappedBy = "user")
+    val bailleur: List<BailleurEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val commissionnaire: List<CommissionnaireEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val locataire: List<LocataireEntity> = emptyList(),
+    @OneToMany(mappedBy = "parrain")
+    val parrainBailleur: List<BailleurEntity> = emptyList(),
 
     @OneToMany(mappedBy = "user")
     val reservation : List<ReservationEntity> = emptyList()

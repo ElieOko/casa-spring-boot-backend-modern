@@ -15,20 +15,20 @@ data class CommissionnaireEntity(
     val lastName    : String,
     @Column("fullName")
     val fullName    : String,
-    @Column("address")
-    val address     : String,
-    @Column("images")
-    val images      : String,
-    @Column("cardFront")
-    val cardFront   : String,
-    @Column("cardBack")
-    val cardBack    : String,
-    @OneToOne
+    @Column("address", nullable = true)
+    val address     : String? = null,
+    @Column("images", nullable = true)
+    val images      : String? = null,
+    @Column("cardFront", nullable = true)
+    val cardFront   : String? = null,
+    @Column("cardBack", nullable = true)
+    val cardBack    : String? = null,
+    @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @OneToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "typeCardId")
-    val typeCard : TypeCardEntity,
-    @Column("numberCard")
+    val typeCard : TypeCardEntity?,
+    @Column("numberCard", nullable = true)
     val numberCard  : String? = null
 )

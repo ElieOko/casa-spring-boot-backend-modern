@@ -19,6 +19,7 @@ import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
 import server.web.casa.app.address.infrastructure.persistence.repository.CityRepository
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.Mode
+import server.web.casa.utils.normalizeAndValidatePhoneNumber
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.*
@@ -44,17 +45,21 @@ class AuthService(
 
     @OptIn(ExperimentalTime::class)
     fun register(user : User): Pair<User?, String> {
-        val userEntity = userRepository.findByUsername(user.username.trim())
+        val phone = normalizeAndValidatePhoneNumber(user.phone) ?: throw ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Ce numero n'est pas valide."
+        )
+
+        val userEntity = userRepository.findByPhoneOrEmail(phone)
         if(userEntity != null) {
-            throw ResponseStatusException(HttpStatus.CONFLICT, "A user with that email already exists.")
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Cet identifiant existe dans la plateforme.")
         }
         val entity = UserEntity(
             userId = 0,
-            username = user.username,
             password = hashEncoder.encode(user.password),
             typeAccount = mapperAccount.toEntity(user.typeAccount) ,
             email = user.email,
-            phone = user.phone,
+            phone = phone,
             city = mapperCity.toEntity(user.city)
         )
         val savedEntity = userRepository.save(entity)
@@ -64,9 +69,13 @@ class AuthService(
         return result
     }
 
-    fun login(username: String, password: String): Pair<TokenPair, User?> {
-        val user = userRepository.findByUsername(username)
-            ?: throw BadCredentialsException("Invalid credentials.")
+    fun login(identifiant: String, password: String): Pair<TokenPair, User?> {
+        var validIdentifiant = normalizeAndValidatePhoneNumber(identifiant)
+        if (validIdentifiant == null){
+            validIdentifiant = identifiant
+        }
+        val user = userRepository.findByPhoneOrEmail(validIdentifiant)
+            ?: throw BadCredentialsException("Invalid credentials .")
 
         if(!hashEncoder.matches(password, user.password.toString())) {
             throw BadCredentialsException("Invalid credentials.")

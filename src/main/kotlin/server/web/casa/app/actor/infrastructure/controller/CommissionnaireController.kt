@@ -32,11 +32,13 @@ class CommissionnaireController(
     ): ResponseEntity<Map<String, Any?>> {
         val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        val typeCard = typeCardService.findByIdTypeCard(request.commissionnaire.typeCardId)
-        if (city != null && typeAccount != null && typeCard != null) {
+        if (request.user.typeAccountId != 2L){
+            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte commissionnaire")
+            return ResponseEntity.badRequest().body(response)
+        }
+//        val typeCard = typeCardService.findByIdTypeCard(request.commissionnaire.typeCardId)
+        if (city != null && typeAccount != null ) {
             val userSystem = User(
-                userId = 0,
-                username = request.user.username,
                 password = request.user.password,
                 typeAccount = typeAccount,
                 email = request.user.email,
@@ -53,7 +55,7 @@ class CommissionnaireController(
                 cardFront = request.commissionnaire.cardFront,
                 cardBack = request.commissionnaire.cardBack,
                 user = userCreated.first,
-                typeCard = typeCard,
+                typeCard = null,
                 numberCard = request.commissionnaire.numberCard
             )
             val bailleutCreated = service.createCommissionnaire(data)

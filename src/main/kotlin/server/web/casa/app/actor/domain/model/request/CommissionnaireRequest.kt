@@ -7,10 +7,10 @@ data class CommissionnaireRequest(
     val lastName: String,
     @NotNull
     val firstName: String,
-    val address : String = "",
-    val images : String="",
-    val cardFront : String="",
-    val cardBack : String="",
-    val typeCardId : Long,
-    val numberCard : String = ""
+    val address : String? = "",
+    val images : String?="",
+    val cardFront : String? ="",
+    val cardBack : String?="",
+    val typeCardId : Long? = 0,
+    val numberCard : String? = ""
 )

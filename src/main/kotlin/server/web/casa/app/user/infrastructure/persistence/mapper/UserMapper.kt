@@ -17,7 +17,6 @@ class UserMapper(
         if (entity != null ){
           data = User(
                 userId = entity.userId,
-                username = entity.username,
                 password = entity.password.toString(),
                 typeAccount = mapperAccount.toDomain(entity.typeAccount) ,
                 email = entity.email,
@@ -34,7 +33,6 @@ class UserMapper(
         if (user != null){
            data = UserEntity(
                 userId = user.userId,
-                username = user.username,
                 password = user.password,
                 typeAccount =mapperAccount.toEntity(user.typeAccount) ,
                 email = user.email,

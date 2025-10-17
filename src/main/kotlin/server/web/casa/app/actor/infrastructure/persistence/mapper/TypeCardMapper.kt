@@ -6,17 +6,17 @@ import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntit
 
 @Component
 class TypeCardMapper {
-    fun toDomain(typeCardEntity: TypeCardEntity) : TypeCard{
+    fun toDomain(typeCardEntity: TypeCardEntity? = null) : TypeCard?{
         return TypeCard(
-            typeCardId = typeCardEntity.typeCardId,
-            name = typeCardEntity.name,
+            typeCardId = typeCardEntity?.typeCardId,
+            name = typeCardEntity?.name,
         )
     }
     
-    fun toEntity(typeCard: TypeCard? = null): TypeCardEntity {
+    fun toEntity(typeCard: TypeCard? = null): TypeCardEntity? {
         return TypeCardEntity(
-            typeCardId = typeCard!!.typeCardId,
-            name = typeCard.name
+            typeCardId = typeCard?.typeCardId,
+            name = typeCard?.name
         )
     }
 }

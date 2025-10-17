@@ -1,12 +1,4 @@
 services:
-#  swagger-ui:
-#    image: swaggerapi/swagger-ui:v5.29.3
-#    environment:
-#      SWAGGER_JSON_URL: http://casa-spring-app:8083/v3/api-docs
-#    ports:
-#      - "8089:8080"
-#    volumes:
-#      - ../openapi:/oas
   casa-spring-app :
     image: 'elieoko/casa-spring-app:latest'
     build:

@@ -32,11 +32,14 @@ class LocataireController(
     ): ResponseEntity<Map<String, Any?>> {
         val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        val typeCard = typeCardService.findByIdTypeCard(request.locataire.typeCardId)
-        if (city != null && typeAccount != null && typeCard != null) {
+        if (request.user.typeAccountId != 4L){
+            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Locataire")
+            return ResponseEntity.badRequest().body(response)
+        }
+//        val typeCard = typeCardService.findByIdTypeCard(request.locataire.typeCardId)
+        if (city != null && typeAccount != null) {
             val userSystem = User(
                 userId = 0,
-                username = request.user.username,
                 password = request.user.password,
                 typeAccount = typeAccount,
                 email = request.user.email,
@@ -53,7 +56,7 @@ class LocataireController(
                 cardFront = request.locataire.cardFront,
                 cardBack = request.locataire.cardBack,
                 user = userCreated.first,
-                typeCard = typeCard,
+                typeCard = null,
                 numberCard = request.locataire.numberCard
             )
             val bailleutCreated = service.createLocataire(data)

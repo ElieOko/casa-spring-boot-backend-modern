@@ -16,25 +16,25 @@ data class BailleurEntity(
     val lastName : String,
     @Column("fullName")
     val fullName : String,
-    @Column("address")
-    val address : String,
-    @Column("images")
-    val images : String,
-    @Column("cardFront")
-    val cardFront : String,
-    @Column("cardBack")
-    val cardBack : String,
-    @OneToOne
-    @JoinColumn(name = "parrainId")
+    @Column("address", nullable = true)
+    val address : String? = "",
+    @Column("images", nullable = true)
+    val images : String? = null,
+    @Column("cardFront", nullable = true)
+    val cardFront : String?,
+    @Column("cardBack", nullable = true)
+    val cardBack : String? = null,
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JoinColumn(name = "parrainId", nullable = true)
     val parrain : UserEntity? = null,
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @OneToOne
-    @JoinColumn(name = "typeCardId")
-    val typeCard : TypeCardEntity,
-    @Column("numberCard")
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "typeCardId", nullable = true)
+    val typeCard : TypeCardEntity? = null,
+    @Column("numberCard", nullable = true)
     val numberCard : String? = null,
-    @Column("note")
+    @Column("note", nullable = true)
     val note : String? = null
 )

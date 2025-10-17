@@ -1,10 +1,16 @@
 package server.web.casa.app.user.domain.model
 
+import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 
 data class UserAuth(
     @NotNull
-    val username : String,
+//    @field:NotBlank(message = "L'identifiant est obligatoire")
+    @field:Size(min = 4, message = "Identifiant non valide")
+    val identifiant : String,
     @NotNull
+    @field:NotBlank(message = "Le mot de passe est obligatoire")
+    @field:Size(min = 4, message = "Le mot de passe doit contenir au moins 4 caractères")
     val password : String
 )

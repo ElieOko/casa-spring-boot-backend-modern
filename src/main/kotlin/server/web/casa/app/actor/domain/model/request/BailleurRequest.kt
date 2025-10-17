@@ -7,16 +7,16 @@ data class BailleurRequest(
     val lastName: String,
     @NotNull
     val firstName: String,
-    val address : String,
-    @NotNull
-    val images : String,
-    @NotNull
-    val cardFront : String,
-    @NotNull
-    val cardBack : String,
+    val address : String? = "",
+//    @NotNull
+    val images : String? = "",
+//    @NotNull
+    val cardFront : String? = "",
+//    @NotNull
+    val cardBack : String? = "",
     val parrainId : Long? = null,
-    val typeCardId : Long,
-    @NotNull
+    val typeCardId : Long? = 3,
+//    @NotNull
     val numberCard : String? = null,
     val note : String? = null
 )

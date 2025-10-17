@@ -30,7 +30,8 @@ class CommandLineActorComponent(
         typeCardRepository.saveAll(
             listOf(
                 TypeCardEntity(name = "Carte d'électeur", typeCardId = 0),
-                TypeCardEntity(name = "Visa", typeCardId = 0)
+                TypeCardEntity(name = "Visa", typeCardId = 0),
+                TypeCardEntity(name = "Autres", typeCardId = 0)
             )
         )
         log.info("save card")

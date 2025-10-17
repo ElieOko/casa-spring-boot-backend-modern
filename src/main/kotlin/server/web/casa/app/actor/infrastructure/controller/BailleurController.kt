@@ -33,16 +33,21 @@ class BailleurController(
     ): ResponseEntity<Map<String, Any?>> {
         val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        val typeCard = typeCardService.findByIdTypeCard(request.bailleur.typeCardId)
         var parrain : User? = null
-
-        if (city != null && typeAccount != null && typeCard != null) {
+        var paraintId : Long = 0
+        if (request.user.typeAccountId != 3L){
+            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte bailleur")
+            return ResponseEntity.badRequest().body(response)
+        }
+//        val typeCard = typeCardService.findByIdTypeCard(request.bailleur.typeCardId)
+        if (city != null && typeAccount != null ) {
             if (request.bailleur.parrainId != null){
-                parrain = userService.findIdUser(request.bailleur.parrainId)
+                paraintId = request.bailleur.parrainId
             }
+//            parrain = userService.findIdUser(paraintId)
+//            }
             val userSystem = User(
                 userId = 0,
-                username = request.user.username,
                 password = request.user.password,
                 typeAccount = typeAccount,
                 email = request.user.email,
@@ -58,9 +63,9 @@ class BailleurController(
                 images = request.bailleur.images,
                 cardFront = request.bailleur.cardFront,
                 cardBack = request.bailleur.cardBack,
-                parrain = parrain,
+                parrain = null,
                 user = userCreated.first,
-                typeCard = typeCard,
+                typeCard = null,
                 numberCard = request.bailleur.numberCard,
                 note = request.bailleur.note
             )
