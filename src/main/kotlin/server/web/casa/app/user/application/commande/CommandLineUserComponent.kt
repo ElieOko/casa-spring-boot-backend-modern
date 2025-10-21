@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
+import server.web.casa.app.address.application.service.CityService
+import server.web.casa.app.user.application.AuthService
+import server.web.casa.app.user.application.TypeAccountService
+import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountRepository
 
@@ -17,7 +21,10 @@ import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccoun
 @Profile("dev")
 class CommandLineUserComponent(
     @Value("\${spring.application.version}")  private val version: String,
-    val typeAccountRepository: TypeAccountRepository
+    val typeAccountRepository: TypeAccountRepository,
+    private val authService: AuthService,
+    private val cityService: CityService,
+    private val typeAccountService: TypeAccountService
 ) : CommandLineRunner {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -27,6 +34,7 @@ class CommandLineUserComponent(
         log.info(version)
         try {
             createTypeAccount()
+            createUser()
             //getAllTypeAccount()
         }
         catch (e : ConstraintViolationException){
@@ -56,5 +64,18 @@ class CommandLineUserComponent(
         typeAccountRepository.findAll().forEach { accountEntity ->
             log.info("${accountEntity.name} | ${accountEntity.typeAccountId}")
         }
+    }
+
+    fun createUser(){
+       val account = typeAccountService.findByIdTypeAccount(1)
+       val city = cityService.findByIdCity(1)
+       val userSystem = User(
+            password = "1234",
+            typeAccount = account,
+            email = "elieoko100@gmail.com",
+            phone = "0827824163",
+            city = city)
+        val data = authService.register(userSystem)
+        log.info("Enregistrement réussi avec succès***${data.first?.phone}")
     }
 }

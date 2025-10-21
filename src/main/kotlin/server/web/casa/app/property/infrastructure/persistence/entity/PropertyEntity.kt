@@ -15,7 +15,7 @@ class PropertyEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val propertyId : Long,
+    val propertyId : Long =0,
     @Column(name = "title")
     val title : String,
     @Column(name = "description", nullable = true)

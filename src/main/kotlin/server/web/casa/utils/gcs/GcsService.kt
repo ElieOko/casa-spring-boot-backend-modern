@@ -31,10 +31,10 @@ class GcsService(
     @Throws(IOException::class)
     fun uploadFile(file: MultipartFile,directory : String = ""): String? {
         log.info("Gcs service****file:${file.name}")
-        val fileName = "${bucketConfig?.bucketName}/${directory}${file.originalFilename}"
+        val fileName = "casa/${directory}${file.originalFilename}"
         log.info("Gcs service****fileName:${fileName}")
         val blob = storage?.create(
-            BlobInfo.newBuilder("${bucketConfig?.subdirectory}", fileName).build(),
+            BlobInfo.newBuilder("staging.infinite-strata-226508.appspot.com", fileName).build(),
             file.bytes
         )
         log.info("Gcs service****blod:${blob?.mediaLink}")
