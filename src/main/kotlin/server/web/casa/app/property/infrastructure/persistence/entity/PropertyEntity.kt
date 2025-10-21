@@ -1,5 +1,7 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
+import com.fasterxml.jackson.annotation.JsonManagedReference
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import server.web.casa.app.address.infrastructure.persistence.entity.CityEntity
 import server.web.casa.app.address.infrastructure.persistence.entity.CommuneEntity
@@ -9,7 +11,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "properties")
-data class PropertyEntity(
+class PropertyEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,30 +68,46 @@ data class PropertyEntity(
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updatedAt")
     val updatedAt: LocalDate = LocalDate.now(),
-    @OneToMany(mappedBy = "property")
-    val propertyImage : List<PropertyImageEntity> = emptyList(),
-    @OneToMany(mappedBy = "property")
-    val propertyImageRoom : List<PropertyImageRoomEntity> = emptyList(),
-    @OneToMany(mappedBy = "property")
-    val propertyImageLivingRoom : List<PropertyImageLivingRoomEntity> = emptyList(),
-    @OneToMany(mappedBy = "property")
-    val propertyImageKitchen : List<PropertyImageKitchenEntity> = emptyList(),
+    @OneToMany(mappedBy = "property", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JsonManagedReference
+    val propertyImage : MutableSet<PropertyImageEntity> = mutableSetOf(),
+    @OneToMany(mappedBy = "propertyRoom", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JsonManagedReference
+    val propertyImageRoom : MutableSet<PropertyImageRoomEntity> = mutableSetOf(),
+    @OneToMany(mappedBy = "propertyLiving", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JsonManagedReference
+    val propertyImageLivingRoom : MutableSet<PropertyImageLivingRoomEntity> = mutableSetOf(),
+    @OneToMany(mappedBy = "propertyKitchen", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JsonManagedReference
+    val propertyImageKitchen : MutableSet<PropertyImageKitchenEntity> = mutableSetOf(),
     @OneToMany(mappedBy = "property")
     val reservation : List<ReservationEntity> = emptyList(),
-
+//    @OneToMany(mappedBy = "property")
+//    val propertyFeature: MutableSet<PropertyFeatureEntity> = mutableSetOf(),
     @ManyToMany
     @JoinTable(
         "PropertyFeatures",
         joinColumns = [JoinColumn("property_id")],
-        inverseJoinColumns = [JoinColumn("user_id")]
+        inverseJoinColumns = [JoinColumn("feature_id")]
     )
-    val features : List<PropertyFeatureEntity> = emptyList(),
-
-    @ManyToMany
-    @JoinTable(
-        "PropertyFavorites",
-        joinColumns = [JoinColumn("property_id")],
-        inverseJoinColumns = [JoinColumn("user_id")]
-    )
-    val favorites : List<PropertyFavoriteEntity?> = emptyList()
+    @JsonManagedReference
+    val features : List<FeatureEntity> = emptyList(),
+//    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    @JoinTable(name = "STUDENT_COURSE_TABLE",
+//        joinColumns = {
+//            @JoinColumn(name = "student_id", referencedColumnName = "id")
+//        },
+//        inverseJoinColumns = {
+//            @JoinColumn(name = "course_id", referencedColumnName = "id")
+//        }
+//    )
+//    @JsonManagedReference
+//    private Set<Course> courses;
+//    @ManyToMany
+//    @JoinTable(
+//        "PropertyFavorites",
+//        joinColumns = [JoinColumn("property_id")],
+//        inverseJoinColumns = [JoinColumn("user_id")]
+//    )
+//    val favorites : List<PropertyFavoriteEntity?> = emptyList()
 )

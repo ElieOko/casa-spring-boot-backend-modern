@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Table(name = "PropertyVisits")
 @Entity
-data class PropertyVisitEntity(
+class PropertyVisitEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

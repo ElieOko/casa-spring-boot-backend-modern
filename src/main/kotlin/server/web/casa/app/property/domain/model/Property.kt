@@ -28,7 +28,7 @@ data class Property(
     val latitude : Double? = null,
     val longitude : Double? = null,
     val isAvailable : Boolean = true,
-    val features : List<PropertyFeature> = emptyList(),
+    val features : List<Feature> = emptyList(),
     val favorites : List<PropertyFavorite?> = emptyList(),
     val propertyImage : List<PropertyImage> = emptyList(),
     val propertyImageRoom : List<PropertyImageRoom> = emptyList(),
