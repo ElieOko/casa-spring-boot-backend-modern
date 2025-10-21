@@ -15,12 +15,12 @@ class PropertyImageRoomMapper{
         )
     }
 
-    fun toEntity(p : PropertyImageRoom): PropertyImageRoomEntity {
-        return PropertyImageRoomEntity(
-            propertyImageRoomId = p.propertyImageRoomId,
-         //   property = propertyMapper.toEntity(p.property),
-            name = p.name,
-            path = p.path
-        )
-    }
+//    fun toEntity(p : PropertyImageRoom): PropertyImageRoomEntity {
+//        return PropertyImageRoomEntity(
+//            propertyImageRoomId = p.propertyImageRoomId,
+//         //   property = propertyMapper.toEntity(p.property),
+//            name = p.name,
+//            path = p.path
+//        )
+//    }
 }

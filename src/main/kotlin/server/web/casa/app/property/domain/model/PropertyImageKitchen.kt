@@ -1,8 +1,8 @@
 package server.web.casa.app.property.domain.model
 
 data class PropertyImageKitchen(
-    val propertyImageKitchenId : Long,
-    val property : Property? = null,
-    val name : String,
-    val path : String
+    val propertyImageKitchenId : Long = 0,
+    var property : Property? = null,
+    var name : String = "",
+    var path : String = ""
 )

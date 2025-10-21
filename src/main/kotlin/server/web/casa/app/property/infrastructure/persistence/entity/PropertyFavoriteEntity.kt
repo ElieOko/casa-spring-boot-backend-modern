@@ -4,11 +4,11 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "PropertyFavorites")
-data class PropertyFavoriteEntity(
+class PropertyFavoriteEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val propertyFavoriteId : Long,
-    @ManyToMany(mappedBy = "favorites")
-    val property : List<PropertyEntity?> = emptyList()
+//    @ManyToMany(mappedBy = "favorites")
+//    val property : List<PropertyEntity?> = emptyList()
 )

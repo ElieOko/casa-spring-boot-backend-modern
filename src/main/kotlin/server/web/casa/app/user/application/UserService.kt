@@ -52,6 +52,7 @@ class UserService(
         return mapper.toDomain(userEntity)
     }
 
+
     @OptIn(ExperimentalTime::class)
     fun updateUser(
         id : Long,

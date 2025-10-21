@@ -15,12 +15,12 @@ class PropertyImageKitchenMapper{
         )
     }
 
-    fun toEntity(p : PropertyImageKitchen) : PropertyImageKitchenEntity {
-        return PropertyImageKitchenEntity(
-            propertyImageKitchenId = p.propertyImageKitchenId,
-//            property = propertyMapper.toEntity(p.property),
-            name = p.name,
-            path = p.path
-        )
-    }
+//    fun toEntity(p : PropertyImageKitchen) : PropertyImageKitchenEntity {
+//        return PropertyImageKitchenEntity(
+//            propertyImageKitchenId = p.propertyImageKitchenId,
+////            property = propertyMapper.toEntity(p.property),
+//            name = p.name,
+//            path = p.path
+//        )
+//    }
 }

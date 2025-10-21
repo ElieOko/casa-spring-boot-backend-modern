@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "quartiers")
-data class QuartierEntity(
+ class QuartierEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
     val quartierId  : Long,

@@ -6,7 +6,7 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
 @Table(name = "cities")
-data class CityEntity(
+class CityEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
     val cityId : Long = 0,

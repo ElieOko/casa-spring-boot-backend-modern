@@ -5,7 +5,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEn
 
 @Entity
 @Table(name = "communes")
-data class CommuneEntity(
+class CommuneEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")

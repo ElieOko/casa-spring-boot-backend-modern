@@ -4,11 +4,11 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "PropertyTypes")
-data class PropertyTypeEntity(
+class PropertyTypeEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val propertyTypeId : Long,
+    val propertyTypeId : Long = 0,
     @Column(name = "name")
     val name : String,
     @Column(name = "description", nullable = true)

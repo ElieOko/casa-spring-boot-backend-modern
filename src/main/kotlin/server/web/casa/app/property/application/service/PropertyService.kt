@@ -16,12 +16,12 @@ class PropertyService(
     private val mapper : PropertyMapper
 ) {
 
-    fun create(p : Property): PropertyEntity {
+    fun create(p : Property): Property {
         val data = mapper.toEntity(p)
         val result = repository.save(data)
-        return result
+        return mapper.toDomain(result)
     }
-    fun getAll() : List<Property> = repository.findAll().stream().map { mapper.toDomain(it) }.toList()
+    fun getAll() : List<Property> = repository.findAll().map { mapper.toDomain(it) }.toList()
 
     fun findByIdProperty(id : Long) : Property? {
         val data = repository.findById(id).orElseThrow { ->

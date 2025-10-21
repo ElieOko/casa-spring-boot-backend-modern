@@ -2,20 +2,18 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.*
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
-@Table(name = "PropertyImages")
-class PropertyImageEntity(
+@Table(name = "features")
+ class FeatureEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val propertyImageId : Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn("property_id")
-    @JsonBackReference
-    var property : PropertyEntity,
+    val featureId : Long = 0,
     @Column(name = "name")
     val name : String,
-    @Column(name = "path_image")
-    val path : String
+    @ManyToMany(mappedBy = "features",fetch = FetchType.LAZY)
+    @JsonBackReference
+    val property: MutableSet<PropertyEntity> = mutableSetOf()
 )
