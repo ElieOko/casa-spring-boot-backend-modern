@@ -18,7 +18,7 @@ class FeatureService(
     }
     fun getAll() : List<Feature> = repository.findAll().stream().map { mapper.toDomain(it) }.toList()
 
-    fun findByIdPropertyType(id : Long) : Feature? {
+    fun findByIdFeature(id : Long) : Feature? {
         val data = repository.findById(id).orElseThrow { ->
             EntityNotFoundException("Aucun equipement avec cet identifiant $id")
         }
