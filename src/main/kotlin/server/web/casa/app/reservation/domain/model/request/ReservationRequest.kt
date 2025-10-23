@@ -10,7 +10,7 @@ data class ReservationRequest(
     @NotNull
     val reservationId: Long,
     @NotNull
-    val user: UserEntity,
+    val user: UserEntity ?,
     @NotNull
     val property: PropertyEntity,
     @NotNull
