@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class Reservation(
     val reservationId: Long = 0,
-    val user: User,
+    val user: User ?,
     val property: Property,
     val message: String? = "",
     val status: ReservationStatus = ReservationStatus.PENDING,

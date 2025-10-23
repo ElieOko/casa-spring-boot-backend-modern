@@ -29,7 +29,8 @@ class ReservationController(
     fun create(
         @Valid @RequestBody request: ReservationRequest
     ): ResponseEntity<Map<String, Any?>> {
-        val user = userService.findIdUser (request.user.userId)
+        //val user = userService.findIdUser (request.user.userId)
+        val user = request.user?.userId?.let { userService.findIdUser(it) }
         val property = propertyService.findByIdProperty(request.property.propertyId)
         val dataReservation = Reservation(
             user = user!!,
