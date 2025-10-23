@@ -25,6 +25,7 @@ class ReservationMapper(
             endDate = reservationEntity.endDate,
             createdAt = reservationEntity.createdAt,
             property = propertyMapper.toDomain(reservationEntity.property)
+            //property = propertyMapper.toDomain(reservationEntity.property!!)
         )
     }
 

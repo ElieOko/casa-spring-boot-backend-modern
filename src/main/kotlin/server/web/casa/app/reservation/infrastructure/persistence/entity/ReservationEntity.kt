@@ -9,17 +9,17 @@ import java.time.LocalDate
 
 @Table(name = "reservations")
 @Entity
-data class ReservationEntity(
+ class ReservationEntity(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val reservationId       : Long,
+    val reservationId       : Long = 0,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("propertyId")
     val property            : PropertyEntity,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("userId")
-    val user                : UserEntity,
+    val user                : UserEntity ?,
     @Column(name = "message", nullable = true)
     val message             : String? = "",
     @Column(name = "reservationHeure", nullable = true)
