@@ -1,5 +1,6 @@
 package server.web.casa.app.reservation.application.service
 
+import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
@@ -62,8 +63,21 @@ class ReservationService(
         val listEntity = repoR.findAllByDate(inputDate).orEmpty()
         return  listEntity.map{ mapperR.toDomain(it) }
     }
-    fun findByInterval(starDate : LocalDate, endDate: LocalDate):List<Reservation>{
+    fun findByInterval(starDate : LocalDate, endDate: LocalDate):List<Reservation> {
         val listEntity = repoR.findAllInInterval(starDate, endDate).orEmpty()
-        return  listEntity.map{ mapperR.toDomain(it) }
+        return listEntity.map { mapperR.toDomain(it) }
+        }
+        //update
+        @Transactional
+        fun updateStatusById(id: Long, status: ReservationStatus):Int{
+            val success = repoR.updateStatusById(id, status)
+            return success
+        }
+
+    //delete
+    @Transactional
+    fun deleteReservationById(id: Long):Int{
+        val success = repoR.deleteByIdReservation(id)
+        return success
     }
 }

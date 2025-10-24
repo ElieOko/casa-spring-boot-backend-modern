@@ -6,13 +6,17 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.property.application.service.PropertyService
+import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.reservation.domain.model.Reservation
+import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
 import server.web.casa.app.user.application.UserService
+import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 
 import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
+import java.time.LocalDate
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -23,7 +27,9 @@ const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 class ReservationController(
     private val service: ReservationService,
     private val userService: UserService,
-    private val propertyService: PropertyService
+    private val propertyService: PropertyService,
+    private val propertyR: PropertyRepository,
+    private val userR: UserRepository,
 ){
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun create(
@@ -59,6 +65,79 @@ class ReservationController(
     fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, Reservation>> {
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+    @GetMapping("/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationByStaus(@PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<Reservation>>> {
+        val reservation = service.findByStatus(status)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+    @GetMapping("/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationByDate(@PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<Reservation>>> {
+        val reservation = service.findByDate(inputDate)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationByMonthYear(@PathVariable month: Int,@PathVariable year: Int): ResponseEntity<Map<String, List<Reservation>>> {
+        val reservation = service.findByMonth(month, year)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<Reservation>>> {
+        val reservation = service.findByPYear(year)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationInInterval(@PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<Reservation>>> {
+        val reservation = service.findByInterval(startDateInput, endDateInput)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<Map<String, List<Reservation>>> {
+
+        val getUser = userR.findById(userId).orElseThrow {
+            RuntimeException("User not found with id: $userId")
+        }
+        val reservation = service.findByUser(getUser)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, List<Reservation>>> {
+
+        val getProperty = propertyR.findById(propertyId).orElseThrow {
+            RuntimeException("Property not found with id: $propertyId")
+        }
+        val reservation = service.findByProperty(getProperty)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @PutMapping("/update/status/{id}")
+    fun updateReservation(
+        @PathVariable id: Long,
+        @RequestBody status: ReservationStatus
+    ): ResponseEntity<Map<String, Reservation>> {
+        val updated = service.updateStatusById(id, status)
+        val reservation = service.findId(id)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @DeleteMapping("/delete/{id}")
+    fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
+        service.deleteReservationById(id)
+        val response = mapOf("message" to "Reservation deleted successfully")
         return ResponseEntity.ok(response)
     }
 
