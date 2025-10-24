@@ -13,11 +13,15 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
     @Query("SELECT r FROM ReservationEntity r WHERE r.createdAt = :date")
     fun findAllByDate(@Param("date") date: LocalDate): List<ReservationEntity>
 
-    @Query("""
-    SELECT r FROM ReservationEntity r 
-    WHERE FUNCTION('MONTH', r.createdAt) = :month 
-      AND FUNCTION('YEAR', r.createdAt) = :year
-    """)
+    @Query(
+        value = """
+        SELECT * FROM reservations 
+        WHERE EXTRACT(MONTH FROM created_at) = :month 
+          AND EXTRACT(YEAR FROM created_at) = :year
+    """,
+        nativeQuery = true
+    )
+
     fun findAllByMonthAndYear(@Param("month") month: Int, @Param("year") year: Int): List<ReservationEntity>?
 
     @Query("SELECT r FROM ReservationEntity r WHERE FUNCTION('YEAR', r.createdAt) = :year")
@@ -37,4 +41,13 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property")
     fun findByProperty(@Param("property") property: PropertyEntity): List<ReservationEntity> ?
+
+    //use with @Transactional when you call it
+    @Modifying
+    @Query("UPDATE ReservationEntity r SET r.status = :status WHERE r.id = :id")
+    fun updateStatusById(@Param("id") id: Long, @Param("status") status: ReservationStatus): Int
+
+    @Modifying
+    @Query("DELETE FROM ReservationEntity r WHERE r.id = :id")
+    fun deleteByIdReservation(@Param("id") id: Long): Int
 }
