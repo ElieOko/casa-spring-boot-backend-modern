@@ -31,6 +31,8 @@ extra["springCloudVersion"] = "2025.0.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    //schedule
+    implementation("org.springframework.boot:spring-boot-starter-quartz")
     //gcs
     implementation("com.google.cloud:spring-cloud-gcp-starter-storage")
     //generator page
