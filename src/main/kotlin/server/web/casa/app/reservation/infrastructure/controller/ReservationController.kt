@@ -1,10 +1,10 @@
 package server.web.casa.app.reservation.infrastructure.controller
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.reservation.application.service.ReservationService
@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
+@Tag(name = "Reservation", description = "Reservation's Management")
 @RestController
 @RequestMapping(ROUTE_RESERVATION)
 @Profile(Mode.DEV)
@@ -35,11 +36,14 @@ class ReservationController(
     fun create(
         @Valid @RequestBody request: ReservationRequest
     ): ResponseEntity<Map<String, Any?>> {
-        //val user = userService.findIdUser (request.user.userId)
-        val user = request.user?.userId?.let { userService.findIdUser(it) }
-        val property = propertyService.findByIdProperty(request.property.propertyId)
+        val user = userService.findIdUser(request.userId)
+        val property = propertyService.findByIdProperty(request.propertyId)
         val dataReservation = Reservation(
-            user = user!!,
+            status = request.status,
+            type = request.type,
+            isActive = true,
+            reservationHeure = request.reservationHeure,
+            user = user,
             property = property!!,
             message = request.message,
             startDate = request.startDate,
