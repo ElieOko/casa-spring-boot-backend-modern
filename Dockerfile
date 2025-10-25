@@ -13,3 +13,4 @@ EXPOSE 8083
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} /app/casa.jar
 ENTRYPOINT ["java", "-jar", "/app/casa.jar"]
+# docker run --publish 8083:8085 elieoko/casa-spring-app
