@@ -1,5 +1,7 @@
 package server.web.casa.app.address.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.District
 import server.web.casa.app.address.infrastructure.persistence.entity.DistrictEntity
@@ -11,7 +13,7 @@ class DistrictService(
     private val repository: DistrictRepository,
     private val mapper : DistrictMapper
 ) {
-    fun saveDistrict(data: District): District? {
+    suspend fun saveDistrict(data: District): District? {
         val entity: DistrictEntity? = mapper.toEntity(data)
         if ( entity != null){
             val result = repository.save(entity)
@@ -20,15 +22,11 @@ class DistrictService(
         return entity
     }
 
-    fun findAllDistrict() : List<District?>{
-        val allEntity = repository.findAll()
-        return allEntity.stream().map {
-            mapper.toDomain(it)
-        }.toList()
+    suspend fun findAllDistrict() : List<District?>{
+        return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
 
-    fun findByIdDistrict(id : Long) : District? {
-        val data = repository.findById(id).orElse(null)
-        return mapper.toDomain(data)
+    suspend fun findByIdDistrict(id : Long) : District? {
+      return repository.findById(id)?.let{  mapper.toDomain(it) }
     }
 }

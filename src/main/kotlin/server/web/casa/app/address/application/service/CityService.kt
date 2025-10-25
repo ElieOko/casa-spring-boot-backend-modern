@@ -1,5 +1,7 @@
 package server.web.casa.app.address.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.City
@@ -17,20 +19,15 @@ class CityService(
     private val repository: CityRepository,
     private val mapper: CityMapper
 ) {
-    fun saveCity(data: City): City {
+    suspend fun saveCity(data: City): City {
         val data = mapper.toEntity(data)
         val result = repository.save(data)
         return mapper.toDomain(result)
     }
-
-    fun findAllCity() : List<City>{
-        val allEntity = repository.findAll()
-        return allEntity.stream().map {
-            mapper.toDomain(it)
-        }.toList()
+    suspend  fun findAllCity() : List<City>{
+        return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
-    fun findByIdCity(id : Long) : City? {
-         val data = repository.findById(id).orElse(null)
-        return mapper.toDomain(data)
+    suspend fun findByIdCity(id : Long) : City? {
+        return repository.findById(id)?.let{  mapper.toDomain(it) }
     }
 }

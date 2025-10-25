@@ -1,8 +1,9 @@
 package server.web.casa.app.address.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import server.web.casa.app.address.domain.model.City
 import server.web.casa.app.address.domain.model.Country
 import server.web.casa.app.address.infrastructure.persistence.mapper.CountryMapper
 import server.web.casa.app.address.infrastructure.persistence.repository.CountryRepository
@@ -14,15 +15,12 @@ class CountryService(
    private val repository: CountryRepository,
    private val mapper: CountryMapper
 ) {
-    fun saveCountry(data: Country): Country {
+    suspend fun saveCountry(data: Country): Country {
         val data = mapper.toEntity(data)
         val result = repository.save(data)
         return mapper.toDomain(result)
     }
-    fun findAllCountry() : List<Country>{
-        val allEntity = repository.findAll()
-        return allEntity.stream().map {
-            mapper.toDomain(it)
-        }.toList()
+    suspend fun findAllCountry() : List<Country>{
+        return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
 }
