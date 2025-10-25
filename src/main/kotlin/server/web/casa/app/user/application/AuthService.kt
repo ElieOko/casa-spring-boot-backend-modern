@@ -44,7 +44,7 @@ class AuthService(
     )
 
     @OptIn(ExperimentalTime::class)
-    fun register(user : User): Pair<User?, String> {
+    suspend fun register(user : User): Pair<User?, String> {
         val phone = normalizeAndValidatePhoneNumber(user.phone) ?: throw ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             "Ce numero n'est pas valide."
@@ -69,7 +69,7 @@ class AuthService(
         return result
     }
 
-    fun login(identifiant: String, password: String): Pair<TokenPair, User?> {
+    suspend fun login(identifiant: String, password: String): Pair<TokenPair, User?> {
         var validIdentifiant = normalizeAndValidatePhoneNumber(identifiant)
         if (validIdentifiant == null){
             validIdentifiant = identifiant
@@ -95,38 +95,37 @@ class AuthService(
     }
 
     @Transactional
-    fun refresh(refreshToken: String): TokenPair {
+    suspend fun refresh(refreshToken: String): TokenPair {
         if(!jwtService.validateRefreshToken(refreshToken)) {
             throw ResponseStatusException(HttpStatusCode.valueOf(401), "Invalid refresh token.")
         }
-
         val userId = jwtService.getUserIdFromToken(refreshToken)
-        val user = userRepository.findById(userId.toLong()).orElseThrow {
-            ResponseStatusException(HttpStatusCode.valueOf(401), "Invalid refresh token.")
-        }
+        val user = userRepository.findById(userId.toLong())?.let { user->
+            val hashed = hashToken(refreshToken)
+            refreshTokenRepository.findByUserIdAndHashedToken(user.userId, hashed)
+                ?: throw ResponseStatusException(
+                    HttpStatusCode.valueOf(401),
+                    "Refresh token not recognized (maybe used or expired?)"
+                )
+            refreshTokenRepository.deleteByUserIdAndHashedToken(user.userId, hashed)
+            val newAccessToken = jwtService.generateAccessToken(userId)
+            val newRefreshToken = jwtService.generateRefreshToken(userId)
+            storeRefreshToken(user.userId, newRefreshToken)
 
-        val hashed = hashToken(refreshToken)
-        refreshTokenRepository.findByUserIdAndHashedToken(user.userId, hashed)
-            ?: throw ResponseStatusException(
-                HttpStatusCode.valueOf(401),
-                "Refresh token not recognized (maybe used or expired?)"
+            return TokenPair(
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken
             )
-
-        refreshTokenRepository.deleteByUserIdAndHashedToken(user.userId, hashed)
-
-        val newAccessToken = jwtService.generateAccessToken(userId)
-        val newRefreshToken = jwtService.generateRefreshToken(userId)
-
-        storeRefreshToken(user.userId, newRefreshToken)
-
-        return TokenPair(
-            accessToken = newAccessToken,
-            refreshToken = newRefreshToken
+        }
+            ?: ResponseStatusException(
+            HttpStatusCode.valueOf(401),
+            "Invalid refresh token."
         )
+        return TokenPair("","")
     }
 
     @OptIn(ExperimentalTime::class)
-    private fun storeRefreshToken(userId: Long, rawRefreshToken: String) {
+    private suspend fun storeRefreshToken(userId: Long, rawRefreshToken: String) {
         val hashed = hashToken(rawRefreshToken)
         val expiryMs = jwtService.refreshTokenValidityMs
         val expiresAt = Instant.now().plusMillis(expiryMs)

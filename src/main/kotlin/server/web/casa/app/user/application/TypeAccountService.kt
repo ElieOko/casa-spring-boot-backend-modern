@@ -1,5 +1,7 @@
 package server.web.casa.app.user.application
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.TypeCard
@@ -16,20 +18,24 @@ class TypeAccountService(
   private val repository: TypeAccountRepository,
   private val mapper: TypeAccountMapper
 ) {
-    fun saveAccount(data: TypeAccount): TypeAccount {
+
+    suspend fun saveAccount(data: TypeAccount): TypeAccount {
         val data = mapper.toEntity(data)
         val result = repository.save(data)
         return mapper.toDomain(result)
     }
-    fun getAll() : List<TypeAccount> {
-        val data: List<TypeAccountEntity?> = repository.findAll()
-        return data.stream().map {
+
+    suspend fun getAll() : List<TypeAccount> {
+        val data= repository.findAll()
+        return data.map {
             mapper.toDomain(TypeAccountEntity(it!!.typeAccountId,it.name))
         }.toList()
     }
 
-    fun findByIdTypeAccount(id : Long) : TypeAccount? {
-        val data = repository.findById(id).orElse(null)
-        return mapper.toDomain(data)
+    suspend fun findByIdTypeAccount(id : Long) : TypeAccount? {
+      repository.findById(id)?.let {
+            return mapper.toDomain(it)
+        }
+        return null
     }
 }

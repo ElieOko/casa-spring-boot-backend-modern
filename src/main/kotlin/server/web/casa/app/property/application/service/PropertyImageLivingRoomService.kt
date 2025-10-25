@@ -15,7 +15,7 @@ class PropertyImageLivingRoomService(
     private val mapper : PropertyMapper,
     private val gcsService: GcsService
 ) {
-    fun create(p : PropertyImageLivingRoom): PropertyImageLivingRoomEntity {
+    suspend fun create(p : PropertyImageLivingRoom): PropertyImageLivingRoomEntity {
         val file = base64ToMultipartFile(p.name,"living_room/")
         val imageUri = gcsService.uploadFile(file,"living/")
         p.path = imageUri!!

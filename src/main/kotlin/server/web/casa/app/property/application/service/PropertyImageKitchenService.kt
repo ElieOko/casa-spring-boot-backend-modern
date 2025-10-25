@@ -15,7 +15,7 @@ class PropertyImageKitchenService(
     private val mapper : PropertyMapper,
     private val gcsService: GcsService
 ) {
-    fun create(p : PropertyImageKitchen): PropertyImageKitchenEntity {
+    suspend fun create(p : PropertyImageKitchen): PropertyImageKitchenEntity {
         val file = base64ToMultipartFile(p.name,"kitchen")
         val imageUri = gcsService.uploadFile(file,"kitchen/")
         p.path = imageUri!!

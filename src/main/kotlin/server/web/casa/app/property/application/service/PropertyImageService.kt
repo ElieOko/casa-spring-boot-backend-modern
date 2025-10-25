@@ -20,7 +20,7 @@ class PropertyImageService(
     private val gcsService: GcsService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-    fun create(p : PropertyImage): PropertyImageEntity {
+    suspend fun create(p : PropertyImage): PropertyImageEntity {
         val file = base64ToMultipartFile(p.name, "property")
         log.info("file ****taille:${file.size}")
         log.info("file ****name:${file.name}")

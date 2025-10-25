@@ -31,7 +31,7 @@ class AuthController(
 ) {
     @Operation(summary = "Création utilisateur")
     @PostMapping(ROUTE_REGISTER)
-    fun register(
+    suspend fun register(
         @Valid @RequestBody user: UserRequest
     ): ResponseEntity<Map<String, Any?>> {
         if (user.cityId == 0L || user.typeAccountId == 0L){
@@ -70,7 +70,7 @@ class AuthController(
 
     @Operation(summary = "Connexion utilisateur")
     @PostMapping(ROUTE_LOGIN)
-    fun login(
+    suspend fun login(
       @Valid @RequestBody body: UserAuth
     ): ResponseEntity<Map<String, Any?>> {
       val data = authService.login(body.identifiant, body.password)
@@ -84,7 +84,7 @@ class AuthController(
     }
 
     @PostMapping("/refresh")
-    fun refresh(
+    suspend fun refresh(
         @RequestBody body: RefreshRequest
     ): AuthService.TokenPair {
         return authService.refresh(body.refreshToken)

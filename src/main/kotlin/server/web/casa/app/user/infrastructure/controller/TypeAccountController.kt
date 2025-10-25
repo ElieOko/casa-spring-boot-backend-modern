@@ -18,7 +18,7 @@ class TypeAccountController(
 ) {
     @Operation(summary = "Liste des comptes")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getListTypeAccount(): ResponseEntity<Map<String, List<TypeAccount>>> {
+    suspend fun getListTypeAccount(): ResponseEntity<Map<String, List<TypeAccount>>> {
         val data = service.getAll()
         val mapResponse = mapOf("type_accounts" to data)
         return ResponseEntity.ok().body(mapResponse)

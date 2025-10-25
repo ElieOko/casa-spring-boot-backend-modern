@@ -1,6 +1,8 @@
 package server.web.casa.app.property.application.service
 
 import jakarta.persistence.EntityNotFoundException
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.PropertyType
@@ -16,17 +18,18 @@ class PropertyService(
     private val mapper : PropertyMapper
 ) {
 
-    fun create(p : Property): Property {
+    suspend fun create(p : Property): Property {
         val data = mapper.toEntity(p)
         val result = repository.save(data)
         return mapper.toDomain(result)
     }
-    fun getAll() : List<Property> = repository.findAll().map { mapper.toDomain(it) }.toList()
+    suspend fun getAll() : List<Property> = repository.findAll().map { mapper.toDomain(it) }.toList()
 
-    fun findByIdProperty(id : Long) : Property? {
-        val data = repository.findById(id).orElseThrow { ->
-            EntityNotFoundException("Aucune proprièté avec cet identifiant $id")
-        }
-        return mapper.toDomain(data)
+    suspend fun findByIdProperty(id : Long) : Property? {
+        val data = repository.findById(id)?.let {
+            return mapper.toDomain(it)
+
+        }?: EntityNotFoundException("Aucune proprièté avec cet identifiant $id")
+       return null
     }
 }

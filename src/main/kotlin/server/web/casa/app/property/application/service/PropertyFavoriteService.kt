@@ -1,5 +1,7 @@
 package server.web.casa.app.property.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyFavorite
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyFavoriteEntity
@@ -12,19 +14,16 @@ class PropertyFavoriteService(
     private val mapper : PropertyFavoriteMapper
 ) {
 
-    fun create(p : PropertyFavorite): PropertyFavoriteEntity {
+    suspend fun create(p : PropertyFavorite): PropertyFavoriteEntity {
         val data = mapper.toEntity(p)
         val result = repository.save(data)
         return result
     }
-    fun getAll() : List<PropertyFavorite> = repository.findAll().stream().map { mapper.toDomain(it) }.toList()
+    suspend fun getAll() : List<PropertyFavorite> = repository.findAll().map { mapper.toDomain(it) }.toList()
 
-    fun remove(id : Long){
-        val data = repository.findById(id).orElse(null)
-        if (data != null){
-            repository.delete(data)
+    suspend fun remove(id : Long){
+        repository.findById(id)?.let{
+            repository.delete(it)
         }
     }
-
-
 }
