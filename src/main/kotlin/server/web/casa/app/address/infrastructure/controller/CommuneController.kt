@@ -23,7 +23,7 @@ class CommuneController(
    private val districtService: DistrictService,
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun createCommune(
+    suspend fun createCommune(
        @Valid @RequestBody request: CommuneRequest
     ): ResponseEntity<Map<String, Any>> {
         val district = districtService.findByIdDistrict(request.districtId)
@@ -46,7 +46,7 @@ class CommuneController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllCommune(): ResponseEntity<Map<String, List<Commune>>> {
+    suspend fun getAllCommune(): ResponseEntity<Map<String, List<Commune>>> {
         val data = service.findAllCommune()
         val response = mapOf("communes" to data)
         return ResponseEntity.ok().body(response)

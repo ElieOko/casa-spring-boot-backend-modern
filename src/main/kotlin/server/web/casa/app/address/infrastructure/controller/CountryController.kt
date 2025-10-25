@@ -22,7 +22,7 @@ class CountryController(
    private val service : CountryService
 ) {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllCountry(): ResponseEntity<Map<String, List<Country>>> {
+    suspend fun getAllCountry(): ResponseEntity<Map<String, List<Country>>> {
         val data = service.findAllCountry()
         val response = mapOf("countries" to data)
         return ResponseEntity.ok().body(response)

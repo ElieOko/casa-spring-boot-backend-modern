@@ -26,7 +26,7 @@ class DistrictController(
    private val cityService: CityService,
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun createDistrict(
+    suspend fun createDistrict(
        @Valid @RequestBody request: DistrictRequest
     ): ResponseEntity<out Map<String, Any?>> {
         val city = cityService.findByIdCity(request.cityId)
@@ -49,7 +49,7 @@ class DistrictController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllDistrict(): ResponseEntity<Map<String, List<District?>>> {
+    suspend fun getAllDistrict(): ResponseEntity<Map<String, List<District?>>> {
         val data = service.findAllDistrict()
         val response = mapOf("districts" to data)
         return ResponseEntity.ok().body(response)

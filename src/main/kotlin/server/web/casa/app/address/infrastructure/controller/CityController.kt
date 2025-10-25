@@ -24,7 +24,7 @@ class CityController(
 ) {
     @Operation(summary = "Liste de villes")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllCity(): ResponseEntity<Map<String, List<City>>> {
+    suspend fun getAllCity(): ResponseEntity<Map<String, List<City>>> {
         val data = service.findAllCity()
         val response = mapOf("cities" to data)
         return ResponseEntity.ok().body(response)
