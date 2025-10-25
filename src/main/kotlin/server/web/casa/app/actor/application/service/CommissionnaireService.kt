@@ -1,5 +1,7 @@
 package server.web.casa.app.actor.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Commissionnaire
@@ -13,16 +15,13 @@ class CommissionnaireService(
     private val repository: CommissionnaireRepository,
     private val mapper: CommissionnaireMapper
 ) {
-    fun createCommissionnaire(commissionnaire: Commissionnaire): Commissionnaire {
+    suspend fun createCommissionnaire(commissionnaire: Commissionnaire): Commissionnaire {
         val data = mapper.toEntity(commissionnaire)
         val result = repository.save(data)
-       return mapper.toDomain(result)
+        return mapper.toDomain(result)
     }
 
-    fun findAllCommissionnaire() : List<Commissionnaire> {
-        val allEntity = repository.findAll()
-        return allEntity.stream().map {
-            mapper.toDomain(it)
-        }.toList()
+    suspend fun findAllCommissionnaire() : List<Commissionnaire> {
+        return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
 }

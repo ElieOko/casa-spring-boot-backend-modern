@@ -1,5 +1,7 @@
 package server.web.casa.app.actor.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Bailleur
@@ -15,16 +17,13 @@ class BailleurService(
     private val repository: BailleurRepository,
     private val mapper: BailleurMapper
 ) {
-    fun createBailleur(bailleur: Bailleur): Bailleur {
+    suspend fun createBailleur(bailleur: Bailleur): Bailleur {
         val data = mapper.toEntity(bailleur)
         val result = repository.save(data)
-       return mapper.toDomain(result)
+        return mapper.toDomain(result)
     }
 
-    fun findAllBailleur() : List<Bailleur> {
-        val allEntity = repository.findAll()
-        return allEntity.stream().map {
-            mapper.toDomain(it)
-        }.toList()
+    suspend fun findAllBailleur() : List<Bailleur> {
+        return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
 }

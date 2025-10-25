@@ -1,5 +1,7 @@
 package server.web.casa.app.actor.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Locataire
@@ -13,16 +15,13 @@ class LocataireService(
     private val repository: LocataireRepository,
     private val mapper: LocataireMapper
 ) {
-    fun createLocataire(locataire: Locataire): Locataire {
+    suspend fun createLocataire(locataire: Locataire): Locataire {
         val data = mapper.toEntity(locataire)
         val result = repository.save(data)
-       return mapper.toDomain(result)
+        return mapper.toDomain(result)
     }
 
-    fun findAllLocataire() : List<Locataire> {
-        val allEntity = repository.findAll()
-        return allEntity.stream().map {
-            mapper.toDomain(it)
-        }.toList()
+    suspend fun findAllLocataire() : List<Locataire> {
+        return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
 }

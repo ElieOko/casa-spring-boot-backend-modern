@@ -15,7 +15,7 @@ class TypeCardService(
    private val repository: TypeCardRepository,
    private val mapper: TypeCardMapper
 ) {
-    fun saveCard(data: TypeCard): TypeCard? {
+    suspend fun saveCard(data: TypeCard): TypeCard? {
         val data = mapper.toEntity(data)
         var result : TypeCardEntity? = null
         if (data!= null){
@@ -24,8 +24,7 @@ class TypeCardService(
         return mapper.toDomain(result)
     }
 
-    fun findByIdTypeCard(id : Long) : TypeCard? {
-        val data = repository.findById(id).orElse(null)
-        return mapper.toDomain(data)
+    suspend fun findByIdTypeCard(id : Long) : TypeCard? {
+        return repository.findById(id)?.let{ mapper.toDomain(it) }
     }
 }
