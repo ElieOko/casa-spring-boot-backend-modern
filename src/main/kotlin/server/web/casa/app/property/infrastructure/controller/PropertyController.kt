@@ -39,7 +39,7 @@ class PropertyController(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun createProperty(
+    suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest
     ): ResponseEntity<out Map<String, Any>> {
        val imageList = request.propertyImage
@@ -131,7 +131,7 @@ class PropertyController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllProperty(): ResponseEntity<Map<String, List<Property>>> {
+    suspend fun getAllProperty(): ResponseEntity<Map<String, List<Property>>> {
         val data = service.getAll()
         val response = mapOf("properties" to data)
         return ResponseEntity.ok().body(response)

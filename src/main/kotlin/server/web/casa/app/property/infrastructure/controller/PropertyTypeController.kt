@@ -17,11 +17,11 @@ class PropertyTypeController(
     private val service : PropertyTypeService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun createType(){
+    suspend fun createType(){
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllType(): ResponseEntity<Map<String, List<PropertyType>>> {
+    suspend fun getAllType(): ResponseEntity<Map<String, List<PropertyType>>> {
         val data = service.getAll()
         val response = mapOf("type_properties" to data)
         return ResponseEntity.ok().body(response)

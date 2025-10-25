@@ -10,12 +10,12 @@ const val ROUTE_PROPERTY_FAVORITE = PropertyRoute.PROPERTY_FAVORITE
 @RequestMapping(ROUTE_PROPERTY_FAVORITE)
 class PropertyFavoriteController {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun createFavorite(){
+    suspend fun createFavorite(){
 
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllFavoriteByUser(){
+    suspend fun getAllFavoriteByUser(){
 
     }
 }

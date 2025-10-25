@@ -23,7 +23,7 @@ class FeatureController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllFeature(): ResponseEntity<Map<String, List<Feature>>> {
+    suspend fun getAllFeature(): ResponseEntity<Map<String, List<Feature>>> {
         val data = service.getAll()
         val response = mapOf("features" to data)
         return ResponseEntity.ok().body(response)
