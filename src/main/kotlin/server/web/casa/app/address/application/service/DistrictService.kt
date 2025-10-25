@@ -27,6 +27,6 @@ class DistrictService(
     }
 
     suspend fun findByIdDistrict(id : Long) : District? {
-      return repository.findById(id)?.let{  mapper.toDomain(it) }
+      return repository.findById(id).let{  mapper.toDomain(it.orElse(null)) }
     }
 }

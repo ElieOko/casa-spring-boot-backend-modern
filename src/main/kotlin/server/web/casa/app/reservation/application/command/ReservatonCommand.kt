@@ -35,34 +35,34 @@ class ReservatonCommand(
         }
     }
 
-   suspend fun createReserv(){
-       var prop : PropertyEntity? = null
-       property.findById(1)?.let{
-        prop = it
-       }
-       var u : UserEntity? = null
-         user.findById(1)?.let{
-           u = it
-       }
-       if (u != null && prop!= null){
-           val start: LocalDate = LocalDate.of(2025, 10, 22)
-           val end: LocalDate = LocalDate.of(2025, 11, 10)
-           val data = ReservationEntity(
-               property = prop,
-               user = u,
-               message = "Your reservation",
-               reservationHeure = "12:00:00",
-               isActive = true,
-               startDate = start,
-               endDate = end,
-               createdAt = LocalDate.now(),
-               status = ReservationStatus.PENDING,
-               type = ReservationType.STANDARD,
-               cancellationReason = "No"
-           )
-           val create = reservation.save(data)
-           log.info("***La melo est gangs success, you got it?***")
-       }
-
-   }
+//   suspend fun createReserv(){
+//       var prop : PropertyEntity? = null
+//       property.findById(1)?.let{
+//        prop = it
+//       }
+//       var u : UserEntity? = null
+//         user.findById(1)?.let{
+//           u = it
+//       }
+//       if (u != null && prop!= null){
+//           val start: LocalDate = LocalDate.of(2025, 10, 22)
+//           val end: LocalDate = LocalDate.of(2025, 11, 10)
+//           val data = ReservationEntity(
+//               property = prop,
+//               user = u,
+//               message = "Your reservation",
+//               reservationHeure = "12:00:00",
+//               isActive = true,
+//               startDate = start,
+//               endDate = end,
+//               createdAt = LocalDate.now(),
+//               status = ReservationStatus.PENDING,
+//               type = ReservationType.STANDARD,
+//               cancellationReason = "No"
+//           )
+//           val create = reservation.save(data)
+//           log.info("***La melo est gangs success, you got it?***")
+//       }
+//
+//   }
 }

@@ -21,10 +21,9 @@ class FeatureService(
     suspend fun getAll() : List<Feature> = repository.findAll().map { mapper.toDomain(it) }.toList()
 
     suspend fun findByIdFeature(id : Long) : Feature? {
-        val data = repository.findById(id)?.let {
-            return mapper.toDomain(it)
-        }?: EntityNotFoundException("Aucun equipement avec cet identifiant $id")
-        return null
+         repository.findById(id).let {
+           val d = it.orElse(null)
+            return mapper.toDomain(d)
+        }
     }
-
 }

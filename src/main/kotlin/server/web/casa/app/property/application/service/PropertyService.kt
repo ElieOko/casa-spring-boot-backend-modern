@@ -23,13 +23,13 @@ class PropertyService(
         val result = repository.save(data)
         return mapper.toDomain(result)
     }
-    suspend fun getAll() : List<Property> = repository.findAll().map { mapper.toDomain(it) }.toList()
+    suspend fun getAll() : List<Property> = repository.findAll().stream().map {
+        mapper.toDomain(it!!)
+    }.toList()
 
     suspend fun findByIdProperty(id : Long) : Property? {
-        val data = repository.findById(id)?.let {
-            return mapper.toDomain(it)
-
-        }?: EntityNotFoundException("Aucune proprièté avec cet identifiant $id")
-       return null
+        val data = repository.findById(id).let {
+            return mapper.toDomain(it.orElse(null))
+        }
     }
 }

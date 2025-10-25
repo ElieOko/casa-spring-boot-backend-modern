@@ -20,14 +20,14 @@ class UserController(
 
     @Operation(summary = "Liste des utilisateurs")
     @GetMapping
-    fun getListUser(): ResponseEntity<List<User?>>{
+    suspend fun getListUser(): ResponseEntity<List<User?>>{
         val data = userService.findAllUser()
         return ResponseEntity.ok().body(data)
     }
 
     @Operation(summary = "Detail utilisateur")
     @GetMapping("/{id}")
-    fun getUser(
+    suspend fun getUser(
         @PathVariable("id") id : Long
     ) : ResponseEntity<User> {
         val data = userService.findIdUser(id)
@@ -36,7 +36,7 @@ class UserController(
 
     @Operation(summary = "Modification utilisateur")
     @PutMapping("/{id}")
-    fun updateUser(
+    suspend fun updateUser(
         @PathVariable("id") id : Long,
         @RequestBody @Valid user : User
     ) : ResponseEntity<User> {
@@ -46,7 +46,7 @@ class UserController(
 
     @Operation(summary = "Suppression utilisateur")
     @DeleteMapping("/{id}")
-    fun delete(
+    suspend fun delete(
         @PathVariable("id") id : Long
     ): ResponseEntity<Map<String, String>> {
         userService.deleteUser(id)

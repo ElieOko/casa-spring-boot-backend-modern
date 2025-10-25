@@ -45,9 +45,9 @@ class UserService(
     }
 
     suspend fun findIdUser(id : Long) : User?{
-        val userEntity = repository.findById(id)?.let{it->
-            return mapper.toDomain(it)
-        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
+        val userEntity = repository.findById(id).orElse(null)
+        return mapper.toDomain(userEntity)
+//        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
 
     }
 

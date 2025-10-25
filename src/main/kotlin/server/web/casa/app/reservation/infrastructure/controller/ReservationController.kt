@@ -106,28 +106,27 @@ class ReservationController(
     }
 
     @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> {
+    suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<Map<String, List<Reservation>?>> {
 
-         userR.findById(userId)?.let {
-            val reservation = service.findByUser(it)
-            val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response)
-        }?:  RuntimeException("User not found with id: $userId")
-        val response = mapOf("message" to "Property not found with id: $userId")
-        return ResponseEntity.badRequest().body(response)
+        val user = userR.findById(userId).orElseThrow{
+                 RuntimeException("User not found with id: $userId")
+         }
+        val reservation = service.findByUser(user)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<out Map<String, Any?>> {
 
-        propertyR.findById(propertyId)?.let {
-            val reservation = service.findByProperty(it)
-            val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response)
-        }?: RuntimeException("Property not found with id: $propertyId")
-        val response = mapOf("message" to "Property not found with id: $propertyId")
+        val property = propertyR.findById(propertyId).orElse(null)
+        val reservation = service.findByProperty(property)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+//        }?: RuntimeException("Property not found with id: $propertyId")
+//        val response = mapOf("message" to "Property not found with id: $propertyId")
 
-        return ResponseEntity.badRequest().body(response)
+//        return ResponseEntity.badRequest().body(response)
     }
     @PutMapping("/update/status/{id}")
     suspend fun updateReservation(

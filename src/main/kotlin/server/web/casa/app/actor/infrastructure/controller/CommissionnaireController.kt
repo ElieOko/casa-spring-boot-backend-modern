@@ -72,7 +72,7 @@ class CommissionnaireController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllCommissionnaire(): ResponseEntity<Map<String, List<Commissionnaire>>> {
+    suspend fun getAllCommissionnaire(): ResponseEntity<Map<String, List<Commissionnaire>>> {
         val data = service.findAllCommissionnaire()
         val response = mapOf("commissionnaires" to data)
         return ResponseEntity.ok().body(response)

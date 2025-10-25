@@ -25,6 +25,7 @@ class TypeCardService(
     }
 
     suspend fun findByIdTypeCard(id : Long) : TypeCard? {
-        return repository.findById(id)?.let{ mapper.toDomain(it) }
+        val data =  repository.findById(id).orElse(null)
+      return  mapper.toDomain(data)
     }
 }

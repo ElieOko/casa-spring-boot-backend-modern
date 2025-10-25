@@ -83,7 +83,7 @@ class BailleurController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllBailleur(): ResponseEntity<Map<String, List<Bailleur>>> {
+    suspend fun getAllBailleur(): ResponseEntity<Map<String, List<Bailleur>>> {
         val data = service.findAllBailleur()
         val response = mapOf("bailleurs" to data)
         return ResponseEntity.ok().body(response)

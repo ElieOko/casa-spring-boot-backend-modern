@@ -33,9 +33,7 @@ class TypeAccountService(
     }
 
     suspend fun findByIdTypeAccount(id : Long) : TypeAccount? {
-      repository.findById(id)?.let {
-            return mapper.toDomain(it)
-        }
-        return null
+      val data = repository.findById(id).orElse(null)
+        return mapper.toDomain(data)
     }
 }

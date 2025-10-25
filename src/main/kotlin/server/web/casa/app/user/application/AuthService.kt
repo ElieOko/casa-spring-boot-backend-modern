@@ -100,7 +100,12 @@ class AuthService(
             throw ResponseStatusException(HttpStatusCode.valueOf(401), "Invalid refresh token.")
         }
         val userId = jwtService.getUserIdFromToken(refreshToken)
-        val user = userRepository.findById(userId.toLong())?.let { user->
+        val user = userRepository.findById(userId.toLong()).orElseThrow{
+            ResponseStatusException(
+                HttpStatusCode.valueOf(401),
+                "Invalid refresh token."
+            )
+        }
             val hashed = hashToken(refreshToken)
             refreshTokenRepository.findByUserIdAndHashedToken(user.userId, hashed)
                 ?: throw ResponseStatusException(
@@ -111,17 +116,12 @@ class AuthService(
             val newAccessToken = jwtService.generateAccessToken(userId)
             val newRefreshToken = jwtService.generateRefreshToken(userId)
             storeRefreshToken(user.userId, newRefreshToken)
-
             return TokenPair(
                 accessToken = newAccessToken,
                 refreshToken = newRefreshToken
             )
-        }
-            ?: ResponseStatusException(
-            HttpStatusCode.valueOf(401),
-            "Invalid refresh token."
-        )
-        return TokenPair("","")
+
+//        return TokenPair("","")
     }
 
     @OptIn(ExperimentalTime::class)

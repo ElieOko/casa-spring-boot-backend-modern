@@ -28,6 +28,8 @@ class CityService(
         return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
     suspend fun findByIdCity(id : Long) : City? {
-        return repository.findById(id)?.let{  mapper.toDomain(it) }
+        return repository.findById(id).let{
+            mapper.toDomain(it.orElse(null))
+        }
     }
 }

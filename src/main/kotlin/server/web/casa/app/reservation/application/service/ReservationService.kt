@@ -31,7 +31,7 @@ class ReservationService(
     }
 
     suspend fun findId(id: Long): Reservation? {
-      return repoR.findById(id)?.let { mapperR.toDomain(it) }
+      return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
 
     suspend fun findByProperty(property: PropertyEntity): List<Reservation>? {

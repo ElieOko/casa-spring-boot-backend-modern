@@ -22,8 +22,8 @@ class PropertyFavoriteService(
     suspend fun getAll() : List<PropertyFavorite> = repository.findAll().map { mapper.toDomain(it) }.toList()
 
     suspend fun remove(id : Long){
-        repository.findById(id)?.let{
-            repository.delete(it)
+        repository.findById(id).let{
+            repository.delete(it.orElse(null))
         }
     }
 }

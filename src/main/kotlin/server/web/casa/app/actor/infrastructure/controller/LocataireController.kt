@@ -73,7 +73,7 @@ class LocataireController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllLocataire(): ResponseEntity<Map<String, List<Locataire>>> {
+    suspend fun getAllLocataire(): ResponseEntity<Map<String, List<Locataire>>> {
         val data = service.findAllLocataire()
         val response = mapOf("locataires" to data)
         return ResponseEntity.ok().body(response)

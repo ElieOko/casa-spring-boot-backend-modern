@@ -1,20 +1,17 @@
 package server.web.casa.app.reservation.infrastructure.persistence.repository
 
-
-import kotlinx.coroutines.flow.Flow
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import org.springframework.data.jpa.repository.*
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import java.time.LocalDate
 
-interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Long>{
+interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.createdAt = :date")
-   suspend fun findAllByDate(@Param("date") date: LocalDate): Flow<ReservationEntity>
+   suspend fun findAllByDate(@Param("date") date: LocalDate): List<ReservationEntity>
 
     @Query(
         value = """
@@ -25,25 +22,25 @@ interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Lon
         nativeQuery = true
     )
 
-    suspend fun findAllByMonthAndYear(@Param("month") month: Int, @Param("year") year: Int): Flow<ReservationEntity>?
+    suspend fun findAllByMonthAndYear(@Param("month") month: Int, @Param("year") year: Int): List<ReservationEntity>?
 
     @Query("SELECT r FROM ReservationEntity r WHERE FUNCTION('YEAR', r.createdAt) = :year")
-    suspend fun findAllByYear(@Param("year") year: Int): Flow<ReservationEntity> ?
+    suspend fun findAllByYear(@Param("year") year: Int): List<ReservationEntity> ?
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.status = :status")
-    suspend fun findAllByStatus(@Param("status") staus: ReservationStatus): Flow<ReservationEntity>?
+    suspend fun findAllByStatus(@Param("status") staus: ReservationStatus): List<ReservationEntity>?
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.startDate <= :endDate AND r.endDate >= :startDate")
     suspend fun findAllInInterval(
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate
-    ): Flow<ReservationEntity> ?
+    ): List<ReservationEntity> ?
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.user = :user")
-    suspend fun findByUser(@Param("user") user: UserEntity): Flow<ReservationEntity>?
+    suspend fun findByUser(@Param("user") user: UserEntity): List<ReservationEntity>?
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property")
-    suspend fun findByProperty(@Param("property") property: PropertyEntity): Flow<ReservationEntity> ?
+    suspend fun findByProperty(@Param("property") property: PropertyEntity): List<ReservationEntity> ?
 
     //use with @Transactional when you call it
     @Modifying

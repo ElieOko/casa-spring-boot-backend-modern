@@ -22,8 +22,8 @@ class CommuneService(
         return repository.findAll().map { mapper.toDomain(it) }.toList()
     }
 
-    suspend fun findByIdCommune(id : Long) : Commune? {
-       return repository.findById(id)?.let{ return mapper.toDomain(it) }
+    suspend fun findByIdCommune(id : Long): Commune {
+        repository.findById(id).let{ return mapper.toDomain(it.orElse(null)) }
 
     }
 }
