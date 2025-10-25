@@ -33,10 +33,10 @@ class CommandLineAddressComponent(
     override fun run(vararg args: String) {
         log.info("***********************")
         try {
-            createCountry()
-            createCity()
-            createDistrict()
-            createCommune()
+//            createCountry()
+//            createCity()
+//            createDistrict()
+//            createCommune()
         } catch (e: Exception){
             log.info(e.message)
         }

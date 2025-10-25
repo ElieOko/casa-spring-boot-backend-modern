@@ -33,8 +33,8 @@ class CommandLineUserComponent(
         log.info(this::class.simpleName)
         log.info(version)
         try {
-            createTypeAccount()
-            createUser()
+//            createTypeAccount()
+//            createUser()
             //getAllTypeAccount()
         }
         catch (e : ConstraintViolationException){

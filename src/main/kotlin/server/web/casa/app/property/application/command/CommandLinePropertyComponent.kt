@@ -46,9 +46,9 @@ class CommandLinePropertyComponent(
     private val log = LoggerFactory.getLogger(this::class.java)
     override fun run(vararg args: String) {
         try {
-            createTypeProperty()
-            createFeature()
-            createProperty()
+//            createTypeProperty()
+//            createFeature()
+//            createProperty()
         }
         catch (e : Exception){
 

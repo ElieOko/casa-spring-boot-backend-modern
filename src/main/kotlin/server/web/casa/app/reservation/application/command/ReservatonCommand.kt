@@ -26,7 +26,7 @@ class ReservatonCommand(
     override fun run(vararg args: String) {
         try {
             log.info("***start command reservation***")
-            createReserv()
+//            createReserv()
         }
         catch (e : Exception){
             log.info("***error command reservation: "+e.message+" cause: "+e.cause+" tlocalize :"+e.localizedMessage)
