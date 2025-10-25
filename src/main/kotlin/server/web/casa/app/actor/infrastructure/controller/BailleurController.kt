@@ -28,12 +28,12 @@ class BailleurController(
    private val typeCardService: TypeCardService,
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun create(
+    suspend fun create(
         @Valid @RequestBody request: BailleurUser
     ): ResponseEntity<Map<String, Any?>> {
         val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        var parrain : User? = null
+        val parrain : User? = null
         var paraintId : Long = 0
         if (request.user.typeAccountId != 3L){
             val response = mapOf("error" to "ce type n'est pas prise en charger pour compte bailleur")

@@ -27,7 +27,7 @@ class LocataireController(
    private val typeCardService: TypeCardService,
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun create(
+    suspend fun create(
         @Valid @RequestBody request: LocataireUser
     ): ResponseEntity<Map<String, Any?>> {
         val city = cityService.findByIdCity(request.user.cityId)
