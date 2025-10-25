@@ -43,164 +43,164 @@ class CommandLineAddressComponent(
 
     }
 
-    fun createCity(){
-        val country = countryRepository.findById(1).toList()
-        cityRepository.save(CityEntity(
-            cityId = 0,
-            country = country[0],
-            name ="Kinshasa",
-        ))
-        log.info("save city")
-    }
-    fun createCountry(){
-        countryRepository.save(
-            CountryEntity(
-                countryId = 0,
-                name = "République démocratique du Congo"
-            )
-        )
-        log.info("save country")
-    }
-
-    fun createDistrict(){
-        try {
-            val city = cityRepository.findById(1).orElse(null)
-            if (city != null){
-                districtRepository.saveAll(
-                    listOf(
-                        DistrictEntity(
-                            city = city,
-                            name = KinshasaDistrict.FUNA
-                        ),
-                        DistrictEntity(
-                            city = city,
-                            name = KinshasaDistrict.MONT_AMBA
-                        ),
-                        DistrictEntity(
-                            city = city,
-                            name = KinshasaDistrict.LUKUNGA
-                        ),
-                        DistrictEntity(
-                            city = city,
-                            name = KinshasaDistrict.TSHANGU
-                        )
-                    )
-                )
-                log.info("save district")
-            }
-        } catch (e : Exception){TODO()
-
-        }
-    }
-
-    fun createCommune(){
-        val districtFuna = districtRepository.findById(1).orElse(null)
-        val districtMontAmba = districtRepository.findById(2).orElse(null)
-        val districtLukunga = districtRepository.findById(3).orElse(null)
-        val districtTshangu = districtRepository.findById(4).orElse(null)
-
-        communeRepository.saveAll(
-            listOf(
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Bandalungwa"
-                ),
-                CommuneEntity(
-                    district = districtLukunga,
-                    name = "Barumbu"
-                ),
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Bumbu"
-                ),
-                CommuneEntity(
-                    district = districtLukunga,
-                    name = "Gombe"
-                ),
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Kalamu"
-                ),
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Kasa-Vubu"
-                ),
-                CommuneEntity(
-                    district = districtTshangu,
-                    name = "Kimbanseke"
-                ),
-                CommuneEntity(
-                    district = districtLukunga,
-                    name = "Kinshasa"
-                ),
-                CommuneEntity(
-                    district = districtLukunga,
-                    name = "Kintambo"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Kisenso"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Lemba"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Limete"
-                ),
-                CommuneEntity(
-                    district = districtLukunga,
-                    name = "Lingwala"
-                ),
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Makala"
-                ),
-                CommuneEntity(
-                    district = districtTshangu,
-                    name = "Maluku"
-                ),
-                CommuneEntity(
-                    district = districtTshangu,
-                    name = "Masina"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Matete"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Mont-Ngafula"
-                ),
-                CommuneEntity(
-                    district = districtTshangu,
-                    name = "Ndjili"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Ngaba"
-                ),
-                CommuneEntity(
-                    district = districtMontAmba,
-                    name = "Ngaliema"
-                ),
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Ngiri-Ngiri"
-                ),
-                CommuneEntity(
-                    district = districtTshangu,
-                    name = "Nsele"
-                ),
-                CommuneEntity(
-                    district = districtFuna,
-                    name = "Selembao"
-                )
-            )
-        )
-        log.info("save commune")
-    }
+//    suspend fun createCity(){
+//        val country = countryRepository.findById(1).toList()
+//        cityRepository.save(CityEntity(
+//            cityId = 0,
+//            country = country[0],
+//            name ="Kinshasa",
+//        ))
+//        log.info("save city")
+//    }
+//    suspend fun createCountry(){
+//        countryRepository.save(
+//            CountryEntity(
+//                countryId = 0,
+//                name = "République démocratique du Congo"
+//            )
+//        )
+//        log.info("save country")
+//    }
+//
+//    fun createDistrict(){
+//        try {
+//            val city = cityRepository.findById(1).orElse(null)
+//            if (city != null){
+//                districtRepository.saveAll(
+//                    listOf(
+//                        DistrictEntity(
+//                            city = city,
+//                            name = KinshasaDistrict.FUNA
+//                        ),
+//                        DistrictEntity(
+//                            city = city,
+//                            name = KinshasaDistrict.MONT_AMBA
+//                        ),
+//                        DistrictEntity(
+//                            city = city,
+//                            name = KinshasaDistrict.LUKUNGA
+//                        ),
+//                        DistrictEntity(
+//                            city = city,
+//                            name = KinshasaDistrict.TSHANGU
+//                        )
+//                    )
+//                )
+//                log.info("save district")
+//            }
+//        } catch (e : Exception){TODO()
+//
+//        }
+//    }
+//
+//    fun createCommune(){
+//        val districtFuna = districtRepository.findById(1).orElse(null)
+//        val districtMontAmba = districtRepository.findById(2).orElse(null)
+//        val districtLukunga = districtRepository.findById(3).orElse(null)
+//        val districtTshangu = districtRepository.findById(4).orElse(null)
+//
+//        communeRepository.saveAll(
+//            listOf(
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Bandalungwa"
+//                ),
+//                CommuneEntity(
+//                    district = districtLukunga,
+//                    name = "Barumbu"
+//                ),
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Bumbu"
+//                ),
+//                CommuneEntity(
+//                    district = districtLukunga,
+//                    name = "Gombe"
+//                ),
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Kalamu"
+//                ),
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Kasa-Vubu"
+//                ),
+//                CommuneEntity(
+//                    district = districtTshangu,
+//                    name = "Kimbanseke"
+//                ),
+//                CommuneEntity(
+//                    district = districtLukunga,
+//                    name = "Kinshasa"
+//                ),
+//                CommuneEntity(
+//                    district = districtLukunga,
+//                    name = "Kintambo"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Kisenso"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Lemba"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Limete"
+//                ),
+//                CommuneEntity(
+//                    district = districtLukunga,
+//                    name = "Lingwala"
+//                ),
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Makala"
+//                ),
+//                CommuneEntity(
+//                    district = districtTshangu,
+//                    name = "Maluku"
+//                ),
+//                CommuneEntity(
+//                    district = districtTshangu,
+//                    name = "Masina"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Matete"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Mont-Ngafula"
+//                ),
+//                CommuneEntity(
+//                    district = districtTshangu,
+//                    name = "Ndjili"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Ngaba"
+//                ),
+//                CommuneEntity(
+//                    district = districtMontAmba,
+//                    name = "Ngaliema"
+//                ),
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Ngiri-Ngiri"
+//                ),
+//                CommuneEntity(
+//                    district = districtTshangu,
+//                    name = "Nsele"
+//                ),
+//                CommuneEntity(
+//                    district = districtFuna,
+//                    name = "Selembao"
+//                )
+//            )
+//        )
+//        log.info("save commune")
+//    }
 
     fun createQuartier(){
 

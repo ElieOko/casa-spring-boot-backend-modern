@@ -54,98 +54,98 @@ class CommandLinePropertyComponent(
 
         }
     }
-    fun createProperty() {
-        log.info("property*********************")
-        val city = cityRepository.findById(1).orElse(null)
-        log.info("in side 0*****")
-        val user = userRepository.findById(1).orElse(null)
-        log.info("in side 1*****")
-        val propertyType = typePropertyRepository.findById(1).orElse(null)
-        log.info("in side 2*****")
-        val commune = communeRepository.findById(1).orElse(null)
-        log.info("in side*****")
-            val property = PropertyEntity(
-                title = "Maison de rêve",
-                description = "",
-                price = 5000.0,
-                surface = 20.0,
-                rooms = 1,
-                bedrooms = 1,
-                kitchen = 1,
-                livingRoom = 1,
-                bathroom = 1,
-                floor = 1,
-                address = "Gazo",
-                city = city!!,
-                postalCode = "",
-                commune = commune,
-                features = emptyList(),
-                quartier = "",
-                sold = true,
-                transactionType = "",
-                propertyType = propertyType,
-                user = user,
-                latitude = 0.0,
-                longitude = 0.0,
-                propertyImage = mutableSetOf(),
-                propertyImageRoom = mutableSetOf(),
-                propertyImageLivingRoom =mutableSetOf(),
-                propertyImageKitchen = mutableSetOf(),
-                reservation = emptyList()
-            )
-            val result = propertyRepository.save(property)
-            log.info("***property success******")
-    }
-    fun createTypeProperty(){
-        typePropertyRepository.saveAll(
-            listOf(
-                PropertyTypeEntity(
-                    name = "Studio",
-                    description = "",
-                ),
-                PropertyTypeEntity(
-                    name = "Apparts",
-                    description = "",
-                ),
-                PropertyTypeEntity(
-                    name = "Maisons",
-                    description = "",
-                ),
-                PropertyTypeEntity(
-                    name = "Bureau",
-                    description = "",
-                ),
-                PropertyTypeEntity(
-                    name = "Hotels",
-                    description = "",
-                ),
-                PropertyTypeEntity(
-                    name = "Vacances",
-                    description = "",
-                )
-            )
-        )
-        log.info("save type property")
-    }
-
-    fun createFeature(){
-        feature.saveAll(
-            listOf(
-                FeatureEntity(name = "Wifi"),
-                FeatureEntity(name = "Climatisation"),
-                FeatureEntity(name = "Chauffage"),
-                FeatureEntity(name = "Cuisine équipé"),
-                FeatureEntity(name = "Lave-linge"),
-                FeatureEntity(name = "Parking"),
-                FeatureEntity(name = "Ascenceur"),
-                FeatureEntity(name = "Piscine"),
-                FeatureEntity(name = "Jardin"),
-                FeatureEntity(name = "Terrasse"),
-                FeatureEntity(name = "Gym"),
-                FeatureEntity(name = "Sécurité"),
-                FeatureEntity(name = "Animaux acceptés"),
-            )
-        )
-        log.info("save features")
-    }
+//    fun createProperty() {
+//        log.info("property*********************")
+//        val city = cityRepository.findById(1).orElse(null)
+//        log.info("in side 0*****")
+//        val user = userRepository.findById(1).orElse(null)
+//        log.info("in side 1*****")
+//        val propertyType = typePropertyRepository.findById(1).orElse(null)
+//        log.info("in side 2*****")
+//        val commune = communeRepository.findById(1).orElse(null)
+//        log.info("in side*****")
+//            val property = PropertyEntity(
+//                title = "Maison de rêve",
+//                description = "",
+//                price = 5000.0,
+//                surface = 20.0,
+//                rooms = 1,
+//                bedrooms = 1,
+//                kitchen = 1,
+//                livingRoom = 1,
+//                bathroom = 1,
+//                floor = 1,
+//                address = "Gazo",
+//                city = city!!,
+//                postalCode = "",
+//                commune = commune,
+//                features = emptyList(),
+//                quartier = "",
+//                sold = true,
+//                transactionType = "",
+//                propertyType = propertyType,
+//                user = user,
+//                latitude = 0.0,
+//                longitude = 0.0,
+//                propertyImage = mutableSetOf(),
+//                propertyImageRoom = mutableSetOf(),
+//                propertyImageLivingRoom =mutableSetOf(),
+//                propertyImageKitchen = mutableSetOf(),
+//                reservation = emptyList()
+//            )
+//            val result = propertyRepository.save(property)
+//            log.info("***property success******")
+//    }
+//    fun createTypeProperty(){
+//        typePropertyRepository.saveAll(
+//            listOf(
+//                PropertyTypeEntity(
+//                    name = "Studio",
+//                    description = "",
+//                ),
+//                PropertyTypeEntity(
+//                    name = "Apparts",
+//                    description = "",
+//                ),
+//                PropertyTypeEntity(
+//                    name = "Maisons",
+//                    description = "",
+//                ),
+//                PropertyTypeEntity(
+//                    name = "Bureau",
+//                    description = "",
+//                ),
+//                PropertyTypeEntity(
+//                    name = "Hotels",
+//                    description = "",
+//                ),
+//                PropertyTypeEntity(
+//                    name = "Vacances",
+//                    description = "",
+//                )
+//            )
+//        )
+//        log.info("save type property")
+//    }
+//
+//    fun createFeature(){
+//        feature.saveAll(
+//            listOf(
+//                FeatureEntity(name = "Wifi"),
+//                FeatureEntity(name = "Climatisation"),
+//                FeatureEntity(name = "Chauffage"),
+//                FeatureEntity(name = "Cuisine équipé"),
+//                FeatureEntity(name = "Lave-linge"),
+//                FeatureEntity(name = "Parking"),
+//                FeatureEntity(name = "Ascenceur"),
+//                FeatureEntity(name = "Piscine"),
+//                FeatureEntity(name = "Jardin"),
+//                FeatureEntity(name = "Terrasse"),
+//                FeatureEntity(name = "Gym"),
+//                FeatureEntity(name = "Sécurité"),
+//                FeatureEntity(name = "Animaux acceptés"),
+//            )
+//        )
+//        log.info("save features")
+//    }
 }
