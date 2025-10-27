@@ -51,7 +51,7 @@ class PropertyController(
        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
        val commune = communeService.findByIdCommune(request.communeId)
 
-        if (city != null && user != null && commune != null && propertyType != null ){
+        if (city != null && user != null && propertyType != null){
             val property = Property(
                 title = request.title,
                 description = request.description,

@@ -19,7 +19,7 @@ class PropertyImageLivingRoomService(
         val file = base64ToMultipartFile(p.name,"living_room/")
         val imageUri = gcsService.uploadFile(file,"living/")
         p.path = imageUri!!
-        p.name = file.originalFilename
+        p.name = file.name
         val data = PropertyImageLivingRoomEntity(
             propertyLiving = mapper.toEntity(p.property!!),
             name = p.name,

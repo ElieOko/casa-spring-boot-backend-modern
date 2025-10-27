@@ -19,7 +19,7 @@ class PropertyImageKitchenService(
         val file = base64ToMultipartFile(p.name,"kitchen")
         val imageUri = gcsService.uploadFile(file,"kitchen/")
         p.path = imageUri!!
-        p.name = file.originalFilename
+        p.name = file.name
         val data = PropertyImageKitchenEntity(
             propertyKitchen =mapper.toEntity(p.property!!),
             name = p.name,
