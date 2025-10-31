@@ -44,7 +44,7 @@ class AuthService(
     )
 
     @OptIn(ExperimentalTime::class)
-    suspend fun register(user : User): Pair<User?, String> {
+     suspend fun register(user : User): Pair<User?, String> {
         val phone = normalizeAndValidatePhoneNumber(user.phone) ?: throw ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             "Ce numero n'est pas valide."

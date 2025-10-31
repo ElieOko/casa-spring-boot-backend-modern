@@ -9,6 +9,6 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 interface UserRepository : JpaRepository<UserEntity, Long> {
 
     @Query("SELECT r FROM UserEntity r WHERE r.email = :identifier OR r.phone = :identifier")
-    suspend fun findByPhoneOrEmail(@Param("identifier") identifier: String): UserEntity?
+    fun findByPhoneOrEmail(@Param("identifier") identifier: String): UserEntity?
 
 }
