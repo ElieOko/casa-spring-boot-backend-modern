@@ -39,7 +39,9 @@ class CommandLineAddressComponent(
 //            createCity()
 //            createDistrict()
 //            createCommune()
-            createQuartier()
+//            createQuartier()
+//            log.info("quartier")
+//            log.info(quartierRepository.findAll()[0].commune?.name)
         } catch (e: Exception){
             log.info(e.message)
         }

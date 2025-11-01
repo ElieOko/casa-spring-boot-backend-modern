@@ -57,7 +57,7 @@ class UserService(
         id : Long,
         user : User
     ): User ?{
-        val userEntity = repository.findById(id)?.let{
+      repository.findById(id).let{
             val entityToUpdate = UserEntity(
                 userId = user.userId,
                 password = user.password,
@@ -67,10 +67,8 @@ class UserService(
                 city = mapperCity.toEntity(user.city)
             )
             val updatedUser = repository.save(entityToUpdate)
-
             return mapper.toDomain(updatedUser)
-        }?:throw   EntityNotFoundException("Aucun $name avec cet identifiant $id")
-
+        }
     }
 
     suspend fun deleteUser(id : Long) : Boolean{
