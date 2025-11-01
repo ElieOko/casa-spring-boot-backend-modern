@@ -3,6 +3,7 @@ package server.web.casa.app.property.infrastructure.persistence.mapper
 import org.springframework.stereotype.Component
 import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
 import server.web.casa.app.address.infrastructure.persistence.mapper.CommuneMapper
+import server.web.casa.app.address.infrastructure.persistence.mapper.QuartierMapper
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.PropertyImage
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
@@ -20,7 +21,8 @@ class PropertyMapper(
     private val propertyImageKitchenMapper: PropertyImageKitchenMapper,
     private val propertyTypeMapper: PropertyTypeMapper,
     private val communeMapper: CommuneMapper,
-    private val featureMapper: FeatureMapper
+    private val featureMapper: FeatureMapper,
+    private val quartierMapper: QuartierMapper
 ) {
     fun toDomain(p : PropertyEntity) : Property {
         return Property(
@@ -39,7 +41,7 @@ class PropertyMapper(
             city = cityMapper.toDomain(p.city) ,
             postalCode = p.postalCode,
             commune = communeMapper.toDomain(p.commune),
-            quartier = p.quartier,
+            quartier = quartierMapper.toDomain(p.quartier),
             sold = p.sold,
             transactionType = p.transactionType,
             propertyType = propertyTypeMapper.toDomain(p.propertyType),
@@ -76,7 +78,7 @@ class PropertyMapper(
             city = cityMapper.toEntity(p.city) ,
             postalCode = p.postalCode,
             commune = communeMapper.toEntity(p.commune),
-            quartier = p.quartier,
+            quartier = quartierMapper.toEntity(p.quartier),
             sold = p.sold,
             transactionType = p.transactionType,
             propertyType = propertyTypeMapper.toEntity(p.propertyType),

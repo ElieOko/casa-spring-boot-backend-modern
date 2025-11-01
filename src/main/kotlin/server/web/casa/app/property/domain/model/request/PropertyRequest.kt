@@ -22,6 +22,8 @@ data class PropertyRequest(
     val cityId : Long,
     @NotNull
     val communeId : Long,
+    @NotNull
+    val quartierId : Long,
     val postalCode : String? = "",
     val quartier : String,
     val sold : Boolean,

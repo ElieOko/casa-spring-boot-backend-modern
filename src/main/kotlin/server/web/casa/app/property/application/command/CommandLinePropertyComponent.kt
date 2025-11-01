@@ -96,56 +96,56 @@ class CommandLinePropertyComponent(
 //            val result = propertyRepository.save(property)
 //            log.info("***property success******")
 //    }
-//    fun createTypeProperty(){
-//        typePropertyRepository.saveAll(
-//            listOf(
-//                PropertyTypeEntity(
-//                    name = "Studio",
-//                    description = "",
-//                ),
-//                PropertyTypeEntity(
-//                    name = "Apparts",
-//                    description = "",
-//                ),
-//                PropertyTypeEntity(
-//                    name = "Maisons",
-//                    description = "",
-//                ),
-//                PropertyTypeEntity(
-//                    name = "Bureau",
-//                    description = "",
-//                ),
-//                PropertyTypeEntity(
-//                    name = "Hotels",
-//                    description = "",
-//                ),
-//                PropertyTypeEntity(
-//                    name = "Vacances",
-//                    description = "",
-//                )
-//            )
-//        )
-//        log.info("save type property")
-//    }
+    fun createTypeProperty(){
+        typePropertyRepository.saveAll(
+            listOf(
+                PropertyTypeEntity(
+                    name = "Studio",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Apparts",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Maisons",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Bureau",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Hotels",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Vacances",
+                    description = "",
+                )
+            )
+        )
+        log.info("save type property")
+    }
 //
-//    fun createFeature(){
-//        feature.saveAll(
-//            listOf(
-//                FeatureEntity(name = "Wifi"),
-//                FeatureEntity(name = "Climatisation"),
-//                FeatureEntity(name = "Chauffage"),
-//                FeatureEntity(name = "Cuisine équipé"),
-//                FeatureEntity(name = "Lave-linge"),
-//                FeatureEntity(name = "Parking"),
-//                FeatureEntity(name = "Ascenceur"),
-//                FeatureEntity(name = "Piscine"),
-//                FeatureEntity(name = "Jardin"),
-//                FeatureEntity(name = "Terrasse"),
-//                FeatureEntity(name = "Gym"),
-//                FeatureEntity(name = "Sécurité"),
-//                FeatureEntity(name = "Animaux acceptés"),
-//            )
-//        )
-//        log.info("save features")
-//    }
+    fun createFeature(){
+        feature.saveAll(
+            listOf(
+                FeatureEntity(name = "Wifi"),
+                FeatureEntity(name = "Climatisation"),
+                FeatureEntity(name = "Chauffage"),
+                FeatureEntity(name = "Cuisine équipé"),
+                FeatureEntity(name = "Lave-linge"),
+                FeatureEntity(name = "Parking"),
+                FeatureEntity(name = "Ascenceur"),
+                FeatureEntity(name = "Piscine"),
+                FeatureEntity(name = "Jardin"),
+                FeatureEntity(name = "Terrasse"),
+                FeatureEntity(name = "Gym"),
+                FeatureEntity(name = "Sécurité"),
+                FeatureEntity(name = "Animaux acceptés"),
+            )
+        )
+        log.info("save features")
+    }
 }

@@ -15,8 +15,8 @@ class CommuneEntity(
     val district  : DistrictEntity? = null,
     @Column("name")
     val name        : String,
-    @OneToOne(mappedBy = "commune")
-    val quartier : QuartierEntity? = null,
+    @OneToMany(mappedBy = "commune")
+    val quartier : List<QuartierEntity> = emptyList(),
     @OneToMany(mappedBy = "commune")
     val properties : List<PropertyEntity> = emptyList()
 )

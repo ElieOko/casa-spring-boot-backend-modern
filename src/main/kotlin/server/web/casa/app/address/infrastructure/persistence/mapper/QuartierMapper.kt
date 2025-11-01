@@ -9,19 +9,19 @@ import server.web.casa.utils.Mode
 @Component
 @Profile(Mode.DEV)
 class QuartierMapper(
-    val communeMapper: CommuneMapper
+//    val communeMapper: CommuneMapper
 ) {
     fun toDomain(quartierEntity: QuartierEntity): Quartier{
         return Quartier(
             quartierId = quartierEntity.quartierId,
-            commune = communeMapper.toDomain(quartierEntity.commune),
+//            commune = communeMapper.toDomain(quartierEntity.commune),
             name = quartierEntity.name
         )
     }
     fun toEntity(quartier: Quartier) : QuartierEntity{
         return QuartierEntity(
             quartierId = quartier.quartierId,
-            commune = communeMapper.toEntity(quartier.commune),
+//            commune = communeMapper.toEntity(quartier.commune),
             name = quartier.name
         )
     }

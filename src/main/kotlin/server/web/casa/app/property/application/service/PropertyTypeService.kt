@@ -22,11 +22,7 @@ class PropertyTypeService(
     suspend fun getAll() : List<PropertyType> = repository.findAll().map { mapper.toDomain(it) }.toList()
 
     suspend fun findByIdPropertyType(id : Long) : PropertyType? {
-        val data = repository.findById(id).let {
-            it.stream().map {
-                mapper.toDomain(it)
-            }
-        }?:  EntityNotFoundException("Aucun type de proprièté avec cet identifiant $id")
-        return null
+        val data = repository.findById(id).orElse(null)
+        return mapper.toDomain(data)
     }
 }

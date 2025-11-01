@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import server.web.casa.app.address.infrastructure.persistence.entity.CityEntity
 import server.web.casa.app.address.infrastructure.persistence.entity.CommuneEntity
+import server.web.casa.app.address.infrastructure.persistence.entity.QuartierEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import java.time.LocalDate
@@ -46,8 +47,9 @@ class PropertyEntity(
     @ManyToOne
     @JoinColumn("commune_id")
     val commune : CommuneEntity,
-    @Column(name = "quartier")
-    val quartier  : String,
+    @ManyToOne
+    @JoinColumn("quartier_id")
+    val quartier : QuartierEntity,
     @Column(name = "sold")
     val sold : Boolean,
     @Column(name = "transactionType")

@@ -35,6 +35,7 @@ class PropertyController(
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
     private val featureService: FeatureService,
+    private val quartierService: QuartierService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -50,8 +51,11 @@ class PropertyController(
        val user = userService.findIdUser(request.userId)
        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
        val commune = communeService.findByIdCommune(request.communeId)
-
-        if (city != null && user != null && propertyType != null){
+       val quartier =  quartierService.findByIdQuartier(request.quartierId)
+        log.info("--> $commune")
+        log.info("--> $city")
+        log.info("--> $propertyType")
+        if (city != null && user != null && propertyType != null && imageList.isNotEmpty()){
             val property = Property(
                 title = request.title,
                 description = request.description,
@@ -68,7 +72,7 @@ class PropertyController(
                 postalCode = request.postalCode,
                 commune = commune,
                 features = request.features,
-                quartier = request.quartier,
+                quartier = quartier,
                 sold = request.sold,
                 transactionType = request.transactionType,
                 propertyType = propertyType,
@@ -79,17 +83,17 @@ class PropertyController(
             val result = service.create(property)
             val  propertyInstance = service.findByIdProperty(result.propertyId)
             log.info("propertyInstance => ***${propertyInstance}***")
-            if (request.propertyImage.isNotEmpty()){
-                request.propertyImage.map {
+            if (imageList.isNotEmpty()){
+                imageList.map {
                     val result = propertyImageService.create(PropertyImage(
                         property = propertyInstance,
                         name = it?.image!!
                     ))
-                    log.info("test => ***${result}***")
+//                    log.info("test => ***${result}***")
                 }
             }
-            if (request.propertyImageRoom.isNotEmpty()){
-                request.propertyImageRoom.map {
+            if (imageRoom.isNotEmpty()){
+                imageRoom.map {
                     val result = propertyImageRoomService.create(PropertyImageRoom(
                         property = propertyInstance,
                         name = it?.image!!
@@ -98,8 +102,8 @@ class PropertyController(
                 }
             }
 
-            if (request.propertyImageLivingRoom.isNotEmpty()){
-                request.propertyImageLivingRoom.map {
+            if (imageLivingRoom.isNotEmpty()){
+                imageLivingRoom.map {
                     val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
                         property = propertyInstance,
                         name = it?.image!!
@@ -108,8 +112,8 @@ class PropertyController(
                 }
             }
 
-            if (request.propertyImageKitchen.isNotEmpty()){
-                request.propertyImageKitchen.map {
+            if (imageKitchen.isNotEmpty()){
+                imageKitchen.map {
                     val result = propertyImageKitchenService.create(PropertyImageKitchen(
                         property = propertyInstance,
                         name = it?.image!!
