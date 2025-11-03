@@ -43,6 +43,7 @@ class PropertyMapper(
             commune = communeMapper.toDomain(p.commune),
             quartier = quartierMapper.toDomain(p.quartier),
             sold = p.sold,
+            electric = p.electric,
             transactionType = p.transactionType,
             propertyType = propertyTypeMapper.toDomain(p.propertyType),
             user = userMapper.toDomain(p.user),
@@ -65,6 +66,7 @@ class PropertyMapper(
         return PropertyEntity(
             propertyId = p.propertyId,
             title = p.title,
+            electric = p.electric,
             description = p.description,
             price = p.price,
             surface = p.surface,

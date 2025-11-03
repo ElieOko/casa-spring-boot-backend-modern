@@ -35,6 +35,8 @@ class PropertyEntity(
     val livingRoom : Int? = 0,
     @Column(name = "bathroom", nullable = true)
     val bathroom : Int? = 0,
+    @Column(name = "electric")
+    val electric : Int = 1,
     @Column(name = "floor", nullable = true)
     val floor : Int? = 0,
     @Column(name = "address")
