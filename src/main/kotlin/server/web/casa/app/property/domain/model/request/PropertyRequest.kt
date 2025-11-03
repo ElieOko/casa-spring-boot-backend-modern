@@ -2,7 +2,6 @@ package server.web.casa.app.property.domain.model.request
 
 import jakarta.validation.constraints.NotNull
 import server.web.casa.app.property.domain.model.Feature
-import server.web.casa.app.property.domain.model.FeatureRequest
 
 data class PropertyRequest(
     @NotNull
@@ -18,6 +17,7 @@ data class PropertyRequest(
     val bathroom : Int? = 0,
     val floor : Int? = 0,
     val address : String,
+    val guarantee : String = "",
     @NotNull
     val cityId : Long,
     @NotNull
@@ -25,6 +25,7 @@ data class PropertyRequest(
     @NotNull
     val quartierId : Long,
     val electric : Int = 1,
+    val water : Int =1,
     val postalCode : String? = "",
     val quartier : String,
     val sold : Boolean,

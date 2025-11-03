@@ -13,6 +13,7 @@ data class Property(
     val rooms : Int? = 0,
     val bedrooms : Int? = 0,
     val electric : Int = 1,
+    val water : Int = 1,
     val kitchen : Int? = 0,
     val livingRoom : Int? = 0,
     val bathroom : Int? = 0,

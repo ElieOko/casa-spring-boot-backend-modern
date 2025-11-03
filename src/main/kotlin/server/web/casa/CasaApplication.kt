@@ -24,6 +24,4 @@ class HomeController {
     fun home():String {
         return  "index"
     }
-
-
 }
