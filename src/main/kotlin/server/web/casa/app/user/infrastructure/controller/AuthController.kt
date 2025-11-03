@@ -10,12 +10,17 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import server.web.casa.app.actor.application.service.BailleurService
+import server.web.casa.app.actor.application.service.CommissionnaireService
+import server.web.casa.app.actor.application.service.LocataireService
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.user.application.AuthService
 import server.web.casa.app.user.application.TypeAccountService
+import server.web.casa.app.user.domain.model.ProfileUser
 import server.web.casa.app.user.domain.model.UserAuth
 import server.web.casa.app.user.domain.model.UserRequest
 import server.web.casa.route.auth.AuthRoute
+import kotlin.String
 
 const val ROUTE_REGISTER = AuthRoute.REGISTER
 const val ROUTE_LOGIN = AuthRoute.LOGIN
@@ -26,6 +31,9 @@ const val ROUTE_LOGIN = AuthRoute.LOGIN
 @Profile("dev")
 class AuthController(
     private val authService: AuthService,
+    private val commissionnaire : CommissionnaireService,
+    private val locataire : LocataireService,
+    private val bailleur : BailleurService,
     private val cityService: CityService,
     private val typeAccountService: TypeAccountService
 ) {
@@ -74,8 +82,53 @@ class AuthController(
       @Valid @RequestBody body: UserAuth
     ): ResponseEntity<Map<String, Any?>> {
       val data = authService.login(body.identifiant, body.password)
+      var profile : ProfileUser? = null
+          when(data.second?.typeAccount?.typeAccountId){
+              1 -> {}
+              2->{
+                val actor = commissionnaire.findAllCommissionnaire().filter{it.user?.userId == data.second?.userId}[0]
+                 profile = ProfileUser(
+                     firstname = actor.firstName,
+                     lastname = actor.lastName,
+                     fullname = actor.fullName,
+                     address = actor.address,
+                     images = actor.images,
+                     cardFront = actor.cardFront,
+                     cardBack = actor.cardBack,
+                     numberCard = actor.numberCard
+                 )
+              }
+              3-> {
+                  val actor = bailleur.findAllBailleur().filter{it.user?.userId == data.second?.userId }[0]
+                  profile = ProfileUser(
+                      firstname = actor.firstName,
+                      lastname = actor.lastName,
+                      fullname = actor.fullName,
+                      address = actor.address,
+                      images = actor.images,
+                      cardFront = actor.cardFront,
+                      cardBack = actor.cardBack,
+                      numberCard = actor.numberCard
+                  )
+              }
+              4-> {
+                  val actor = locataire.findAllLocataire().filter{ it.user?.userId == data.second?.userId }[0]
+                  profile = ProfileUser(
+                      firstname = actor.firstName,
+                      lastname = actor.lastName,
+                      fullname = actor.fullName,
+                      address = actor.address,
+                      images = actor.images,
+                      cardFront = actor.cardFront,
+                      cardBack = actor.cardBack,
+                      numberCard = actor.numberCard
+                  )
+              }
+              else -> {}
+          }
       val response = mapOf(
           "user" to data.second,
+          "profile" to profile,
           "token" to data.first.accessToken,
           "refresh_token" to data.first.refreshToken,
           "message" to "Connexion réussie avec succès"
