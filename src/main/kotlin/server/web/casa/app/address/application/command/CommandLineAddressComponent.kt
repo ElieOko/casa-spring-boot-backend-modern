@@ -35,10 +35,10 @@ class CommandLineAddressComponent(
     override fun run(vararg args: String) {
         log.info("***********************")
         try {
-//            createCountry()
-//            createCity()
-//            createDistrict()
-//            createCommune()
+            createCountry()
+            createCity()
+            createDistrict()
+            createCommune()
 //            createQuartier()
 //            log.info("quartier")
 //            log.info(quartierRepository.findAll()[0].commune?.name)
