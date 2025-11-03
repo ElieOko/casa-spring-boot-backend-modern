@@ -58,6 +58,8 @@ class PropertyEntity(
     val sold : Boolean,
     @Column(name = "transactionType")
     val transactionType : String,
+    @Column(name = "guarantee")
+    val guarantee : String = "",
     @ManyToOne
     @JoinColumn("property_type_id")
     val propertyType : PropertyTypeEntity,

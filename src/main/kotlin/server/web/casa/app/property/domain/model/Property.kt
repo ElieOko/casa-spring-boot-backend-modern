@@ -16,6 +16,7 @@ data class Property(
     val water : Int = 1,
     val kitchen : Int? = 0,
     val livingRoom : Int? = 0,
+    val guarantee : String = "",
     val bathroom : Int? = 0,
     val floor : Int? = 0,
     val address : String,
