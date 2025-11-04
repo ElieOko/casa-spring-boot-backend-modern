@@ -5,6 +5,4 @@ data class FavoriteRequest(
     val userId : Long,
     @Null
     val propertyId : Long,
-    @Null
-    val featureId : Long
 )
