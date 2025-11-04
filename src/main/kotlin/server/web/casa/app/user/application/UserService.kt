@@ -8,7 +8,9 @@ import jakarta.persistence.EntityNotFoundException
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.Mode
@@ -57,18 +59,22 @@ class UserService(
         id : Long,
         user : User
     ): User ?{
-      repository.findById(id).let{
-            val entityToUpdate = UserEntity(
-                userId = user.userId,
-                password = user.password,
-                typeAccount = mapperAccount.toEntity(user.typeAccount),
-                email = user.email,
-                phone = user.phone,
-                city = mapperCity.toEntity(user.city)
-            )
-            val updatedUser = repository.save(entityToUpdate)
-            return mapper.toDomain(updatedUser)
-        }
+      val userState =  repository.findById(id).orElse(null)
+      if (userState.email == user.email) {
+          userState.city = mapperCity.toEntity(user.city)
+          val updatedUser = repository.save(userState)
+          return mapper.toDomain(updatedUser)
+      }
+      else{
+          val state = repository.findByPhoneOrEmail(user.email!!)
+          if(state != null) {
+              throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse email est déjà utilisé.")
+          }
+          userState.email = user.email
+          userState.city = mapperCity.toEntity(user.city)
+          val updatedUser = repository.save(userState)
+          return mapper.toDomain(updatedUser)
+      }
     }
 
     suspend fun deleteUser(id : Long) : Boolean{

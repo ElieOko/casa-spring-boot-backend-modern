@@ -34,12 +34,12 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     val typeAccount: TypeAccountEntity,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cityId")
-    val city: CityEntity,
+    var city: CityEntity,
     @Column("password", nullable = false)
     @JsonIgnore
-    val password: String?,
+    var password: String?,
     @Column("email", nullable = true)
-    val email: String? = null,
+    var email: String? = null,
     @Column("phone", nullable = true)
     val phone: String,
     @Column("createdAt")

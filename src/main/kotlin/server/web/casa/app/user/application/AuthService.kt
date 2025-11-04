@@ -94,6 +94,16 @@ class AuthService(
         return result
     }
 
+    suspend fun changePassword(id : Long,new : String, old : String): User? {
+        val data = userRepository.findById(id).orElse(null)
+        if(!hashEncoder.matches(old, data.password.toString())) {
+            throw BadCredentialsException("Mot de passe invalide.")
+        }
+        data.password = hashEncoder.encode(new)
+        val updatedUser = userRepository.save(data)
+        return mapper.toDomain(updatedUser)
+    }
+
     @Transactional
     suspend fun refresh(refreshToken: String): TokenPair {
         if(!jwtService.validateRefreshToken(refreshToken)) {
