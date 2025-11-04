@@ -1,5 +1,6 @@
 package server.web.casa.app.actor.infrastructure.controller
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
@@ -76,5 +77,15 @@ class CommissionnaireController(
         val data = service.findAllCommissionnaire()
         val response = mapOf("commissionnaires" to data)
         return ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Modification Commissionnaire")
+    @PutMapping("/{id}")
+    suspend fun updateCommissionnaire(
+        @PathVariable("id") id : Long,
+        @RequestBody @Valid commissionnaire: Commissionnaire
+    ) : ResponseEntity<Commissionnaire> {
+        val updated = service.updateCommissionnaire(id,commissionnaire)
+        return ResponseEntity.ok(updated)
     }
 }

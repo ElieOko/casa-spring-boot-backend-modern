@@ -1,5 +1,6 @@
 package server.web.casa.app.actor.infrastructure.controller
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
@@ -87,5 +88,17 @@ class BailleurController(
         val data = service.findAllBailleur()
         val response = mapOf("bailleurs" to data)
         return ResponseEntity.ok().body(response)
+    }
+
+
+
+    @Operation(summary = "Modification bailleur")
+    @PutMapping("/{id}")
+    suspend fun updateBailleur(
+        @PathVariable("id") id : Long,
+        @RequestBody @Valid bailleur: Bailleur
+    ) : ResponseEntity<Bailleur> {
+        val updated = service.updateBailleur(id,bailleur)
+        return ResponseEntity.ok(updated)
     }
 }

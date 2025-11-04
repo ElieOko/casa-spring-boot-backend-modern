@@ -1,5 +1,6 @@
 package server.web.casa.app.actor.infrastructure.controller
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
@@ -77,5 +78,15 @@ class LocataireController(
         val data = service.findAllLocataire()
         val response = mapOf("locataires" to data)
         return ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Modification Locataire")
+    @PutMapping("/{id}")
+    suspend fun updateLocataire(
+        @PathVariable("id") id : Long,
+        @RequestBody @Valid locataire: Locataire
+    ) : ResponseEntity<Locataire> {
+        val updated = service.updateLocataire(id,locataire)
+        return ResponseEntity.ok(updated)
     }
 }
