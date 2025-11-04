@@ -6,7 +6,9 @@ import server.web.casa.app.user.domain.model.User
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -19,6 +21,7 @@ import server.web.casa.app.user.application.TypeAccountService
 import server.web.casa.app.user.domain.model.ProfileUser
 import server.web.casa.app.user.domain.model.UserAuth
 import server.web.casa.app.user.domain.model.UserRequest
+import server.web.casa.app.user.domain.model.request.UserPassword
 import server.web.casa.route.auth.AuthRoute
 import kotlin.String
 
@@ -142,7 +145,23 @@ class AuthController(
     ): AuthService.TokenPair {
         return authService.refresh(body.refreshToken)
     }
+
+    @Operation(summary = "Change password utilisateur")
+    @PutMapping("/change/password/{id}")
+    suspend fun updateUser(
+        @PathVariable("id") id : Long,
+        @RequestBody @Valid user : UserPassword
+    ) : ResponseEntity<Map<String, String>> {
+        val new = user.newPassword
+        val old = user.oldPassword
+        val updated = authService.changePassword(id,new,old)
+        val message = mapOf(
+            "message" to "Mot de passe changé avec succès"
+        )
+        return ResponseEntity.ok(message)
+    }
 }
+
 
 data class RefreshRequest(
     val refreshToken: String

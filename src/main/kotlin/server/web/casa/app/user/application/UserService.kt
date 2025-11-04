@@ -5,13 +5,12 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import jakarta.persistence.EntityNotFoundException
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
+import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.Mode
 import kotlin.time.ExperimentalTime
@@ -56,8 +55,8 @@ class UserService(
 
     @OptIn(ExperimentalTime::class)
     suspend fun updateUser(
-        id : Long,
-        user : User
+        id: Long,
+        user: UserRequestChange
     ): User ?{
       val userState =  repository.findById(id).orElse(null)
       if (userState.email == user.email) {
@@ -66,7 +65,7 @@ class UserService(
           return mapper.toDomain(updatedUser)
       }
       else{
-          val state = repository.findByPhoneOrEmail(user.email!!)
+          val state = repository.findByPhoneOrEmail(user.email)
           if(state != null) {
               throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse email est déjà utilisé.")
           }

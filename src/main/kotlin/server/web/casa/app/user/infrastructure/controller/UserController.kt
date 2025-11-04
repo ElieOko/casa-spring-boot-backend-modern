@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.user.application.UserService
 import server.web.casa.app.user.domain.model.User
+import server.web.casa.app.user.domain.model.request.UserRequestChange
 
 @Tag(name = "Utilisateur", description = "Gestion des utilisateurs")
 @RestController
@@ -38,7 +39,7 @@ class UserController(
     @PutMapping("/{id}")
     suspend fun updateUser(
         @PathVariable("id") id : Long,
-        @RequestBody @Valid user : User
+        @RequestBody @Valid user : UserRequestChange
     ) : ResponseEntity<User> {
         val updated = userService.updateUser(id,user)
         return ResponseEntity.ok(updated)
