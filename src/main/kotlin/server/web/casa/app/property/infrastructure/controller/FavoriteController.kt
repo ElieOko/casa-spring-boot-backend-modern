@@ -44,8 +44,9 @@ class FavoriteController(
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(mapOf("error" to "You must assign property and user, not none."))
         }
-
-        val favoriteCreate = service.create(data)
+        val ifExist = service.getFavoriteIfExist(propR.findById(request.propertyId).orElse(null),
+                                                    userR.findById(request.userId).orElse(null))
+        val favoriteCreate  = ifExist ?: service.create(data)
 
         val response = mapOf(
             "message" to "Property ${favoriteCreate.property} add to favorite with success",
@@ -62,7 +63,7 @@ class FavoriteController(
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping("/user/property/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<Favorite>?>> {
         val user = userR.findById(user).orElse(null)
         val favorite = service.getUserFavoriteProperty(user)

@@ -6,6 +6,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEn
 import server.web.casa.app.property.infrastructure.persistence.mapper.FavoriteMapper
 import server.web.casa.app.property.infrastructure.persistence.repository.FavoriteRepository
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import kotlin.collections.map
 
 @Service
 class FavoriteService(
@@ -24,6 +25,9 @@ class FavoriteService(
     }
     suspend fun getOneFavoritePropertyCount( property: PropertyEntity ) : List<Favorite>?{
         return repos.findOneFavoritePropertyCount(property).let {list-> list?.map{mapper.toDomain(it)}?.toList() ?: emptyList() }
+    }
+    suspend fun getFavoriteIfExist( property: PropertyEntity , user: UserEntity) : Favorite?{
+        return repos.findFavoriteExist(property, user).let{mapper.toDomain(it!!)}
     }
     suspend fun deleteById(favoriteId: Long) : Int{
         return repos.deleteByIdFavorite(favoriteId)

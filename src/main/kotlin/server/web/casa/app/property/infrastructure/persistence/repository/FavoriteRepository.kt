@@ -16,6 +16,9 @@ interface FavoriteRepository : JpaRepository<FavoriteEntity, Long> {
     @Query("SELECT r FROM FavoriteEntity r WHERE r.property = :property")
     suspend fun findOneFavoritePropertyCount(@Param("property") property: PropertyEntity): List<FavoriteEntity> ?
 
+    @Query("SELECT r FROM FavoriteEntity r WHERE r.property = :property AND r.user = :user")
+    suspend fun findFavoriteExist(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): FavoriteEntity?
+
     @Modifying
     @Query("DELETE FROM FavoriteEntity r WHERE r.id = :id")
     suspend fun deleteByIdFavorite(@Param("id") id: Long): Int
