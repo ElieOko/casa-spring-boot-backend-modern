@@ -1,12 +1,10 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
-import kotlinx.coroutines.flow.Flow
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 
