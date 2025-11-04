@@ -18,11 +18,7 @@ class FavoriteEntity (
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "property_id", nullable = true)
-    val property : PropertyEntity ?,
-
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "feature_id", nullable = true)
-    val feature : FeatureEntity  ?,
+    val property : PropertyEntity?,
 
     @Column(name = "createdAt")
     val createdAt: LocalDate = LocalDate.now()

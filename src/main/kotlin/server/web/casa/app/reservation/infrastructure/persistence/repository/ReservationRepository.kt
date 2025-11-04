@@ -48,6 +48,11 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
     suspend fun updateStatusById(@Param("id") id: Long, @Param("status") status: ReservationStatus): Int
 
     @Modifying
+    @Query("UPDATE ReservationEntity r SET r.isActive = :isActive, r.cancellationReason = :reason WHERE r.id = :id")
+    suspend fun cancelOrKeepReservation(@Param("id") id: Long,
+                                        @Param("isActive") isActive: Boolean,
+                                        @Param("reason") reason: String?): Int
+    @Modifying
     @Query("DELETE FROM ReservationEntity r WHERE r.id = :id")
     suspend fun deleteByIdReservation(@Param("id") id: Long): Int
 }

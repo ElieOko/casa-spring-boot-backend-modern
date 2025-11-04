@@ -17,7 +17,6 @@ class FavoriteMapper(
             favoriteId = f.favoriteId,
             user = userMapper.toDomain(f.user),
             property = propertyMapper.toDomain(f.property!!),
-            feature = featureM.toDomain(f.feature!!),
             createdAt = f.createdAt,
         )
     }
@@ -27,7 +26,6 @@ class FavoriteMapper(
             favoriteId = f.favoriteId,
             user = userMapper.toEntity(f.user)!!,
             property = propertyMapper.toEntity(f.property!!),
-            feature = featureM.toEntity(f.feature!!),
             createdAt = f.createdAt
         )
     }

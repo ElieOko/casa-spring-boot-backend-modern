@@ -110,7 +110,7 @@ class ReservationController(
 
         val user = userR.findById(userId).orElseThrow{
                  RuntimeException("User not found with id: $userId")
-         }
+        }
         val reservation = service.findByUser(user)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
@@ -134,6 +134,28 @@ class ReservationController(
         @RequestBody status: ReservationStatus
     ): ResponseEntity<Map<String, Reservation?>> {
         val updated = service.updateStatusById(id, status)
+        val reservation = service.findId(id)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @PutMapping("/cancel/{id}/{reason}")
+    suspend fun cancelReservation(
+        @PathVariable id: Long,
+        @RequestBody reason: String ?
+    ): ResponseEntity<Map<String, Reservation?>> {
+        val cancel = service.cancelOrKeepReservation(id, false,reason)
+        val reservation = service.findId(id)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+    }
+
+    @PutMapping("/keep/{id}/{reason}")
+    suspend fun keepReservation(
+        @PathVariable id: Long,
+        @RequestBody reason: String ?
+    ): ResponseEntity<Map<String, Reservation?>> {
+        val keep = service.cancelOrKeepReservation(id, true, reason)
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
