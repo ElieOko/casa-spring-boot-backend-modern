@@ -62,7 +62,10 @@ class ReservationService(
         suspend fun updateStatusById(id: Long, status: ReservationStatus):Int{
           return repoR.updateStatusById(id, status)
         }
-
+    @Transactional
+    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?):Int{
+        return repoR.cancelOrKeepReservation(id, isActive, reason)
+    }
     //delete
     @Transactional
     suspend fun deleteReservationById(id: Long):Int{
