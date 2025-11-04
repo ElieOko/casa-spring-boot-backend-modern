@@ -3,6 +3,6 @@ import jakarta.validation.constraints.*
 data class FavoriteRequest(
     @NotNull
     val userId : Long,
-    @Null
+    @NotNull
     val propertyId : Long,
 )
