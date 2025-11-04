@@ -5,8 +5,7 @@ import java.time.LocalDate
 
 data class Favorite(
     val favoriteId: Long = 0,
-    val user: User ?,
-    val property: Property ?,
-    val feature: Feature ?,
+    val user: User?,
+    val property: Property?,
     val createdAt: LocalDate
 )
