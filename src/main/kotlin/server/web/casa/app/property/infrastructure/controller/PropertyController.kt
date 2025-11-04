@@ -159,7 +159,7 @@ class PropertyController(
         @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
         @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
-    ): ResponseEntity<Map<String, Page<PropertyEntity>>> {
+    ): ResponseEntity<Map<String, Page<Property>>> {
         val data = service.filterProduct(
             filterModel = PropertyFilter(
                 sold = sold,

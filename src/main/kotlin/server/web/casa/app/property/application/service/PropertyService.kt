@@ -36,7 +36,7 @@ class PropertyService(
         size : Int,
         sortBy : String,
         sortOrder : String
-    ): Page<PropertyEntity>{
+    ): Page<Property>{
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
         val pageable = PageRequest.of(page,size,sort)
         val data = repository.filterProperty(
@@ -49,7 +49,7 @@ class PropertyService(
             room = filterModel.room,
             pageable = pageable
         )
-        return data
+        return data.map { mapper.toDomain(it) }
     }
 }
 

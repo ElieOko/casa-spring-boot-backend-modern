@@ -45,7 +45,6 @@ class CommandLineAddressComponent(
         } catch (e: Exception){
             log.info(e.message)
         }
-
     }
 
     fun createCity(){
