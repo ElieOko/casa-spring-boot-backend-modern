@@ -1,4 +1,4 @@
-package server.web.casa.app.notification.service
+package server.web.casa.app.notification.application.service
 
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
