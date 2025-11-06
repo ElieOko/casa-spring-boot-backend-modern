@@ -23,6 +23,7 @@ import server.web.casa.app.user.domain.model.UserAuth
 import server.web.casa.app.user.domain.model.UserRequest
 import server.web.casa.app.user.domain.model.request.UserPassword
 import server.web.casa.route.auth.AuthRoute
+import server.web.casa.security.Auth
 import kotlin.String
 
 const val ROUTE_REGISTER = AuthRoute.REGISTER
@@ -38,7 +39,8 @@ class AuthController(
     private val locataire : LocataireService,
     private val bailleur : BailleurService,
     private val cityService: CityService,
-    private val typeAccountService: TypeAccountService
+    private val typeAccountService: TypeAccountService,
+    private val auth: Auth
 ) {
     @Operation(summary = "Création utilisateur")
     @PostMapping(ROUTE_REGISTER)
@@ -147,14 +149,14 @@ class AuthController(
     }
 
     @Operation(summary = "Change password utilisateur")
-    @PutMapping("/change/password/{id}")
+    @PutMapping("/change/password")
     suspend fun updateUser(
-        @PathVariable("id") id : Long,
         @RequestBody @Valid user : UserPassword
     ) : ResponseEntity<Map<String, String>> {
+        val userConnect = auth.user()
         val new = user.newPassword
         val old = user.oldPassword
-        val updated = authService.changePassword(id,new,old)
+        val updated = authService.changePassword(userConnect!!.userId,new,old)
         val message = mapOf(
             "message" to "Mot de passe changé avec succès"
         )
