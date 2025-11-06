@@ -1,10 +1,12 @@
 package server.web.casa.app.notification.application.service
 
+import org.springframework.stereotype.Service
 import server.web.casa.app.notification.domain.model.request.NotificationReservation
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationReservationRepository
 import server.web.casa.app.reservation.application.service.ReservationService
 
+@Service
 class NotificationReservationService(
     private val repository: NotificationReservationRepository,
     private val reservationService: ReservationService
