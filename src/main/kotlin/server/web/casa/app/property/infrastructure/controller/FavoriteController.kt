@@ -2,6 +2,7 @@ package server.web.casa.app.property.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -14,13 +15,16 @@ import server.web.casa.app.property.infrastructure.persistence.repository.Proper
 import server.web.casa.app.user.application.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.route.favorite.FavoriteRoute
+import server.web.casa.utils.Mode
 import java.time.LocalDate
 
 const val ROUTE_FAVORITE = FavoriteRoute.FAVORITE_PATH
 
 @Tag(name = "Favorite", description = "Gestion des favorites")
 @RestController
+@Profile(Mode.DEV)
 @RequestMapping(ROUTE_FAVORITE)
+
 class FavoriteController(
     private val service: FavoriteService,
     private val userS: UserService,
@@ -30,30 +34,32 @@ class FavoriteController(
 ) {
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun createFeature(@Valid @RequestBody request: FavoriteRequest): ResponseEntity<Map<String, Any?>>{
+    suspend fun createFavorite(
+        @Valid @RequestBody request: FavoriteRequest
+    ): ResponseEntity<Map<String, Any?>> {
         val user = userS.findIdUser(request.userId)
         val property = prop.findByIdProperty(request.propertyId)
 
-        val data = Favorite(
+        if (user == null || property == null) {
+            return ResponseEntity.badRequest().body(
+                mapOf("error" to "User and property must not be null.")
+            )
+        }
+
+        val favorite = Favorite(
             user = user,
             property = property,
             createdAt = LocalDate.now()
         )
+       val existingFavorite = service.getFavoriteIfExist(propR.findById(request.propertyId).orElse(null), userR.findById(request.userId).orElse(null))?.firstOrNull()
 
-        if ((property == null) || (user == null)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(mapOf("error" to "You must assign property and user, not none."))
-        }
-        val ifExist = service.getFavoriteIfExist(propR.findById(request.propertyId).orElse(null),
-                                                    userR.findById(request.userId).orElse(null))
-        val favoriteCreate  = ifExist ?: service.create(data)
-
+        val savedFavorite = existingFavorite ?: service.create(favorite)
         val response = mapOf(
-            "message" to "Property ${favoriteCreate.property} add to favorite with success",
+            "message" to "Property '${property.propertyId}' added to favorites successfully.",
             "user" to user,
-            "favorite" to favoriteCreate
+            "favorite" to savedFavorite
         )
-        return ResponseEntity.status(201).body(response)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -64,15 +70,15 @@ class FavoriteController(
     }
 
     @GetMapping("/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<Favorite>?>> {
+     fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<Favorite>?>> {
         val user = userR.findById(user).orElse(null)
-        val favorite = service.getUserFavoriteProperty(user)
+        val favorite = if(user != null) service.getUserFavoriteProperty(user) else null
         val response = mapOf("favorites" to favorite)
         return ResponseEntity.ok().body(response)
     }
 
     @GetMapping("/property/{property}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getOneFavoriteProperty(@PathVariable property: Long):ResponseEntity<Map<String, List<Favorite>?>> {
+     fun getOneFavoriteProperty(@PathVariable property: Long):ResponseEntity<Map<String, List<Favorite>?>> {
         val property = propR.findById (property).orElse(null)
         val favorite = service.getOneFavoritePropertyCount(property)
         val response = mapOf("favorites" to favorite)
@@ -80,14 +86,14 @@ class FavoriteController(
     }
 
     @DeleteMapping("/delete/{id}")
-    suspend fun deleteFavorite(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
+     fun deleteFavorite(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
         service.deleteById(id)
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
     }
 
     @DeleteMapping("/user/delete/{user}")
-    suspend fun deleteAllFavoriteByUser(@PathVariable user: Long): ResponseEntity<Map<String, String>> {
+     fun deleteAllFavoriteByUser(@PathVariable user: Long): ResponseEntity<Map<String, String>> {
         val user = userR.findById(user).orElse(null)
         service.deleteAllFavoriteUser(user)
         val response = mapOf("message" to "Favorite deleted successfully")

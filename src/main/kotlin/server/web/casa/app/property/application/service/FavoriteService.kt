@@ -13,26 +13,26 @@ class FavoriteService(
     private val repos: FavoriteRepository,
     private val mapper : FavoriteMapper
 ) {
-        suspend fun create(f : Favorite): Favorite {
+         fun create(f : Favorite): Favorite {
         val data = mapper.toEntity(f)
         val result = repos.save(data)
         return mapper.toDomain(result)
     }
-    suspend fun getAll() : List<Favorite> = repos.findAll().map { mapper.toDomain(it) }.toList()
+     fun getAll() : List<Favorite> = repos.findAll().map { mapper.toDomain(it) }.toList()
 
-    suspend fun getUserFavoriteProperty(user: UserEntity) : List<Favorite>?{
+     fun getUserFavoriteProperty(user: UserEntity) : List<Favorite>?{
         return repos.findFavoriteByPropertyUser(user).let {list-> list?.map{mapper.toDomain(it)}?.toList() ?: emptyList() }
     }
-    suspend fun getOneFavoritePropertyCount( property: PropertyEntity ) : List<Favorite>?{
+     fun getOneFavoritePropertyCount( property: PropertyEntity ) : List<Favorite>?{
         return repos.findOneFavoritePropertyCount(property).let {list-> list?.map{mapper.toDomain(it)}?.toList() ?: emptyList() }
     }
-    suspend fun getFavoriteIfExist( property: PropertyEntity , user: UserEntity) : Favorite?{
-        return repos.findFavoriteExist(property, user).let{mapper.toDomain(it!!)}
+     fun getFavoriteIfExist( property: PropertyEntity , user: UserEntity) : List<Favorite>?{
+        return repos.findFavoriteExist(property, user).let{list-> list?.map{mapper.toDomain(it)}?.toList() ?: emptyList() }
     }
-    suspend fun deleteById(favoriteId: Long) : Int{
-        return repos.deleteByIdFavorite(favoriteId)
+     fun deleteById(favoriteId: Long) {
+        return repos.deleteById(favoriteId)
     }
-    suspend fun deleteAllFavoriteUser(user: UserEntity) : Int{
+     fun deleteAllFavoriteUser(user: UserEntity) : Int{
         return repos.deleteAllFavoriteUser(user)
     }
 
