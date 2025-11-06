@@ -31,6 +31,8 @@ extra["springCloudVersion"] = "2025.0.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    //websocket
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
 //    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
 //    implementation("io.r2dbc:r2dbc-postgresql")
     //reactive

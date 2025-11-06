@@ -37,6 +37,7 @@ class ServerConfig(
                     .requestMatchers(
                         "/",
                         "/**",
+                        "/websocket/*",
                         "/swagger-ui/**",
                         "/swagger-ui.html/**",
                         "/v3/**"

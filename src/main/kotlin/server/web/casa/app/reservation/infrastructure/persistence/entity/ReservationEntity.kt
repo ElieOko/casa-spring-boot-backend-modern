@@ -1,6 +1,7 @@
 package server.web.casa.app.reservation.infrastructure.persistence.entity
 
 import jakarta.persistence.*
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.ReservationType
@@ -20,6 +21,8 @@ import java.time.LocalDate
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("userId")
     val user                : UserEntity ?,
+    @OneToMany(mappedBy = "reservation")
+    val notification : List<NotificationReservationEntity> = emptyList(),
     @Column(name = "message", nullable = true)
     val message             : String? = "",
     @Column(name = "reservationHeure", nullable = true)
