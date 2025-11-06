@@ -20,55 +20,55 @@ class ReservationService(
     private val mapperR: ReservationMapper,
     private val repoR: ReservationRepository
 ) {
-    suspend fun createReservation(reservation: Reservation): Reservation {
+     fun createReservation(reservation: Reservation): Reservation {
         val data = mapperR.toEntity(reservation)
         val result = repoR.save(data)
         return mapperR.toDomain(result)
     }
 
-    suspend fun findAllReservation() : List<Reservation> {
+     fun findAllReservation() : List<Reservation> {
         return repoR.findAll().map { mapperR.toDomain(it) }.toList()
     }
 
-    suspend fun findId(id: Long): Reservation? {
+     fun findId(id: Long): Reservation? {
       return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
 
-    suspend fun findByProperty(property: PropertyEntity): List<Reservation>? {
+     fun findByProperty(property: PropertyEntity): List<Reservation>? {
         return repoR.findByProperty(property)?.map {
             mapperR.toDomain(it)
         }?.toList()
     }
-    suspend fun findByUser(user: UserEntity): List<Reservation>?{
+     fun findByUser(user: UserEntity): List<Reservation>?{
         return repoR.findByUser(user).let {list-> list?.map{mapperR.toDomain(it)}?.toList() ?: emptyList() }
     }
-    suspend fun findByStatus(status: ReservationStatus): List<Reservation>{
+     fun findByStatus(status: ReservationStatus): List<Reservation>{
         return repoR.findAllByStatus(status).let {list-> list?.map{ mapperR.toDomain(it) }?.toList() ?: emptyList() }
     }
-    suspend fun findByMonth(month: Int, year: Int): List<Reservation>{
+     fun findByMonth(month: Int, year: Int): List<Reservation>{
         return repoR.findAllByMonthAndYear(month, year).let { list-> list?.map{ mapperR.toDomain(it) }?.toList() ?: emptyList() }
     }
-    suspend fun findByPYear(year : Int) : List<Reservation>{
+     fun findByPYear(year : Int) : List<Reservation>{
       return repoR.findAllByYear( year)?.map{ mapperR.toDomain(it) }?.toList() ?: emptyList()
     }
-    suspend fun findByDate(inputDate: LocalDate): List<Reservation> {
+     fun findByDate(inputDate: LocalDate): List<Reservation> {
         return repoR.findAllByDate(inputDate).map{ mapperR.toDomain(it) }.toList()
     }
-    suspend fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
+     fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
       return repoR.findAllInInterval(starDate, endDate)?.map { mapperR.toDomain(it) }?.toList()
     }
         //update
         @Transactional
-        suspend fun updateStatusById(id: Long, status: ReservationStatus):Int{
+         fun updateStatusById(id: Long, status: ReservationStatus):Int{
           return repoR.updateStatusById(id, status)
         }
     @Transactional
-    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?):Int{
+     fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?):Int{
         return repoR.cancelOrKeepReservation(id, isActive, reason)
     }
     //delete
     @Transactional
-    suspend fun deleteReservationById(id: Long):Int{
+     fun deleteReservationById(id: Long):Int{
         val success = repoR.deleteByIdReservation(id)
         return success
     }
