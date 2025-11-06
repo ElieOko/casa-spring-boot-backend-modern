@@ -1,6 +1,7 @@
 package server.web.casa.config
 
 import jakarta.servlet.DispatcherType
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -13,15 +14,21 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import server.web.casa.exception.CustomAccessDeniedHandler
+import server.web.casa.exception.CustomAuthEntryPoint
 import server.web.casa.security.JwtAuthFilter
 import server.web.casa.utils.Mode
+import kotlin.math.log
 
 @Configuration
 @EnableWebSecurity
 @Profile(Mode.DEV)
 class ServerConfig(
-    private val jwtAuthFilter: JwtAuthFilter
+    private val jwtAuthFilter: JwtAuthFilter,
+    private val customAuthEntryPoint: CustomAuthEntryPoint,
+    private val  customAccessDeniedHandler: CustomAccessDeniedHandler
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
     @Bean
     fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
         httpSecurity
@@ -31,28 +38,18 @@ class ServerConfig(
             }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(HttpMethod.GET,"/clients")
-                    .permitAll()
-
                     .requestMatchers(
                         "/",
-                        "/**",
                         "/websocket/*",
                         "/swagger-ui/**",
                         "/swagger-ui.html/**",
                         "/v3/**"
                     )
                     .permitAll()
-
                     .requestMatchers("/api/*")
                     .permitAll()
-
-                    .requestMatchers("/auth/*")
+                    .requestMatchers("/auth/login","/auth/register")
                     .permitAll()
-
-                    .requestMatchers(HttpMethod.POST,"/clients")
-                    .permitAll()
-
                     .dispatcherTypeMatchers(
                         DispatcherType.ERROR,
                         DispatcherType.FORWARD
@@ -62,8 +59,10 @@ class ServerConfig(
                     .authenticated()
             }
             .exceptionHandling { configurer ->
+                log.info("____________${HttpStatus.UNAUTHORIZED}")
                 configurer
-                    .authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                    .authenticationEntryPoint(customAuthEntryPoint)
+                    .accessDeniedHandler(customAccessDeniedHandler)
             }
             .addFilterBefore(jwtAuthFilter,
                 UsernamePasswordAuthenticationFilter::class.java)
