@@ -49,7 +49,7 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property")
      fun findByProperty(@Param("property") property: PropertyEntity): List<ReservationEntity> ?
 
-     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property AND WHERE r.user = :user")
+     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property AND r.user = :user")
     fun findByUserProperty(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): List<ReservationEntity> ?
 
     //use with @Transactional when you call it
