@@ -57,14 +57,17 @@ class ReservationService(
      fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
       return repoR.findAllInInterval(starDate, endDate)?.map { mapperR.toDomain(it) }?.toList()
     }
+    fun findByStartDateAndEndDate(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
+        return repoR.findByStartDateAndEndDate(starDate, endDate)?.map { mapperR.toDomain(it) }?.toList()
+    }
         //update
         @Transactional
          fun updateStatusById(id: Long, status: ReservationStatus):Int{
           return repoR.updateStatusById(id, status)
         }
     @Transactional
-     fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?):Int{
-        return repoR.cancelOrKeepReservation(id, isActive, reason)
+     fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Int{
+        return repoR.cancelOrKeepReservation(id, isActive, reason, status)
     }
     //delete
     @Transactional

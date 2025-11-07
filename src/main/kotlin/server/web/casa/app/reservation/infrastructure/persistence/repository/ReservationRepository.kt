@@ -36,6 +36,12 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
         @Param("endDate") endDate: LocalDate
     ): List<ReservationEntity> ?
 
+    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate = :endDate AND r.endDate = :startDate")
+    fun findByStartDateAndEndDate(
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate
+    ): List<ReservationEntity> ?
+
     @Query("SELECT r FROM ReservationEntity r WHERE r.user = :user")
      fun findByUser(@Param("user") user: UserEntity): List<ReservationEntity>?
 
@@ -50,10 +56,11 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
 
     @Transactional
     @Modifying
-    @Query("UPDATE ReservationEntity r SET r.isActive = :isActive, r.cancellationReason = :reason WHERE r.id = :id")
+    @Query("UPDATE ReservationEntity r SET r.isActive = :isActive, r.status = :status, r.cancellationReason = :reason WHERE r.id = :id")
      fun cancelOrKeepReservation(@Param("id") id: Long,
                                  @Param("isActive") isActive: Boolean,
-                                 @Param("reason") reason: String?): Int
+                                 @Param("reason") reason: String?,
+                                 @Param("status") status: ReservationStatus): Int
 
      @Transactional
      @Modifying

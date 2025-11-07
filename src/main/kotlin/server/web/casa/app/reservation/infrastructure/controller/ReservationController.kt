@@ -143,7 +143,7 @@ class ReservationController(
         @PathVariable id: Long,
         @RequestBody reason: String ?
     ): ResponseEntity<Map<String, Reservation?>> {
-        val cancel = service.cancelOrKeepReservation(id, false,reason)
+        val cancel = service.cancelOrKeepReservation(id, false,reason, ReservationStatus.CANCELLED)
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
@@ -154,7 +154,7 @@ class ReservationController(
         @PathVariable id: Long,
         @RequestBody reason: String ?
     ): ResponseEntity<Map<String, Reservation?>> {
-        val keep = service.cancelOrKeepReservation(id, true, reason)
+        val keep = service.cancelOrKeepReservation(id, true, reason, ReservationStatus.PENDING)
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
