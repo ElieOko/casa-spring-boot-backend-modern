@@ -57,8 +57,11 @@ class ReservationService(
      fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
       return repoR.findAllInInterval(starDate, endDate)?.map { mapperR.toDomain(it) }?.toList()
     }
-    fun findByStartDateAndEndDate(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
-        return repoR.findByStartDateAndEndDate(starDate, endDate)?.map { mapperR.toDomain(it) }?.toList()
+    fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, property: PropertyEntity): List<Reservation>? {
+        return repoR.findByStartDateAndEndDateProperty(starDate, endDate, property)?.map { mapperR.toDomain(it) }?.toList()
+    }
+    fun findByUserProperty(property: PropertyEntity , user: UserEntity): List<Reservation>? {
+        return repoR.findByUserProperty(property, user)?.map { mapperR.toDomain(it) }?.toList()
     }
         //update
         @Transactional

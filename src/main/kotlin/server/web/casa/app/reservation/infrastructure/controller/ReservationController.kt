@@ -13,10 +13,12 @@ import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
 import server.web.casa.app.user.application.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
-
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
 import java.time.LocalDate
+import kotlin.text.format
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -38,17 +40,57 @@ class ReservationController(
     ): ResponseEntity<Map<String, Any?>> {
         val user = userService.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
+        if (user == null || property == null){
+            val responseNotFound = mapOf("error" to "User or property not found")
+            return ResponseEntity.ok().body(responseNotFound )
+        }
+        if (request.endDate < request.startDate){
+            val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
+            return ResponseEntity.ok().body(responseNotFound )
+        }
         val dataReservation = Reservation(
             status = request.status,
             type = request.type,
             isActive = true,
             reservationHeure = request.reservationHeure,
             user = user,
-            property = property!!,
+            property = property,
             message = request.message,
             startDate = request.startDate,
             endDate = request.endDate,
         )
+        //!= verify
+        val propertyEntity = propertyR.findById(request.propertyId).orElse(null)
+        val userEntity = userR.findById(request.userId).orElse(null)
+        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
+        val statusLastReservationUserProperty = lastStatusReservationUserProperty?.last()?.status
+
+        if (statusLastReservationUserProperty == ReservationStatus.PENDING){
+            val responsePending = mapOf("error" to "You already have a pending reservation with this property")
+            return ResponseEntity.ok().body(responsePending )
+        }
+        //if close or cancel we can verify the last before adding
+        val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, propertyEntity)
+
+        val format = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+        val propertyBooked = lastReservationProperty
+            ?.filter {
+                val hour = LocalTime.parse(it.reservationHeure!!, format).plusHours(1)
+                val timeUp = LocalTime.parse(request.reservationHeure, format)
+                hour.isBefore(timeUp)
+            }
+            ?.sortedBy { it.reservationHeure }
+        if(propertyBooked != null) {
+            val responseHour = mapOf("error" to "Unfortunately, this time slot is already booked.")
+            return ResponseEntity.ok().body(responseHour )
+        }
+
+        // check if property is available before adding
+        if(!property.isAvailable){
+            val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
+            return ResponseEntity.ok().body(responseAvailable)
+        }
         val reservationCreate = service.createReservation(dataReservation)
         val response = mapOf(
             "message" to "Votre reservation à la date du ${reservationCreate.startDate} au ${reservationCreate.endDate} a été créée avec succès",
@@ -58,7 +100,7 @@ class ReservationController(
         return ResponseEntity.status(201).body(response)
     }
     @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
-     fun getAllReserv(): ResponseEntity<Map<String, List<Reservation>>>
+     fun getAllReservation(): ResponseEntity<Map<String, List<Reservation>>>
     {
         val data = service.findAllReservation()
         val response = mapOf("reservation" to data)

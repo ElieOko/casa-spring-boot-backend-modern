@@ -36,10 +36,11 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
         @Param("endDate") endDate: LocalDate
     ): List<ReservationEntity> ?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate = :endDate AND r.endDate = :startDate")
-    fun findByStartDateAndEndDate(
+    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate = :endDate AND r.endDate = :startDate AND r.property = :property")
+    fun findByStartDateAndEndDateProperty(
         @Param("startDate") startDate: LocalDate,
-        @Param("endDate") endDate: LocalDate
+        @Param("endDate") endDate: LocalDate,
+        @Param("property") property: PropertyEntity
     ): List<ReservationEntity> ?
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.user = :user")
@@ -47,6 +48,9 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
 
     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property")
      fun findByProperty(@Param("property") property: PropertyEntity): List<ReservationEntity> ?
+
+     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property AND WHERE r.user = :user")
+    fun findByUserProperty(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): List<ReservationEntity> ?
 
     //use with @Transactional when you call it
     @Transactional
