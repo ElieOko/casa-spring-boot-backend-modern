@@ -8,7 +8,7 @@ data class TypeAccountEntity(
     @Id
     @Column("id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val typeAccountId : Int = 0,
+    val typeAccountId : Long = 0,
     @Column("name", unique = true)
     val name : String,
     @OneToMany(mappedBy = "typeAccount")

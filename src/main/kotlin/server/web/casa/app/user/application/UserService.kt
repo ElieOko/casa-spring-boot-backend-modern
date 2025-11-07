@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
+import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.Mode
@@ -19,6 +20,7 @@ import kotlin.time.ExperimentalTime
 @Profile(Mode.DEV)
 class UserService(
     private val repository: UserRepository,
+    private val service: TypeAccountService,
     private val mapper: UserMapper,
     private val mapperAccount: TypeAccountMapper,
     private val mapperCity: CityMapper,
@@ -46,6 +48,16 @@ class UserService(
     }
 
     suspend fun findIdUser(id : Long) : User?{
+        val userEntity = repository.findById(id).orElse(null)
+        return mapper.toDomain(userEntity)
+//        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
+
+    }
+    fun findUsernameOrEmail(identifier : String): User? {
+        return mapper.toDomain( repository.findByPhoneOrEmail(identifier))
+    }
+
+    fun findId(id : Long) : User?{
         val userEntity = repository.findById(id).orElse(null)
         return mapper.toDomain(userEntity)
 //        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
@@ -82,5 +94,8 @@ class UserService(
         }
         repository.deleteById(id)
         return true
+    }
+     fun account(id: Long): TypeAccount? {
+        return service.findByIdType(id)
     }
 }

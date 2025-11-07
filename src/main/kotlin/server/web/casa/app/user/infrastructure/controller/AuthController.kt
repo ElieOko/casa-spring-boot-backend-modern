@@ -2,29 +2,31 @@ package server.web.casa.app.user.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import server.web.casa.app.user.domain.model.User
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.BailleurService
 import server.web.casa.app.actor.application.service.CommissionnaireService
 import server.web.casa.app.actor.application.service.LocataireService
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.user.application.AuthService
 import server.web.casa.app.user.application.TypeAccountService
+import server.web.casa.app.user.domain.model.CustomUserDetails
 import server.web.casa.app.user.domain.model.ProfileUser
+import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.domain.model.UserAuth
 import server.web.casa.app.user.domain.model.UserRequest
 import server.web.casa.app.user.domain.model.request.UserPassword
 import server.web.casa.route.auth.AuthRoute
 import server.web.casa.security.Auth
-import kotlin.String
+import server.web.casa.security.HashEncoder
 
 const val ROUTE_REGISTER = AuthRoute.REGISTER
 const val ROUTE_LOGIN = AuthRoute.LOGIN
@@ -34,14 +36,17 @@ const val ROUTE_LOGIN = AuthRoute.LOGIN
 @RequestMapping
 @Profile("dev")
 class AuthController(
+
     private val authService: AuthService,
     private val commissionnaire : CommissionnaireService,
     private val locataire : LocataireService,
     private val bailleur : BailleurService,
     private val cityService: CityService,
     private val typeAccountService: TypeAccountService,
-    private val auth: Auth
+    private val auth: Auth,
+    private val hashEncoder: HashEncoder,
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Création utilisateur")
     @PostMapping(ROUTE_REGISTER)
     suspend fun register(
@@ -89,8 +94,8 @@ class AuthController(
       val data = authService.login(body.identifiant, body.password)
       var profile : ProfileUser? = null
           when(data.second?.typeAccount?.typeAccountId){
-              1 -> {}
-              2->{
+              1L -> {}
+              2L->{
                 val actor = commissionnaire.findAllCommissionnaire().filter{it.user?.userId == data.second?.userId}[0]
                  profile = ProfileUser(
                      firstname = actor.firstName,
@@ -103,7 +108,7 @@ class AuthController(
                      numberCard = actor.numberCard
                  )
               }
-              3-> {
+              3L-> {
                   val actor = bailleur.findAllBailleur().filter{it.user?.userId == data.second?.userId }[0]
                   profile = ProfileUser(
                       firstname = actor.firstName,
@@ -116,7 +121,7 @@ class AuthController(
                       numberCard = actor.numberCard
                   )
               }
-              4-> {
+              4L-> {
                   val actor = locataire.findAllLocataire().filter{ it.user?.userId == data.second?.userId }[0]
                   profile = ProfileUser(
                       firstname = actor.firstName,
@@ -131,14 +136,38 @@ class AuthController(
               }
               else -> {}
           }
-      val response = mapOf(
-          "user" to data.second,
-          "profile" to profile,
-          "token" to data.first.accessToken,
-          "refresh_token" to data.first.refreshToken,
-          "message" to "Connexion réussie avec succès"
-      )
-      return ResponseEntity.ok().body(response)
+//        authManager.authenticate(UsernamePasswordAuthenticationToken("user", "password"))
+        try {
+//            val authentication: Authentication = authManager.authenticate(
+//                UsernamePasswordAuthenticationToken(
+//                    data.second?.phone,
+//                    body.password
+//                )
+//            )
+
+//            val userDetails: CustomUserDetails = authentication.principal as CustomUserDetails
+//            val authentication: Authentication = authenticationManager.authenticate(UsernamePasswordAuthenticationToken(data.second?.phone, data.second?.password))
+//            SecurityContextHolder.getContext().authentication = authentication
+           // if (authentication.isAuthenticated){
+                val response = mapOf(
+                    "user" to data.second,
+                    "profile" to profile,
+                    "token" to data.first.accessToken,
+                    "refresh_token" to data.first.refreshToken,
+                    "message" to "Connexion réussie avec succès",
+//                    "test" to authentication.isAuthenticated
+                )
+                return ResponseEntity.ok().body(response)
+
+
+        }
+        catch (e: AuthenticationException){
+            log.info(e.message)
+        }
+        val response = mapOf(
+            "error" to ""
+        )
+        return ResponseEntity.ok().body(response)
     }
 
     @PostMapping("/refresh")

@@ -19,11 +19,11 @@ interface PropertyRepository : JpaRepository<PropertyEntity, Long> {
     @Query("""
         SELECT r FROM PropertyEntity r 
         WHERE r.sold = :sold 
-        AND (r.price BETWEEN :minPrice AND :maxPrice)
-        AND (r.commune.id = :commune)
-        AND (r.city.id = :city)
-        AND (r.propertyType.id = :typeMaison)
-        AND (r.rooms = :room)
+        OR (r.price BETWEEN :minPrice AND :maxPrice)
+        OR (r.commune.id = :commune)
+        OR (r.city.id = :city)
+        OR (r.propertyType.id = :typeMaison)
+        OR (r.rooms = :room)
     """)
     fun filterProperty(
         @Param("sold") sold: Boolean,

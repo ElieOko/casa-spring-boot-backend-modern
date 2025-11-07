@@ -36,4 +36,9 @@ class TypeAccountService(
       val data = repository.findById(id).orElse(null)
         return mapper.toDomain(data)
     }
+
+    fun findByIdType(id : Long) : TypeAccount? {
+        val data = repository.findById(id).orElse(null)
+        return mapper.toDomain(data)
+    }
 }
