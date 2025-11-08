@@ -40,9 +40,15 @@ class ReservationController(
     ): ResponseEntity<Map<String, Any?>> {
         val user = userService.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
+
         if (user == null || property == null){
             val responseNotFound = mapOf("error" to "User or property not found")
             return ResponseEntity.ok().body(responseNotFound )
+        }
+
+        if(property.user == user){
+            val responsePending = mapOf("error" to "You can't reserve your own property")
+            return ResponseEntity.ok().body(responsePending )
         }
         if (request.endDate < request.startDate){
             val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
@@ -63,8 +69,10 @@ class ReservationController(
         val propertyEntity = propertyR.findById(request.propertyId).orElse(null)
         val userEntity = userR.findById(request.userId).orElse(null)
         val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
-        val statusLastReservationUserProperty = lastStatusReservationUserProperty?.last()?.status
-
+        val statusLastReservationUserProperty = lastStatusReservationUserProperty
+                                                ?.takeIf { it.isNotEmpty() }
+                                                ?.last()
+                                                ?.status
         if (statusLastReservationUserProperty == ReservationStatus.PENDING){
             val responsePending = mapOf("error" to "You already have a pending reservation with this property")
             return ResponseEntity.ok().body(responsePending )
@@ -75,6 +83,7 @@ class ReservationController(
         val format = DateTimeFormatter.ofPattern("HH:mm:ss")
 
         val propertyBooked = lastReservationProperty
+            ?.takeIf { it.isNotEmpty() }
             ?.filter {
                 val hour = LocalTime.parse(it.reservationHeure!!, format).plusHours(1)
                 val timeUp = LocalTime.parse(request.reservationHeure, format)
