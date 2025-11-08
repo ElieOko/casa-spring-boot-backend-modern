@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -29,7 +28,8 @@ class UserController(
     @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getListUser(): ResponseEntity<List<User?>>{
-//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+        logger.info("My ID -> $ownerId")
         val data = userService.findAllUser()
         return ResponseEntity.ok().body(data)
     }
