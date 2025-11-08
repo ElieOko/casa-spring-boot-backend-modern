@@ -1,7 +1,7 @@
 package server.web.casa.app.property.domain.model.filter
 
 data class PropertyFilter(
-    val sold : Boolean,
+    val transactionType : String,
     val minPrice : Double = 0.0,
     val maxPrice : Double = 0.0,
     val city : Long,

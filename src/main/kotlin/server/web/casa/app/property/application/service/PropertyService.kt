@@ -40,7 +40,7 @@ class PropertyService(
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
         val pageable = PageRequest.of(page,size,sort)
         val data = repository.filterProperty(
-            sold = filterModel.sold,
+            transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,
             maxPrice = filterModel.maxPrice,
             city = filterModel.city,

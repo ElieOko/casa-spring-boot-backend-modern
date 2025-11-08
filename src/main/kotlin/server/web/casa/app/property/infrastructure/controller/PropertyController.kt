@@ -148,7 +148,7 @@ class PropertyController(
     @GetMapping(ROUTE_PROPERTY_FILTER,produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Get property by sold into price, room, city, commune with pagination and sorting")
     suspend fun getAllPropertyFilter(
-        @Parameter(description = "Solde") @RequestParam sold : Boolean,
+        @Parameter(description = "Transaction Type") @RequestParam transactionType : String,
         @Parameter(description = "Prix minimun") @RequestParam minPrice : Double,
         @Parameter(description = "Prix maximun") @RequestParam maxPrice : Double,
         @Parameter(description = "Type de maison") @RequestParam typeMaison : Long,
@@ -162,7 +162,7 @@ class PropertyController(
     ): ResponseEntity<Map<String, Page<Property>>> {
         val data = service.filterProduct(
             filterModel = PropertyFilter(
-                sold = sold,
+                transactionType = transactionType,
                 minPrice = minPrice,
                 maxPrice = maxPrice,
                 city = city,

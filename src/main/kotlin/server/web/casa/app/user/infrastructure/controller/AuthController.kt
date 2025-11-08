@@ -6,11 +6,7 @@ import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.BailleurService
 import server.web.casa.app.actor.application.service.CommissionnaireService
@@ -18,7 +14,6 @@ import server.web.casa.app.actor.application.service.LocataireService
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.user.application.AuthService
 import server.web.casa.app.user.application.TypeAccountService
-import server.web.casa.app.user.domain.model.CustomUserDetails
 import server.web.casa.app.user.domain.model.ProfileUser
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.domain.model.UserAuth
@@ -36,7 +31,6 @@ const val ROUTE_LOGIN = AuthRoute.LOGIN
 @RequestMapping
 @Profile("dev")
 class AuthController(
-
     private val authService: AuthService,
     private val commissionnaire : CommissionnaireService,
     private val locataire : LocataireService,
@@ -136,30 +130,15 @@ class AuthController(
               }
               else -> {}
           }
-//        authManager.authenticate(UsernamePasswordAuthenticationToken("user", "password"))
         try {
-//            val authentication: Authentication = authManager.authenticate(
-//                UsernamePasswordAuthenticationToken(
-//                    data.second?.phone,
-//                    body.password
-//                )
-//            )
-
-//            val userDetails: CustomUserDetails = authentication.principal as CustomUserDetails
-//            val authentication: Authentication = authenticationManager.authenticate(UsernamePasswordAuthenticationToken(data.second?.phone, data.second?.password))
-//            SecurityContextHolder.getContext().authentication = authentication
-           // if (authentication.isAuthenticated){
                 val response = mapOf(
                     "user" to data.second,
                     "profile" to profile,
                     "token" to data.first.accessToken,
                     "refresh_token" to data.first.refreshToken,
                     "message" to "Connexion réussie avec succès",
-//                    "test" to authentication.isAuthenticated
                 )
                 return ResponseEntity.ok().body(response)
-
-
         }
         catch (e: AuthenticationException){
             log.info(e.message)
