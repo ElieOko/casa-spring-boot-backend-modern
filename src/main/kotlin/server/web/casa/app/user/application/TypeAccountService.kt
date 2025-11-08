@@ -1,11 +1,7 @@
 package server.web.casa.app.user.application
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import server.web.casa.app.actor.domain.model.TypeCard
-import server.web.casa.app.address.domain.model.City
 import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper

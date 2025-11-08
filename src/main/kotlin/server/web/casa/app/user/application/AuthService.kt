@@ -11,7 +11,6 @@ import server.web.casa.security.HashEncoder
 import server.web.casa.security.JwtService
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
