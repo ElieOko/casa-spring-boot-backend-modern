@@ -1,5 +1,6 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
+import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -11,19 +12,20 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 interface FavoriteRepository : JpaRepository<FavoriteEntity, Long> {
     @Query("SELECT r FROM FavoriteEntity r WHERE r.user = :user")
-    suspend fun findFavoriteByPropertyUser(@Param("user") user: UserEntity): List<FavoriteEntity> ?
+    fun findFavoriteByPropertyUser(@Param("user") user: UserEntity): List<FavoriteEntity> ?
 
     @Query("SELECT r FROM FavoriteEntity r WHERE r.property = :property")
-    suspend fun findOneFavoritePropertyCount(@Param("property") property: PropertyEntity): List<FavoriteEntity> ?
+    fun findOneFavoritePropertyCount(@Param("property") property: PropertyEntity): List<FavoriteEntity> ?
 
     @Query("SELECT r FROM FavoriteEntity r WHERE r.property = :property AND r.user = :user")
-    suspend fun findFavoriteExist(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): FavoriteEntity?
+    fun findFavoriteExist(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): List<FavoriteEntity> ?
 
     @Modifying
     @Query("DELETE FROM FavoriteEntity r WHERE r.id = :id")
-    suspend fun deleteByIdFavorite(@Param("id") id: Long): Int
+    fun deleteByIdFavorite(@Param("id") id: Long): Int
 
+    @Transactional
     @Modifying
     @Query("DELETE FROM FavoriteEntity r WHERE r.user = :user")
-    suspend fun deleteAllFavoriteUser(@Param("user") user: UserEntity): Int
+    fun deleteAllFavoriteUser(@Param("user") user: UserEntity): Int
 }
