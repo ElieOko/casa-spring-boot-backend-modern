@@ -7,7 +7,7 @@ import server.web.casa.app.notification.infrastructure.persistence.repository.No
 import server.web.casa.app.reservation.application.service.ReservationService
 
 @Service
-class NotificationReservationService(
+class  NotificationReservationService(
     private val repository: NotificationReservationRepository,
     private val reservationService: ReservationService
 ) {
