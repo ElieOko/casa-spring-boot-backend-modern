@@ -12,16 +12,15 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.Property
-import server.web.casa.app.property.domain.model.PropertyFeature
 import server.web.casa.app.property.domain.model.PropertyImage
 import server.web.casa.app.property.domain.model.PropertyImageKitchen
 import server.web.casa.app.property.domain.model.PropertyImageLivingRoom
 import server.web.casa.app.property.domain.model.PropertyImageRoom
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.PropertyRequest
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.user.application.UserService
 import server.web.casa.route.property.PropertyRoute
+import server.web.casa.security.Auth
 
 const val ROUTE_PROPERTY = PropertyRoute.PROPERTY
 const val ROUTE_PROPERTY_FILTER = PropertyRoute.PROPERTY_FILTER
@@ -38,8 +37,8 @@ class PropertyController(
     private val propertyImageLivingRoomService: PropertyImageLivingRoomService,
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
-    private val featureService: FeatureService,
-    private val quartierService: QuartierService
+    private val quartierService: QuartierService,
+    private val authSession : Auth
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -47,18 +46,18 @@ class PropertyController(
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest
     ): ResponseEntity<out Map<String, Any>> {
+//       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
        val imageList = request.propertyImage
        val imageKitchen = request.propertyImageKitchen
        val imageRoom = request.propertyImageRoom
        val imageLivingRoom = request.propertyImageLivingRoom
        val city = cityService.findByIdCity(request.cityId)
        val user = userService.findIdUser(request.userId)
+//       val mapCreated = mutableMapOf<String, Any>()
+//       val account = authSession.user()?.typeAccount
        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
        val commune = communeService.findByIdCommune(request.communeId)
        val quartier =  quartierService.findByIdQuartier(request.quartierId)
-        log.info("--> $commune")
-        log.info("--> $city")
-        log.info("--> $propertyType")
         if (city != null && user != null && propertyType != null && imageList.isNotEmpty()){
             val property = Property(
                 title = request.title,
@@ -125,7 +124,20 @@ class PropertyController(
                     log.info("test => ***${result}***")
                 }
             }
-
+//            when(account?.typeAccountId){
+//                1L->{
+//                    mapCreated["from"] = "admin"
+//                    mapCreated["by"] = "CasaNayo"
+//                }
+//                2L->{
+//                    mapCreated["from"] = "admin"
+//                    mapCreated["by"] = "admin"
+//                }
+//                3L->{
+//                    mapCreated["from"] = "admin"
+//                    mapCreated["by"] = "admin"
+//                }
+//            }
             val response = mapOf(
                 "message" to "Enregistrement réussie pour la proprièté",
                 "properties" to result
