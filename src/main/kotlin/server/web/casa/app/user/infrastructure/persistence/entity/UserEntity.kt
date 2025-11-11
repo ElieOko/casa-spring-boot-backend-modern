@@ -44,6 +44,8 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     var username: String? = null,
     @Column("isPremium", nullable = true)
     var isPremium: Boolean? = false,
+    @Column("isCertified", nullable = true)
+    var isCertified: Boolean? = false,
     @Column("phone", nullable = true)
     val phone: String,
     @Column("createdAt")
