@@ -24,7 +24,9 @@ data class PropertyRequest(
     val communeId : Long,
     @NotNull
     val quartierId : Long,
+    @NotNull
     val electric : Int,
+    @NotNull
     val water : Int,
     val postalCode : String?,
     val quartier : String,
