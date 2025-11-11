@@ -10,7 +10,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import server.web.casa.app.actor.infrastructure.persistence.entity.BailleurEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.CommissionnaireEntity
@@ -43,6 +42,8 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     var email: String? = null,
     @Column("username", nullable = true)
     var username: String? = null,
+    @Column("isPremium", nullable = true)
+    var isPremium: Boolean? = false,
     @Column("phone", nullable = true)
     val phone: String,
     @Column("createdAt")

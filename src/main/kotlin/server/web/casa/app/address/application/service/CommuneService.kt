@@ -19,7 +19,7 @@ class CommuneService(
     }
 
     suspend fun findAllCommune() : List<Commune>{
-        return repository.findAll().map { mapper.toDomain(it) }.toList()
+        return repository.findAll().map { mapper.toDomainOrigin(it) }.toList()
     }
 
     suspend fun findByIdCommune(id : Long): Commune {

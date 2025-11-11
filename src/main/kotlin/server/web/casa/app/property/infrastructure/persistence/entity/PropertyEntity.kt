@@ -36,9 +36,9 @@ class PropertyEntity(
     @Column(name = "bathroom", nullable = true)
     val bathroom : Int? = 0,
     @Column(name = "electric")
-    val electric : Int = 1,
+    val electric : Int,
     @Column(name = "water")
-    val water : Int = 1,
+    val water : Int,
     @Column(name = "floor", nullable = true)
     val floor : Int? = 0,
     @Column(name = "address")

@@ -27,22 +27,22 @@ class QuartierService(
     suspend fun findAllQuartier() : List<Quartier>{
         return repository.findAll().map { Quartier(
             quartierId = it.quartierId,
-            commune = Commune(
-                communeId = it.commune!!.communeId,
-                name = it.commune!!.name,
-                district = District(
-                    districtId = it.commune!!.district!!.districtId,
-                    city = City(
-                        cityId = it.commune!!.district!!.city.cityId,
-                        country = Country(
-                            countryId = it.commune!!.district!!.city.country.countryId,
-                            name = it.commune!!.district!!.city.country.name
-                        ),
-                        name = it.commune!!.district!!.city.name
-                    ),
-                    name = it.commune!!.district!!.name
-                )
-            ),
+//            commune = Commune(
+//                communeId = it.commune!!.communeId,
+//                name = it.commune!!.name,
+//                district = District(
+//                    districtId = it.commune!!.district!!.districtId,
+//                    city = City(
+//                        cityId = it.commune!!.district!!.city.cityId,
+//                        country = Country(
+//                            countryId = it.commune!!.district!!.city.country.countryId,
+//                            name = it.commune!!.district!!.city.country.name
+//                        ),
+//                        name = it.commune!!.district!!.city.name
+//                    ),
+//                    name = it.commune!!.district!!.name
+//                )
+//            ),
             name = it.name
         ) }.toList()
     }

@@ -15,6 +15,14 @@ class CommuneMapper(
     fun toDomain(communeEntity: CommuneEntity) : Commune{
         return Commune(
             communeId = communeEntity.communeId,
+//            quartiers = communeEntity.quartier.map { quartierMapper.toDomain(it) }.toList() ,
+//            district = districtMapper.toDomain(communeEntity.district),
+            name = communeEntity.name
+        )
+    }
+    fun toDomainOrigin(communeEntity: CommuneEntity) : Commune{
+        return Commune(
+            communeId = communeEntity.communeId,
             quartiers = communeEntity.quartier.map { quartierMapper.toDomain(it) }.toList() ,
             district = districtMapper.toDomain(communeEntity.district),
             name = communeEntity.name

@@ -15,7 +15,7 @@ data class User(
     @NotNull
     @field:NotBlank(message = "Le mot de passe est obligatoire")
     @field:Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
-    val password      : String,
+    val password      : String ="",
     @NotNull
     val typeAccount   : TypeAccount? = null,
     @Null
