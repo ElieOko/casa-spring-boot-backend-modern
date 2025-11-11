@@ -34,6 +34,7 @@ class UserService(
             typeAccount = mapperAccount.toEntity(user.typeAccount) ,
             email = user.email,
             phone = user.phone,
+            username = user.username,
             city = mapperCity.toEntity(user.city)
         )
         val savedEntity = repository.save(entityToSave)
@@ -86,6 +87,17 @@ class UserService(
           val updatedUser = repository.save(userState)
           return mapper.toDomain(updatedUser)
       }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun updateUsername(
+        id: Long,
+        username : String
+    ): User ?{
+        val userState =  repository.findById(id).orElse(null)
+        userState.username = username
+        val updatedUser = repository.save(userState)
+        return mapper.toDomain(updatedUser)
     }
 
     suspend fun deleteUser(id : Long) : Boolean{

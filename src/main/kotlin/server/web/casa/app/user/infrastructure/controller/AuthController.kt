@@ -65,6 +65,7 @@ class AuthController(
                 password = user.password,
                 typeAccount = typeAccount,
                 email = user.email,
+                username ="@"+user.username,
                 phone = user.phone,
                 city = city
             )

@@ -20,6 +20,8 @@ data class User(
     val typeAccount   : TypeAccount? = null,
     @Null
     val email         : String? = null,
+    @Null
+    val username       : String? = null,
     @NotNull
     @field:NotBlank(message = "Ce numero est invalide")
     @field:Size(min = 8, message = "Ce numero est invalide car il ne respecte pas le nommage")
@@ -42,6 +44,7 @@ data class UserRequest(
     @NotNull
     val typeAccountId : Long,
     val email : String? = null,
+    val username : String? = null,
     @NotNull
     val cityId : Long,
 )

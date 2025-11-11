@@ -7,5 +7,7 @@ data class UserRequestChange(
     @NotNull
     val email : String,
     @NotNull
+    val username : String,
+    @NotNull
     val city  : City,
 )

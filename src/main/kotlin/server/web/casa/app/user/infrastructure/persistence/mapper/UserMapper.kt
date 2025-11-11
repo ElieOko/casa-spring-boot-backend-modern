@@ -21,6 +21,7 @@ class UserMapper(
                 typeAccount = mapperAccount.toDomain(entity.typeAccount) ,
                 email = entity.email,
                 phone = entity.phone,
+                username = entity.username,
                 city = mapperCity.toDomain(entity.city)
           )
         }
@@ -34,6 +35,7 @@ class UserMapper(
            data = UserEntity(
                 userId = user.userId,
                 password = user.password,
+               username = user.username,
                 typeAccount =mapperAccount.toEntity(user.typeAccount) ,
                 email = user.email,
                 phone = user.phone,
