@@ -71,7 +71,7 @@ class PropertyEntity(
     @Column(name = "longitude", nullable = true)
     val longitude : Double? = null,
     @Column(name = "isAvailable")
-    val isAvailable : Boolean = true,
+    var isAvailable : Boolean = true,
     @Column("createdAt")
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updatedAt")

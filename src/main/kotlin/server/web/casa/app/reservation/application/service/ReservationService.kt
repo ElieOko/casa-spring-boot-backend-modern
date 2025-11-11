@@ -31,7 +31,9 @@ class ReservationService(
     }
 
      fun findId(id: Long): Reservation? {
-      return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
+         val reservation = repoR.findById(id).orElse(null)
+         return reservation?.let { mapperR.toDomain(it) }
+         //return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
 
      fun findByProperty(property: PropertyEntity): List<Reservation>? {
@@ -76,6 +78,18 @@ class ReservationService(
     @Transactional
      fun deleteReservationById(id: Long):Int{
         val success = repoR.deleteByIdReservation(id)
+        return success
+    }
+
+    @Transactional
+    fun deleteAllReservationByUser(user: UserEntity):Int{
+        val success = repoR.deleteAllByUserReservation (user)
+        return success
+    }
+
+    @Transactional
+    fun deleteAllReservationByProperty(property: PropertyEntity):Int{
+        val success = repoR.deleteAllByPropertyReservation(property)
         return success
     }
 }
