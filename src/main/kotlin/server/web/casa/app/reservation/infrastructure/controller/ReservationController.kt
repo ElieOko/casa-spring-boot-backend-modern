@@ -3,22 +3,25 @@ package server.web.casa.app.reservation.infrastructure.controller
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
-import org.springframework.http.*
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import server.web.casa.app.notification.application.service.NotificationReservationService
+import server.web.casa.app.notification.domain.model.request.NotificationReservation
 import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.reservation.domain.model.Reservation
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
+import server.web.casa.app.reservation.infrastructure.persistence.mapper.ReservationMapper
 import server.web.casa.app.user.application.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
 import java.time.LocalDate
-import kotlin.text.format
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -33,6 +36,8 @@ class ReservationController(
     private val propertyService: PropertyService,
     private val propertyR: PropertyRepository,
     private val userR: UserRepository,
+    private val notif: NotificationReservationService,
+    private val mapperR: ReservationMapper
 ){
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -40,9 +45,15 @@ class ReservationController(
     ): ResponseEntity<Map<String, Any?>> {
         val user = userService.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
+
         if (user == null || property == null){
             val responseNotFound = mapOf("error" to "User or property not found")
             return ResponseEntity.ok().body(responseNotFound )
+        }
+
+        if(property.user == user){
+            val responsePending = mapOf("error" to "You can't reserve your own property")
+            return ResponseEntity.ok().body(responsePending )
         }
         if (request.endDate < request.startDate){
             val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
@@ -63,8 +74,10 @@ class ReservationController(
         val propertyEntity = propertyR.findById(request.propertyId).orElse(null)
         val userEntity = userR.findById(request.userId).orElse(null)
         val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
-        val statusLastReservationUserProperty = lastStatusReservationUserProperty?.last()?.status
-
+        val statusLastReservationUserProperty = lastStatusReservationUserProperty
+                                                ?.takeIf { it.isNotEmpty() }
+                                                ?.last()
+                                                ?.status
         if (statusLastReservationUserProperty == ReservationStatus.PENDING){
             val responsePending = mapOf("error" to "You already have a pending reservation with this property")
             return ResponseEntity.ok().body(responsePending )
@@ -75,6 +88,7 @@ class ReservationController(
         val format = DateTimeFormatter.ofPattern("HH:mm:ss")
 
         val propertyBooked = lastReservationProperty
+            ?.takeIf { it.isNotEmpty() }
             ?.filter {
                 val hour = LocalTime.parse(it.reservationHeure!!, format).plusHours(1)
                 val timeUp = LocalTime.parse(request.reservationHeure, format)
@@ -92,10 +106,18 @@ class ReservationController(
             return ResponseEntity.ok().body(responseAvailable)
         }
         val reservationCreate = service.createReservation(dataReservation)
+        val notification = notif.create(
+            NotificationReservation(
+                reservation = mapperR.toEntity(reservationCreate),
+                guestUser = userEntity,
+                hostUser = propertyEntity.user!!
+            )
+        )
         val response = mapOf(
             "message" to "Votre reservation à la date du ${reservationCreate.startDate} au ${reservationCreate.endDate} a été créée avec succès",
             "user" to user,
             "property" to property,
+            "notificationSendState" to notification
         )
         return ResponseEntity.status(201).body(response)
     }
@@ -159,7 +181,7 @@ class ReservationController(
     }
 
     @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-     fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<out Map<String, Any?>> {
+     fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> {
         val property = propertyR.findById(propertyId).orElse(null)
         val reservation = service.findByProperty(property)
         val response = mapOf("reservation" to reservation)
@@ -180,10 +202,10 @@ class ReservationController(
         return ResponseEntity.ok(response)
     }
 
-    @PutMapping("/cancel/{id}/{reason}")
+    @PutMapping("/cancel/{id}")
      fun cancelReservation(
         @PathVariable id: Long,
-        @RequestBody reason: String ?
+        @RequestBody reason: String?
     ): ResponseEntity<Map<String, Reservation?>> {
         val cancel = service.cancelOrKeepReservation(id, false,reason, ReservationStatus.CANCELLED)
         val reservation = service.findId(id)
@@ -191,7 +213,7 @@ class ReservationController(
         return ResponseEntity.ok(response)
     }
 
-    @PutMapping("/keep/{id}/{reason}")
+    @PutMapping("/keep/{id}/")
      fun keepReservation(
         @PathVariable id: Long,
         @RequestBody reason: String ?
@@ -208,6 +230,62 @@ class ReservationController(
         val response = mapOf("message" to "Reservation deleted successfully")
         return ResponseEntity.ok(response)
     }
+    @PutMapping("/notification/partners/{reservationId}")
+    fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+        val reservation = service.findId(reservationId)
+        if (reservation ==null){
+            val response = mapOf("error" to "reservation not found")
+            return ResponseEntity.ok(response)
+        }
+        val notification = notif.dealConcludedHost(reservation.reservationId, true)
+        val notificationGuest = notif.dealConcludedGuest(reservation.reservationId, true)
+        val notificationState = notif.stateReservationHost(reservation.reservationId, true)
 
+        val propertyEntity = propertyR.findAll()
+            .takeIf{ it.isNotEmpty() }!!
+            .filter { entity -> entity!!.propertyId==reservation.property.propertyId }[0] //.filter { }//findById(reservation.property.propertyId)
+        propertyEntity!!.isAvailable = false
+        propertyR.save(propertyEntity)
+        val response = mapOf(
+            "DealConcludeHost" to notification,
+            "DealConcludeGuest" to notificationGuest,
+            "DealConcludeState" to notificationState,
+            "message" to "True if it's successfully and null or false when unfulfilled")
+
+        return ResponseEntity.ok(response)
+    }
+   /* @PutMapping("/notification/guest/{reservationId}")
+    fun dealconcluguest( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+        val reservation = service.findId(reservationId)
+        val notification = if(reservation != null) notif.dealConcludedGuest(reservation.reservationId, true) else null
+        val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
+        return ResponseEntity.ok(response)
+    }*/
+    @PutMapping("/notification/state/{reservationId}/{state}")
+    fun stateReservationHost(
+       @PathVariable reservationId: Long,
+       @PathVariable state: Boolean
+    ): ResponseEntity<Map<String, Any?>> {
+        val reservation = service.findId(reservationId)
+        val notification = if(reservation != null) notif.stateReservationHost(reservation.reservationId, state) else null
+        val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
+        return ResponseEntity.ok(response)
+    }
+    @PutMapping("/notification/cancel/{reservationId}")
+    fun dealCancel( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+        val reservation = service.findId(reservationId)
+        if (reservation ==null){
+            val response = mapOf("error" to "reservation not found")
+            return ResponseEntity.ok(response)
+        }
+        val notification = notif.stateReservationGuestCancel(reservation.reservationId)
+        val propertyEntity = propertyR.findAll()
+            .takeIf{ it.isNotEmpty() }!!
+            .filter { entity -> entity!!.propertyId==reservation.property.propertyId }[0] //.filter { }//findById(reservation.property.propertyId)
+        propertyEntity!!.isAvailable = true
+        propertyR.save(propertyEntity)
+        val response = mapOf("DealCancel" to notification, "message" to "Deal cancel successfully")
+        return ResponseEntity.ok(response)
+    }
 }
 

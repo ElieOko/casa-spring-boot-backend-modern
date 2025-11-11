@@ -70,4 +70,14 @@ interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
      @Modifying
      @Query("DELETE FROM ReservationEntity r WHERE r.id = :id")
      fun deleteByIdReservation(@Param("id") id: Long): Int
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ReservationEntity r WHERE r.user = :user")
+    fun deleteAllByUserReservation(@Param("user") user: UserEntity): Int
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ReservationEntity r WHERE r.property = :property")
+    fun deleteAllByPropertyReservation(@Param("property") property: PropertyEntity): Int
 }
