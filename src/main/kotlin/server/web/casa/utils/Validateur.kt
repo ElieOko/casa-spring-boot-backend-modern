@@ -22,3 +22,11 @@ fun normalizeAndValidatePhoneNumber(phoneNumber: String): String? {
         null
     }
 }
+
+fun toPascalCase(input: String): String {
+    return input.split(" ", "-", "_") // sépare selon espaces ou tirets
+        .filter { it.isNotEmpty() }   // enlève les mots vides
+        .joinToString("") { word ->
+            word.lowercase().replaceFirstChar { it.uppercase() }
+        }
+}
