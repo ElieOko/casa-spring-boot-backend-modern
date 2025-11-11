@@ -13,6 +13,7 @@ import server.web.casa.app.user.application.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
 import server.web.casa.utils.Mode
+import server.web.casa.utils.toPascalCase
 
 const val ROUTE_ACTOR_LOCATAIRE = ActorRoute.LOCATAIRE
 
@@ -26,6 +27,7 @@ class LocataireController(
    private val cityService: CityService,
    private val typeAccountService: TypeAccountService,
    private val typeCardService: TypeCardService,
+   private val userService: UserService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -45,7 +47,8 @@ class LocataireController(
                 typeAccount = typeAccount,
                 email = request.user.email,
                 phone = request.user.phone,
-                city = city
+                city = city,
+                username = "@"+toPascalCase("${request.locataire.firstName} ${request.locataire.lastName}")
             )
             val userCreated = authService.register(userSystem)
             val data = Locataire(
@@ -87,6 +90,7 @@ class LocataireController(
         @RequestBody @Valid locataire: Locataire
     ) : ResponseEntity<Locataire> {
         val updated = service.updateLocataire(id,locataire)
+        userService.updateUsername(locataire.user!!.userId,"@"+toPascalCase(locataire.firstName + locataire.lastName))
         return ResponseEntity.ok(updated)
     }
 }

@@ -13,6 +13,7 @@ import server.web.casa.app.user.application.*
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.route.actor.ActorRoute
 import server.web.casa.utils.Mode
+import server.web.casa.utils.toPascalCase
 
 const val ROUTE_ACTOR_BAILLEUR = ActorRoute.BAILLEUR
 
@@ -53,8 +54,10 @@ class BailleurController(
                 typeAccount = typeAccount,
                 email = request.user.email,
                 phone = request.user.phone,
+                username = "@"+toPascalCase("${request.bailleur.firstName} ${request.bailleur.lastName}"),
                 city = city
             )
+            toPascalCase("${request.bailleur.firstName} ${request.bailleur.lastName}")
             val userCreated = authService.register(userSystem)
             val data = Bailleur(
                 firstName = request.bailleur.firstName,
@@ -99,6 +102,7 @@ class BailleurController(
         @RequestBody @Valid bailleur: Bailleur
     ) : ResponseEntity<Bailleur> {
         val updated = service.updateBailleur(id,bailleur)
+        userService.updateUsername(bailleur.user!!.userId,"@"+toPascalCase(bailleur.firstName + bailleur.lastName))
         return ResponseEntity.ok(updated)
     }
 }

@@ -37,7 +37,7 @@ class BailleurService(
                 bailleurId = id,
                 firstName = bailleur.firstName,
                 lastName = bailleur.lastName,
-                fullName = bailleur.fullName,
+                fullName = bailleur.firstName + bailleur.lastName,
                 address = bailleur.address,
                 images = bailleur.images,
                 cardFront = bailleur.cardFront,
