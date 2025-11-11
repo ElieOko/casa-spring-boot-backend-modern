@@ -33,7 +33,6 @@ class JwtAuthFilter(
         val path = request.requestURI
         val publicPaths = listOf(
             "/",
-            "/websocket/*",
             "/swagger-ui/**",
             "/swagger-ui.html/*",
             "/v3/**",
@@ -44,7 +43,9 @@ class JwtAuthFilter(
             "/api/districts",
             "/api/quartiers",
             "/auth/login",
+            "/api/property",
             "/auth/register",
+            "/refresh"
         )
         try {
             //Vérifie si la route est publique (pattern matching)
