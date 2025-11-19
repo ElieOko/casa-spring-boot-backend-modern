@@ -36,6 +36,6 @@ jobs:
           rsync -avz -e "ssh" $LOCAL_JAR_PATH $REMOTE_SERVER:$REMOTE_JAR_DIR/$JAR_NAME
 
           ssh $REMOTE_SERVER << EOF
-            mv $REMOTE_JAR_DIR/$JAR_NAME $REMOTE_JAR_DIR/casaserver.jar
+            mv ~/$JAR_NAME $REMOTE_JAR_DIR/casaserver.jar
             sudo systemctl restart casa.service
           EOF
