@@ -33,20 +33,21 @@ class CommissionnaireController(
     suspend fun create(
         @Valid @RequestBody request: CommissionnaireUser
     ): ResponseEntity<Map<String, Any?>> {
-        val city = cityService.findByIdCity(request.user.cityId)
+//        val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         if (request.user.typeAccountId != 2L){
             val response = mapOf("error" to "ce type n'est pas prise en charger pour compte commissionnaire")
             return ResponseEntity.badRequest().body(response)
         }
 //        val typeCard = typeCardService.findByIdTypeCard(request.commissionnaire.typeCardId)
-        if (city != null && typeAccount != null ) {
+        if (typeAccount != null ) {
             val userSystem = User(
                 password = request.user.password,
                 typeAccount = typeAccount,
                 email = request.user.email,
                 phone = request.user.phone,
-                city = city,
+                city = request.user.city,
+                country = request.user.country,
                 username = "@"+toPascalCase("${request.commissionnaire.firstName} ${request.commissionnaire.lastName}")
             )
             val userCreated = authService.register(userSystem)

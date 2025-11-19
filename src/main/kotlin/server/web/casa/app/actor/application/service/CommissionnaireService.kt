@@ -1,15 +1,10 @@
 package server.web.casa.app.actor.application.service
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Commissionnaire
-import server.web.casa.app.actor.domain.model.Locataire
 import server.web.casa.app.actor.infrastructure.persistence.entity.CommissionnaireEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.LocataireEntity
-import server.web.casa.app.actor.infrastructure.persistence.mapper.CommissionnaireMapper
-import server.web.casa.app.actor.infrastructure.persistence.mapper.TypeCardMapper
+import server.web.casa.app.actor.infrastructure.persistence.mapper.*
 import server.web.casa.app.actor.infrastructure.persistence.repository.CommissionnaireRepository
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.utils.Mode
@@ -43,7 +38,7 @@ class CommissionnaireService(
                 images = c.images,
                 cardFront =c.cardFront,
                 cardBack = c.cardBack,
-                user = userMapper.toEntity(c.user),
+                user = userMapper.toEntityToDto(c.user),
                 typeCard = cardMapper.toEntity( c.typeCard),
                 numberCard = c.numberCard,
             )

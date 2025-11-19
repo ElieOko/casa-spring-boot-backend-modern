@@ -35,25 +35,33 @@ class PropertyEntity(
     val livingRoom : Int? = 0,
     @Column(name = "bathroom", nullable = true)
     val bathroom : Int? = 0,
-    @Column(name = "electric")
-    val electric : Int,
-    @Column(name = "water")
-    val water : Int,
+    @Column(name = "electric", nullable = true)
+    val electric : Int?=0,
+    @Column(name = "water", nullable = true)
+    val water : Int?=0,
     @Column(name = "floor", nullable = true)
     val floor : Int? = 0,
     @Column(name = "address")
     val address : String,
+    @Column(name = "communeValue", nullable = true)
+    val communeValue: String? = "",
+    @Column(name = "quartierValue", nullable = true)
+    val quartierValue: String? = "",
+    @Column(name = "cityValue", nullable = true)
+    val cityValue: String? = "",
+    @Column(name = "countryValue", nullable = true)
+    val countryValue: String? = "",
     @ManyToOne
-    @JoinColumn("city_id")
-    val city : CityEntity,
+    @JoinColumn("city_id", nullable = true)
+    val city : CityEntity?,
     @Column(name = "postalCode", nullable = true)
     val postalCode : String? = "",
     @ManyToOne
-    @JoinColumn("commune_id")
-    val commune : CommuneEntity,
+    @JoinColumn("commune_id", nullable = true)
+    val commune : CommuneEntity?,
     @ManyToOne
-    @JoinColumn("quartier_id")
-    val quartier : QuartierEntity,
+    @JoinColumn("quartier_id", nullable = true)
+    val quartier : QuartierEntity?,
     @Column(name = "sold")
     val sold : Boolean,
     @Column(name = "transactionType")
@@ -90,8 +98,6 @@ class PropertyEntity(
     val propertyImageKitchen : MutableSet<PropertyImageKitchenEntity> = mutableSetOf(),
     @OneToMany(mappedBy = "property")
     val reservation : List<ReservationEntity> = emptyList(),
-//    @OneToMany(mappedBy = "property")
-//    val propertyFeature: MutableSet<PropertyFeatureEntity> = mutableSetOf(),
     @ManyToMany
     @JoinTable(
         "PropertyFeatures",
@@ -100,22 +106,4 @@ class PropertyEntity(
     )
     @JsonManagedReference
     val features : List<FeatureEntity> = emptyList(),
-//    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    @JoinTable(name = "STUDENT_COURSE_TABLE",
-//        joinColumns = {
-//            @JoinColumn(name = "student_id", referencedColumnName = "id")
-//        },
-//        inverseJoinColumns = {
-//            @JoinColumn(name = "course_id", referencedColumnName = "id")
-//        }
-//    )
-//    @JsonManagedReference
-//    private Set<Course> courses;
-//    @ManyToMany
-//    @JoinTable(
-//        "PropertyFavorites",
-//        joinColumns = [JoinColumn("property_id")],
-//        inverseJoinColumns = [JoinColumn("user_id")]
-//    )
-//    val favorites : List<PropertyFavoriteEntity?> = emptyList()
 )

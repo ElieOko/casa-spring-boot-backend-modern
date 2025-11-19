@@ -1,15 +1,10 @@
 package server.web.casa.app.actor.application.service
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.actor.domain.model.Locataire
-import server.web.casa.app.actor.infrastructure.persistence.entity.BailleurEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.LocataireEntity
-import server.web.casa.app.actor.infrastructure.persistence.mapper.LocataireMapper
-import server.web.casa.app.actor.infrastructure.persistence.mapper.TypeCardMapper
+import server.web.casa.app.actor.infrastructure.persistence.mapper.*
 import server.web.casa.app.actor.infrastructure.persistence.repository.LocataireRepository
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.utils.Mode
@@ -42,7 +37,7 @@ class LocataireService(
                 images = l.images,
                 cardFront = l.cardFront,
                 cardBack = l.cardBack,
-                user = userMapper.toEntity(l.user),
+                user = userMapper.toEntityToDto(l.user),
                 typeCard = cardMapper.toEntity( l.typeCard),
                 numberCard = l.numberCard,
             )

@@ -6,7 +6,6 @@ import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEnt
 
 @Component
 class TypeAccountMapper(
-//    val userMapper: UserMapper
 ) {
     fun toDomain(typeAccountEntity: TypeAccountEntity) : TypeAccount{
         return TypeAccount(

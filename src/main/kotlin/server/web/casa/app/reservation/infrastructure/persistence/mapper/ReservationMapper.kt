@@ -32,7 +32,7 @@ class ReservationMapper(
     fun toEntity(reservation : Reservation): ReservationEntity {
         return ReservationEntity(
             reservationId = reservation.reservationId,
-            user = userMapper.toEntity(reservation.user)!!,
+            user = userMapper.toEntityToDto(reservation.user),
             property = propertyMapper.toEntity(reservation.property),
             message = reservation.message,
             status = reservation.status,

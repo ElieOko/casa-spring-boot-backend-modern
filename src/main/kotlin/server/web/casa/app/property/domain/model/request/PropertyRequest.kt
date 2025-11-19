@@ -17,7 +17,11 @@ data class PropertyRequest(
     val bathroom : Int? = 0,
     val floor : Int? = 0,
     val address : String,
-    val guarantee : String?,
+    val guarantee : String = "",
+    val communeValue: String? = "",
+    val quartierValue: String? = "",
+    val cityValue: String? = "",
+    val countryValue: String? = "",
     @NotNull
     val cityId : Long,
     @NotNull
@@ -25,9 +29,9 @@ data class PropertyRequest(
     @NotNull
     val quartierId : Long,
     @NotNull
-    val electric : Int,
+    val electric : Int?=0,
     @NotNull
-    val water : Int,
+    val water : Int?=0,
     val postalCode : String?,
     val quartier : String,
     val sold : Boolean,

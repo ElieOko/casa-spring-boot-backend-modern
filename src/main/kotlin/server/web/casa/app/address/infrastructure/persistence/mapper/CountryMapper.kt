@@ -14,14 +14,12 @@ class CountryMapper(
     fun toDomain(countryEntity: CountryEntity): Country{
         return Country(
             countryId = countryEntity.countryId,
-//            city = cityMapper.toDomain(countryEntity.city),
             name = countryEntity.name
         )
     }
     fun toEntity(country: Country) : CountryEntity {
         return CountryEntity(
             countryId = country.countryId,
-//            city = cityMapper.toEntity(country.city),
             name = country.name
         )
     }

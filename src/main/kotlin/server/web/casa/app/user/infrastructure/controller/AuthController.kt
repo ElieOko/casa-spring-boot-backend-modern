@@ -8,20 +8,12 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.actor.application.service.BailleurService
-import server.web.casa.app.actor.application.service.CommissionnaireService
-import server.web.casa.app.actor.application.service.LocataireService
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.user.application.AuthService
-import server.web.casa.app.user.application.TypeAccountService
-import server.web.casa.app.user.domain.model.ProfileUser
-import server.web.casa.app.user.domain.model.User
-import server.web.casa.app.user.domain.model.UserAuth
-import server.web.casa.app.user.domain.model.UserRequest
+import server.web.casa.app.actor.application.service.*
+import server.web.casa.app.user.application.*
+import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserPassword
 import server.web.casa.route.auth.AuthRoute
 import server.web.casa.security.Auth
-import server.web.casa.security.HashEncoder
 
 const val ROUTE_REGISTER = AuthRoute.REGISTER
 const val ROUTE_LOGIN = AuthRoute.LOGIN
@@ -35,10 +27,8 @@ class AuthController(
     private val commissionnaire : CommissionnaireService,
     private val locataire : LocataireService,
     private val bailleur : BailleurService,
-    private val cityService: CityService,
     private val typeAccountService: TypeAccountService,
     private val auth: Auth,
-    private val hashEncoder: HashEncoder,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Création utilisateur")
@@ -46,7 +36,7 @@ class AuthController(
     suspend fun register(
         @Valid @RequestBody user: UserRequest
     ): ResponseEntity<Map<String, Any?>> {
-        if (user.cityId == 0L || user.typeAccountId == 0L){
+        if (user.typeAccountId == 0L){
             val response = mapOf(
                 "message" to "0 n'est ne peut pas être identifiant"
             )
@@ -58,16 +48,17 @@ class AuthController(
             )
             return ResponseEntity.status(404).body(response)
         }
-        val city = cityService.findByIdCity(user.cityId)
+        val city = user.city
         val typeAccount = typeAccountService.findByIdTypeAccount(user.typeAccountId)
-        if (city != null && typeAccount != null){
+        if (typeAccount != null){
             val userSystem = User(
                 password = user.password,
                 typeAccount = typeAccount,
                 email = user.email,
                 username ="@"+user.username,
                 phone = user.phone,
-                city = city
+                city = city,
+                country = user.country
             )
            val data = authService.register(userSystem)
            val response = mapOf(
@@ -165,7 +156,7 @@ class AuthController(
         val userConnect = auth.user()
         val new = user.newPassword
         val old = user.oldPassword
-        val updated = authService.changePassword(userConnect!!.userId,new,old)
+        authService.changePassword(userConnect!!.userId,new,old)
         val message = mapOf(
             "message" to "Mot de passe changé avec succès"
         )

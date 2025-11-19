@@ -38,8 +38,8 @@ class BailleurMapper(
                 images = bailleur.images,
                 cardFront = bailleur.cardFront,
                 cardBack = bailleur.cardBack,
-                parrain = userMapper.toEntity(bailleur.parrain),
-                user = userMapper.toEntity(bailleur.user),
+                parrain = userMapper.toEntityToDto(bailleur.parrain),
+                user = userMapper.toEntityToDto(bailleur.user),
                 typeCard = typeCardMapper.toEntity(bailleur.typeCard),
                 numberCard = bailleur.numberCard,
                 note = bailleur.note

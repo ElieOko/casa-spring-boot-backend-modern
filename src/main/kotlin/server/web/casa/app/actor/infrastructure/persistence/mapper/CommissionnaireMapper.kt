@@ -36,7 +36,7 @@ class CommissionnaireMapper(
                 images = commissionnaire.images,
                 cardFront = commissionnaire.cardFront,
                 cardBack = commissionnaire.cardBack,
-                user = userMapper.toEntity(commissionnaire.user),
+                user = userMapper.toEntityToDto(commissionnaire.user),
                 typeCard = typeCardMapper.toEntity(commissionnaire.typeCard),
                 numberCard = commissionnaire.numberCard
             )

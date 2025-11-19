@@ -12,28 +12,35 @@ class CommuneMapper(
     val districtMapper: DistrictMapper,
     val quartierMapper: QuartierMapper
 ) {
-    fun toDomain(communeEntity: CommuneEntity) : Commune{
-        return Commune(
-            communeId = communeEntity.communeId,
-//            quartiers = communeEntity.quartier.map { quartierMapper.toDomain(it) }.toList() ,
-//            district = districtMapper.toDomain(communeEntity.district),
-            name = communeEntity.name
-        )
+    fun toDomain(communeEntity: CommuneEntity?) : Commune?{
+        return if (communeEntity != null){
+            Commune(
+                communeId = communeEntity.communeId,
+                name = communeEntity.name
+            )
+        }
+        else{
+            null
+        }
     }
     fun toDomainOrigin(communeEntity: CommuneEntity) : Commune{
         return Commune(
             communeId = communeEntity.communeId,
-            quartiers = communeEntity.quartier.map { quartierMapper.toDomain(it) }.toList() ,
+            quartiers = communeEntity.quartier.map { quartierMapper.toDomain(it) }.toList(),
             district = districtMapper.toDomain(communeEntity.district),
             name = communeEntity.name
         )
     }
 
-    fun toEntity(commune: Commune) : CommuneEntity{
-        return CommuneEntity(
-            communeId = commune.communeId,
-            district = districtMapper.toEntity(commune.district),
-            name = commune.name
-        )
+    fun toEntity(commune: Commune?) : CommuneEntity?{
+        return if (commune != null){
+            CommuneEntity(
+                communeId = commune.communeId,
+                district = districtMapper.toEntity(commune.district),
+                name = commune.name
+            )
+        } else{
+            null
+        }
     }
 }

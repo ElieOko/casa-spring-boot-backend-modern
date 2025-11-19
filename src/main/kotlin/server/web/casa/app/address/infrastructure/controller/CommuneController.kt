@@ -34,7 +34,7 @@ class CommuneController(
             )
           val result = service.saveCommune(data)
           val response = mapOf(
-              "commune" to result,
+              "commune" to result as Commune,
               "message" to "Enregistrement réussie avec succès"
           )
             return ResponseEntity.status(201).body(response)

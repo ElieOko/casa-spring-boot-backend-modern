@@ -1,15 +1,11 @@
 package server.web.casa.app.actor.application.service
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.actor.infrastructure.persistence.entity.BailleurEntity
-import server.web.casa.app.actor.infrastructure.persistence.mapper.BailleurMapper
-import server.web.casa.app.actor.infrastructure.persistence.mapper.TypeCardMapper
+import server.web.casa.app.actor.infrastructure.persistence.mapper.*
 import server.web.casa.app.actor.infrastructure.persistence.repository.BailleurRepository
-import server.web.casa.app.address.domain.model.City
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.utils.Mode
 
@@ -42,8 +38,8 @@ class BailleurService(
                 images = bailleur.images,
                 cardFront = bailleur.cardFront,
                 cardBack = bailleur.cardBack,
-                parrain = userMapper.toEntity(bailleur.parrain),
-                user = userMapper.toEntity(bailleur.user),
+                parrain = userMapper.toEntityToDto(bailleur.parrain),
+                user = userMapper.toEntityToDto(bailleur.user),
                 typeCard = cardMapper.toEntity( bailleur.typeCard),
                 numberCard = bailleur.numberCard,
                 note = bailleur.note

@@ -1,7 +1,6 @@
 package server.web.casa.app.address.infrastructure.persistence.entity
 
 import jakarta.persistence.*
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
 @Table(name = "districts")
@@ -11,7 +10,7 @@ class DistrictEntity(
     val districtId  : Long = 0,
     @ManyToOne
     @JoinColumn("city_id")
-    val city      : CityEntity,
+    val city      : CityEntity?,
     @Column("name")
     val name        : String,
     @OneToMany(mappedBy = "district", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)

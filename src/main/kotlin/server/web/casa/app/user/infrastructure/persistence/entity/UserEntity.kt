@@ -1,26 +1,12 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
-import server.web.casa.app.actor.infrastructure.persistence.entity.BailleurEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.CommissionnaireEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.LocataireEntity
-import server.web.casa.app.address.infrastructure.persistence.entity.CityEntity
+import jakarta.persistence.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.*
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import kotlin.time.*
 
 @Table(name = "users")
 @Entity
@@ -32,22 +18,24 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("typeAccountId")
     val typeAccount: TypeAccountEntity,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cityId")
-    var city: CityEntity,
+//    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "city")
+    var city: String? = null,
     @Column("password", nullable = false)
     @JsonIgnore
-    var password: String?,
+    var password: String? = "",
     @Column("email", nullable = true)
     var email: String? = null,
     @Column("username", nullable = true)
     var username: String? = null,
     @Column("isPremium", nullable = true)
-    var isPremium: Boolean? = false,
+    var isPremium: Boolean = false,
     @Column("isCertified", nullable = true)
-    var isCertified: Boolean? = false,
+    var isCertified: Boolean = false,
     @Column("phone", nullable = true)
-    val phone: String,
+    val phone: String?=null,
+    @Column("country", nullable = true)
+    val country: String,
     @Column("createdAt")
     val createdAt: Instant = Clock.System.now(),
     @OneToMany(mappedBy = "user")
@@ -64,7 +52,6 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     val locataire: List<LocataireEntity> = emptyList(),
     @OneToMany(mappedBy = "parrain")
     val parrainBailleur: List<BailleurEntity> = emptyList(),
-
     @OneToMany(mappedBy = "user")
     val reservation : List<ReservationEntity> = emptyList()
 

@@ -1,7 +1,5 @@
 package server.web.casa.app.address.application.service
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.Country

@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
-import server.web.casa.app.user.domain.model.TypeAccount
+import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.Mode
@@ -27,42 +27,40 @@ class UserService(
 ) {
     val name = "utilisateur"
     @OptIn(ExperimentalTime::class)
-    suspend fun createUser(user: User) : User? {
-
+    suspend fun createUser(user: User) : UserDto? {
         val entityToSave = UserEntity(
             password = user.password,
             typeAccount = mapperAccount.toEntity(user.typeAccount) ,
             email = user.email,
             phone = user.phone,
             username = user.username,
-            city = mapperCity.toEntity(user.city)
+            city = user.city,
+            country = user.country
         )
         val savedEntity = repository.save(entityToSave)
         return mapper.toDomain(savedEntity)
     }
 
-    suspend fun findAllUser() : List<User?> {
+    suspend fun findAllUser() : List<UserDto?> {
         val allEntityUser = repository.findAll()
         return allEntityUser.map {
             mapper.toDomain(it)
         }.toList()
     }
 
-    suspend fun findIdUser(id : Long) : User?{
+    suspend fun findIdUser(id : Long) : UserDto?{
         val userEntity = repository.findById(id).orElse(null)
         return mapper.toDomain(userEntity)
 //        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
 
     }
-    fun findUsernameOrEmail(identifier : String): User? {
+    fun findUsernameOrEmail(identifier : String): UserDto? {
         return mapper.toDomain( repository.findByPhoneOrEmail(identifier))
     }
 
-    fun findId(id : Long) : User?{
+    fun findId(id : Long) : UserDto?{
         val userEntity = repository.findById(id).orElse(null)
         return mapper.toDomain(userEntity)
-//        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
-
     }
 
 
@@ -70,10 +68,10 @@ class UserService(
     suspend fun updateUser(
         id: Long,
         user: UserRequestChange
-    ): User ?{
+    ): UserDto ?{
       val userState =  repository.findById(id).orElse(null)
       if (userState.email == user.email) {
-          userState.city = mapperCity.toEntity(user.city)
+          userState.city = user.city
           val updatedUser = repository.save(userState)
           return mapper.toDomain(updatedUser)
       }
@@ -83,7 +81,7 @@ class UserService(
               throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse email est déjà utilisé.")
           }
           userState.email = user.email
-          userState.city = mapperCity.toEntity(user.city)
+          userState.city = user.city
           val updatedUser = repository.save(userState)
           return mapper.toDomain(updatedUser)
       }
@@ -93,7 +91,7 @@ class UserService(
     suspend fun updateUsername(
         id: Long,
         username : String
-    ): User ?{
+    ): UserDto ?{
         val userState =  repository.findById(id).orElse(null)
         userState.username = username
         val updatedUser = repository.save(userState)

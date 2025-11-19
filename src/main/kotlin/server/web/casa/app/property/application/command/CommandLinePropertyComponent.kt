@@ -5,28 +5,10 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.infrastructure.persistence.repository.CityRepository
 import server.web.casa.app.address.infrastructure.persistence.repository.CommuneRepository
-import server.web.casa.app.property.application.service.FeatureService
-import server.web.casa.app.property.application.service.PropertyImageKitchenService
-import server.web.casa.app.property.application.service.PropertyImageLivingRoomService
-import server.web.casa.app.property.application.service.PropertyImageRoomService
-import server.web.casa.app.property.application.service.PropertyImageService
-import server.web.casa.app.property.application.service.PropertyService
-import server.web.casa.app.property.application.service.PropertyTypeService
-import server.web.casa.app.property.domain.model.Feature
-import server.web.casa.app.property.domain.model.Property
-import server.web.casa.app.property.domain.model.PropertyImage
-import server.web.casa.app.property.domain.model.PropertyImageKitchen
-import server.web.casa.app.property.domain.model.PropertyImageLivingRoom
-import server.web.casa.app.property.domain.model.PropertyImageRoom
-import server.web.casa.app.property.domain.model.request.PropertyImageRequest
-import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 import server.web.casa.app.property.infrastructure.persistence.repository.*
-import server.web.casa.app.user.application.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.utils.Mode
 
@@ -121,6 +103,14 @@ class CommandLinePropertyComponent(
                 ),
                 PropertyTypeEntity(
                     name = "Vacances",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Espace funéraire",
+                    description = "",
+                ),
+                PropertyTypeEntity(
+                    name = "Salle de fête",
                     description = "",
                 )
             )

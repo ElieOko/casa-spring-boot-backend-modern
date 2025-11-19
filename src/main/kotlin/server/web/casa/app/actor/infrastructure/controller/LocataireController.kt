@@ -24,7 +24,6 @@ const val ROUTE_ACTOR_LOCATAIRE = ActorRoute.LOCATAIRE
 class LocataireController(
    private val service : LocataireService,
    private val authService: AuthService,
-   private val cityService: CityService,
    private val typeAccountService: TypeAccountService,
    private val typeCardService: TypeCardService,
    private val userService: UserService
@@ -33,21 +32,21 @@ class LocataireController(
     suspend fun create(
         @Valid @RequestBody request: LocataireUser
     ): ResponseEntity<Map<String, Any?>> {
-        val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         if (request.user.typeAccountId != 4L){
             val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Locataire")
             return ResponseEntity.badRequest().body(response)
         }
 //        val typeCard = typeCardService.findByIdTypeCard(request.locataire.typeCardId)
-        if (city != null && typeAccount != null) {
+        if (typeAccount != null) {
             val userSystem = User(
                 userId = 0,
                 password = request.user.password,
                 typeAccount = typeAccount,
                 email = request.user.email,
                 phone = request.user.phone,
-                city = city,
+                city = request.user.city,
+                country = request.user.country,
                 username = "@"+toPascalCase("${request.locataire.firstName} ${request.locataire.lastName}")
             )
             val userCreated = authService.register(userSystem)
