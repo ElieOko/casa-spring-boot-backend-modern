@@ -98,11 +98,15 @@ class ReservationController(
                 val end = start.plusHours(1)
                 val newTimeR = LocalTime.parse(request.reservationHeure, format)
                 // newTimeR, verify interval
-                newTimeR.isAfter(start) && newTimeR.isBefore(end)
+                !newTimeR.isBefore(start) && newTimeR.isBefore(end)
             }
             ?.sortedBy { it.reservationHeure }
-        if(propertyBooked != null) {
-            val responseHour = mapOf("error" to "Unfortunately, this time slot is already booked.")
+        //if propertyBooked = null || empty we can add
+        if(propertyBooked?.isNotEmpty() == true) {
+            val responseHour = mapOf(
+                "error" to "Unfortunately, this time slot is already booked.",
+                "data" to propertyBooked
+            )
             return ResponseEntity.ok().body(responseHour )
         }
 
@@ -121,6 +125,7 @@ class ReservationController(
         )
         val response = mapOf(
             "message" to "Votre reservation à la date du ${reservationCreate.startDate} au ${reservationCreate.endDate} a été créée avec succès",
+            "reservation" to reservationCreate,
             "user" to user,
             "property" to property,
             "notificationSendState" to notification
