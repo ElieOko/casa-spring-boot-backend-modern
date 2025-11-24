@@ -71,8 +71,12 @@ class ReservationController(
             endDate = request.endDate,
         )
         //!= verify
-        val propertyEntity = propertyR.findById(request.propertyId).orElse(null)
-        val userEntity = userR.findById(request.userId).orElse(null)
+        val propertyEntity = propertyR.findById(request.propertyId)
+            .orElseThrow { RuntimeException("Property not found") }
+
+        val userEntity = userR.findById(request.userId)
+            .orElseThrow { RuntimeException("User not found") }
+
         val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
         val statusLastReservationUserProperty = lastStatusReservationUserProperty
                                                 ?.takeIf { it.isNotEmpty() }
@@ -90,9 +94,11 @@ class ReservationController(
         val propertyBooked = lastReservationProperty
             ?.takeIf { it.isNotEmpty() }
             ?.filter {
-                val hour = LocalTime.parse(it.reservationHeure!!, format).plusHours(1)
-                val timeUp = LocalTime.parse(request.reservationHeure, format)
-                hour.isBefore(timeUp)
+                val start = LocalTime.parse(it.reservationHeure!!, format)
+                val end = start.plusHours(1)
+                val newTimeR = LocalTime.parse(request.reservationHeure, format)
+                // newTimeR, verify interval
+                newTimeR.isAfter(start) && newTimeR.isBefore(end)
             }
             ?.sortedBy { it.reservationHeure }
         if(propertyBooked != null) {
