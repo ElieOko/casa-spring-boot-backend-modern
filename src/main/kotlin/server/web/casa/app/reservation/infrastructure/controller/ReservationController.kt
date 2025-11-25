@@ -237,9 +237,14 @@ class ReservationController(
 
     @DeleteMapping("/delete/{id}")
      fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        service.deleteReservationById(id)
-        val response = mapOf("message" to "Reservation deleted successfully")
-        return ResponseEntity.ok(response)
+        val reservation = service.findId(id) ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
+        val notificationDelete = notif.deleteByReservation(id)
+        return if (notificationDelete) {
+            service.deleteReservationById(id)
+            ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
+        }else{
+            return ResponseEntity.ok(mapOf("message" to "Something was wrong"))
+        }
     }
     @PutMapping("/notification/partners/{reservationId}")
     fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
