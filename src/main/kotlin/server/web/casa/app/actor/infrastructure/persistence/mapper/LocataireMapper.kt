@@ -36,7 +36,7 @@ class LocataireMapper(
                 images = locataire.images,
                 cardFront = locataire.cardFront,
                 cardBack = locataire.cardBack,
-                user = userMapper.toEntity(locataire.user),
+                user = userMapper.toEntityToDto(locataire.user),
                 typeCard = typeCardMapper.toEntity(locataire.typeCard),
                 numberCard = locataire.numberCard
             )

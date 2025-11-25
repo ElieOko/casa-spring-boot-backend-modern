@@ -25,10 +25,10 @@ class PropertyService(
         mapper.toDomain(it!!)
     }.toList()
 
-    suspend fun findByIdProperty(id : Long) : Property? {
-        repository.findById(id).let {
-            return mapper.toDomain(it.orElse(null))
-        }
+    suspend fun findByIdProperty(id: Long): Property? {
+        val property = repository.findById(id)
+            .orElseThrow { IllegalArgumentException("Property not found with id $id") }
+        return mapper.toDomain(property)
     }
     suspend fun filterProduct(
         filterModel : PropertyFilter,

@@ -1,6 +1,7 @@
 package server.web.casa.app.actor.domain.model
 
 import server.web.casa.app.user.domain.model.User
+import server.web.casa.app.user.domain.model.UserDto
 
 data class Locataire(
     val locataireId: Long = 0,
@@ -11,7 +12,7 @@ data class Locataire(
     val images     : String?,
     val cardFront  : String?,
     val cardBack   : String?,
-    val user       : User?,
+    val user       : UserDto?,
     val typeCard   : TypeCard? = null,
     val numberCard : String? = null
 )

@@ -71,8 +71,12 @@ class ReservationController(
             endDate = request.endDate,
         )
         //!= verify
-        val propertyEntity = propertyR.findById(request.propertyId).orElse(null)
-        val userEntity = userR.findById(request.userId).orElse(null)
+        val propertyEntity = propertyR.findById(request.propertyId)
+            .orElseThrow { RuntimeException("Property not found") }
+
+        val userEntity = userR.findById(request.userId)
+            .orElseThrow { RuntimeException("User not found") }
+
         val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
         val statusLastReservationUserProperty = lastStatusReservationUserProperty
                                                 ?.takeIf { it.isNotEmpty() }
@@ -90,13 +94,19 @@ class ReservationController(
         val propertyBooked = lastReservationProperty
             ?.takeIf { it.isNotEmpty() }
             ?.filter {
-                val hour = LocalTime.parse(it.reservationHeure!!, format).plusHours(1)
-                val timeUp = LocalTime.parse(request.reservationHeure, format)
-                hour.isBefore(timeUp)
+                val start = LocalTime.parse(it.reservationHeure!!, format)
+                val end = start.plusHours(1)
+                val newTimeR = LocalTime.parse(request.reservationHeure, format)
+                // newTimeR, verify interval
+                !newTimeR.isBefore(start) && newTimeR.isBefore(end)
             }
             ?.sortedBy { it.reservationHeure }
-        if(propertyBooked != null) {
-            val responseHour = mapOf("error" to "Unfortunately, this time slot is already booked.")
+        //if propertyBooked = null || empty we can add
+        if(propertyBooked?.isNotEmpty() == true) {
+            val responseHour = mapOf(
+                "error" to "Unfortunately, this time slot is already booked.",
+                "data" to propertyBooked
+            )
             return ResponseEntity.ok().body(responseHour )
         }
 
@@ -115,6 +125,7 @@ class ReservationController(
         )
         val response = mapOf(
             "message" to "Votre reservation à la date du ${reservationCreate.startDate} au ${reservationCreate.endDate} a été créée avec succès",
+            "reservation" to reservationCreate,
             "user" to user,
             "property" to property,
             "notificationSendState" to notification
@@ -226,9 +237,14 @@ class ReservationController(
 
     @DeleteMapping("/delete/{id}")
      fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        service.deleteReservationById(id)
-        val response = mapOf("message" to "Reservation deleted successfully")
-        return ResponseEntity.ok(response)
+        val reservation = service.findId(id) ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
+        val notificationDelete = notif.deleteByReservation(id)
+        return if (notificationDelete) {
+            service.deleteReservationById(id)
+            ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
+        }else{
+            return ResponseEntity.ok(mapOf("message" to "Something was wrong"))
+        }
     }
     @PutMapping("/notification/partners/{reservationId}")
     fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {

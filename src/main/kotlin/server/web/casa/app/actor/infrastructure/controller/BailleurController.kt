@@ -8,11 +8,10 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.domain.model.*
-import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.user.application.*
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.route.actor.ActorRoute
-import server.web.casa.utils.Mode
+import server.web.casa.utils.*
 
 const val ROUTE_ACTOR_BAILLEUR = ActorRoute.BAILLEUR
 
@@ -24,7 +23,6 @@ class BailleurController(
    private val service : BailleurService,
    private val authService: AuthService,
    private val userService: UserService,
-   private val cityService: CityService,
    private val typeAccountService: TypeAccountService,
    private val typeCardService: TypeCardService,
 ) {
@@ -32,7 +30,7 @@ class BailleurController(
     suspend fun create(
         @Valid @RequestBody request: BailleurUser
     ): ResponseEntity<Map<String, Any?>> {
-        val city = cityService.findByIdCity(request.user.cityId)
+//        val city = cityService.findByIdCity(request.user.cityId)
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         val parrain : User? = null
         var paraintId : Long = 0
@@ -41,7 +39,7 @@ class BailleurController(
             return ResponseEntity.badRequest().body(response)
         }
 //        val typeCard = typeCardService.findByIdTypeCard(request.bailleur.typeCardId)
-        if (city != null && typeAccount != null ) {
+        if (typeAccount != null ) {
             if (request.bailleur.parrainId != null){
                 paraintId = request.bailleur.parrainId
             }
@@ -53,8 +51,11 @@ class BailleurController(
                 typeAccount = typeAccount,
                 email = request.user.email,
                 phone = request.user.phone,
-                city = city
+                username = "@"+toPascalCase("${request.bailleur.firstName} ${request.bailleur.lastName}"),
+                city = request.user.city,
+                country =  request.user.country
             )
+            toPascalCase("${request.bailleur.firstName} ${request.bailleur.lastName}")
             val userCreated = authService.register(userSystem)
             val data = Bailleur(
                 firstName = request.bailleur.firstName,
@@ -90,8 +91,6 @@ class BailleurController(
         return ResponseEntity.ok().body(response)
     }
 
-
-
     @Operation(summary = "Modification bailleur")
     @PutMapping("/{id}")
     suspend fun updateBailleur(
@@ -99,6 +98,7 @@ class BailleurController(
         @RequestBody @Valid bailleur: Bailleur
     ) : ResponseEntity<Bailleur> {
         val updated = service.updateBailleur(id,bailleur)
+        userService.updateUsername(bailleur.user!!.userId,"@"+toPascalCase(bailleur.firstName + bailleur.lastName))
         return ResponseEntity.ok(updated)
     }
 }

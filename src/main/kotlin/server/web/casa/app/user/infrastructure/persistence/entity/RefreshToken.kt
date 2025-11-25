@@ -1,12 +1,7 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import jakarta.persistence.*
+import kotlin.time.*
 
 @Entity
 @Table(name = "refresh_tokens")

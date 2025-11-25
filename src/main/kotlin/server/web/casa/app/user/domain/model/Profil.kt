@@ -1,8 +1,8 @@
 package server.web.casa.app.user.domain.model
 
 data class ProfileUser(
-    var firstname : String?="",
-    var lastname : String?="",
+    var firstname  : String?="",
+    var lastname   : String?="",
     var fullname   : String?="",
     var address    : String?="",
     var images     : String?="",

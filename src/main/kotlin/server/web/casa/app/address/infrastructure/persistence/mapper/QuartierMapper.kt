@@ -11,18 +11,24 @@ import server.web.casa.utils.Mode
 class QuartierMapper(
 //    val communeMapper: CommuneMapper
 ) {
-    fun toDomain(quartierEntity: QuartierEntity): Quartier{
-        return Quartier(
-            quartierId = quartierEntity.quartierId,
-//            commune = communeMapper.toDomain(quartierEntity.commune),
-            name = quartierEntity.name
-        )
+    fun toDomain(quartierEntity: QuartierEntity?): Quartier?{
+        return if (quartierEntity != null){
+            Quartier(
+                quartierId = quartierEntity.quartierId,
+                name = quartierEntity.name
+            )
+        } else{
+            null
+        }
     }
-    fun toEntity(quartier: Quartier) : QuartierEntity{
-        return QuartierEntity(
-            quartierId = quartier.quartierId,
-//            commune = communeMapper.toEntity(quartier.commune),
-            name = quartier.name
-        )
+    fun toEntity(quartier: Quartier?) : QuartierEntity?{
+        return if (quartier != null){
+            QuartierEntity(
+                quartierId = quartier.quartierId,
+                name = quartier.name
+            )
+        } else{
+            null
+        }
     }
 }

@@ -24,7 +24,7 @@ class FavoriteMapper(
     fun toEntity(f : Favorite): FavoriteEntity {
         return FavoriteEntity(
             favoriteId = f.favoriteId,
-            user = userMapper.toEntity(f.user)!!,
+            user = userMapper.toEntityToDto(f.user)!!,
             property = propertyMapper.toEntity(f.property!!),
             createdAt = f.createdAt
         )

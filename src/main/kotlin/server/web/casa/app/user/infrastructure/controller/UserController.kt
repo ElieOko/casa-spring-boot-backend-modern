@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.user.application.UserService
-import server.web.casa.app.user.domain.model.User
+import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.security.Auth
 
@@ -27,7 +27,7 @@ class UserController(
     @GetMapping
     @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
-    suspend fun getListUser(): ResponseEntity<List<User?>>{
+    suspend fun getListUser(): ResponseEntity<List<UserDto?>>{
         val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         logger.info("My ID -> $ownerId")
         val data = userService.findAllUser()
@@ -40,8 +40,8 @@ class UserController(
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getUser(
         @PathVariable("id") id : Long
-    ) : ResponseEntity<User> {
-        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+    ) : ResponseEntity<UserDto> {
+//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         val data = userService.findIdUser(id)
         return ResponseEntity.ok().body(data)
     }
@@ -51,7 +51,7 @@ class UserController(
     @Transactional
     suspend fun updateUser(
         @RequestBody @Valid user : UserRequestChange
-    ) : ResponseEntity<User> {
+    ) : ResponseEntity<UserDto> {
         val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         val id = auth.user()?.userId
         val updated = userService.updateUser(id!!,user)
@@ -65,7 +65,7 @@ class UserController(
     suspend fun delete(
         @PathVariable("id") id : Long
     ): ResponseEntity<Map<String, String>> {
-        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         userService.deleteUser(id)
         val response = mapOf("message" to "Suppression réussi avec succès")
         return ResponseEntity.ok().body(response)

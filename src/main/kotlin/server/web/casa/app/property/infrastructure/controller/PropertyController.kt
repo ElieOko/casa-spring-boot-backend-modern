@@ -1,25 +1,17 @@
 package server.web.casa.app.property.infrastructure.controller
 
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.property.application.service.*
-import server.web.casa.app.property.domain.model.Property
-import server.web.casa.app.property.domain.model.PropertyFeature
-import server.web.casa.app.property.domain.model.PropertyImage
-import server.web.casa.app.property.domain.model.PropertyImageKitchen
-import server.web.casa.app.property.domain.model.PropertyImageLivingRoom
-import server.web.casa.app.property.domain.model.PropertyImageRoom
+import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.PropertyRequest
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.user.application.UserService
 import server.web.casa.route.property.PropertyRoute
 
@@ -38,8 +30,8 @@ class PropertyController(
     private val propertyImageLivingRoomService: PropertyImageLivingRoomService,
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
-    private val featureService: FeatureService,
-    private val quartierService: QuartierService
+    private val quartierService: QuartierService,
+//    private val authSession : Auth
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -47,6 +39,7 @@ class PropertyController(
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest
     ): ResponseEntity<out Map<String, Any>> {
+//       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
        val imageList = request.propertyImage
        val imageKitchen = request.propertyImageKitchen
        val imageRoom = request.propertyImageRoom
@@ -56,10 +49,8 @@ class PropertyController(
        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
        val commune = communeService.findByIdCommune(request.communeId)
        val quartier =  quartierService.findByIdQuartier(request.quartierId)
-        log.info("--> $commune")
-        log.info("--> $city")
-        log.info("--> $propertyType")
-        if (city != null && user != null && propertyType != null && imageList.isNotEmpty()){
+
+        if (user != null && propertyType != null && imageList.isNotEmpty()){
             val property = Property(
                 title = request.title,
                 description = request.description,
@@ -71,6 +62,13 @@ class PropertyController(
                 livingRoom = request.livingRoom,
                 bathroom = request.bathroom,
                 floor = request.floor,
+                guarantee = request.guarantee,
+                water = request.water,
+                electric = request.electric,
+                countryValue = request.countryValue,
+                communeValue = request.communeValue,
+                quartierValue = request.quartierValue,
+                cityValue = request.cityValue,
                 address = request.address,
                 city = city,
                 postalCode = request.postalCode,
@@ -89,20 +87,18 @@ class PropertyController(
             log.info("propertyInstance => ***${propertyInstance}***")
             if (imageList.isNotEmpty()){
                 imageList.map {
-                    val result = propertyImageService.create(PropertyImage(
+                     propertyImageService.create(PropertyImage(
                         property = propertyInstance,
                         name = it?.image!!
                     ))
-//                    log.info("test => ***${result}***")
                 }
             }
             if (imageRoom.isNotEmpty()){
                 imageRoom.map {
-                    val result = propertyImageRoomService.create(PropertyImageRoom(
+                    propertyImageRoomService.create(PropertyImageRoom(
                         property = propertyInstance,
                         name = it?.image!!
                     ))
-                    log.info("test => ***${result}***")
                 }
             }
 
@@ -118,14 +114,12 @@ class PropertyController(
 
             if (imageKitchen.isNotEmpty()){
                 imageKitchen.map {
-                    val result = propertyImageKitchenService.create(PropertyImageKitchen(
+                    propertyImageKitchenService.create(PropertyImageKitchen(
                         property = propertyInstance,
                         name = it?.image!!
                     ))
-                    log.info("test => ***${result}***")
                 }
             }
-
             val response = mapOf(
                 "message" to "Enregistrement réussie pour la proprièté",
                 "properties" to result

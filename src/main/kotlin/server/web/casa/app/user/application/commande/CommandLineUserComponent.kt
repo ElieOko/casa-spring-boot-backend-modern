@@ -8,8 +8,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.user.application.AuthService
-import server.web.casa.app.user.application.TypeAccountService
+import server.web.casa.app.user.application.*
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountRepository
@@ -66,13 +65,15 @@ class CommandLineUserComponent(
 //
 suspend fun createUser(){
        val account = typeAccountService.findByIdTypeAccount(1)
-       val city = cityService.findByIdCity(1)
+//       val city = cityService.findByIdCity(1)
        val userSystem = User(
             password = "1234",
             typeAccount = account,
             email = "elieoko100@gmail.com",
             phone = "0827824163",
-            city = city)
+            city = "Kinshasa",
+           country = "CD"
+           )
         val data = authService.register(userSystem)
         log.info("Enregistrement réussi avec succès***${data.first?.phone}")
     }

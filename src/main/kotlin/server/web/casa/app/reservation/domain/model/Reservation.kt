@@ -2,11 +2,12 @@ package server.web.casa.app.reservation.domain.model
 
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.user.domain.model.User
+import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
 
 data class Reservation(
     val reservationId: Long = 0,
-    val user: User ?,
+    val user: UserDto ?,
     val property: Property,
     val message: String? = "",
     val status: ReservationStatus = ReservationStatus.PENDING,

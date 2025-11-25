@@ -2,7 +2,6 @@ package server.web.casa.app.address.infrastructure.persistence.entity
 
 import jakarta.persistence.*
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
 @Table(name = "cities")
@@ -15,8 +14,6 @@ class CityEntity(
     val country : CountryEntity,
     @Column("name")
     val name : String,
-    @OneToMany(mappedBy = "city", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    val user: List<UserEntity> = emptyList(),
     @OneToMany(mappedBy = "city", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val district: List<DistrictEntity> = emptyList(),
     @OneToMany(mappedBy = "city")
