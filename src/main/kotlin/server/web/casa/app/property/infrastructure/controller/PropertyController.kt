@@ -12,7 +12,7 @@ import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.PropertyRequest
-import server.web.casa.app.user.application.UserService
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 
 const val ROUTE_PROPERTY = PropertyRoute.PROPERTY

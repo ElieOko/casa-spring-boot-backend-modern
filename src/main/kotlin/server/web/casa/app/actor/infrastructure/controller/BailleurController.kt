@@ -8,7 +8,9 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.domain.model.*
-import server.web.casa.app.user.application.*
+import server.web.casa.app.user.application.service.AuthService
+import server.web.casa.app.user.application.service.TypeAccountService
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.route.actor.ActorRoute
 import server.web.casa.utils.*
@@ -20,11 +22,11 @@ const val ROUTE_ACTOR_BAILLEUR = ActorRoute.BAILLEUR
 @RequestMapping(ROUTE_ACTOR_BAILLEUR)
 @Profile(Mode.DEV)
 class BailleurController(
-   private val service : BailleurService,
-   private val authService: AuthService,
-   private val userService: UserService,
-   private val typeAccountService: TypeAccountService,
-   private val typeCardService: TypeCardService,
+    private val service : BailleurService,
+    private val authService: AuthService,
+    private val userService: UserService,
+    private val typeAccountService: TypeAccountService,
+    private val typeCardService: TypeCardService,
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(

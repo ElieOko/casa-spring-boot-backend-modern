@@ -15,7 +15,7 @@ import server.web.casa.app.reservation.domain.model.Reservation
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
 import server.web.casa.app.reservation.infrastructure.persistence.mapper.ReservationMapper
-import server.web.casa.app.user.application.UserService
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode

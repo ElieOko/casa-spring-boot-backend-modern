@@ -8,8 +8,9 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.domain.model.*
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.user.application.*
+import server.web.casa.app.user.application.service.AuthService
+import server.web.casa.app.user.application.service.TypeAccountService
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
 import server.web.casa.utils.Mode
@@ -22,11 +23,11 @@ const val ROUTE_ACTOR_LOCATAIRE = ActorRoute.LOCATAIRE
 @RequestMapping(ROUTE_ACTOR_LOCATAIRE)
 @Profile(Mode.DEV)
 class LocataireController(
-   private val service : LocataireService,
-   private val authService: AuthService,
-   private val typeAccountService: TypeAccountService,
-   private val typeCardService: TypeCardService,
-   private val userService: UserService
+    private val service : LocataireService,
+    private val authService: AuthService,
+    private val typeAccountService: TypeAccountService,
+    private val typeCardService: TypeCardService,
+    private val userService: UserService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(

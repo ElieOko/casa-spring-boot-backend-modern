@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.user.application.*
+import server.web.casa.app.user.application.service.AuthService
+import server.web.casa.app.user.application.service.TypeAccountService
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountRepository

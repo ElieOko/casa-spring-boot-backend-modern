@@ -12,7 +12,7 @@ import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.property.domain.model.Favorite
 import server.web.casa.app.property.domain.model.request.FavoriteRequest
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
-import server.web.casa.app.user.application.UserService
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.route.favorite.FavoriteRoute
 import server.web.casa.utils.Mode
