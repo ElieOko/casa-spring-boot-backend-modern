@@ -6,15 +6,15 @@ import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.domain.model.*
 import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.user.application.service.AuthService
-import server.web.casa.app.user.application.service.TypeAccountService
-import server.web.casa.app.user.application.service.UserService
+import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
 import server.web.casa.utils.Mode
+import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 import server.web.casa.utils.toPascalCase
 
 const val ROUTE_ACTOR_COMMISSIONNAIRE = ActorRoute.COMMISSIONNAIRE
@@ -41,13 +41,15 @@ class CommissionnaireController(
             val response = mapOf("error" to "ce type n'est pas prise en charger pour compte commissionnaire")
             return ResponseEntity.badRequest().body(response)
         }
+        val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
 //        val typeCard = typeCardService.findByIdTypeCard(request.commissionnaire.typeCardId)
         if (typeAccount != null ) {
             val userSystem = User(
                 password = request.user.password,
                 typeAccount = typeAccount,
                 email = request.user.email,
-                phone = request.user.phone,
+                phone = phone,
                 city = request.user.city,
                 country = request.user.country,
                 username = "@"+toPascalCase("${request.commissionnaire.firstName} ${request.commissionnaire.lastName}")
