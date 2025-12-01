@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.utils.Mode
 import java.time.LocalDateTime
 
@@ -24,6 +25,15 @@ class GlobalExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(errorDto)
+    }
+
+    @ExceptionHandler(value = [ResponseStatusException::class])
+    fun handleStatusException(e:ResponseStatusException): ResponseEntity<MutableMap<String, Any>>{
+        val map = mutableMapOf<String, Any>()
+        map["message"] = e.reason.toString()
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(map)
     }
 
     @ExceptionHandler(value = [EntityNotFoundException::class])
