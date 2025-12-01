@@ -37,24 +37,27 @@ class AuthService(
 
     @OptIn(ExperimentalTime::class)
      suspend fun register(user : User): Pair<UserDto?, String> {
-         var phone = user.phone
-        if (user.country == "CD"){
-            phone = normalizeAndValidatePhoneNumberCD(user.phone) ?: throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Ce numero n'est pas valide."
-            )
-        }
+         val phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
 
-
-        val userEntity = userRepository.findByPhoneOrEmail(phone.toString())
-        if(userEntity != null) {
+        if(userRepository.findByPhoneOrEmail(phone) != null) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Cet identifiant existe dans la plateforme.")
         }
+
+        if (user.email != null){
+            if(user.email.isNotEmpty()){
+                if(userRepository.findByPhoneOrEmail(user.email) != null) {
+                    throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse existe dans la plateforme.")
+                }
+            }
+        }
+
         val entity = UserEntity(
             userId = 0,
             password = hashEncoder.encode(user.password),
             typeAccount = mapperAccount.toEntity(user.typeAccount) ,
             email = user.email,
+            username = user.username,
             phone = phone,
             city = user.city,
             country = user.country
@@ -67,7 +70,11 @@ class AuthService(
     }
 
     suspend fun login(identifier: String, password: String): Pair<TokenPair, UserDto?> {
-        val validIdentifier = normalizeAndValidatePhoneNumber(identifier)
+        var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
+        if (isEmailValid(identifier)){
+            validIdentifier = identifier
+        }
+
         val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
             ?: throw BadCredentialsException("Invalid credentials .")
 

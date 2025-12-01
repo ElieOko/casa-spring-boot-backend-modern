@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component
 import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntity
 import server.web.casa.app.actor.infrastructure.persistence.repository.TypeCardRepository
 import server.web.casa.utils.Mode
+import server.web.casa.utils.isEmailValid
+import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 
 @Component
 @Order(2)
@@ -19,6 +21,18 @@ class CommandLineActorComponent(
     override fun run(vararg args: String) {
         try {
 //            createCard()
+//            log.info(normalizeAndValidatePhoneNumberUniversal("00243827824163"))
+//            log.info("*************")
+//            isEmailValid("elieoko100@gmail.com")
+//            log.info(normalizeAndValidatePhoneNumberUniversal("+243837824163"))
+//            log.info("*************")
+//            log.info(normalizeAndValidatePhoneNumberUniversal("+2438278241630"))
+//            log.info("*************")
+//            log.info(normalizeAndValidatePhoneNumberUniversal("+24382782416e"))
+//            log.info("*************")
+//            log.info(normalizeAndValidatePhoneNumberUniversal("+242827824163"))
+//            log.info("*************")
+//            log.info(normalizeAndValidatePhoneNumberUniversal("+242065208881"))
         }
         catch (e : Exception){
 
