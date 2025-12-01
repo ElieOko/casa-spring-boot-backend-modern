@@ -23,10 +23,10 @@ data class CommissionnaireEntity(
     val cardFront   : String? = null,
     @Column("cardBack", nullable = true)
     val cardBack    : String? = null,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "typeCardId")
     val typeCard : TypeCardEntity?,
     @Column("numberCard", nullable = true)

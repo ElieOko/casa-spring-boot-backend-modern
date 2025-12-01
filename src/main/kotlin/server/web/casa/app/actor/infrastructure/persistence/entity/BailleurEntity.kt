@@ -24,13 +24,13 @@ data class BailleurEntity(
     val cardFront : String?,
     @Column("cardBack", nullable = true)
     val cardBack : String? = null,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parrainId", nullable = true)
     val parrain : UserEntity? = null,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "typeCardId", nullable = true)
     val typeCard : TypeCardEntity? = null,
     @Column("numberCard", nullable = true)

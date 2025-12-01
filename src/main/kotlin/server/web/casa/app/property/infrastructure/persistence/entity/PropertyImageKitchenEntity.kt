@@ -20,7 +20,7 @@ class PropertyImageKitchenEntity(
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val propertyImageKitchenId : Long = 0,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn("property_id")
     @JsonBackReference
     var propertyKitchen : PropertyEntity,

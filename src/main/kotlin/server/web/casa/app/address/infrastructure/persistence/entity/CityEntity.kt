@@ -14,7 +14,7 @@ class CityEntity(
     val country : CountryEntity,
     @Column("name")
     val name : String,
-    @OneToMany(mappedBy = "city", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "city", fetch = FetchType.LAZY)
     val district: List<DistrictEntity> = emptyList(),
     @OneToMany(mappedBy = "city")
     val properties : List<PropertyEntity> = emptyList()

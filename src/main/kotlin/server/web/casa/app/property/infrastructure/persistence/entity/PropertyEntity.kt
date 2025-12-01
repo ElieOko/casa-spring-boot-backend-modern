@@ -51,15 +51,15 @@ class PropertyEntity(
     val cityValue: String? = "",
     @Column(name = "countryValue", nullable = true)
     val countryValue: String? = "",
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("city_id", nullable = true)
     val city : CityEntity?,
     @Column(name = "postalCode", nullable = true)
     val postalCode : String? = "",
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("commune_id", nullable = true)
     val commune : CommuneEntity?,
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("quartier_id", nullable = true)
     val quartier : QuartierEntity?,
     @Column(name = "sold")
@@ -68,10 +68,10 @@ class PropertyEntity(
     val transactionType : String,
     @Column(name = "guarantee")
     val guarantee : String = "",
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("property_type_id")
     val propertyType : PropertyTypeEntity,
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("user_id")
     val user : UserEntity?,
     @Column(name = "latitude", nullable = true)
@@ -84,21 +84,21 @@ class PropertyEntity(
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updatedAt")
     val updatedAt: LocalDate = LocalDate.now(),
-    @OneToMany(mappedBy = "property", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "property")
     @JsonManagedReference
     val propertyImage : MutableSet<PropertyImageEntity> = mutableSetOf(),
-    @OneToMany(mappedBy = "propertyRoom", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "propertyRoom")
     @JsonManagedReference
     val propertyImageRoom : MutableSet<PropertyImageRoomEntity> = mutableSetOf(),
-    @OneToMany(mappedBy = "propertyLiving", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "propertyLiving")
     @JsonManagedReference
     val propertyImageLivingRoom : MutableSet<PropertyImageLivingRoomEntity> = mutableSetOf(),
-    @OneToMany(mappedBy = "propertyKitchen", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "propertyKitchen")
     @JsonManagedReference
     val propertyImageKitchen : MutableSet<PropertyImageKitchenEntity> = mutableSetOf(),
     @OneToMany(mappedBy = "property")
     val reservation : List<ReservationEntity> = emptyList(),
-    @ManyToMany(cascade = [CascadeType.ALL])
+    @ManyToMany
     @JoinTable(
         "PropertyFeatures",
         joinColumns = [JoinColumn("property_id")],

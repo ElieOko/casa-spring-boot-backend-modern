@@ -10,7 +10,7 @@ class PropertyImageEntity(
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val propertyImageId : Long = 0,
-    @ManyToOne(cascade = [CascadeType.ALL],fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn("property_id")
     @JsonBackReference
     var property : PropertyEntity,
