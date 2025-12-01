@@ -23,10 +23,10 @@ data class LocataireEntity(
     val cardFront   : String?,
     @Column("cardBack", nullable = true)
     val cardBack    : String?,
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(cascade = [CascadeType.ALL],fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(cascade = [CascadeType.ALL],fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "typeCardId", nullable = true)
     val typeCard : TypeCardEntity? = null,
     @Column("numberCard", nullable = true)
