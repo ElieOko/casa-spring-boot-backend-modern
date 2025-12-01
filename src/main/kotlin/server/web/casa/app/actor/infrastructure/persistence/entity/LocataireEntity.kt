@@ -26,7 +26,7 @@ data class LocataireEntity(
     @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne
     @JoinColumn(name = "typeCardId", nullable = true)
     val typeCard : TypeCardEntity? = null,
     @Column("numberCard", nullable = true)
