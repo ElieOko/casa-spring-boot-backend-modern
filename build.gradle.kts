@@ -48,6 +48,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     // security
 	implementation("org.springframework.boot:spring-boot-starter-security")
+    //
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.38")
     // crypto
     implementation("org.springframework.security:spring-security-crypto")
     // validation

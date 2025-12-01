@@ -1,4 +1,4 @@
-package server.web.casa.app.user.application
+package server.web.casa.app.user.application.service
 
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.user.application.TypeAccountService
+import server.web.casa.app.user.application.service.TypeAccountService
 import server.web.casa.app.user.domain.model.TypeAccount
 
 @Tag(name = "Type de Compte", description = "Gestion des comptes")

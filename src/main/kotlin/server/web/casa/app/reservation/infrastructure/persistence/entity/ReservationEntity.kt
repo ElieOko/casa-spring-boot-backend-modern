@@ -21,8 +21,12 @@ import java.time.LocalDate
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("userId")
     val user                : UserEntity ?,
-    @OneToMany(mappedBy = "reservation")
-    val notification : List<NotificationReservationEntity> = emptyList(),
+    @OneToMany(
+        mappedBy = "reservation",
+        cascade = [CascadeType.REMOVE],
+        orphanRemoval = true
+    )
+    val notification: MutableList<NotificationReservationEntity> = mutableListOf(),
     @Column(name = "message", nullable = true)
     val message             : String? = "",
     @Column(name = "reservationHeure", nullable = true)

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.user.application.UserService
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.security.Auth

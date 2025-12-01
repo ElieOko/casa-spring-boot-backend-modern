@@ -57,6 +57,10 @@ class  NotificationReservationService(
         repository.save(data)
         return false
     }
-
-
+    fun deleteByReservation(reservation: Long): Boolean {
+        val notificationDelete = repository.findAll()
+            .filter { entity -> entity.reservation.reservationId == reservation }
+        repository.deleteAll(notificationDelete)
+        return notificationDelete.isNotEmpty()
+    }
 }
