@@ -9,7 +9,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEn
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
     val quartierId  : Long = 0,
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
     @JoinColumn("commune_id")
     val commune   : CommuneEntity? = null,
     @Column("name")

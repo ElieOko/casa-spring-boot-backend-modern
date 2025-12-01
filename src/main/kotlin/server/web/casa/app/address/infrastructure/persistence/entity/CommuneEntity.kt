@@ -10,7 +10,7 @@ class CommuneEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
     val communeId   : Long = 0,
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
     @JoinColumn("district_id")
     val district  : DistrictEntity? = null,
     @Column("name")

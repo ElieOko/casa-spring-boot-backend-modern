@@ -12,7 +12,7 @@ class FavoriteEntity (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val favoriteId : Long = 0,
 
-    @ManyToOne(optional = false)
+    @ManyToOne(cascade = [CascadeType.ALL],  optional = false)
     @JoinColumn(name = "user_id")
     val user : UserEntity,
 

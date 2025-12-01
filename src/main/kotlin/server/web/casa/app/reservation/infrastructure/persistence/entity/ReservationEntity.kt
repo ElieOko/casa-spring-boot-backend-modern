@@ -3,8 +3,7 @@ package server.web.casa.app.reservation.infrastructure.persistence.entity
 import jakarta.persistence.*
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.reservation.domain.model.ReservationStatus
-import server.web.casa.app.reservation.domain.model.ReservationType
+import server.web.casa.app.reservation.domain.model.*
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import java.time.LocalDate
 
@@ -15,10 +14,10 @@ import java.time.LocalDate
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val reservationId       : Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn("propertyId")
     val property            : PropertyEntity,
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn("userId")
     val user                : UserEntity ?,
     @OneToMany(

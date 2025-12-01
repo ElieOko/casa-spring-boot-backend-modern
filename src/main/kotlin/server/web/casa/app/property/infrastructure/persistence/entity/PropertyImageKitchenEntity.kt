@@ -1,6 +1,7 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -19,7 +20,7 @@ class PropertyImageKitchenEntity(
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val propertyImageKitchenId : Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn("property_id")
     @JsonBackReference
     var propertyKitchen : PropertyEntity,

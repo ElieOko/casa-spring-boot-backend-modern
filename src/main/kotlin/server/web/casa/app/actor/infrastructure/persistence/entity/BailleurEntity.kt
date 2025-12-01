@@ -27,7 +27,7 @@ data class BailleurEntity(
     @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "parrainId", nullable = true)
     val parrain : UserEntity? = null,
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "userId")
     val user : UserEntity?,
     @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)

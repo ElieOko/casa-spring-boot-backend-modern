@@ -8,7 +8,7 @@ class DistrictEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
     val districtId  : Long = 0,
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
     @JoinColumn("city_id")
     val city      : CityEntity?,
     @Column("name")

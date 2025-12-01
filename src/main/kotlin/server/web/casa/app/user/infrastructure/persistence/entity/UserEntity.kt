@@ -15,7 +15,7 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @Column("id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val userId: Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn("typeAccountId")
     val typeAccount: TypeAccountEntity,
 //    @ManyToOne(fetch = FetchType.LAZY)
