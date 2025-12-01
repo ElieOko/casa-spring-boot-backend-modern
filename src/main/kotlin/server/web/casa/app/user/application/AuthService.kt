@@ -39,7 +39,7 @@ class AuthService(
      suspend fun register(user : User): Pair<UserDto?, String> {
          var phone = user.phone
         if (user.country == "CD"){
-            phone = normalizeAndValidatePhoneNumber(user.phone) ?: throw ResponseStatusException(
+            phone = normalizeAndValidatePhoneNumberCD(user.phone) ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Ce numero n'est pas valide."
             )
