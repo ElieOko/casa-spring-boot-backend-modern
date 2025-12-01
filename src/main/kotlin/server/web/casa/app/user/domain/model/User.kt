@@ -12,7 +12,7 @@ data class User(
     val userId: Long = 0,
     @NotNull
     @field:NotBlank(message = "Le mot de passe est obligatoire")
-    @field:Size(min = 8, message = "Le mot de passe doit contenir au moins 6 caractères")
+    @field:Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
     val password: String ="",
     @NotNull
     val typeAccount: TypeAccount? = null,
@@ -36,7 +36,7 @@ data class UserDto(
     val username: String,
     val phone: String,
     val city: String,
-    val country : String,
+    val country : String? = "Democratic Republic of the Congo",
     val isPremium : Boolean,
     val isCertified: Boolean
 )
@@ -48,7 +48,7 @@ data class UserRequest(
     val phone : String? = null,
     @NotNull
     @field:NotBlank(message = "Le mot de passe est obligatoire")
-    @field:Size(min = 8, message = "Le mot de passe doit contenir au moins 4 caractères")
+    @field:Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
     val password : String,
     @NotNull
     val typeAccountId : Long,

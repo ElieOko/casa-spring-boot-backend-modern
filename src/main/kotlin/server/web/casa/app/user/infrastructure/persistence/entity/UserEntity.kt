@@ -35,7 +35,7 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @Column("phone", nullable = true)
     val phone: String?=null,
     @Column("country", nullable = true)
-    val country: String,
+    val country: String? = "Democratic Republic of the Congo",
     @Column("createdAt")
     val createdAt: Instant = Clock.System.now(),
     @OneToMany(mappedBy = "user")
