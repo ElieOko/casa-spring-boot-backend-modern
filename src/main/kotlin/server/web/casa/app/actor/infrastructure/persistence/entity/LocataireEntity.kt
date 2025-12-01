@@ -23,7 +23,7 @@ data class LocataireEntity(
     val cardFront   : String?,
     @Column("cardBack", nullable = true)
     val cardBack    : String?,
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
