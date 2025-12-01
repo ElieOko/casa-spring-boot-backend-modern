@@ -6,7 +6,6 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 

@@ -9,8 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.*
-import server.web.casa.app.user.application.service.AuthService
-import server.web.casa.app.user.application.service.TypeAccountService
+import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserPassword
 import server.web.casa.route.auth.AuthRoute
@@ -164,8 +163,3 @@ class AuthController(
         return ResponseEntity.ok(message)
     }
 }
-
-
-data class RefreshRequest(
-    val refreshToken: String
-)

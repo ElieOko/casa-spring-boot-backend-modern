@@ -59,3 +59,7 @@ data class UserRequest(
     @NotNull
     val country : String
 )
+
+data class RefreshRequest(
+    val refreshToken: String
+)

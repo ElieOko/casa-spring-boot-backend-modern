@@ -2,7 +2,6 @@ package server.web.casa.security
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
