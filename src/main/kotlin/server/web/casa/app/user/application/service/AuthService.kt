@@ -76,10 +76,10 @@ class AuthService(
         }
 
         val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
-            ?: throw BadCredentialsException("Invalid credentials .")
+            ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
 
         if(!hashEncoder.matches(password, user.password.toString())) {
-            throw BadCredentialsException("Invalid credentials.")
+            throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
         }
 
         val newAccessToken = jwtService.generateAccessToken(user.userId.toHexString())
@@ -108,19 +108,19 @@ class AuthService(
     @Transactional
     suspend fun refresh(refreshToken: String): TokenPair {
         if(!jwtService.validateRefreshToken(refreshToken)) {
-            throw ResponseStatusException(HttpStatusCode.valueOf(401), "Invalid refresh token.")
+            throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid refresh token.")
         }
         val userId = jwtService.getUserIdFromToken(refreshToken)
         val user = userRepository.findById(userId.toLong()).orElseThrow{
             ResponseStatusException(
-                HttpStatusCode.valueOf(401),
+                HttpStatusCode.valueOf(403),
                 "Invalid refresh token."
             )
         }
             val hashed = hashToken(refreshToken)
             refreshTokenRepository.findByUserIdAndHashedToken(user.userId, hashed)
                 ?: throw ResponseStatusException(
-                    HttpStatusCode.valueOf(401),
+                    HttpStatusCode.valueOf(403),
                     "Refresh token not recognized (maybe used or expired?)"
                 )
             refreshTokenRepository.deleteByUserIdAndHashedToken(user.userId, hashed)
