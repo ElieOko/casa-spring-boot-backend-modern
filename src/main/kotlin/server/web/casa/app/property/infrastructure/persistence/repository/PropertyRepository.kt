@@ -14,7 +14,7 @@ interface PropertyRepository : JpaRepository<PropertyEntity, Long> {
         "propertyImageRoom",
         "propertyImageLivingRoom",
         "propertyImageKitchen"])
-    override fun findAll(): List<PropertyEntity?>
+    override fun findAll(pageable: Pageable): Page<PropertyEntity>
 
     @Query("""
         SELECT r FROM PropertyEntity r 
