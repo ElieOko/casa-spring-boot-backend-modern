@@ -139,8 +139,8 @@ class PropertyController(
     suspend fun getAllProperty(): ResponseEntity<Map<String, Page<Property>>> {
        val page = 0
        val size = 15
-       val sortBy = "asc"
-       val sortOrder = "title"
+       val sortBy = "title"
+       val sortOrder = "asc"
        val data = service.getAll(
            page = page,
            size = size,
@@ -152,7 +152,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Get Property by User")
-    @GetMapping("/owner/{userId}/",
+    @GetMapping("/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByUser(
         @PathVariable("userId") userId : Long,
@@ -163,7 +163,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Get Property by ID")
-    @GetMapping("/{propertyId}/",
+    @GetMapping("/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByID(
         @PathVariable("propertyId") propertyId : Long,

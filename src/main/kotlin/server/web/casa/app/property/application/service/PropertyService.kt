@@ -1,5 +1,6 @@
 package server.web.casa.app.property.application.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -18,7 +19,7 @@ class PropertyService(
     private val repository: PropertyRepository,
     private val mapper : PropertyMapper
 ) {
-
+    private val log = LoggerFactory.getLogger(this::class.java)
     suspend fun create(p : Property): Property {
         val data = mapper.toEntity(p)
         val result = repository.save(data)
@@ -32,12 +33,13 @@ class PropertyService(
     ) : Page<Property> {
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
         val pageable = PageRequest.of(page,size,sort)
-        val page: Page<PropertyEntity> = repository.findAll(pageable = pageable)
-        return page.map { mapper.toDomain(it) }
+        val page = repository.findAll(pageable)
+        val data = page.map { mapper.toDomain(it) }
+        return data
     }
 
     suspend fun getAllPropertyByUser(userId : Long) : List<Property> {
-        val data = repository.findAll().filter { it.user?.userId ==  it.user?.userId}
+        val data = repository.findAll().filter { it.user?.userId == userId }
         return data.map { mapper.toDomain(it) }
     }
 
@@ -46,9 +48,26 @@ class PropertyService(
                 ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
             }
         val data = mapper.toDomain(property)
-        val similary = repository.findAll().filter {
-            (it.cityValue == data.cityValue) || (it.communeValue == data.communeValue)  || (it.transactionType == data.transactionType) || (it.propertyType == data.propertyType)
-        }.toList()
+        //|| (it.propertyType == data.propertyType)
+        var similary = repository.findAll()
+            .filter { it.cityValue == data.cityValue }
+            .filter { it.communeValue == data.communeValue }
+            .filter { it.transactionType == data.transactionType }
+            .filter { it.propertyId != data.propertyId }
+        if (data.city?.cityId == 1L){
+            similary = repository.findAll()
+                .filter { it.city?.cityId == 1L }
+                .filter {it.commune?.communeId == data.commune?.communeId}
+                .filter {it.transactionType == data.transactionType }
+                .filter { it.propertyId != data.propertyId }
+//
+//                .filter { it.commune?.communeId == data.commune?.communeId}
+//                .filter { it.propertyId != data.propertyId }
+//                .filter {
+//                    it.transactionType == data.transactionType
+//                }
+        }
+
         val key = Pair(data,similary.map{mapper.toDomain(it)})
         return key
     }

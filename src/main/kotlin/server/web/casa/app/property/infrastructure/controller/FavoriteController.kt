@@ -48,14 +48,14 @@ class FavoriteController(
 
         val favorite = Favorite(
             user = user,
-            property = property,
+            property = property.first,
             createdAt = LocalDate.now()
         )
        val existingFavorite = service.getFavoriteIfExist(propR.findById(request.propertyId).orElse(null), userR.findById(request.userId).orElse(null))?.firstOrNull()
 
         val savedFavorite = existingFavorite ?: service.create(favorite)
         val response = mapOf(
-            "message" to "Property '${property.propertyId}' added to favorites successfully.",
+            "message" to "Property '${property.first.propertyId}' added to favorites successfully.",
             "user" to user,
             "favorite" to savedFavorite
         )
