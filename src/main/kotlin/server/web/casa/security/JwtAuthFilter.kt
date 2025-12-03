@@ -47,6 +47,7 @@ class JwtAuthFilter(
             "/api/quartiers",
             "/auth/login",
             "/api/property",
+            "/api/property/**",
             "/auth/register",
             "/refresh"
         )

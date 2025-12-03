@@ -26,7 +26,7 @@ data class CommissionnaireEntity(
     @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "typeCardId")
     val typeCard : TypeCardEntity?,
     @Column("numberCard", nullable = true)

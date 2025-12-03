@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.*
@@ -14,6 +15,7 @@ import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
+import java.time.LocalDate
 
 const val ROUTE_PROPERTY = PropertyRoute.PROPERTY
 const val ROUTE_PROPERTY_FILTER = PropertyRoute.PROPERTY_FILTER
@@ -88,7 +90,7 @@ class PropertyController(
             if (imageList.isNotEmpty()){
                 imageList.map {
                      propertyImageService.create(PropertyImage(
-                        property = propertyInstance,
+                        property = propertyInstance.first,
                         name = it?.image!!
                     ))
                 }
@@ -96,7 +98,7 @@ class PropertyController(
             if (imageRoom.isNotEmpty()){
                 imageRoom.map {
                     propertyImageRoomService.create(PropertyImageRoom(
-                        property = propertyInstance,
+                        property = propertyInstance.first,
                         name = it?.image!!
                     ))
                 }
@@ -105,7 +107,7 @@ class PropertyController(
             if (imageLivingRoom.isNotEmpty()){
                 imageLivingRoom.map {
                     val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
-                        property = propertyInstance,
+                        property = propertyInstance.first,
                         name = it?.image!!
                     ))
                     log.info("test => ***${result}***")
@@ -115,7 +117,7 @@ class PropertyController(
             if (imageKitchen.isNotEmpty()){
                 imageKitchen.map {
                     propertyImageKitchenService.create(PropertyImageKitchen(
-                        property = propertyInstance,
+                        property = propertyInstance.first,
                         name = it?.image!!
                     ))
                 }
@@ -132,10 +134,45 @@ class PropertyController(
         return ResponseEntity.badRequest().body(response)
     }
 
+    @Operation(summary = "Voir les Property")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllProperty(): ResponseEntity<Map<String, List<Property>>> {
-        val data = service.getAll()
+    suspend fun getAllProperty(): ResponseEntity<Map<String, Page<Property>>> {
+       val page = 0
+       val size = 15
+       val sortBy = "title"
+       val sortOrder = "asc"
+       val data = service.getAll(
+           page = page,
+           size = size,
+           sortBy = sortBy,
+           sortOrder = sortOrder
+       )
+       val response = mapOf("properties" to data)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Get Property by User")
+    @GetMapping("/owner/{userId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPropertyByUser(
+        @PathVariable("userId") userId : Long,
+    ): ResponseEntity<Map<String, List<Property>>> {
+        val data = service.getAllPropertyByUser(userId)
         val response = mapOf("properties" to data)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Get Property by ID")
+    @GetMapping("/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPropertyByID(
+        @PathVariable("propertyId") propertyId : Long,
+    ): ResponseEntity<Map<String, Any>> {
+        val data = service.findByIdProperty(propertyId)
+        val response = mapOf(
+            "properties" to data.first,
+            "similaires" to data.second
+        )
         return ResponseEntity.ok().body(response)
     }
 
@@ -171,5 +208,54 @@ class PropertyController(
         )
         val response = mapOf("properties" to data)
         return ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Modification Property")
+    @PutMapping("/owner/{userId}/{propertyId}")
+    suspend fun updateProperty(
+        @PathVariable("userId") userId : Long,
+        @PathVariable("propertyId") propertyId : Long,
+        @Valid @RequestBody request: PropertyRequest
+    ): ResponseEntity<Property> {
+        val city = cityService.findByIdCity(request.cityId)
+        val user = userService.findIdUser(request.userId)
+        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
+        val commune = communeService.findByIdCommune(request.communeId)
+        val quartier =  quartierService.findByIdQuartier(request.quartierId)
+        val property = service.findByIdProperty(propertyId)
+        if (property.first.user?.userId != userId){
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Cet auteur n'appartient pas à la proprièté.")
+        }
+        if (propertyType != null) {
+            property.first.propertyType = propertyType
+        }
+        property.first.title = request.title
+        property.first.description = request.description
+        property.first.address = request.address
+        property.first.bathroom = request.bathroom
+        property.first.rooms = request.rooms
+        property.first.countryValue = request.countryValue
+        property.first.sold = request.sold
+        property.first.kitchen = request.kitchen
+        property.first.cityValue = request.cityValue
+        property.first.communeValue = request.communeValue
+        property.first.electric = request.electric
+        property.first.water = request.water
+        property.first.guarantee = request.guarantee
+        property.first.city = city
+        property.first.quartier = quartier
+        property.first.commune = commune
+        property.first.price = request.price
+        property.first.floor = request.floor
+        property.first.quartierValue = request.quartierValue
+        property.first.transactionType = request.transactionType
+        property.first.postalCode = request.postalCode
+        property.first.surface = request.surface
+        property.first.latitude = request.latitude
+        property.first.longitude = request.longitude
+        property.first.updatedAt = LocalDate.now()
+        val updated = service.create(property.first)
+        return ResponseEntity.ok(updated)
     }
 }

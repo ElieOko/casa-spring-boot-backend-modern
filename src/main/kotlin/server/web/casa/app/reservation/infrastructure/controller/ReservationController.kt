@@ -51,7 +51,7 @@ class ReservationController(
             return ResponseEntity.ok().body(responseNotFound )
         }
 
-        if(property.user == user){
+        if(property.first.user == user){
             val responsePending = mapOf("error" to "You can't reserve your own property")
             return ResponseEntity.ok().body(responsePending )
         }
@@ -65,7 +65,7 @@ class ReservationController(
             isActive = true,
             reservationHeure = request.reservationHeure,
             user = user,
-            property = property,
+            property = property.first,
             message = request.message,
             startDate = request.startDate,
             endDate = request.endDate,
@@ -111,7 +111,7 @@ class ReservationController(
         }
 
         // check if property is available before adding
-        if(!property.isAvailable){
+        if(!property.first.isAvailable){
             val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
             return ResponseEntity.ok().body(responseAvailable)
         }
