@@ -32,7 +32,7 @@ class PropertyService(
         sortOrder : String
     ) : Page<Property> {
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
-        val pageable = PageRequest.of(page,size,sort)
+        val pageable = PageRequest.of(page,repository.findAll().size,sort)
         val page = repository.findAll(pageable)
         val data = page.map { mapper.toDomain(it) }
         return data
