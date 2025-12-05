@@ -49,6 +49,8 @@ class JwtAuthFilter(
             "/api/property",
             "/api/property/**",
             "/auth/register",
+            "/otp/**",
+            "/reset/password",
             "/refresh"
         )
         try {
@@ -80,7 +82,6 @@ class JwtAuthFilter(
         } catch (e : AuthorizationDeniedException){
             sendJsonError(response, request,HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
         }
-
     }
 
      fun sendJsonError(
