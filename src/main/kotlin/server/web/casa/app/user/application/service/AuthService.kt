@@ -7,11 +7,12 @@ import server.web.casa.app.user.infrastructure.persistence.repository.*
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.security.*
 import org.springframework.http.*
-import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
+import server.web.casa.adaptater.provide.twilio.TwilioService
 import server.web.casa.app.user.domain.model.UserDto
+import server.web.casa.app.user.domain.model.request.VerifyRequest
 import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
 import server.web.casa.utils.*
 import java.security.MessageDigest
@@ -28,7 +29,8 @@ class AuthService(
     private val hashEncoder: HashEncoder,
     private val mapper: UserMapper,
     private val mapperAccount: TypeAccountMapper,
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val twilio : TwilioService
 ) {
     data class TokenPair(
         val accessToken: String,
@@ -95,11 +97,24 @@ class AuthService(
         return result
     }
 
-    suspend fun changePassword(id : Long,new : String, old : String): UserDto? {
-        val data = userRepository.findById(id).orElse(null)
-        if(!hashEncoder.matches(old, data.password.toString())) {
-            throw BadCredentialsException("Mot de passe invalide.")
+    fun generateOTP(identifier: String): Triple<String?, String, String> {
+        var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
+        if (isEmailValid(identifier)){
+            validIdentifier = identifier
         }
+        val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
+            ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
+       val status = twilio.generateVerifyOTP()
+       return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur",identifier)
+    }
+
+    fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
+        val userSecurity = userRepository.findByPhoneOrEmail(user.identifier)
+            ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
+       return Pair(userSecurity.userId,twilio.checkVerify(code = user.code, contact = user.identifier))
+    }
+    suspend fun changePassword(id : Long,new : String): UserDto? {
+        val data = userRepository.findById(id).orElse(null)
         data.password = hashEncoder.encode(new)
         val updatedUser = userRepository.save(data)
         return mapper.toDomain(updatedUser)
