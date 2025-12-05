@@ -31,6 +31,12 @@ extra["springCloudVersion"] = "2025.0.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    //vonage
+//    implementation("com.vonage:server-sdk-kotlin:2.1.1")
+    //twilio
+    implementation("com.twilio.sdk:twilio:9.2.1")
+    //redis
+//    implementation("org.springframework.boot:spring-boot-starter-session-data-redis")
     //websocket
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 //    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -71,6 +77,7 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 //	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	annotationProcessor("org.projectlombok:lombok")
+    testImplementation("org.springframework.boot:spring-boot-starter-session-data-redis-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.springframework.security:spring-security-test")
