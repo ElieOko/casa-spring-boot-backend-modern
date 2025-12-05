@@ -23,7 +23,6 @@ class UserService(
     private val service: TypeAccountService,
     private val mapper: UserMapper,
     private val mapperAccount: TypeAccountMapper,
-    private val mapperCity: CityMapper,
 ) {
     val name = "utilisateur"
     @OptIn(ExperimentalTime::class)

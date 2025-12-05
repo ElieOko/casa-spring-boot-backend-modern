@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
+import server.web.casa.app.user.domain.model.request.IdentifiantRequest
 import server.web.casa.app.user.domain.model.request.UserPassword
+import server.web.casa.app.user.domain.model.request.VerifyRequest
 import server.web.casa.route.auth.AuthRoute
 import server.web.casa.security.Auth
 
@@ -148,6 +150,46 @@ class AuthController(
         return authService.refresh(body.refreshToken)
     }
 
+    @Operation(summary = "OTP activation send code")
+    @PostMapping("/otp/generate")
+    fun generateKeyOTP(
+        @RequestBody @Valid user : IdentifiantRequest
+    ): ResponseEntity<Map<String, String?>> {
+       val result = authService.generateOTP(user.identifier)
+        val message = mapOf(
+            "message" to result.second,
+            "status" to result.first,
+            "phone" to result.third,
+        )
+        return ResponseEntity.ok(message)
+    }
+
+    @Operation(summary = "OTP activation send code")
+    @PostMapping("/otp/verify")
+    fun verifyOTP(
+        @RequestBody @Valid user : VerifyRequest
+    ): ResponseEntity<out Map<String, Any?>> {
+        val result = authService.verifyOTP(user)
+        val message = mapOf(
+            "status" to result.second,
+            "user" to result.first
+        )
+        return ResponseEntity.ok(message)
+    }
+
+    @Operation(summary = "Reset password ")
+    @PutMapping("/reset/password")
+    suspend fun resetPassword(
+        @RequestBody @Valid user : UserPassword
+    ) : ResponseEntity<Map<String, String>> {
+        val new = user.newPassword
+        authService.changePassword(user.userId,new)
+        val message = mapOf(
+            "message" to "Mot de passe changé avec succès"
+        )
+        return ResponseEntity.ok(message)
+    }
+
     @Operation(summary = "Change password utilisateur")
     @PutMapping("/change/password")
     suspend fun updateUser(
@@ -155,8 +197,8 @@ class AuthController(
     ) : ResponseEntity<Map<String, String>> {
         val userConnect = auth.user()
         val new = user.newPassword
-        val old = user.oldPassword
-        authService.changePassword(userConnect!!.userId,new,old)
+//        val old = user.oldPassword
+        authService.changePassword(userConnect!!.userId,new)
         val message = mapOf(
             "message" to "Mot de passe changé avec succès"
         )
