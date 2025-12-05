@@ -10,3 +10,15 @@ data class UserRequestChange(
     @NotNull
     val city  : String,
 )
+
+data class IdentifiantRequest(
+    @NotNull
+    val identifier : String,
+)
+
+data class VerifyRequest(
+    @NotNull
+    val identifier : String,
+    @NotNull
+    val code : String,
+)
