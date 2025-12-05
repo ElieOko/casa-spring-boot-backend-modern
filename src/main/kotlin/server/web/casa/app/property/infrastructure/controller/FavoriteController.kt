@@ -40,7 +40,7 @@ class FavoriteController(
         val user = userS.findIdUser(request.userId)
         val property = prop.findByIdProperty(request.propertyId)
 
-        if (user == null || property == null) {
+        if (user == null) {
             return ResponseEntity.badRequest().body(
                 mapOf("error" to "User and property must not be null.")
             )
