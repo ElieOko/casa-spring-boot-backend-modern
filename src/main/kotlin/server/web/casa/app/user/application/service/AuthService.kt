@@ -104,8 +104,8 @@ class AuthService(
         }
         val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
             ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
-       val status = twilio.generateVerifyOTP()
-       return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur",identifier)
+       val status = twilio.generateVerifyOTP(identifier)
+       return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur numero non prises en charge",identifier)
     }
 
     fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
