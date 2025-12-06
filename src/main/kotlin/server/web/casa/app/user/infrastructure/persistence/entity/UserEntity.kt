@@ -2,9 +2,9 @@ package server.web.casa.app.user.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import server.web.casa.app.actor.infrastructure.persistence.entity.master.BailleurEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.master.CommissionnaireEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.master.LocataireEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.other.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.second.MajordomeEntity
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
@@ -55,6 +55,29 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @OneToMany(mappedBy = "parrain")
     val parrainBailleur: List<BailleurEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
-    val reservation : List<ReservationEntity> = emptyList()
-
-)
+    val reservation : List<ReservationEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val majordome: List<MajordomeEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val ajusteur: List<AjusteurEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val architect: List<ArchitecteEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val frigoriste: List<BrigoristeEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val carreleur: List<CarreleurEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val chauffeur : List<ChauffeurEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val electricien: List<ElectricienEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val macon: List<MaconEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val menusier: List<MenusierEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val peintre : List<PeintreEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val plombier: List<PlombierEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val salubrite : List<SalubriteEntity> = emptyList()
+    )
