@@ -1,6 +1,9 @@
 package server.web.casa.app.actor.infrastructure.persistence.entity
 
 import jakarta.persistence.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.BailleurEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.CommissionnaireEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.LocataireEntity
 
 @Entity
 @Table(name = "typecards")

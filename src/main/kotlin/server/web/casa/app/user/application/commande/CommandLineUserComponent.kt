@@ -43,10 +43,23 @@ class CommandLineUserComponent(
     fun createTypeAccount(){
         val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(
             listOf(
-                TypeAccountEntity(name = "admin"),
-                TypeAccountEntity(name = "commissionnaire"),
-                TypeAccountEntity(name = "bailleur"),
-                TypeAccountEntity(name = "locataire"),
+                TypeAccountEntity(name = "admin"),//1
+                TypeAccountEntity(name = "commissionnaire"),//2
+                TypeAccountEntity(name = "bailleur"),//3
+                TypeAccountEntity(name = "locataire"),//4
+                TypeAccountEntity(name = "majordome"),//5
+                TypeAccountEntity(name = "demenagement"),//6
+                TypeAccountEntity(name = "electricien"),//7
+                TypeAccountEntity(name = "salubrité"),//8
+                TypeAccountEntity(name = "peintre"),//9
+                TypeAccountEntity(name = "carrelleur"),//10
+                TypeAccountEntity(name = "menusier"),//11
+                TypeAccountEntity(name = "frigoriste"),//12
+                TypeAccountEntity(name = "ajusteur"),//13
+                TypeAccountEntity(name = "architect"),//14
+                TypeAccountEntity(name = "chauffeur"),//15
+                TypeAccountEntity(name = "plombier"),//16
+                TypeAccountEntity(name = "maçon"),//18
             )
         )
         log.info("Enregistrement réussi avec succès")
