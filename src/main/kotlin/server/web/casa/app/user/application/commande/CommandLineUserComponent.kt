@@ -59,6 +59,7 @@ class CommandLineUserComponent(
                 TypeAccountEntity(name = "architect"),//14
                 TypeAccountEntity(name = "chauffeur"),//15
                 TypeAccountEntity(name = "plombier"),//16
+                TypeAccountEntity(name = "maçon"),//18
             )
         )
         log.info("Enregistrement réussi avec succès")

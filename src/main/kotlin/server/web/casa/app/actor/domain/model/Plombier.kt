@@ -3,7 +3,7 @@ package server.web.casa.app.actor.domain.model
 import server.web.casa.app.user.domain.model.UserDto
 
 data class Plombier(
-    val plombierId : Long,
+    val plombierId : Long = 0,
     val firstName  : String,
     val lastName   : String,
     val fullName   : String,
