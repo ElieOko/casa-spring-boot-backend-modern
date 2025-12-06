@@ -2,7 +2,7 @@ package server.web.casa.app.actor.domain.model.request
 
 import jakarta.validation.constraints.NotNull
 
-data class BrigoristeRequest(
+data class FrigoristeRequest(
     @NotNull
     val lastName: String,
     @NotNull

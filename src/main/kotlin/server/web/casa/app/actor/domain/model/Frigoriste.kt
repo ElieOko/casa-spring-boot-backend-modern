@@ -2,8 +2,8 @@ package server.web.casa.app.actor.domain.model
 
 import server.web.casa.app.user.domain.model.UserDto
 
-data class Brigoriste(
-    val brigoristeId : Long,
+data class Frigoriste(
+    val frigoristeId : Long,
     val firstName  : String,
     val lastName   : String,
     val fullName   : String,

@@ -63,7 +63,7 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @OneToMany(mappedBy = "user")
     val architect: List<ArchitecteEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
-    val frigoriste: List<BrigoristeEntity> = emptyList(),
+    val frigoriste: List<FrigoristeEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
     val carreleur: List<CarreleurEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
