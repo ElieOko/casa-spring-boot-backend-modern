@@ -36,7 +36,7 @@ class MajordomeController(
         @Valid @RequestBody request: MajordomeUser
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        if (request.user.typeAccountId != 4L){
+        if (request.user.typeAccountId != 5L){
             val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Locataire")
             return ResponseEntity.badRequest().body(response)
         }

@@ -8,9 +8,9 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
-import server.web.casa.app.actor.application.service.other.AjusteurService
+import server.web.casa.app.actor.application.service.other.SalubriteService
 import server.web.casa.app.actor.domain.model.*
-import server.web.casa.app.actor.domain.model.join.other.AjusteurUser
+import server.web.casa.app.actor.domain.model.join.other.SalubriteUser
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
@@ -18,26 +18,26 @@ import server.web.casa.utils.Mode
 import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 import server.web.casa.utils.toPascalCase
 
-const val ROUTE_ACTOR_AJUSTEUR = ActorRoute.AJUSTEUR
+const val ROUTE_ACTOR_SALUBRITE = ActorRoute.SALUBRITE
 
-@Tag(name = "AJUSTEUR", description = "Gestion des AJUSTEUR")
+@Tag(name = "SALUBRITE", description = "Gestion des SALUBRITE")
 @RestController
-@RequestMapping(ROUTE_ACTOR_AJUSTEUR)
+@RequestMapping(ROUTE_ACTOR_SALUBRITE)
 @Profile(Mode.DEV)
-class AjusteurController(
-    private val service : AjusteurService,
+class SalubriteController(
+    private val service : SalubriteService,
     private val authService: AuthService,
     private val typeAccountService: TypeAccountService,
     private val typeCardService: TypeCardService,
     private val userService: UserService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun createAjusteur(
-        @Valid @RequestBody request: AjusteurUser
+    suspend fun createSalubrite(
+        @Valid @RequestBody request: SalubriteUser
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        if (request.user.typeAccountId != 13L){
-            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Locataire")
+        if (request.user.typeAccountId != 8L){
+            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Salubrite")
             return ResponseEntity.badRequest().body(response)
         }
         val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(
@@ -52,26 +52,26 @@ class AjusteurController(
                 phone = phone,
                 city = request.user.city,
                 country = request.user.country,
-                username = "@"+toPascalCase("${request.ajusteur.firstName} ${request.ajusteur.lastName}")
+                username = "@"+toPascalCase("${request.salubrite.firstName} ${request.salubrite.lastName}")
             )
             val userCreated = authService.register(userSystem)
-            val data = Ajusteur(
-                firstName = request.ajusteur.firstName,
-                lastName = request.ajusteur.lastName,
-                fullName = "${request.ajusteur.firstName} ${request.ajusteur.lastName}",
-                address = request.ajusteur.address,
-                images = request.ajusteur.images,
-                cardFront = request.ajusteur.cardFront,
-                cardBack = request.ajusteur.cardBack,
+            val data = Salubrite(
+                firstName = request.salubrite.firstName,
+                lastName = request.salubrite.lastName,
+                fullName = "${request.salubrite.firstName} ${request.salubrite.lastName}",
+                address = request.salubrite.address,
+                images = request.salubrite.images,
+                cardFront = request.salubrite.cardFront,
+                cardBack = request.salubrite.cardBack,
                 user = userCreated.first,
                 typeCard = null,
-                numberCard = request.ajusteur.numberCard
+                numberCard = request.salubrite.numberCard
             )
             val created = service.create(data)
             val response = mapOf(
                 "message" to "Votre compte ${userCreated.first?.typeAccount?.name} a été créer avec succès",
                 "user" to userCreated.first,
-                "ajusteur" to created,
+                "salubrite" to created,
                 "token" to userCreated.second
             )
             return ResponseEntity.status(201).body(response)
@@ -81,18 +81,18 @@ class AjusteurController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllAjusteur(): ResponseEntity<Map<String, List<Ajusteur>>> {
+    suspend fun getAllSalubrite(): ResponseEntity<Map<String, List<Salubrite>>> {
         val data = service.findAll()
-        val response = mapOf("ajusteurs" to data)
+        val response = mapOf("salubrites" to data)
         return ResponseEntity.ok().body(response)
     }
 
-    @Operation(summary = "Modification Ajusteur")
+    @Operation(summary = "Modification Salubrite")
     @PutMapping("/{id}")
-    suspend fun updateAjusteur(
+    suspend fun updateSalubrite(
         @PathVariable("id") id : Long,
-        @RequestBody @Valid data: Ajusteur
-    ) : ResponseEntity<Ajusteur> {
+        @RequestBody @Valid data: Salubrite
+    ) : ResponseEntity<Salubrite> {
         val updated = service.update(id,data)
         userService.updateUsername(data.user!!.userId,"@"+toPascalCase(data.firstName + data.lastName))
         return ResponseEntity.ok(updated)

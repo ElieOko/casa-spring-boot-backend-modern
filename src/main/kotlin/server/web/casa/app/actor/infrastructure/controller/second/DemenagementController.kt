@@ -36,7 +36,7 @@ class DemenagementController(
         @Valid @RequestBody request: DemenagementUser
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
-        if (request.user.typeAccountId != 4L){
+        if (request.user.typeAccountId != 6L){
             val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Locataire")
             return ResponseEntity.badRequest().body(response)
         }
