@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Locataire
 import server.web.casa.app.actor.infrastructure.persistence.entity.master.LocataireEntity
 import server.web.casa.app.actor.infrastructure.persistence.mapper.*
+import server.web.casa.app.actor.infrastructure.persistence.mapper.master.LocataireMapper
 import server.web.casa.app.actor.infrastructure.persistence.repository.LocataireRepository
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.utils.Mode

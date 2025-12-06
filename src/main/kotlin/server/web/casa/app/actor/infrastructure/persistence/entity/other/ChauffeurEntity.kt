@@ -5,12 +5,12 @@ import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntit
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
-@Table(name = "architectes")
+@Table(name = "chauffeurs")
 class ChauffeurEntity(
     @Id
     @Column("id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val architecteId : Long,
+    val chauffeurId : Long,
     @Column("firstName")
     val firstName : String,
     @Column("lastName")

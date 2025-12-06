@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.actor.infrastructure.persistence.entity.master.BailleurEntity
 import server.web.casa.app.actor.infrastructure.persistence.mapper.*
+import server.web.casa.app.actor.infrastructure.persistence.mapper.master.BailleurMapper
 import server.web.casa.app.actor.infrastructure.persistence.repository.BailleurRepository
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.utils.Mode

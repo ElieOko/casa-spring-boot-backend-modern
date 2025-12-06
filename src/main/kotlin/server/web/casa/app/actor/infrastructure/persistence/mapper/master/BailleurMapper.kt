@@ -1,8 +1,9 @@
-package server.web.casa.app.actor.infrastructure.persistence.mapper
+package server.web.casa.app.actor.infrastructure.persistence.mapper.master
 
 import org.springframework.stereotype.Component
 import server.web.casa.app.actor.domain.model.Bailleur
 import server.web.casa.app.actor.infrastructure.persistence.entity.master.BailleurEntity
+import server.web.casa.app.actor.infrastructure.persistence.mapper.TypeCardMapper
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 
 @Component
