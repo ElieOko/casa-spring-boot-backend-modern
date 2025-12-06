@@ -2,7 +2,7 @@ package server.web.casa.app.actor.infrastructure.persistence.mapper
 
 import org.springframework.stereotype.Component
 import server.web.casa.app.actor.domain.model.Commissionnaire
-import server.web.casa.app.actor.infrastructure.persistence.entity.CommissionnaireEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.CommissionnaireEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 
 @Component

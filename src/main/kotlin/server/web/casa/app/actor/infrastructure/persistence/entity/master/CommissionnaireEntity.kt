@@ -1,14 +1,15 @@
-package server.web.casa.app.actor.infrastructure.persistence.entity
+package server.web.casa.app.actor.infrastructure.persistence.entity.master
 
 import jakarta.persistence.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntity
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
-@Table(name = "locataires")
-data class LocataireEntity(
+@Table(name = "commissionnaires")
+data class CommissionnaireEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column("id")
-    val locataireId : Long = 0,
+    val commissionnaireId : Long,
     @Column("firstName")
     val firstName   : String,
     @Column("lastName")
@@ -18,17 +19,17 @@ data class LocataireEntity(
     @Column("address", nullable = true)
     val address     : String? = null,
     @Column("images", nullable = true)
-    val images      : String?,
+    val images      : String? = null,
     @Column("cardFront", nullable = true)
-    val cardFront   : String?,
+    val cardFront   : String? = null,
     @Column("cardBack", nullable = true)
-    val cardBack    : String?,
+    val cardBack    : String? = null,
     @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
     @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "typeCardId", nullable = true)
-    val typeCard : TypeCardEntity? = null,
+    @JoinColumn(name = "typeCardId")
+    val typeCard : TypeCardEntity?,
     @Column("numberCard", nullable = true)
-    val numberCard  : String? = null,
+    val numberCard  : String? = null
 )

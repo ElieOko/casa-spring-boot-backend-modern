@@ -3,7 +3,7 @@ package server.web.casa.app.actor.application.service
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Commissionnaire
-import server.web.casa.app.actor.infrastructure.persistence.entity.CommissionnaireEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.CommissionnaireEntity
 import server.web.casa.app.actor.infrastructure.persistence.mapper.*
 import server.web.casa.app.actor.infrastructure.persistence.repository.CommissionnaireRepository
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper

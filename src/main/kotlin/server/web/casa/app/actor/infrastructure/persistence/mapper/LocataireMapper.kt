@@ -2,7 +2,7 @@ package server.web.casa.app.actor.infrastructure.persistence.mapper
 
 import org.springframework.stereotype.Component
 import server.web.casa.app.actor.domain.model.Locataire
-import server.web.casa.app.actor.infrastructure.persistence.entity.LocataireEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.LocataireEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 
 @Component

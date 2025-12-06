@@ -2,7 +2,9 @@ package server.web.casa.app.user.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import server.web.casa.app.actor.infrastructure.persistence.entity.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.BailleurEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.CommissionnaireEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.master.LocataireEntity
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
