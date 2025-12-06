@@ -1,14 +1,14 @@
-package server.web.casa.app.actor.infrastructure.persistence.entity
+package server.web.casa.app.actor.infrastructure.persistence.entity.other
 
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "carreleurs")
-class CarreleurEntity(
+@Table(name = "salubrites")
+class SalubriteEntity(
     @Id
     @Column("id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val carreleurId : Long,
+    val salubriteId : Long,
     @Column("firstName")
     val firstName : String,
     @Column("lastName")
