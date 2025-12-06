@@ -1,6 +1,8 @@
 package server.web.casa.app.actor.infrastructure.persistence.entity.other
 
 import jakarta.persistence.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntity
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
 @Table(name = "brigoristes")
@@ -19,4 +21,10 @@ class BrigoristeEntity(
     val address : String? = "",
     @Column("images", nullable = true)
     val images : String? = null,
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    val user : UserEntity?,
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "typeCardId", nullable = true)
+    val typeCard : TypeCardEntity? = null,
 )

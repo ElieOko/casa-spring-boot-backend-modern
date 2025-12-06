@@ -1,11 +1,8 @@
 package server.web.casa.app.actor.infrastructure.persistence.entity.second
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntity
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 @Entity
 @Table(name = "majordomes")
@@ -24,4 +21,10 @@ class MajordomeEntity(
     val address : String? = "",
     @Column("images", nullable = true)
     val images : String? = null,
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    val user : UserEntity?,
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "typeCardId", nullable = true)
+    val typeCard : TypeCardEntity? = null,
 )
