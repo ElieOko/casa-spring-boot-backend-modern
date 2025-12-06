@@ -1,4 +1,4 @@
-package server.web.casa.app.actor.application.service
+package server.web.casa.app.actor.application.service.master
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service

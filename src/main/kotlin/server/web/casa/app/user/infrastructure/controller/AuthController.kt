@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.actor.application.service.*
+import server.web.casa.app.actor.application.service.master.BailleurService
+import server.web.casa.app.actor.application.service.master.CommissionnaireService
+import server.web.casa.app.actor.application.service.master.LocataireService
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.IdentifiantRequest

@@ -9,6 +9,7 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
+import server.web.casa.app.actor.application.service.master.BailleurService
 import server.web.casa.app.actor.domain.model.*
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.User
