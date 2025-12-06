@@ -1,4 +1,4 @@
-package server.web.casa.app.actor.infrastructure.controller.master
+package server.web.casa.app.actor.infrastructure.controller.other
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -8,9 +8,11 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
-import server.web.casa.app.actor.application.service.master.LocataireService
+import server.web.casa.app.actor.application.service.other.AjusteurService
+import server.web.casa.app.actor.application.service.other.ArchitectService
 import server.web.casa.app.actor.domain.model.*
-import server.web.casa.app.actor.domain.model.join.master.LocataireUser
+import server.web.casa.app.actor.domain.model.join.other.AjusteurUser
+import server.web.casa.app.actor.domain.model.join.other.ArchitectUser
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
@@ -18,22 +20,22 @@ import server.web.casa.utils.Mode
 import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 import server.web.casa.utils.toPascalCase
 
-const val ROUTE_ACTOR_LOCATAIRE = ActorRoute.LOCATAIRE
+const val ROUTE_ACTOR_ARCHITECT = ActorRoute.ARCHITECT
 
-@Tag(name = "Locataire", description = "Gestion des locataires")
+@Tag(name = "ARCHITECT", description = "Gestion des ARCHITECT")
 @RestController
-@RequestMapping(ROUTE_ACTOR_LOCATAIRE)
+@RequestMapping(ROUTE_ACTOR_ARCHITECT)
 @Profile(Mode.DEV)
-class LocataireController(
-    private val service : LocataireService,
+class ArchitectController(
+    private val service : ArchitectService,
     private val authService: AuthService,
     private val typeAccountService: TypeAccountService,
     private val typeCardService: TypeCardService,
     private val userService: UserService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun create(
-        @Valid @RequestBody request: LocataireUser
+    suspend fun createArchitect(
+        @Valid @RequestBody request: ArchitectUser
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         if (request.user.typeAccountId != 4L){
@@ -52,26 +54,26 @@ class LocataireController(
                 phone = phone,
                 city = request.user.city,
                 country = request.user.country,
-                username = "@"+toPascalCase("${request.locataire.firstName} ${request.locataire.lastName}")
+                username = "@"+toPascalCase("${request.architect.firstName} ${request.architect.lastName}")
             )
             val userCreated = authService.register(userSystem)
-            val data = Locataire(
-                firstName = request.locataire.firstName,
-                lastName = request.locataire.lastName,
-                fullName = "${request.locataire.firstName} ${request.locataire.lastName}",
-                address = request.locataire.address,
-                images = request.locataire.images,
-                cardFront = request.locataire.cardFront,
-                cardBack = request.locataire.cardBack,
+            val data = Architect(
+                firstName = request.architect.firstName,
+                lastName = request.architect.lastName,
+                fullName = "${request.architect.firstName} ${request.architect.lastName}",
+                address = request.architect.address,
+                images = request.architect.images,
+                cardFront = request.architect.cardFront,
+                cardBack = request.architect.cardBack,
                 user = userCreated.first,
                 typeCard = null,
-                numberCard = request.locataire.numberCard
+                numberCard = request.architect.numberCard
             )
-            val bailleutCreated = service.createLocataire(data)
+            val created = service.create(data)
             val response = mapOf(
                 "message" to "Votre compte ${userCreated.first?.typeAccount?.name} a été créer avec succès",
                 "user" to userCreated.first,
-                "locataire" to bailleutCreated,
+                "architect" to created,
                 "token" to userCreated.second
             )
             return ResponseEntity.status(201).body(response)
@@ -81,20 +83,20 @@ class LocataireController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllLocataire(): ResponseEntity<Map<String, List<Locataire>>> {
-        val data = service.findAllLocataire()
-        val response = mapOf("locataires" to data)
+    suspend fun getAllArchitect(): ResponseEntity<Map<String, List<Architect>>> {
+        val data = service.findAll()
+        val response = mapOf("architects" to data)
         return ResponseEntity.ok().body(response)
     }
 
-    @Operation(summary = "Modification Locataire")
+    @Operation(summary = "Modification Architect")
     @PutMapping("/{id}")
-    suspend fun updateLocataire(
+    suspend fun updateArchitect(
         @PathVariable("id") id : Long,
-        @RequestBody @Valid locataire: Locataire
-    ) : ResponseEntity<Locataire> {
-        val updated = service.updateLocataire(id,locataire)
-        userService.updateUsername(locataire.user!!.userId,"@"+toPascalCase(locataire.firstName + locataire.lastName))
+        @RequestBody @Valid data: Architect
+    ) : ResponseEntity<Architect> {
+        val updated = service.update(id,data)
+        userService.updateUsername(data.user!!.userId,"@"+toPascalCase(data.firstName + data.lastName))
         return ResponseEntity.ok(updated)
     }
 }

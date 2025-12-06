@@ -1,4 +1,4 @@
-package server.web.casa.app.actor.domain.model
+package server.web.casa.app.actor.domain.model.join.master
 
 import jakarta.validation.constraints.NotNull
 import server.web.casa.app.actor.domain.model.request.CommissionnaireRequest

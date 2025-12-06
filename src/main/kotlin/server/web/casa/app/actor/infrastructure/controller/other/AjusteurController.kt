@@ -1,4 +1,4 @@
-package server.web.casa.app.actor.infrastructure.controller.master
+package server.web.casa.app.actor.infrastructure.controller.other
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -8,9 +8,9 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
-import server.web.casa.app.actor.application.service.master.LocataireService
+import server.web.casa.app.actor.application.service.other.AjusteurService
 import server.web.casa.app.actor.domain.model.*
-import server.web.casa.app.actor.domain.model.join.master.LocataireUser
+import server.web.casa.app.actor.domain.model.join.other.AjusteurUser
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
@@ -18,22 +18,22 @@ import server.web.casa.utils.Mode
 import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 import server.web.casa.utils.toPascalCase
 
-const val ROUTE_ACTOR_LOCATAIRE = ActorRoute.LOCATAIRE
+const val ROUTE_ACTOR_AJUSTEUR = ActorRoute.AJUSTEUR
 
-@Tag(name = "Locataire", description = "Gestion des locataires")
+@Tag(name = "AJUSTEUR", description = "Gestion des AJUSTEUR")
 @RestController
-@RequestMapping(ROUTE_ACTOR_LOCATAIRE)
+@RequestMapping(ROUTE_ACTOR_AJUSTEUR)
 @Profile(Mode.DEV)
-class LocataireController(
-    private val service : LocataireService,
+class AjusteurController(
+    private val service : AjusteurService,
     private val authService: AuthService,
     private val typeAccountService: TypeAccountService,
     private val typeCardService: TypeCardService,
     private val userService: UserService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun create(
-        @Valid @RequestBody request: LocataireUser
+    suspend fun createAjusteur(
+        @Valid @RequestBody request: AjusteurUser
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         if (request.user.typeAccountId != 4L){
@@ -52,26 +52,26 @@ class LocataireController(
                 phone = phone,
                 city = request.user.city,
                 country = request.user.country,
-                username = "@"+toPascalCase("${request.locataire.firstName} ${request.locataire.lastName}")
+                username = "@"+toPascalCase("${request.ajusteur.firstName} ${request.ajusteur.lastName}")
             )
             val userCreated = authService.register(userSystem)
-            val data = Locataire(
-                firstName = request.locataire.firstName,
-                lastName = request.locataire.lastName,
-                fullName = "${request.locataire.firstName} ${request.locataire.lastName}",
-                address = request.locataire.address,
-                images = request.locataire.images,
-                cardFront = request.locataire.cardFront,
-                cardBack = request.locataire.cardBack,
+            val data = Ajusteur(
+                firstName = request.ajusteur.firstName,
+                lastName = request.ajusteur.lastName,
+                fullName = "${request.ajusteur.firstName} ${request.ajusteur.lastName}",
+                address = request.ajusteur.address,
+                images = request.ajusteur.images,
+                cardFront = request.ajusteur.cardFront,
+                cardBack = request.ajusteur.cardBack,
                 user = userCreated.first,
                 typeCard = null,
-                numberCard = request.locataire.numberCard
+                numberCard = request.ajusteur.numberCard
             )
-            val bailleutCreated = service.createLocataire(data)
+            val created = service.create(data)
             val response = mapOf(
                 "message" to "Votre compte ${userCreated.first?.typeAccount?.name} a été créer avec succès",
                 "user" to userCreated.first,
-                "locataire" to bailleutCreated,
+                "ajusteur" to created,
                 "token" to userCreated.second
             )
             return ResponseEntity.status(201).body(response)
@@ -81,20 +81,20 @@ class LocataireController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllLocataire(): ResponseEntity<Map<String, List<Locataire>>> {
-        val data = service.findAllLocataire()
-        val response = mapOf("locataires" to data)
+    suspend fun getAllAjusteur(): ResponseEntity<Map<String, List<Ajusteur>>> {
+        val data = service.findAll()
+        val response = mapOf("ajusteurs" to data)
         return ResponseEntity.ok().body(response)
     }
 
-    @Operation(summary = "Modification Locataire")
+    @Operation(summary = "Modification Ajusteur")
     @PutMapping("/{id}")
-    suspend fun updateLocataire(
+    suspend fun updateAjusteur(
         @PathVariable("id") id : Long,
-        @RequestBody @Valid locataire: Locataire
-    ) : ResponseEntity<Locataire> {
-        val updated = service.updateLocataire(id,locataire)
-        userService.updateUsername(locataire.user!!.userId,"@"+toPascalCase(locataire.firstName + locataire.lastName))
+        @RequestBody @Valid data: Ajusteur
+    ) : ResponseEntity<Ajusteur> {
+        val updated = service.update(id,data)
+        userService.updateUsername(data.user!!.userId,"@"+toPascalCase(data.firstName + data.lastName))
         return ResponseEntity.ok(updated)
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.application.service.master.CommissionnaireService
 import server.web.casa.app.actor.domain.model.*
+import server.web.casa.app.actor.domain.model.join.master.CommissionnaireUser
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
