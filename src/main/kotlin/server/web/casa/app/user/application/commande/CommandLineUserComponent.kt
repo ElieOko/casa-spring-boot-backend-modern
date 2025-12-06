@@ -48,7 +48,7 @@ class CommandLineUserComponent(
                 TypeAccountEntity(name = "bailleur"),//3
                 TypeAccountEntity(name = "locataire"),//4
                 TypeAccountEntity(name = "majordome"),//5
-                TypeAccountEntity(name = "plombier"),//6
+                TypeAccountEntity(name = "demenagement"),//6
                 TypeAccountEntity(name = "electricien"),//7
                 TypeAccountEntity(name = "salubrité"),//8
                 TypeAccountEntity(name = "peintre"),//9
@@ -58,6 +58,7 @@ class CommandLineUserComponent(
                 TypeAccountEntity(name = "ajusteur"),//13
                 TypeAccountEntity(name = "architect"),//14
                 TypeAccountEntity(name = "chauffeur"),//15
+                TypeAccountEntity(name = "plombier"),//16
             )
         )
         log.info("Enregistrement réussi avec succès")
