@@ -21,6 +21,12 @@ class AjusteurEntity(
     val address : String? = "",
     @Column("images", nullable = true)
     val images : String? = null,
+    @Column("cardFront", nullable = true)
+    val cardFront : String?,
+    @Column("cardBack", nullable = true)
+    val cardBack : String? = null,
+    @Column("numberCard", nullable = true)
+    val numberCard : String? = null,
     @ManyToOne
     @JoinColumn(name = "userId")
     val user : UserEntity?,
