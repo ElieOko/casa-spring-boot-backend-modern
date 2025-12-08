@@ -11,6 +11,7 @@ import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.application.service.other.FrigoristeService
 import server.web.casa.app.actor.domain.model.*
 import server.web.casa.app.actor.domain.model.join.other.ElectricienUser
+import server.web.casa.app.actor.domain.model.join.other.FrigoristeUser
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.route.actor.ActorRoute
@@ -33,11 +34,11 @@ class FrigoristeController(
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFrigoriste(
-        @Valid @RequestBody request: ElectricienUser
+        @Valid @RequestBody request: FrigoristeUser
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         if (request.user.typeAccountId != 12L){
-            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte ELECTRICIEN")
+            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte le service Frigoriste")
             return ResponseEntity.badRequest().body(response)
         }
         val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(
@@ -52,20 +53,20 @@ class FrigoristeController(
                 phone = phone,
                 city = request.user.city,
                 country = request.user.country,
-                username = "@"+toPascalCase("${request.electricien.firstName} ${request.electricien.lastName}")
+                username = "@"+toPascalCase("${request.frigoriste.firstName} ${request.frigoriste.lastName}")
             )
             val userCreated = authService.register(userSystem)
             val data = Frigoriste(
-                firstName = request.electricien.firstName,
-                lastName = request.electricien.lastName,
-                fullName = "${request.electricien.firstName} ${request.electricien.lastName}",
-                address = request.electricien.address,
-                images = request.electricien.images,
-                cardFront = request.electricien.cardFront,
-                cardBack = request.electricien.cardBack,
+                firstName = request.frigoriste.firstName,
+                lastName = request.frigoriste.lastName,
+                fullName = "${request.frigoriste.firstName} ${request.frigoriste.lastName}",
+                address = request.frigoriste.address,
+                images = request.frigoriste.images,
+                cardFront = request.frigoriste.cardFront,
+                cardBack = request.frigoriste.cardBack,
                 user = userCreated.first,
                 typeCard = null,
-                numberCard = request.electricien.numberCard
+                numberCard = request.frigoriste.numberCard
             )
             val created = service.create(data)
             val response = mapOf(
