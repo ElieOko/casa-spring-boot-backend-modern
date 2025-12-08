@@ -55,6 +55,7 @@ class JwtAuthFilter(
             "/api/electriciens",
             "/api/carreleurs",
             "/api/frigoristes",
+            "/api/peintres",
             "/api/districts",
             "/api/quartiers",
             "/auth/login",
