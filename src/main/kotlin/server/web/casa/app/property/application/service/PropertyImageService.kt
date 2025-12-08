@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImage
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -12,7 +12,6 @@ import server.web.casa.utils.gcs.GcsService
 @Service
 class PropertyImageService(
     private val repository: PropertyImageRepository,
-    private val mapper : PropertyMapper,
     private val gcsService: GcsService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -25,7 +24,7 @@ class PropertyImageService(
         p.path = imageUri!!
         p.name = file.name
         val data = PropertyImageEntity(
-            property =mapper.toEntity(p.property!!),
+            property = p.property!!.toEntity(),
             name = p.name,
             path = p.path
         )

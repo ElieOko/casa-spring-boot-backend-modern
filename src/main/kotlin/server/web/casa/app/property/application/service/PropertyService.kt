@@ -1,29 +1,25 @@
 package server.web.casa.app.property.application.service
 
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
-import org.springframework.data.util.Streamable
+import org.springframework.data.domain.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
+import server.web.casa.app.property.infrastructure.persistence.mapper.*
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 
 @Service
 class PropertyService(
     private val repository: PropertyRepository,
-    private val mapper : PropertyMapper
+
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     suspend fun create(p : Property): Property {
-        val data = mapper.toEntity(p)
+        val data = p.toEntity()
         val result = repository.save(data)
-        return mapper.toDomain(result)
+        return result.toDomain()
     }
     suspend fun getAll(
         page : Int,
@@ -34,20 +30,20 @@ class PropertyService(
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
         val pageable = PageRequest.of(page,repository.findAll().size,sort)
         val page = repository.findAll(pageable)
-        val data = page.map { mapper.toDomain(it) }
+        val data = page.map { it.toDomain() }
         return data
     }
 
     suspend fun getAllPropertyByUser(userId : Long) : List<Property> {
         val data = repository.findAll().filter { it.user?.userId == userId }
-        return data.map { mapper.toDomain(it) }
+        return data.map { it.toDomain() }
     }
 
     suspend fun findByIdProperty(id: Long): Pair<Property, List<Property>> {
         val property = repository.findById(id).orElseThrow {
                 ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
             }
-        val data = mapper.toDomain(property)
+        val data = property.toDomain()
         //|| (it.propertyType == data.propertyType)
         var similary = repository.findAll()
             .filter { it.cityValue == data.cityValue }
@@ -68,7 +64,7 @@ class PropertyService(
 //                }
         }
 
-        val key = Pair(data,similary.map{mapper.toDomain(it)})
+        val key = Pair(data,similary.map{it.toDomain()})
         return key
     }
     suspend fun filterProduct(
@@ -90,7 +86,7 @@ class PropertyService(
             room = filterModel.room,
             pageable = pageable
         )
-        return data.map { mapper.toDomain(it) }
+        return data.map { it.toDomain() }
     }
 }
 

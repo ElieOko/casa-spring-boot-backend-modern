@@ -3,8 +3,7 @@ package server.web.casa.app.property.application.service
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImageKitchen
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageKitchenEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyImageKitchenMapper
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageKitchenRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -12,7 +11,6 @@ import server.web.casa.utils.gcs.GcsService
 @Service
 class PropertyImageKitchenService(
     private val repository: PropertyImageKitchenRepository,
-    private val mapper : PropertyMapper,
     private val gcsService: GcsService
 ) {
     suspend fun create(p : PropertyImageKitchen): PropertyImageKitchenEntity {
@@ -21,7 +19,7 @@ class PropertyImageKitchenService(
         p.path = imageUri!!
         p.name = file.name
         val data = PropertyImageKitchenEntity(
-            propertyKitchen =mapper.toEntity(p.property!!),
+            propertyKitchen = p.property!!.toEntity(),
             name = p.name,
             path = p.path
         )

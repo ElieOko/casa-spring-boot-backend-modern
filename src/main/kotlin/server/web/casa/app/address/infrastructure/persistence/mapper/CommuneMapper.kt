@@ -1,46 +1,19 @@
 package server.web.casa.app.address.infrastructure.persistence.mapper
 
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Component
 import server.web.casa.app.address.domain.model.Commune
 import server.web.casa.app.address.infrastructure.persistence.entity.CommuneEntity
-import server.web.casa.utils.Mode
 
-@Component
-@Profile(Mode.DEV)
-class CommuneMapper(
-    val districtMapper: DistrictMapper,
-    val quartierMapper: QuartierMapper
-) {
-    fun toDomain(communeEntity: CommuneEntity?) : Commune?{
-        return if (communeEntity != null){
-            Commune(
-                communeId = communeEntity.communeId,
-                name = communeEntity.name
-            )
-        }
-        else{
-            null
-        }
-    }
-    fun toDomainOrigin(communeEntity: CommuneEntity) : Commune{
-        return Commune(
-            communeId = communeEntity.communeId,
-            quartiers = communeEntity.quartier.map { quartierMapper.toDomain(it) }.toList(),
-            district = districtMapper.toDomain(communeEntity.district),
-            name = communeEntity.name
-        )
-    }
+fun CommuneEntity.toDomain() = Commune( communeId = this.communeId, name = this.name)
 
-    fun toEntity(commune: Commune?) : CommuneEntity?{
-        return if (commune != null){
-            CommuneEntity(
-                communeId = commune.communeId,
-                district = districtMapper.toEntity(commune.district),
-                name = commune.name
-            )
-        } else{
-            null
-        }
-    }
-}
+fun CommuneEntity.toDomainOrigin() = Commune(
+    communeId = this.communeId,
+    quartiers = this.quartier.map { it.toDomain() }.toList(),
+    district = this.district?.toDomain(),
+    name = this.name
+)
+
+fun Commune.toEntity() = CommuneEntity(
+    communeId = this.communeId,
+    district = this.district?.toEntity(),
+    name = this.name
+)

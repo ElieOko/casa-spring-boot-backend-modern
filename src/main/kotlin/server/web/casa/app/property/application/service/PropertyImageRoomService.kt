@@ -3,8 +3,7 @@ package server.web.casa.app.property.application.service
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImageRoom
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageRoomEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyImageRoomMapper
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageRoomRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -12,7 +11,6 @@ import server.web.casa.utils.gcs.GcsService
 @Service
 class PropertyImageRoomService(
     private val repository: PropertyImageRoomRepository,
-    private val mapper : PropertyMapper,
     private val gcsService: GcsService
 ) {
     suspend fun create(p : PropertyImageRoom): PropertyImageRoomEntity {
@@ -21,7 +19,7 @@ class PropertyImageRoomService(
         p.path = imageUri!!
         p.name = file.name
         val data = PropertyImageRoomEntity(
-            propertyRoom = mapper.toEntity(p.property!!),
+            propertyRoom = p.property!!.toEntity(),
             name = p.name,
             path = p.path
         )

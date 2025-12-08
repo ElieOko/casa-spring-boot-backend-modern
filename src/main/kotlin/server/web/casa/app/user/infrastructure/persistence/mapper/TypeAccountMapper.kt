@@ -1,22 +1,20 @@
 package server.web.casa.app.user.infrastructure.persistence.mapper
 
-import org.springframework.stereotype.Component
 import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 
-@Component
-class TypeAccountMapper(
-) {
-    fun toDomain(typeAccountEntity: TypeAccountEntity) : TypeAccount{
-        return TypeAccount(
-            typeAccountId = typeAccountEntity.typeAccountId,
-            name = typeAccountEntity.name,
-        )
-    }
-    fun toEntity(typeAccount: TypeAccount? = null): TypeAccountEntity{
-        return TypeAccountEntity(
-            typeAccountId = typeAccount!!.typeAccountId,
-            name = typeAccount.name
-        )
-    }
+fun TypeAccountEntity.toDomain(): TypeAccount {
+    val e = this
+    return TypeAccount(
+        typeAccountId = e.typeAccountId,
+        name = e.name,
+    )
+}
+
+fun TypeAccount.toEntity(): TypeAccountEntity {
+    val e = this
+    return TypeAccountEntity(
+        typeAccountId = e.typeAccountId,
+        name = e.name
+    )
 }

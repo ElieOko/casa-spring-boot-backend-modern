@@ -2,17 +2,15 @@ package server.web.casa.app.user.application.service
 
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
-import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserRequestChange
-import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
+import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.Mode
 import kotlin.time.ExperimentalTime
 
@@ -21,15 +19,13 @@ import kotlin.time.ExperimentalTime
 class UserService(
     private val repository: UserRepository,
     private val service: TypeAccountService,
-    private val mapper: UserMapper,
-    private val mapperAccount: TypeAccountMapper,
 ) {
     val name = "utilisateur"
     @OptIn(ExperimentalTime::class)
     suspend fun createUser(user: User) : UserDto? {
         val entityToSave = UserEntity(
             password = user.password,
-            typeAccount = mapperAccount.toEntity(user.typeAccount) ,
+            typeAccount = user.typeAccount!!.toEntity() ,
             email = user.email,
             phone = user.phone,
             username = user.username,
@@ -37,29 +33,29 @@ class UserService(
             country = user.country
         )
         val savedEntity = repository.save(entityToSave)
-        return mapper.toDomain(savedEntity)
+        return savedEntity.toDomain()
     }
 
     suspend fun findAllUser() : List<UserDto?> {
         val allEntityUser = repository.findAll()
         return allEntityUser.map {
-            mapper.toDomain(it)
+            it.toDomain()
         }.toList()
     }
 
-    suspend fun findIdUser(id : Long) : UserDto?{
+    suspend fun findIdUser(id : Long) : UserDto? {
         val userEntity = repository.findById(id).orElse(null)
-        return mapper.toDomain(userEntity)
+        return userEntity.toDomain()
 //        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
 
     }
     fun findUsernameOrEmail(identifier : String): UserDto? {
-        return mapper.toDomain( repository.findByPhoneOrEmail(identifier))
+        return  repository.findByPhoneOrEmail(identifier)?.toDomain()
     }
 
-    fun findId(id : Long) : UserDto?{
+    fun findId(id : Long) : UserDto? {
         val userEntity = repository.findById(id).orElse(null)
-        return mapper.toDomain(userEntity)
+        return userEntity.toDomain()
     }
 
 
@@ -72,7 +68,7 @@ class UserService(
       if (userState.email == user.email) {
           userState.city = user.city
           val updatedUser = repository.save(userState)
-          return mapper.toDomain(updatedUser)
+          return updatedUser.toDomain()
       }
       else{
           val state = repository.findByPhoneOrEmail(user.email)
@@ -82,7 +78,7 @@ class UserService(
           userState.email = user.email
           userState.city = user.city
           val updatedUser = repository.save(userState)
-          return mapper.toDomain(updatedUser)
+          return updatedUser.toDomain()
       }
     }
 
@@ -94,7 +90,7 @@ class UserService(
         val userState =  repository.findById(id).orElse(null)
         userState.username = username
         val updatedUser = repository.save(userState)
-        return mapper.toDomain(updatedUser)
+        return updatedUser.toDomain()
     }
 
     suspend fun deleteUser(id : Long) : Boolean{
