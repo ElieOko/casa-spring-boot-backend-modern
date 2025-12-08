@@ -56,6 +56,7 @@ class PropertyEntity(
     val city : CityEntity?,
     @Column(name = "postalCode", nullable = true)
     val postalCode : String? = "",
+    @ManyToOne
     @JoinColumn("commune_id", nullable = true)
     val commune : CommuneEntity?,
     @ManyToOne
