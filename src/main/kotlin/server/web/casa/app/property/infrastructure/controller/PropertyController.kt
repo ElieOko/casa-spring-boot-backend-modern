@@ -2,6 +2,7 @@ package server.web.casa.app.property.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -39,7 +40,8 @@ class PropertyController(
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createProperty(
-        @Valid @RequestBody request: PropertyRequest
+        @Valid @RequestBody request: PropertyRequest,
+        requestHttp: HttpServletRequest
     ): ResponseEntity<out Map<String, Any>> {
 //       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
        val imageList = request.propertyImage
@@ -51,7 +53,8 @@ class PropertyController(
        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
        val commune = communeService.findByIdCommune(request.communeId)
        val quartier =  quartierService.findByIdQuartier(request.quartierId)
-
+       val isProd = true
+       val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
         if (user != null && propertyType != null && imageList.isNotEmpty()){
             val property = Property(
                 title = request.title,
@@ -92,15 +95,16 @@ class PropertyController(
                      propertyImageService.create(PropertyImage(
                         property = propertyInstance.first,
                         name = it?.image!!
-                    ))
+                    ),baseUrl)
                 }
             }
             if (imageRoom.isNotEmpty()){
+
                 imageRoom.map {
                     propertyImageRoomService.create(PropertyImageRoom(
                         property = propertyInstance.first,
                         name = it?.image!!
-                    ))
+                    ),baseUrl)
                 }
             }
 
@@ -109,7 +113,7 @@ class PropertyController(
                     val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
                         property = propertyInstance.first,
                         name = it?.image!!
-                    ))
+                    ),baseUrl)
                     log.info("test => ***${result}***")
                 }
             }
@@ -119,7 +123,7 @@ class PropertyController(
                     propertyImageKitchenService.create(PropertyImageKitchen(
                         property = propertyInstance.first,
                         name = it?.image!!
-                    ))
+                    ),baseUrl)
                 }
             }
             val response = mapOf(
