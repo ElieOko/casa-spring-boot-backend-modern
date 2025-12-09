@@ -51,15 +51,15 @@ class PropertyEntity(
     val cityValue: String? = "",
     @Column(name = "countryValue", nullable = true)
     val countryValue: String? = "",
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("city_id", nullable = true)
     val city : CityEntity?,
     @Column(name = "postalCode", nullable = true)
     val postalCode : String? = "",
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("commune_id", nullable = true)
     val commune : CommuneEntity?,
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("quartier_id", nullable = true)
     val quartier : QuartierEntity?,
     @Column(name = "sold")
@@ -68,10 +68,10 @@ class PropertyEntity(
     val transactionType : String,
     @Column(name = "guarantee")
     val guarantee : String = "",
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("property_type_id")
     val propertyType : PropertyTypeEntity,
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
     @JoinColumn("user_id")
     val user : UserEntity?,
     @Column(name = "latitude", nullable = true)

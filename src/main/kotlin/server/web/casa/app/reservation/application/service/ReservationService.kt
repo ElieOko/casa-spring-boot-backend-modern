@@ -1,14 +1,12 @@
 package server.web.casa.app.reservation.application.service
 
 import jakarta.transaction.Transactional
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.domain.model.Reservation
 import server.web.casa.app.reservation.domain.model.ReservationStatus
-import server.web.casa.app.reservation.infrastructure.persistence.mapper.ReservationMapper
+import server.web.casa.app.reservation.infrastructure.persistence.mapper.*
 import server.web.casa.app.reservation.infrastructure.persistence.repository.ReservationRepository
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.utils.Mode
@@ -17,53 +15,52 @@ import java.time.LocalDate
 @Service
 @Profile(Mode.DEV)
 class ReservationService(
-    private val mapperR: ReservationMapper,
     private val repoR: ReservationRepository
 ) {
      fun createReservation(reservation: Reservation): Reservation {
-        val data = mapperR.toEntity(reservation)
+        val data = reservation.toEntity()
         val result = repoR.save(data)
-        return mapperR.toDomain(result)
+        return result.toDomain()
     }
 
      fun findAllReservation() : List<Reservation> {
-        return repoR.findAll().map { mapperR.toDomain(it) }.toList()
+        return repoR.findAll().map { it.toDomain() }.toList()
     }
 
      fun findId(id: Long): Reservation? {
          val reservation = repoR.findById(id).orElse(null)
-         return reservation?.let { mapperR.toDomain(it) }
+         return reservation?.let { it.toDomain() }
          //return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
 
      fun findByProperty(property: PropertyEntity): List<Reservation>? {
         return repoR.findByProperty(property)?.map {
-            mapperR.toDomain(it)
+            it.toDomain()
         }?.toList()
     }
      fun findByUser(user: UserEntity): List<Reservation>?{
-        return repoR.findByUser(user).let {list-> list?.map{mapperR.toDomain(it)}?.toList() ?: emptyList() }
+        return repoR.findByUser(user).let {list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
     }
      fun findByStatus(status: ReservationStatus): List<Reservation>{
-        return repoR.findAllByStatus(status).let {list-> list?.map{ mapperR.toDomain(it) }?.toList() ?: emptyList() }
+        return repoR.findAllByStatus(status).let {list-> list?.map{ it.toDomain() }?.toList() ?: emptyList() }
     }
      fun findByMonth(month: Int, year: Int): List<Reservation>{
-        return repoR.findAllByMonthAndYear(month, year).let { list-> list?.map{ mapperR.toDomain(it) }?.toList() ?: emptyList() }
+        return repoR.findAllByMonthAndYear(month, year).let { list-> list?.map{ it.toDomain() }?.toList() ?: emptyList() }
     }
      fun findByPYear(year : Int) : List<Reservation>{
-      return repoR.findAllByYear( year)?.map{ mapperR.toDomain(it) }?.toList() ?: emptyList()
+      return repoR.findAllByYear( year)?.map{ it.toDomain() }?.toList() ?: emptyList()
     }
      fun findByDate(inputDate: LocalDate): List<Reservation> {
-        return repoR.findAllByDate(inputDate).map{ mapperR.toDomain(it) }.toList()
+        return repoR.findAllByDate(inputDate).map{ it.toDomain() }.toList()
     }
      fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
-      return repoR.findAllInInterval(starDate, endDate)?.map { mapperR.toDomain(it) }?.toList()
+      return repoR.findAllInInterval(starDate, endDate)?.map { it.toDomain() }?.toList()
     }
     fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, property: PropertyEntity): List<Reservation>? {
-        return repoR.findByStartDateAndEndDateProperty(starDate, endDate, property)?.map { mapperR.toDomain(it) }?.toList()
+        return repoR.findByStartDateAndEndDateProperty(starDate, endDate, property)?.map { it.toDomain() }?.toList()
     }
     fun findByUserProperty(property: PropertyEntity , user: UserEntity): List<Reservation>? {
-        return repoR.findByUserProperty(property, user)?.map { mapperR.toDomain(it) }?.toList()
+        return repoR.findByUserProperty(property, user)?.map { it.toDomain() }?.toList()
     }
         //update
         @Transactional

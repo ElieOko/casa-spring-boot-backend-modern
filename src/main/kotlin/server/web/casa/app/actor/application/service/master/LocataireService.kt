@@ -5,27 +5,21 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Locataire
 import server.web.casa.app.actor.infrastructure.persistence.entity.master.LocataireEntity
 import server.web.casa.app.actor.infrastructure.persistence.mapper.*
-import server.web.casa.app.actor.infrastructure.persistence.mapper.master.LocataireMapper
+import server.web.casa.app.actor.infrastructure.persistence.mapper.master.*
 import server.web.casa.app.actor.infrastructure.persistence.repository.LocataireRepository
-import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
+import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.Mode
 
 @Service
 @Profile(Mode.DEV)
-class LocataireService(
-    private val repository: LocataireRepository,
-    private val mapper: LocataireMapper,
-    private val userMapper: UserMapper,
-    private val cardMapper: TypeCardMapper
-) {
+class LocataireService(private val repository: LocataireRepository) {
     suspend fun createLocataire(locataire: Locataire): Locataire {
-        val data = mapper.toEntity(locataire)
+        val data = locataire.toEntity()
         val result = repository.save(data)
-        return mapper.toDomain(result)
+        return result.toDomain()
     }
-
     suspend fun findAllLocataire() : List<Locataire> {
-        return repository.findAll().map { mapper.toDomain(it) }.toList()
+        return repository.findAll().map { it.toDomain() }.toList()
     }
     suspend fun updateLocataire(id : Long, l: Locataire): Locataire {
         repository.findById(id).let{
@@ -38,12 +32,12 @@ class LocataireService(
                 images = l.images,
                 cardFront = l.cardFront,
                 cardBack = l.cardBack,
-                user = userMapper.toEntityToDto(l.user),
-                typeCard = cardMapper.toEntity( l.typeCard),
+                user = l.user?.toEntityToDto(),
+                typeCard =  l.typeCard?.toEntity(),
                 numberCard = l.numberCard,
             )
             val updated = repository.save(entityToUpdate)
-            return mapper.toDomain(updated)
+            return updated.toDomain()
         }
     }
 }

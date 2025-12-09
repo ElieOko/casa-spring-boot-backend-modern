@@ -11,10 +11,9 @@ import server.web.casa.app.notification.domain.model.request.NotificationReserva
 import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.reservation.application.service.ReservationService
-import server.web.casa.app.reservation.domain.model.Reservation
-import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.domain.model.*
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
-import server.web.casa.app.reservation.infrastructure.persistence.mapper.ReservationMapper
+import server.web.casa.app.reservation.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.route.reservation.ReservationRoute
@@ -36,8 +35,7 @@ class ReservationController(
     private val propertyService: PropertyService,
     private val propertyR: PropertyRepository,
     private val userR: UserRepository,
-    private val notif: NotificationReservationService,
-    private val mapperR: ReservationMapper
+    private val notif: NotificationReservationService
 ){
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -118,7 +116,7 @@ class ReservationController(
         val reservationCreate = service.createReservation(dataReservation)
         val notification = notif.create(
             NotificationReservation(
-                reservation = mapperR.toEntity(reservationCreate),
+                reservation = reservationCreate.toEntity(),
                 guestUser = userEntity,
                 hostUser = propertyEntity.user!!
             )

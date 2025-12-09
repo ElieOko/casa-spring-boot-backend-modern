@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Profile
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.*
 import server.web.casa.app.user.infrastructure.persistence.repository.*
-import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
 import server.web.casa.security.*
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -13,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import server.web.casa.adaptater.provide.twilio.TwilioService
 import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.domain.model.request.VerifyRequest
-import server.web.casa.app.user.infrastructure.persistence.mapper.TypeAccountMapper
+import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.*
 import java.security.MessageDigest
 import java.time.Instant
@@ -27,8 +26,6 @@ class AuthService(
     private val jwtService: JwtService,
     private val userRepository: UserRepository,
     private val hashEncoder: HashEncoder,
-    private val mapper: UserMapper,
-    private val mapperAccount: TypeAccountMapper,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val twilio : TwilioService
 ) {
@@ -57,7 +54,7 @@ class AuthService(
         val entity = UserEntity(
             userId = 0,
             password = hashEncoder.encode(user.password),
-            typeAccount = mapperAccount.toEntity(user.typeAccount) ,
+            typeAccount = user.typeAccount!!.toEntity(),
             email = user.email,
             username = user.username,
             phone = phone,
@@ -66,7 +63,7 @@ class AuthService(
         )
         val savedEntity = userRepository.save(entity)
         val newAccessToken = jwtService.generateAccessToken(savedEntity.userId.toHexString())
-        val userData : UserDto? = mapper.toDomain(savedEntity)
+        val userData : UserDto = savedEntity.toDomain()
         val result = Pair(userData,newAccessToken)
         return result
     }
@@ -93,7 +90,7 @@ class AuthService(
                 accessToken = newAccessToken,
                 refreshToken = newRefreshToken
             )
-            ,mapper.toDomain(user))
+            ,user.toDomain())
         return result
     }
 
@@ -117,7 +114,7 @@ class AuthService(
         val data = userRepository.findById(id).orElse(null)
         data.password = hashEncoder.encode(new)
         val updatedUser = userRepository.save(data)
-        return mapper.toDomain(updatedUser)
+        return updatedUser.toDomain()
     }
 
     @Transactional

@@ -1,32 +1,20 @@
 package server.web.casa.app.property.infrastructure.persistence.mapper
 
-import org.springframework.stereotype.Component
 import server.web.casa.app.property.domain.model.Favorite
 import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
-import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
+import server.web.casa.app.user.infrastructure.persistence.mapper.toDomain
+import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 
+fun FavoriteEntity.toDomain() =  Favorite(
+    favoriteId = this.favoriteId,
+    user = this.user.toDomain(),
+    property = this.property!!.toDomain(),
+    createdAt = this.createdAt
+)
 
-@Component
-class FavoriteMapper(
-        private val userMapper : UserMapper,
-        private  val featureM : FeatureMapper,
-        private val propertyMapper: PropertyMapper
-    ){
-        fun toDomain(f : FavoriteEntity): Favorite {
-        return Favorite(
-            favoriteId = f.favoriteId,
-            user = userMapper.toDomain(f.user),
-            property = propertyMapper.toDomain(f.property!!),
-            createdAt = f.createdAt,
-        )
-    }
-
-    fun toEntity(f : Favorite): FavoriteEntity {
-        return FavoriteEntity(
-            favoriteId = f.favoriteId,
-            user = userMapper.toEntityToDto(f.user)!!,
-            property = propertyMapper.toEntity(f.property!!),
-            createdAt = f.createdAt
-        )
-    }
-}
+fun Favorite.toEntity() = FavoriteEntity(
+    favoriteId = this.favoriteId,
+    user = this.user!!.toEntityToDto(),
+    property = this.property!!.toEntity(),
+    createdAt = this.createdAt
+)

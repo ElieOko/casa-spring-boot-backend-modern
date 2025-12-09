@@ -37,7 +37,7 @@ class DemenagementController(
     ): ResponseEntity<Map<String, Any?>> {
         val typeAccount = typeAccountService.findByIdTypeAccount(request.user.typeAccountId)
         if (request.user.typeAccountId != 6L){
-            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte Locataire")
+            val response = mapOf("error" to "ce type n'est pas prise en charger pour compte pour le service Démenagement")
             return ResponseEntity.badRequest().body(response)
         }
         val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(

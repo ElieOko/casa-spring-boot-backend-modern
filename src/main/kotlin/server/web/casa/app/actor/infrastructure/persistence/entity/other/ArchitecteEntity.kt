@@ -10,7 +10,7 @@ class ArchitecteEntity(
     @Id
     @Column("id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val architecteId : Long,
+    val architectId : Long,
     @Column("firstName")
     val firstName : String,
     @Column("lastName")

@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import server.web.casa.exception.*
 import server.web.casa.security.JwtAuthFilter
 import server.web.casa.utils.Mode
@@ -19,7 +21,7 @@ class ServerConfig(
     private val customAuthEntryPoint: CustomAuthEntryPoint,
     private val  customAccessDeniedHandler: CustomAccessDeniedHandler,
     private val jwtAuthFilter: JwtAuthFilter
-) {
+) : WebMvcConfigurer {
     private val log = LoggerFactory.getLogger(this::class.java)
     @PostConstruct
     fun init() {
@@ -39,5 +41,17 @@ class ServerConfig(
           .httpBasic { it.disable() }
           .formLogin { it.disable() }
             .build()
+    }
+
+    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+        registry.addResourceHandler("/property/**")
+            .addResourceLocations(
+                "file:casa/property/",
+//                "file:casa/property/bedroom/",
+//                "file:casa/property/room/",
+//                "file:casa/property/kitchen/",
+//                "file:casa/profil/",
+//                "file:casa/realisation/",
+            )
     }
 }

@@ -3,28 +3,21 @@ package server.web.casa.app.address.application.service
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.City
-import server.web.casa.app.address.infrastructure.persistence.entity.CityEntity
-import server.web.casa.app.address.infrastructure.persistence.mapper.CityMapper
+import server.web.casa.app.address.infrastructure.persistence.mapper.*
 import server.web.casa.app.address.infrastructure.persistence.repository.CityRepository
 import server.web.casa.utils.Mode
 
 @Service
 @Profile(Mode.DEV)
 class CityService(
-    private val repository: CityRepository,
-    private val mapper: CityMapper
+    private val repository: CityRepository
 ) {
     suspend fun saveCity(data: City): City? {
-        val data = mapper.toEntity(data)
-        val result = repository.save(data as CityEntity)
-        return mapper.toDomain(result)
+        val data = data.toEntity()
+        val result = repository.save(data)
+        return result.toDomain()
     }
-    suspend  fun findAllCity() : List<City?>{
-        return repository.findAll().map { mapper.toDomain(it) }.toList()
-    }
-    suspend fun findByIdCity(id : Long) : City? {
-        return repository.findById(id).let{
-            mapper.toDomain(it.orElse(null))
-        }
-    }
+    suspend  fun findAllCity() : List<City?> = repository.findAll().map { it.toDomain() }.toList()
+
+    suspend fun findByIdCity(id : Long) : City?  = repository.findById(id).orElse(null).toDomain()
 }

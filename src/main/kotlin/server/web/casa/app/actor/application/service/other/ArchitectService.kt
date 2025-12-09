@@ -5,31 +5,26 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Architect
 import server.web.casa.app.actor.infrastructure.persistence.entity.other.ArchitecteEntity
 import server.web.casa.app.actor.infrastructure.persistence.mapper.*
-import server.web.casa.app.actor.infrastructure.persistence.mapper.other.ArchitectMapper
+import server.web.casa.app.actor.infrastructure.persistence.mapper.other.*
 import server.web.casa.app.actor.infrastructure.persistence.repository.ArchitectRepository
-import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
+import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 import server.web.casa.utils.Mode
 
 @Service
 @Profile(Mode.DEV)
-class ArchitectService(
-    private val repository: ArchitectRepository,
-    private val mapper: ArchitectMapper,
-    private val userMapper: UserMapper,
-    private val cardMapper: TypeCardMapper
-) {
+class ArchitectService(private val repository: ArchitectRepository) {
     suspend fun create(m: Architect): Architect {
-        val data = mapper.toEntity(m)
+        val data = m.toEntity()
         val result = repository.save(data)
-        return mapper.toDomain(result)
+        return result.toDomain()
     }
     suspend fun findAll() : List<Architect> {
-        return repository.findAll().map { mapper.toDomain(it) }.toList()
+        return repository.findAll().map { it.toDomain() }.toList()
     }
     suspend fun update(id : Long, l: Architect): Architect {
         repository.findById(id).let{
             val entityToUpdate = ArchitecteEntity(
-                architecteId = id,
+                architectId = id,
                 firstName = l.firstName,
                 lastName = l.lastName,
                 fullName = l.fullName,
@@ -37,12 +32,12 @@ class ArchitectService(
                 images = l.images,
                 cardFront = l.cardFront,
                 cardBack = l.cardBack,
-                user = userMapper.toEntityToDto(l.user),
-                typeCard = cardMapper.toEntity(l.typeCard),
-                numberCard = l.numberCard,
+                user = l.user?.toEntityToDto(),
+                typeCard = l.typeCard?.toEntity(),
+                numberCard = l.numberCard
             )
             val updated = repository.save(entityToUpdate)
-            return mapper.toDomain(updated)
+            return updated.toDomain()
         }
     }
 }

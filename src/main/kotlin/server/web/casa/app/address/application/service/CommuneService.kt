@@ -2,27 +2,19 @@ package server.web.casa.app.address.application.service
 
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.Commune
-import server.web.casa.app.address.infrastructure.persistence.entity.CommuneEntity
-import server.web.casa.app.address.infrastructure.persistence.mapper.CommuneMapper
+import server.web.casa.app.address.infrastructure.persistence.mapper.*
 import server.web.casa.app.address.infrastructure.persistence.repository.CommuneRepository
 
 @Service
 class CommuneService(
-    private val repository: CommuneRepository,
-    private val mapper : CommuneMapper
+    private val repository: CommuneRepository
 ) {
     suspend fun saveCommune(data: Commune): Commune? {
-        val data = mapper.toEntity(data)
-        val result = repository.save(data as CommuneEntity)
-        return mapper.toDomain(result)
+        val data = data.toEntity()
+        val result = repository.save(data)
+        return result.toDomain()
     }
+    suspend fun findAllCommune() = repository.findAll().map { it.toDomainOrigin() }.toList()
 
-    suspend fun findAllCommune() : List<Commune>{
-        return repository.findAll().map { mapper.toDomainOrigin(it) }.toList()
-    }
-
-    suspend fun findByIdCommune(id : Long): Commune? {
-        repository.findById(id).let{ return mapper.toDomain(it.orElse(null)) }
-
-    }
+    suspend fun findByIdCommune(id : Long) = repository.findById(id).orElse(null).toDomain()
 }

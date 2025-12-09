@@ -4,28 +4,23 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.actor.domain.model.Commissionnaire
 import server.web.casa.app.actor.infrastructure.persistence.entity.master.CommissionnaireEntity
+import server.web.casa.app.actor.infrastructure.persistence.mapper.master.*
 import server.web.casa.app.actor.infrastructure.persistence.mapper.*
-import server.web.casa.app.actor.infrastructure.persistence.mapper.master.CommissionnaireMapper
 import server.web.casa.app.actor.infrastructure.persistence.repository.CommissionnaireRepository
-import server.web.casa.app.user.infrastructure.persistence.mapper.UserMapper
+import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.Mode
 
 @Service
 @Profile(Mode.DEV)
-class CommissionnaireService(
-    private val repository: CommissionnaireRepository,
-    private val mapper: CommissionnaireMapper,
-    private val userMapper: UserMapper,
-    private val cardMapper: TypeCardMapper
-) {
+class CommissionnaireService(private val repository: CommissionnaireRepository) {
     suspend fun createCommissionnaire(commissionnaire: Commissionnaire): Commissionnaire {
-        val data = mapper.toEntity(commissionnaire)
+        val data = commissionnaire.toEntity()
         val result = repository.save(data)
-        return mapper.toDomain(result)
+        return result.toDomain()
     }
 
     suspend fun findAllCommissionnaire() : List<Commissionnaire> {
-        return repository.findAll().map { mapper.toDomain(it) }.toList()
+        return repository.findAll().map { it.toDomain() }.toList()
     }
 
     suspend fun updateCommissionnaire(id : Long, c: Commissionnaire): Commissionnaire {
@@ -39,12 +34,12 @@ class CommissionnaireService(
                 images = c.images,
                 cardFront =c.cardFront,
                 cardBack = c.cardBack,
-                user = userMapper.toEntityToDto(c.user),
-                typeCard = cardMapper.toEntity( c.typeCard),
+                user = c.user?.toEntityToDto(),
+                typeCard = c.typeCard?.toEntity(),
                 numberCard = c.numberCard,
             )
             val updated = repository.save(entityToUpdate)
-            return mapper.toDomain(updated)
+            return updated.toDomain()
         }
     }
 }

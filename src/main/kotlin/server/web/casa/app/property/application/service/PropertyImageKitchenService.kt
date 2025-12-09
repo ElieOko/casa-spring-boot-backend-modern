@@ -3,27 +3,28 @@ package server.web.casa.app.property.application.service
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImageKitchen
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageKitchenEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyImageKitchenMapper
-import server.web.casa.app.property.infrastructure.persistence.mapper.PropertyMapper
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageKitchenRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
+import server.web.casa.utils.storage.FileSystemStorageService
 
 @Service
 class PropertyImageKitchenService(
     private val repository: PropertyImageKitchenRepository,
-    private val mapper : PropertyMapper,
-    private val gcsService: GcsService
+    private val storageService: FileSystemStorageService
 ) {
-    suspend fun create(p : PropertyImageKitchen): PropertyImageKitchenEntity {
+    suspend fun create(p : PropertyImageKitchen, server : String): PropertyImageKitchenEntity {
         val file = base64ToMultipartFile(p.name,"kitchen")
-        val imageUri = gcsService.uploadFile(file,"kitchen/")
-        p.path = imageUri!!
-        p.name = file.name
+//        val imageUri = gcsService.uploadFile(file,"kitchen/")
+//        p.path = imageUri!!
+//        p.name = file.name
+        val filename = storageService.store(file, subfolder = "/property/kitchen/")
+        val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
-            propertyKitchen =mapper.toEntity(p.property!!),
-            name = p.name,
-            path = p.path
+            propertyKitchen = p.property!!.toEntity(),
+            name = filename,
+            path = fileUrl
         )
         val result = repository.save(data)
         return result
