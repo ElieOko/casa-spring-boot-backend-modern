@@ -36,6 +36,8 @@ class JwtAuthFilter(
             "/swagger-ui/**",
             "/swagger-ui.html/*",
             "/v3/**",
+            "/files/**",
+            "/property/**",
             "/api/account",
             "/api/cities",
             "/api/countries",
