@@ -9,7 +9,6 @@ import server.web.casa.app.property.infrastructure.persistence.repository.Proper
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
 import server.web.casa.utils.storage.FileSystemStorageService
-import server.web.casa.utils.storage.StorageService
 
 @Service
 class PropertyImageService(
@@ -22,17 +21,17 @@ class PropertyImageService(
         val file = base64ToMultipartFile(p.name, "property")
         log.info("file ****taille:${file.size}")
         log.info("file ****name:${file.name}")
-//        val imageUri = gcsService.uploadFile(file,"property/")
+        val imageUri = gcsService.uploadFile(file,"property/images/")
         val filename = storageService.store(file, subfolder = "/property/images/")
         val fileUrl = "$server/property/images/$filename"
         log.info("public url local $fileUrl")
 //        log.info("file uri ****name:${imageUri}")
-//        p.path = imageUri!!
+        p.path = imageUri!!
 //        p.name = file.name
         val data = PropertyImageEntity(
             property = p.property!!.toEntity(),
-            name = filename,
-            path = fileUrl
+            name = fileUrl,
+            path = p.path
         )
         val result = repository.save(data)
         return result

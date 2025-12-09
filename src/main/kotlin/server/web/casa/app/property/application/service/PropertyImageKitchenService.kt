@@ -12,19 +12,20 @@ import server.web.casa.utils.storage.FileSystemStorageService
 @Service
 class PropertyImageKitchenService(
     private val repository: PropertyImageKitchenRepository,
+    private val gcsService: GcsService,
     private val storageService: FileSystemStorageService
 ) {
     suspend fun create(p : PropertyImageKitchen, server : String): PropertyImageKitchenEntity {
         val file = base64ToMultipartFile(p.name,"kitchen")
-//        val imageUri = gcsService.uploadFile(file,"kitchen/")
-//        p.path = imageUri!!
+        val imageUri = gcsService.uploadFile(file,"property/kitchen/")
+        p.path = imageUri!!
 //        p.name = file.name
         val filename = storageService.store(file, subfolder = "/property/kitchen/")
         val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
             propertyKitchen = p.property!!.toEntity(),
-            name = filename,
-            path = fileUrl
+            name = fileUrl,
+            path = p.path
         )
         val result = repository.save(data)
         return result
