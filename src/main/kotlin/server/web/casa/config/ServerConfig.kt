@@ -46,7 +46,7 @@ class ServerConfig(
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         registry.addResourceHandler("/property/**")
             .addResourceLocations(
-                "file:casa/property/",
+                "file:opt/backend/casa/property/",
 //                "file:casa/property/bedroom/",
 //                "file:casa/property/room/",
 //                "file:casa/property/kitchen/",

@@ -29,7 +29,7 @@ class GcsService(
         val fileName = "casa/${directory}${file.originalFilename}"
         log.info("Gcs service****fileName:${fileName}")
         val blob = storage?.create(
-            BlobInfo.newBuilder("staging.infinite-strata-226508.appspot.com", fileName).build(),
+            BlobInfo.newBuilder("casanayo-bucket", fileName).build(),
             file.bytes
         )
         log.info("Gcs service****blod:${blob?.mediaLink}")
