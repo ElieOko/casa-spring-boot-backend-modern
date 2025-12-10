@@ -6,6 +6,7 @@ import server.web.casa.app.actor.infrastructure.persistence.entity.master.*
 import server.web.casa.app.actor.infrastructure.persistence.entity.other.*
 import server.web.casa.app.actor.infrastructure.persistence.entity.second.DemenagementEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.second.MajordomeEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.menusier.ServiceMenusierEntity
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
@@ -78,9 +79,13 @@ data class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @OneToMany(mappedBy = "user")
     val peintre : List<PeintreEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
+    val serviceMenusier : List<ServiceMenusierEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
     val plombier: List<PlombierEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
     val salubrite : List<SalubriteEntity> = emptyList(),
     @OneToMany(mappedBy = "user")
-    val demenagement : List<DemenagementEntity> = emptyList()
+    val demenagement : List<DemenagementEntity> = emptyList(),
+    @OneToMany(mappedBy = "user")
+    val typeAccountUser: List<TypeAccountUserEntity> = emptyList()
     )
