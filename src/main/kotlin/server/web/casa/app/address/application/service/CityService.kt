@@ -17,7 +17,10 @@ class CityService(
         val result = repository.save(data)
         return result.toDomain()
     }
-    suspend  fun findAllCity() : List<City?> = repository.findAll().map { it.toDomain() }.toList()
+    suspend fun findAllCity() : List<City?> = repository.findAll().map { it.toDomain() }.toList()
 
-    suspend fun findByIdCity(id : Long) : City?  = repository.findById(id).orElse(null).toDomain()
+    suspend fun findByIdCity(id : Long) : City?  {
+        val data = repository.findById(id).orElse(null)
+        return data?.toDomain()
+    }
 }
