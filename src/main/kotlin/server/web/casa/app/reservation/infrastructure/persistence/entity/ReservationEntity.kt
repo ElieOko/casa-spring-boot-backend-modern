@@ -14,10 +14,10 @@ import java.time.LocalDate
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val reservationId       : Long = 0,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("propertyId")
     val property            : PropertyEntity,
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn("userId")
     val user                : UserEntity ?,
     @OneToMany(

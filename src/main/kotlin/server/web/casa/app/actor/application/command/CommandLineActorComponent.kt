@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component
 import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntity
 import server.web.casa.app.actor.infrastructure.persistence.repository.TypeCardRepository
 import server.web.casa.utils.Mode
-import server.web.casa.utils.isEmailValid
-import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 
 @Component
 @Order(2)
