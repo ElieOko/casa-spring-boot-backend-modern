@@ -44,7 +44,7 @@ class ReservationController(
         val user = userService.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
 
-        if (user == null || property == null){
+        if (user == null){
             val responseNotFound = mapOf("error" to "User or property not found")
             return ResponseEntity.ok().body(responseNotFound )
         }
@@ -76,18 +76,31 @@ class ReservationController(
             .orElseThrow { RuntimeException("User not found") }
 
         val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
-        val statusLastReservationUserProperty = lastStatusReservationUserProperty
                                                 ?.takeIf { it.isNotEmpty() }
                                                 ?.last()
-                                                ?.status
-        if (statusLastReservationUserProperty == ReservationStatus.PENDING){
-            val responsePending = mapOf("error" to "You already have a pending reservation with this property")
-            return ResponseEntity.ok().body(responsePending )
-        }
-        //if close or cancel we can verify the last before adding
-        val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, propertyEntity)
 
         val format = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+        if (lastStatusReservationUserProperty != null){
+            val status = lastStatusReservationUserProperty.status
+            val reservationHeure = lastStatusReservationUserProperty.reservationHeure
+            val reservationId = lastStatusReservationUserProperty.reservationId
+            val startInterval = LocalTime.parse(reservationHeure!!, format)
+            val endInterval = startInterval.plusHours(1)
+            val timeRequest = LocalTime.parse(request.reservationHeure, format)
+
+
+            if (status == ReservationStatus.PENDING && !timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval)
+            ){
+                val responsePending = mapOf("error" to "You already have a pending reservation with this property")
+                return ResponseEntity.ok().body(responsePending )
+            }else{
+                val updated = service.updateStatusById(reservationId, ReservationStatus.CANCELLED)
+            }
+        }
+
+        //if close or cancel we can verify the last before adding
+        val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, propertyEntity)
 
         val propertyBooked = lastReservationProperty
             ?.takeIf { it.isNotEmpty() }
