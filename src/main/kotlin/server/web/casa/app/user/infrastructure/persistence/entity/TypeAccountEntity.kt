@@ -14,6 +14,7 @@ data class TypeAccountEntity(
     @OneToMany(mappedBy = "typeAccount")
     val user: List<UserEntity> = emptyList(),
     @OneToMany(mappedBy = "typeAccount")
+    val account: List<AccountEntity> = emptyList(),
+    @OneToMany(mappedBy = "typeAccount")
     val typeAccountUser: List<TypeAccountUserEntity> = emptyList()
-
 )
