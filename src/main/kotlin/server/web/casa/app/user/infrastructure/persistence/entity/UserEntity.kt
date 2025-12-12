@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 import kotlin.time.*
 
 @Table(name = "users")
-data class UserEntity @OptIn(ExperimentalTime::class) constructor(
+data class UserEntity2 @OptIn(ExperimentalTime::class) constructor(
     @Id
     val userId: Long = 0,
     var city: String? = null,
