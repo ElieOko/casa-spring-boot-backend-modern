@@ -1,16 +1,12 @@
 package server.web.casa.app.address.infrastructure.persistence.entity
 
-import jakarta.persistence.*
 
-@Entity
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
+
 @Table(name = "countries")
 class CountryEntity(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column("id")
+    @Id
     val countryId : Long,
-    @Column("name")
     val name : String,
-    @OneToOne(mappedBy = "country")
-    val city : CityEntity? = null,
-
 )
