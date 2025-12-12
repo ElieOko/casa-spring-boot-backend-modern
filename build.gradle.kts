@@ -30,7 +30,7 @@ extra["springCloudGcpVersion"] = "7.3.1"
 extra["springCloudVersion"] = "2025.0.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+//	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     //vonage
 //    implementation("com.vonage:server-sdk-kotlin:2.1.1")
     //twilio
@@ -39,8 +39,7 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-session-data-redis")
     //websocket
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-//    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-//    implementation("io.r2dbc:r2dbc-postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     //reactive
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
@@ -73,7 +72,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	compileOnly("org.projectlombok:lombok")
-    runtimeOnly("org.postgresql:postgresql")
+//	implementation("io.r2dbc:r2dbc-postgresql")
+//    runtimeOnly("org.postgresql:postgresql")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 //	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	annotationProcessor("org.projectlombok:lombok")

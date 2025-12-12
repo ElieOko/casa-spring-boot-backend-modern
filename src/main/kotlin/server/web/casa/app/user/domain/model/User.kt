@@ -1,10 +1,6 @@
 package server.web.casa.app.user.domain.model
 
-import jakarta.validation.constraints.FutureOrPresent
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Null
-import jakarta.validation.constraints.Size
+import jakarta.validation.constraints.*
 import java.time.LocalDateTime
 
 data class User(
@@ -15,7 +11,7 @@ data class User(
     @field:Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
     val password: String ="",
     @NotNull
-    val typeAccount: TypeAccount? = null,
+    val accountId: Long? = null,
     @Null
     val email: String? = null,
     @Null
@@ -31,7 +27,7 @@ data class User(
 
 data class UserDto(
     val userId: Long = 0,
-    val typeAccount: TypeAccount? = null,
+    val accountId: Long? = null,
     val email: String? = null,
     val username: String,
     val phone: String,
@@ -42,16 +38,13 @@ data class UserDto(
 )
 
 data class UserRequest(
-//    @NotNull
-//    @field:NotBlank(message = "Le phone est obligatoire")
-//    @field:Size(min = 8, message = "Ce numero est invalide car il ne respecte pas le nommage")
     val phone : String? = null,
     @NotNull
     @field:NotBlank(message = "Le mot de passe est obligatoire")
     @field:Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
     val password : String,
     @NotNull
-    val typeAccountId : Long,
+    val accountId : Long,
     val email : String? = null,
     val username : String? = null,
     @NotNull

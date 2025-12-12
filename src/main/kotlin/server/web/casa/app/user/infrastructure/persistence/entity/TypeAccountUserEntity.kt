@@ -1,20 +1,12 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
-import jakarta.persistence.*
-import server.web.casa.app.user.domain.model.User
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
 @Table(name = "TypeAccountUsers")
-data class TypeAccountUserEntity(
+class TypeAccountUserEntity(
     @Id
-    @Column("id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val typeAccountId : Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn("typeAccountId")
-    val typeAccount: TypeAccountEntity,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn("userId")
-    val user: UserEntity,
-
+    val typeAccountUserId : Long = 0,
+    val typeAccountId: Long,
+    val userId: Long,
 )

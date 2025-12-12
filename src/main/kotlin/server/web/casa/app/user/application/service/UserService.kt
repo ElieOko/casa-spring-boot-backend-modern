@@ -25,7 +25,7 @@ class UserService(
     suspend fun createUser(user: User) : UserDto? {
         val entityToSave = UserEntity(
             password = user.password,
-            typeAccount = user.typeAccount!!.toEntity() ,
+            typeAccountUserId = user.accountId() ,
             email = user.email,
             phone = user.phone,
             username = user.username,
@@ -66,7 +66,7 @@ class UserService(
     ): UserDto ?{
       val userState =  repository.findById(id).orElse(null)
       if (userState.email == user.email) {
-          userState.city = user.city
+          userState.city = user.cityId
           val updatedUser = repository.save(userState)
           return updatedUser.toDomain()
       }

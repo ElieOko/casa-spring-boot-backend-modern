@@ -1,20 +1,11 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
 @Table(name = "TypeAccounts")
-data class TypeAccountEntity(
+class TypeAccountEntity(
     @Id
-    @Column("id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val typeAccountId : Long = 0,
-    @Column("name", unique = true)
     val name : String,
-    @OneToMany(mappedBy = "typeAccount")
-    val user: List<UserEntity> = emptyList(),
-    @OneToMany(mappedBy = "typeAccount")
-    val account: List<AccountEntity> = emptyList(),
-    @OneToMany(mappedBy = "typeAccount")
-    val typeAccountUser: List<TypeAccountUserEntity> = emptyList()
 )
