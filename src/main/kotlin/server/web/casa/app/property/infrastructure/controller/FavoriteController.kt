@@ -91,10 +91,20 @@ class FavoriteController(
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
     }
+    @DeleteMapping("/delete/{userId}/{propertyId}")
+    fun deleteFavorite(@PathVariable userId: Long, @PathVariable propertyId:Long): ResponseEntity<Map<String, String>> {
+        val existingFavorite = service.getFavoriteIfExist(propR.findById(propertyId).orElse(null), userR.findById(userId).orElse(null))?.firstOrNull()
 
-    @DeleteMapping("/user/delete/{user}")
-     fun deleteAllFavoriteByUser(@PathVariable user: Long): ResponseEntity<Map<String, String>> {
-        val user = userR.findById(user).orElse(null)
+        val deleteFavorite = existingFavorite?.favoriteId?.let {
+            service.deleteById(it)
+        }
+        val response = mapOf("message" to "Favorite deleted successfully")
+        return ResponseEntity.ok(response)
+    }
+
+    @DeleteMapping("/user/delete/{userId}")
+     fun deleteAllFavoriteByUser(@PathVariable userId: Long): ResponseEntity<Map<String, String>> {
+        val user = userR.findById(userId).orElse(null)
         service.deleteAllFavoriteUser(user)
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
