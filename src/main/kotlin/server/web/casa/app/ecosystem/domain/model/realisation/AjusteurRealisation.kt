@@ -2,7 +2,7 @@ package server.web.casa.app.ecosystem.domain.model.realisation
 
 import server.web.casa.app.ecosystem.domain.model.task.AjusteurTask
 import server.web.casa.app.ecosystem.domain.model.task.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.ServiceAjusteurRealisationEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ServiceAjusteurRealisationEntity
 
 
 data class AjusteurRealisation(

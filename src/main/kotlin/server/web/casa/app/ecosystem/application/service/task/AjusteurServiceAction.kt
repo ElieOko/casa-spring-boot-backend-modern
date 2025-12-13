@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.ecosystem.domain.model.task.AjusteurTask
 import server.web.casa.app.ecosystem.domain.model.task.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.toDomain
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.salubrite.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.service.ServiceAjusteurRepository
 

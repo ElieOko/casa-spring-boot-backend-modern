@@ -6,8 +6,7 @@ import server.web.casa.app.address.domain.model.City
 import server.web.casa.app.address.domain.model.Commune
 import server.web.casa.app.address.domain.model.Quartier
 import server.web.casa.app.address.infrastructure.persistence.mapper.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.ServiceAjusteurEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.architect.ServiceArchitectEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ServiceAjusteurEntity
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.payment.domain.model.toEntity
 import server.web.casa.app.user.domain.model.UserDto

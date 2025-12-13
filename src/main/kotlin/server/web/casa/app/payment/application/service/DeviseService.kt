@@ -3,8 +3,7 @@ package server.web.casa.app.payment.application.service
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.ecosystem.domain.model.task.AjusteurTask
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.toDomain
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.payment.domain.model.toEntity
 import server.web.casa.app.payment.infrastructure.persistence.entity.toDomain

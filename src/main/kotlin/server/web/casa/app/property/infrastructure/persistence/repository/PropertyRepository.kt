@@ -2,19 +2,18 @@ package server.web.casa.app.property.infrastructure.persistence.repository
 
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.EntityGraph
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 
-interface PropertyRepository : JpaRepository<PropertyEntity, Long> {
-    @EntityGraph(attributePaths = [
-        "propertyImage",
-        "propertyImageRoom",
-        "propertyImageLivingRoom",
-        "propertyImageKitchen"])
-    override fun findAll(pageable: Pageable): Page<PropertyEntity>
+interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
+//    @EntityGraph(attributePaths = [
+//        "propertyImage",
+//        "propertyImageRoom",
+//        "propertyImageLivingRoom",
+//        "propertyImageKitchen"])
+    fun findAll(pageable: Pageable): Page<PropertyEntity>
 
     @Query("""
         SELECT r FROM PropertyEntity r 

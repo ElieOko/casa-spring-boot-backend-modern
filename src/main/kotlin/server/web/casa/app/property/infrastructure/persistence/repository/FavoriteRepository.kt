@@ -1,16 +1,17 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
-import jakarta.transaction.Transactional
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
+
+import org.springframework.data.r2dbc.repository.Modifying
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
+import org.springframework.transaction.annotation.Transactional
 import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 
-interface FavoriteRepository : JpaRepository<FavoriteEntity, Long> {
+interface FavoriteRepository : CoroutineCrudRepository<FavoriteEntity, Long> {
     @Query("SELECT r FROM FavoriteEntity r WHERE r.user = :user")
     fun findFavoriteByPropertyUser(@Param("user") user: UserEntity): List<FavoriteEntity> ?
 

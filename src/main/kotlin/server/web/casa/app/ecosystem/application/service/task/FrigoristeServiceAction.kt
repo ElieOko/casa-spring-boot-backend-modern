@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.ecosystem.domain.model.task.FrigoristeTask
 import server.web.casa.app.ecosystem.domain.model.task.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.toDomain
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.architect.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.frigoriste.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.macon.toDomain

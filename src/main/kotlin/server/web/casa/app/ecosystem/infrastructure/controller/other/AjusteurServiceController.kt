@@ -15,10 +15,9 @@ import server.web.casa.app.ecosystem.application.service.realisation.Realisation
 import server.web.casa.app.ecosystem.application.service.task.AjusteurServiceAction
 import server.web.casa.app.ecosystem.domain.model.realisation.AjusteurRealisation
 import server.web.casa.app.ecosystem.domain.model.task.AjusteurTask
-import server.web.casa.app.ecosystem.domain.model.task.ArchitectTask
 import server.web.casa.app.ecosystem.domain.request.AjusteurServiceRequest
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.ServiceAjusteurEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.toDomain
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ServiceAjusteurEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.payment.domain.model.toEntity
 import server.web.casa.app.user.application.service.UserService

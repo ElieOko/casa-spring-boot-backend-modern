@@ -2,7 +2,6 @@ package server.web.casa.app.ecosystem.domain.model.realisation
 
 import server.web.casa.app.ecosystem.domain.model.task.ArchitectTask
 import server.web.casa.app.ecosystem.domain.model.task.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.ServiceAjusteurRealisationEntity
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.architect.ServiceArchitectRealisationEntity
 
 data class ArchitectRealisation(

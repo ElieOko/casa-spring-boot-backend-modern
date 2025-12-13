@@ -4,8 +4,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import server.web.casa.app.ecosystem.domain.model.realisation.AjusteurRealisation
 import server.web.casa.app.ecosystem.domain.model.task.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.ServiceAjusteurRealisationEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ajusteur.toDomain
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ServiceAjusteurRealisationEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.realisation.AjusteurRealisationRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
