@@ -1,25 +1,14 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
-import jakarta.persistence.*
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 
 @Table(name = "favorites")
-@Entity
 class FavoriteEntity (
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val favoriteId : Long = 0,
-
-    @ManyToOne( optional = false)
-    @JoinColumn(name = "user_id")
-    val user : UserEntity,
-
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "property_id", nullable = true)
-    val property : PropertyEntity?,
-
-    @Column(name = "createdAt")
+    val id : Long = 0,
+    val userId : Long,
+    val propertyId : Long?,
     val createdAt: LocalDate = LocalDate.now()
 )
