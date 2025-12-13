@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import server.web.casa.app.pub.domain.model.Publicity
 import server.web.casa.app.pub.infrastructure.persistance.mapper.*
-import server.web.casa.app.pub.infrastructure.persistance.repo.PublicityRepository
+import server.web.casa.app.pub.infrastructure.persistance.repository.PublicityRepository
 import server.web.casa.utils.Mode
 
 @Service
