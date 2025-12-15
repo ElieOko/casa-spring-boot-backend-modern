@@ -13,6 +13,7 @@ import server.web.casa.app.property.infrastructure.persistence.repository.Proper
 import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.reservation.domain.model.*
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
+import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.reservation.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
@@ -57,25 +58,25 @@ class ReservationController(
             val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
             return ResponseEntity.ok().body(responseNotFound )
         }
-        val dataReservation = Reservation(
-            status = request.status,
-            type = request.type,
+        val dataReservation = ReservationEntity(
+            status = request.status.toString(),
+            type = request.type.toString(),
             isActive = true,
             reservationHeure = request.reservationHeure,
-            user = user,
-            property = property.first,
+            userId = request.userId,
+            propertyId = property.first.propertyId,
             message = request.message,
             startDate = request.startDate,
             endDate = request.endDate,
         )
         //!= verify
         val propertyEntity = propertyR.findById(request.propertyId)
-            .orElseThrow { RuntimeException("Property not found") }
+            //.orElseThrow { RuntimeException("Property not found") }
 
         val userEntity = userR.findById(request.userId)
-            .orElseThrow { RuntimeException("User not found") }
+            //.orElseThrow { RuntimeException("User not found") }
 
-        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity, userEntity)
+        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity!!.id, userEntity!!.userId)
                                                 ?.takeIf { it.isNotEmpty() }
                                                 ?.last()
 
@@ -84,13 +85,13 @@ class ReservationController(
         if (lastStatusReservationUserProperty != null){
             val status = lastStatusReservationUserProperty.status
             val reservationHeure = lastStatusReservationUserProperty.reservationHeure
-            val reservationId = lastStatusReservationUserProperty.reservationId
+            val reservationId = lastStatusReservationUserProperty.id
             val startInterval = LocalTime.parse(reservationHeure!!, format)
             val endInterval = startInterval.plusHours(1)
             val timeRequest = LocalTime.parse(request.reservationHeure, format)
 
 
-            if (status == ReservationStatus.PENDING && !timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval)
+            if (status == ReservationStatus.PENDING.toString() && !timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval)
             ){
                 val responsePending = mapOf("error" to "You already have a pending reservation with this property")
                 return ResponseEntity.ok().body(responsePending )
@@ -129,7 +130,7 @@ class ReservationController(
         val reservationCreate = service.createReservation(dataReservation)
         val notification = notif.create(
             NotificationReservation(
-                reservation = reservationCreate.toEntity(),
+                reservation = reservationCreate,
                 guestUser = userEntity,
                 hostUser = propertyEntity.user!!
             )

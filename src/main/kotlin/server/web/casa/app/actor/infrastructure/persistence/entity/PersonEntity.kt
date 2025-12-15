@@ -15,7 +15,7 @@ class PersonEntity(
     val images : String? = null,
     val cardFront : String?,
     val cardBack : String? = null,
-    val numberCard : String? = null,
+    val numberCard : String? =  null,
     val userId : Long?,
     val parrainId : Long? = null,
     val typeCard : Long? = null,

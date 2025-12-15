@@ -1,14 +1,12 @@
 package server.web.casa.app.reservation.application.service
 
-import jakarta.transaction.Transactional
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.reservation.domain.model.Reservation
 import server.web.casa.app.reservation.domain.model.ReservationStatus
-import server.web.casa.app.reservation.infrastructure.persistence.mapper.*
+import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.reservation.infrastructure.persistence.repository.ReservationRepository
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.utils.Mode
 import java.time.LocalDate
 
@@ -17,75 +15,71 @@ import java.time.LocalDate
 class ReservationService(
     private val repoR: ReservationRepository
 ) {
-     fun createReservation(reservation: Reservation): Reservation {
-        val data = reservation.toEntity()
-        val result = repoR.save(data)
-        return result.toDomain()
+     suspend fun createReservation(reservation: ReservationEntity): ReservationEntity {
+        val result = repoR.save(reservation)
+        return result
     }
 
-     fun findAllReservation() : List<Reservation> {
-        return repoR.findAll().map { it.toDomain() }.toList()
+     suspend fun findAllReservation() : List<ReservationEntity> {
+        return repoR.findAll().map { it }.toList()
     }
 
-     fun findId(id: Long): Reservation? {
-         val reservation = repoR.findById(id).orElse(null)
-         return reservation?.let { it.toDomain() }
+     suspend fun findId(id: Long): ReservationEntity? {
+         val reservation = repoR.findById(id)
+         return reservation
          //return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
 
-     fun findByProperty(property: PropertyEntity): List<Reservation>? {
-        return repoR.findByProperty(property)?.map {
-            it.toDomain()
-        }?.toList()
+    suspend fun findByProperty(property: Long): List<ReservationEntity>? {
+        return repoR.findByProperty(property)?.map {it}?.toList()
     }
-     fun findByUser(user: UserEntity): List<Reservation>?{
-        return repoR.findByUser(user).let {list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
+    suspend fun findByUser(userId: Long): List<ReservationEntity>?{
+        return repoR.findByUser(userId).let {list-> list?.map{it}?.toList() ?: emptyList() }
     }
-     fun findByStatus(status: ReservationStatus): List<Reservation>{
-        return repoR.findAllByStatus(status).let {list-> list?.map{ it.toDomain() }?.toList() ?: emptyList() }
+    suspend fun findByStatus(status: ReservationStatus): List<ReservationEntity>{
+        return repoR.findAllByStatus(status).let {list-> list?.map{ it }?.toList() ?: emptyList() }
     }
-     fun findByMonth(month: Int, year: Int): List<Reservation>{
-        return repoR.findAllByMonthAndYear(month, year).let { list-> list?.map{ it.toDomain() }?.toList() ?: emptyList() }
+    suspend fun findByMonth(month: Int, year: Int): List<ReservationEntity>{
+        return repoR.findAllByMonthAndYear(month, year).let { list-> list?.map{ it }?.toList() ?: emptyList() }
     }
-     fun findByPYear(year : Int) : List<Reservation>{
-      return repoR.findAllByYear( year)?.map{ it.toDomain() }?.toList() ?: emptyList()
+    suspend fun findByPYear(year : Int) : List<ReservationEntity>{
+      return repoR.findAllByYear( year)?.map{ it }?.toList() ?: emptyList()
     }
-     fun findByDate(inputDate: LocalDate): List<Reservation> {
-        return repoR.findAllByDate(inputDate).map{ it.toDomain() }.toList()
+    suspend fun findByDate(inputDate: LocalDate): List<ReservationEntity> {
+        return repoR.findAllByDate(inputDate).map{ it }.toList()
     }
-     fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<Reservation>? {
-      return repoR.findAllInInterval(starDate, endDate)?.map { it.toDomain() }?.toList()
+    suspend fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<ReservationEntity>? {
+      return repoR.findAllInInterval(starDate, endDate)?.map { it }?.toList()
     }
-    fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, property: PropertyEntity): List<Reservation>? {
-        return repoR.findByStartDateAndEndDateProperty(starDate, endDate, property)?.map { it.toDomain() }?.toList()
+    suspend fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, propertyId: Long): List<ReservationEntity>? {
+        return repoR.findByStartDateAndEndDateProperty(starDate, endDate, propertyId)?.map { it }?.toList()
     }
-    fun findByUserProperty(property: PropertyEntity , user: UserEntity): List<Reservation>? {
-        return repoR.findByUserProperty(property, user)?.map { it.toDomain() }?.toList()
+    suspend fun findByUserProperty(propertyId: Long , userId: Long): List<ReservationEntity>? {
+        return repoR.findByUserProperty(propertyId, userId)?.map { it }?.toList()
     }
         //update
-        @Transactional
-         fun updateStatusById(id: Long, status: ReservationStatus):Int{
+
+    suspend fun updateStatusById(id: Long, status: ReservationStatus):Int{
           return repoR.updateStatusById(id, status)
         }
-    @Transactional
-     fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Int{
+
+    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Int{
         return repoR.cancelOrKeepReservation(id, isActive, reason, status)
     }
     //delete
-    @Transactional
-     fun deleteReservationById(id: Long):Int{
+
+    suspend fun deleteReservationById(id: Long):Int{
         val success = repoR.deleteByIdReservation(id)
         return success
     }
 
-    @Transactional
-    fun deleteAllReservationByUser(user: UserEntity):Int{
+    suspend fun deleteAllReservationByUser(user: Long):Int{
         val success = repoR.deleteAllByUserReservation (user)
         return success
     }
 
-    @Transactional
-    fun deleteAllReservationByProperty(property: PropertyEntity):Int{
+
+    suspend fun deleteAllReservationByProperty(property: Long):Int{
         val success = repoR.deleteAllByPropertyReservation(property)
         return success
     }
