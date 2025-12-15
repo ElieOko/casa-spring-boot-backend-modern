@@ -9,7 +9,7 @@ import java.time.LocalDate
 class PublicityEntity(
     @Id
     val publicityId: Long = 0,
-    val user            : UserEntity?,
+    val user            : Long?,
     val image           : String? = null,
     val title           : String,
     val description     : String,
