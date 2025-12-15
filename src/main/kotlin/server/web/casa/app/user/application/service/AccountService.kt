@@ -7,15 +7,16 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
+import server.web.casa.app.user.infrastructure.persistence.repository.AccountRepository
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountRepository
 import server.web.casa.utils.Mode
 
 @Service
 @Profile(Mode.DEV)
-class TypeAccountService(
-  private val repository: TypeAccountRepository,
+class AccountService(
+    private val repository: AccountRepository,
 ) {
-    suspend fun saveAccount(data: TypeAccount): TypeAccount {
+    suspend fun saveAccount(data: Account): Account {
         val data = data.toEntity()
         val result = repository.save(data)
         return result.toDomain()
