@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
@@ -36,16 +38,16 @@ class UserService(
         return savedEntity.toDomain()
     }
 
-    suspend fun findAllUser() : List<UserDto?> {
+    suspend fun findAllUser() : Flux<UserDto?> {
         val allEntityUser = repository.findAll()
         return allEntityUser.map {
             it.toDomain()
         }.toList()
     }
 
-    suspend fun findIdUser(id : Long) : UserDto? {
-        val userEntity = repository.findById(id).orElse(null)
-        return userEntity.toDomain()
+    suspend fun findIdUser(id : Long) : Mono<UserDto?> {
+        val userEntity = repository.findById(id)
+        return userEntity?.toDomain()
 //        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
 
     }
