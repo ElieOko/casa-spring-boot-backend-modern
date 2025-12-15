@@ -3,6 +3,7 @@ package server.web.casa.app.user.infrastructure.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import kotlinx.coroutines.flow.Flow
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -12,6 +13,7 @@ import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.security.Auth
+import server.web.casa.utils.ApiResponse
 
 @Tag(name = "Utilisateur", description = "Gestion des utilisateurs")
 @RestController
@@ -27,11 +29,11 @@ class UserController(
     @GetMapping
     @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
-    suspend fun getListUser(): ResponseEntity<List<UserDto?>>{
+    suspend fun getListUser(): ApiResponse<Flow<UserDto>> {
         val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         logger.info("My ID -> $ownerId")
         val data = userService.findAllUser()
-        return ResponseEntity.ok().body(data)
+        return ApiResponse(data)
     }
 
     @Operation(summary = "Detail utilisateur")

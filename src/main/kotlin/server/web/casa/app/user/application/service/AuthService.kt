@@ -54,7 +54,6 @@ class AuthService(
         val entity = UserEntity(
             userId = 0,
             password = hashEncoder.encode(user.password),
-            typeAccount = user.typeAccount!!.toEntity(),
             email = user.email,
             username = user.username,
             phone = phone,
@@ -94,7 +93,7 @@ class AuthService(
         return result
     }
 
-    fun generateOTP(identifier: String): Triple<String?, String, String> {
+    suspend fun generateOTP(identifier: String): Triple<String?, String, String> {
         var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
         if (isEmailValid(identifier)){
             validIdentifier = identifier
@@ -105,16 +104,19 @@ class AuthService(
        return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur numero non prises en charge",identifier)
     }
 
-    fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
+    suspend fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
         val userSecurity = userRepository.findByPhoneOrEmail(user.identifier)
             ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
        return Pair(userSecurity.userId,twilio.checkVerify(code = user.code, contact = user.identifier))
     }
-    suspend fun changePassword(id : Long,new : String): UserDto? {
-        val data = userRepository.findById(id).orElse(null)
-        data.password = hashEncoder.encode(new)
-        val updatedUser = userRepository.save(data)
-        return updatedUser.toDomain()
+    suspend fun changePassword(id : Long,new : String): UserDto {
+        val data = userRepository.findById(id)
+        if (data != null) {
+            data.password = hashEncoder.encode(new)
+            val updatedUser = userRepository.save(data)
+            return updatedUser.toDomain()
+        }
+        throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
     }
 
     @Transactional
@@ -123,13 +125,12 @@ class AuthService(
             throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid refresh token.")
         }
         val userId = jwtService.getUserIdFromToken(refreshToken)
-        val user = userRepository.findById(userId.toLong()).orElseThrow{
-            ResponseStatusException(
-                HttpStatusCode.valueOf(403),
-                "Invalid refresh token."
-            )
-        }
-            val hashed = hashToken(refreshToken)
+        val user = userRepository.findById(userId.toLong()) ?: throw ResponseStatusException(
+            HttpStatusCode.valueOf(403),
+            "Invalid refresh token."
+        )
+
+        val hashed = hashToken(refreshToken)
             refreshTokenRepository.findByUserIdAndHashedToken(user.userId, hashed)
                 ?: throw ResponseStatusException(
                     HttpStatusCode.valueOf(403),

@@ -1,6 +1,6 @@
 package server.web.casa.exception
 
-import jakarta.persistence.EntityNotFoundException
+import com.google.api.gax.rpc.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
@@ -36,8 +36,8 @@ class GlobalExceptionHandler {
             .body(map)
     }
 
-    @ExceptionHandler(value = [EntityNotFoundException::class])
-    fun handleEntityNotFound(e: EntityNotFoundException): ResponseEntity<ErrorResponseDto>{
+    @ExceptionHandler(value = [NotFoundException::class])
+    fun handleEntityNotFound(e: NotFoundException): ResponseEntity<ErrorResponseDto>{
         logger.error("Handle entityNotFoundException", e);
         val errorDto = ErrorResponseDto(
             "Entity not found",
