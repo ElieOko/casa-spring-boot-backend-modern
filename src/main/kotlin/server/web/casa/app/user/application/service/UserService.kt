@@ -7,6 +7,7 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.user.domain.model.*
@@ -41,9 +42,12 @@ class UserService(
         return allEntityUser.map { it.toDomain() }
     }
 
-    suspend fun findIdUser(id : Long) : UserDto? {
-        val userEntity = repository.findById(id)
-        return userEntity?.toDomain()
+    suspend fun findIdUser(id : Long) : UserDto {
+        val userEntity = repository.findById(id)?:throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "ID Is Not Found."
+        )
+        return userEntity.toDomain()
 //        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
 
     }
