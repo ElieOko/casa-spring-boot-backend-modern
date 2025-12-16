@@ -1,5 +1,6 @@
 package server.web.casa.app.property.application.service
 
+import kotlinx.coroutines.flow.map
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.Favorite
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
@@ -10,27 +11,27 @@ import kotlin.collections.map
 
 @Service
 class FavoriteService(
-    private val repos: FavoriteRepository,
+    private val repository: FavoriteRepository,
 ) {
-    fun create(f : Favorite): Favorite { val data = f.toEntity()
-        val result = repos.save(data)
+    suspend fun create(f : Favorite): Favorite { val data = f.toEntity()
+        val result = repository.save(data)
         return result.toDomain()
     }
-    fun getAll() : List<Favorite> = repos.findAll().map { it.toDomain() }.toList()
+    fun getAll() = repository.findAll().map { it.toDomain() }
 
     fun getUserFavoriteProperty(user: UserEntity) : List<Favorite>?{
-        return repos.findFavoriteByPropertyUser(user).let {list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
+        return repository.findFavoriteByPropertyUser(user).let {list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
     }
     fun getOneFavoritePropertyCount( property: PropertyEntity ) : List<Favorite>?{
-        return repos.findOneFavoritePropertyCount(property).let {list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
+        return repository.findOneFavoritePropertyCount(property).let {list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
     }
     fun getFavoriteIfExist( property: PropertyEntity , user: UserEntity) : List<Favorite>?{
-        return repos.findFavoriteExist(property, user).let{list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
+        return repository.findFavoriteExist(property, user).let{list-> list?.map{it.toDomain()}?.toList() ?: emptyList() }
     }
-    fun deleteById(favoriteId: Long) {
-        return repos.deleteById(favoriteId)
+    suspend fun deleteById(favoriteId: Long) {
+        return repository.deleteById(favoriteId)
     }
     fun deleteAllFavoriteUser(user: UserEntity) : Int{
-        return repos.deleteAllFavoriteUser(user)
+        return repository.deleteAllFavoriteUser(user)
     }
 }
