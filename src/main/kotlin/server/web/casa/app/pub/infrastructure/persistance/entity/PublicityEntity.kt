@@ -10,7 +10,7 @@ class PublicityEntity(
     @Id
     val publicityId: Long = 0,
     val user            : Long?,
-    val image           : String? = null,
+    val imagePath       : String? = null,
     val title           : String,
     val description     : String,
     var isActive        : Boolean = true,
