@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
@@ -104,11 +102,4 @@ class UserService(
         repository.deleteById(id)
         return true
     }
-<<<<<<< HEAD
-
-=======
-     suspend fun account(id: Long): TypeAccount? {
-        return service.findByIdType(id)
-    }
->>>>>>> 38d55da7efe8fcc1778acdf40bddd25640aee5c8
 }
