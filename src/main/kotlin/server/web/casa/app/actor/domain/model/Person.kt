@@ -1,12 +1,8 @@
-package server.web.casa.app.actor.infrastructure.persistence.entity
+package server.web.casa.app.actor.domain.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
-import server.web.casa.app.actor.domain.model.Person
+import server.web.casa.app.actor.infrastructure.persistence.entity.PersonEntity
 
-@Table(name = "persons")
-class PersonEntity(
-    @Id
+class Person(
     val id : Long? = 0,
     val firstName : String,
     val lastName : String,
@@ -21,7 +17,7 @@ class PersonEntity(
     val typeCardId : Long? = null,
 )
 
-fun PersonEntity.toDomain() = Person(
+fun Person.toEntity() = PersonEntity(
     id = this.id,
     firstName = this.firstName,
     lastName = this.lastName,
