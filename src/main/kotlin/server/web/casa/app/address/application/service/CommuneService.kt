@@ -1,5 +1,7 @@
 package server.web.casa.app.address.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.Commune
 import server.web.casa.app.address.infrastructure.persistence.mapper.*
@@ -17,7 +19,7 @@ class CommuneService(
     suspend fun findAllCommune() = repository.findAll().map { it.toDomainOrigin() }.toList()
 
     suspend fun findByIdCommune(id : Long) : Commune? {
-        val data = repository.findById(id).orElse(null)
+        val data = repository.findById(id)//.orElse(null)
         return data?.toDomain()
     }
 }
