@@ -104,5 +104,11 @@ class UserService(
         repository.deleteById(id)
         return true
     }
+<<<<<<< HEAD
 
+=======
+     suspend fun account(id: Long): TypeAccount? {
+        return service.findByIdType(id)
+    }
+>>>>>>> 38d55da7efe8fcc1778acdf40bddd25640aee5c8
 }

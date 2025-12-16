@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import server.web.casa.app.actor.infrastructure.persistence.entity.TypeCardEntity
+import server.web.casa.app.actor.infrastructure.persistence.repository.TypeCardRepository
 import server.web.casa.utils.Mode
 
 @Component

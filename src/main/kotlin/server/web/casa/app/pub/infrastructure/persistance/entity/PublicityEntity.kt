@@ -9,8 +9,8 @@ import java.time.LocalDate
 class PublicityEntity(
     @Id
     val publicityId: Long = 0,
-    val user            : UserEntity?,
-    val image           : String? = null,
+    val user            : Long?,
+    val imagePath       : String? = null,
     val title           : String,
     val description     : String,
     var isActive        : Boolean = true,

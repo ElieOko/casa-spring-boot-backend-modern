@@ -37,21 +37,22 @@ interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Lon
         @Param("endDate") endDate: LocalDate
     ): List<ReservationEntity> ?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate = :endDate AND r.endDate = :startDate AND r.property = :property")
+    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate = :endDate AND r.endDate = :startDate AND r.propertyId = :propertyId")
     fun findByStartDateAndEndDateProperty(
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate,
-        @Param("property") property: PropertyEntity
+        @Param("propertyId") propertyId: Long
     ): List<ReservationEntity> ?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.user = :user")
-     fun findByUser(@Param("user") user: UserEntity): List<ReservationEntity>?
+    @Query("SELECT r FROM ReservationEntity r WHERE r.userId = :userId")
+     fun findByUser(@Param("userId") userId: Long): List<ReservationEntity>?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property")
-     fun findByProperty(@Param("property") property: PropertyEntity): List<ReservationEntity> ?
+    @Query("SELECT r FROM ReservationEntity r WHERE r.propertyId = :propertyId")
+     fun findByProperty(@Param("propertyId") propertyId: Long): List<ReservationEntity> ?
 
-     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property AND r.user = :user")
-    fun findByUserProperty(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): List<ReservationEntity> ?
+     @Query("SELECT r FROM ReservationEntity r WHERE r.propertyId = :propertyId AND r.userId = :userId")
+    fun findByUserProperty(@Param("propertyId") propertyId: Long,
+                           @Param("userId") userId: Long): List<ReservationEntity> ?
 
     //use with @Transactional when you call it
     @Transactional
@@ -74,11 +75,11 @@ interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Lon
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM ReservationEntity r WHERE r.user = :user")
-    fun deleteAllByUserReservation(@Param("user") user: UserEntity): Int
+    @Query("DELETE FROM ReservationEntity r WHERE r.userId = :userId")
+    fun deleteAllByUserReservation(@Param("userId") userId: Long): Int
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM ReservationEntity r WHERE r.property = :property")
-    fun deleteAllByPropertyReservation(@Param("property") property: PropertyEntity): Int
+    @Query("DELETE FROM ReservationEntity r WHERE r.propertyId = :propertyId")
+    fun deleteAllByPropertyReservation(@Param("propertyId") propertyId: Long): Int
 }

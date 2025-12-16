@@ -15,9 +15,10 @@ class PersonEntity(
     val images : String? = null,
     val cardFront : String?,
     val cardBack : String? = null,
-    val numberCard : String? = null,
+    val numberCard : String? =  null,
     val userId : Long?,
     val parrainId : Long? = null,
+<<<<<<< HEAD
     val typeCardId : Long? = null,
 )
 
@@ -35,3 +36,20 @@ fun PersonEntity.toDomain() = Person(
     parrainId = this.parrainId,
     typeCardId = this.typeCardId,
 )
+=======
+    val typeCard : Long? = null,
+)
+
+    /*
+    Ajoute deux champ : job => pour le service que user peut rendre
+    (work, job=> chauffeur, plombier...) et
+    acteurType => où on aura bailleur, commissionnaire et locateur, soit admin...
+    en gros ces sont les memes info de preference on ajoute ces deux champs
+    puis userId le différentie
+    ou soit pour job on cree une table intermediaire
+    au cas où un user aura plusieurs service rendre : user -userjob- job
+    avec userjob (userId et jobId)
+    si on doit ajouter des privileges specifiques on cree la table privilege
+    où on va attribuer à user en fonction de acteurType
+    */
+>>>>>>> 38d55da7efe8fcc1778acdf40bddd25640aee5c8

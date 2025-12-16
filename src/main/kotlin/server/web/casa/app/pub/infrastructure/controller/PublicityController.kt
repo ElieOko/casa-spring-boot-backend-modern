@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.pub.application.PublicityService
 import server.web.casa.app.pub.domain.model.Publicity
 import server.web.casa.app.pub.domain.model.PublicityRequest
+import server.web.casa.app.pub.infrastructure.persistance.entity.PublicityEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.pub.PubRoute
 import server.web.casa.utils.Mode
@@ -32,9 +33,9 @@ class PublicityController(
                     ?: return ResponseEntity.badRequest()
                     .body(mapOf("error" to "User not found"))
 
-            val pub = Publicity(
-                user = user,
-                image = request.image,
+            val pub = PublicityEntity(
+                user = user.userId,
+                imagePath = request.imagePath,
                 title = request.title,
                 description = request.description,
                 isActive = true,
@@ -50,20 +51,20 @@ class PublicityController(
         }
 
         @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
-        fun getAllPub(): ResponseEntity<Map<String, List<Publicity?>>>{
+    suspend fun getAllPub(): ResponseEntity<Map<String, List<PublicityEntity>>> {
             val pub = service.findAllPub()
             val response = mapOf("pub" to pub)
             return ResponseEntity.ok().body(response)
         }
 
         @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-        fun getPubById(@PathVariable id: Long): ResponseEntity<Map<String, Publicity?>> {
+        suspend fun getPubById(@PathVariable id: Long): ResponseEntity<Map<String, PublicityEntity?>> {
             val pub = service.findId(id)
             val response = mapOf("pub" to pub)
             return ResponseEntity.ok(response)
         }
         @GetMapping("/user/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-        suspend fun getPubByUser(@PathVariable id: Long): ResponseEntity<Map<String, List<Publicity?>>> {
+        suspend fun getPubByUser(@PathVariable id: Long): ResponseEntity<Map<String, List<PublicityEntity?>>> {
             val user = userS.findIdUser(id)
                 ?: throw RuntimeException("User not found")
             val pub = service.findByUser(user.userId)
@@ -71,10 +72,10 @@ class PublicityController(
             return ResponseEntity.ok(response)
         }
         @PutMapping("/update/active/{id}")
-        fun updateReservation(
+        suspend fun updateReservation(
             @PathVariable id: Long,
             @RequestBody state: Boolean
-        ): ResponseEntity<Map<String, Publicity?>> {
+        ): ResponseEntity<Map<String, PublicityEntity?>> {
             val pub = service.findId(id)
                 ?: throw RuntimeException("Publicity not found")
             val updated = service.updateIsActive(id, state )
@@ -83,7 +84,7 @@ class PublicityController(
         }
 
         @DeleteMapping("/delete/{id}")
-        fun deletePub(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
+        suspend fun deletePub(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
             val pub = service.findId(id)
                 ?: throw RuntimeException("Publicity not found")
             val deleted = service.deleteById(id)
