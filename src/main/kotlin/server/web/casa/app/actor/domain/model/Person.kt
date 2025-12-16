@@ -31,3 +31,17 @@ fun Person.toEntity() = PersonEntity(
     parrainId = this.parrainId,
     typeCardId = this.typeCardId,
 )
+
+fun Person.getProfile() = Person(
+    firstName = this.firstName,
+    lastName = this.lastName,
+    fullName = this.fullName,
+    address = this.address,
+    images = this.images,
+    cardFront = this.cardFront,
+    cardBack = this.cardBack,
+    numberCard = this.numberCard,
+    userId = this.userId,
+    parrainId = this.parrainId,
+    typeCardId = this.typeCardId,
+)

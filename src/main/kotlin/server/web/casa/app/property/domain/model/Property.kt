@@ -1,7 +1,5 @@
 package server.web.casa.app.property.domain.model
 
-import server.web.casa.app.address.domain.model.*
-import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
 
 data class Property(
@@ -20,28 +18,26 @@ data class Property(
     var bathroom: Int? = 0,
     var floor: Int? = 0,
     var address: String,
-    var city: City?,
-    var quartier: Quartier?,
+    var city: Long?,
+    var quartier: Long?,
     var postalCode: String? = "",
-    var commune: Commune?,
+    var commune: Long?,
     var communeValue: String? = "",
     var quartierValue: String? = "",
     var cityValue: String? = "",
     var countryValue: String? = "",
-//    val quartier : String,
     var sold: Boolean,
     var transactionType: String,
-    var propertyType: PropertyType,
-    val user: UserDto?,
+    var propertyTypeId: Long,
+    val user: Long?,
     var latitude: Double? = null,
     var longitude: Double? = null,
     val isAvailable: Boolean = true,
-    val features: List<Feature> = emptyList(),
-    val favorites: List<PropertyFavorite?> = emptyList(),
-    val propertyImage: List<PropertyImage> = emptyList(),
-    val propertyImageRoom: List<PropertyImageRoom> = emptyList(),
-    val propertyImageLivingRoom: List<PropertyImageLivingRoom> = emptyList(),
-    val propertyImageKitchen: List<PropertyImageKitchen> = emptyList(),
     val createdAt: LocalDate = LocalDate.now(),
     var updatedAt: LocalDate = LocalDate.now(),
+)
+
+data class PropertyDataSource(
+    val property : Property,
+    val feature: List<Feature>
 )

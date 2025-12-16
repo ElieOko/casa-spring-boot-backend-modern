@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import server.web.casa.adaptater.provide.twilio.TwilioService
+import server.web.casa.app.user.domain.model.TypeAccountUser
 import server.web.casa.app.user.domain.model.UserDto
+import server.web.casa.app.user.domain.model.request.AccountRequest
 import server.web.casa.app.user.domain.model.request.VerifyRequest
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.*
@@ -27,7 +29,8 @@ class AuthService(
     private val userRepository: UserRepository,
     private val hashEncoder: HashEncoder,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val twilio : TwilioService
+    private val twilio : TwilioService,
+    private val serviceMultiAccount: TypeAccountUserService,
 ) {
     data class TokenPair(
         val accessToken: String,
@@ -35,7 +38,7 @@ class AuthService(
     )
 
     @OptIn(ExperimentalTime::class)
-     suspend fun register(user : User): Pair<UserDto?, String> {
+     suspend fun register(user: User, accountItems: List<AccountRequest>): Pair<UserDto?, String> {
          val phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
 
@@ -61,6 +64,13 @@ class AuthService(
             country = user.country
         )
         val savedEntity = userRepository.save(entity)
+        accountItems.forEach {
+            serviceMultiAccount.save(TypeAccountUser(
+                id = 0,
+                userId = savedEntity.userId,
+                typeAccountId = it.typeAccount
+            ))
+        }
         val newAccessToken = jwtService.generateAccessToken(savedEntity.userId.toHexString())
         val userData : UserDto = savedEntity.toDomain()
         val result = Pair(userData,newAccessToken)

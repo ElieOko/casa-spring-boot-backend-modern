@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImage
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -29,12 +28,14 @@ class PropertyImageService(
         p.path = imageUri!!
 //        p.name = file.name
         val data = PropertyImageEntity(
-            propertyId = p.property?.propertyId!!,
+            propertyId = p.propertyId,
             name = fileUrl,
             path = p.path
         )
         val result = repository.save(data)
         return result
     }
+    suspend fun findPropertyIdIn(ids : List<Long>) = repository.findByPropertyIdIn(ids)
+
 //    fun getAll() : List<PropertyImage> = repository.findAll().stream().map { mapper.toDomain(it) }.toList()
 }

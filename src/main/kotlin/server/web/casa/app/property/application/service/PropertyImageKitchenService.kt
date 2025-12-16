@@ -3,7 +3,6 @@ package server.web.casa.app.property.application.service
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImageKitchen
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageKitchenEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageKitchenRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -23,12 +22,14 @@ class PropertyImageKitchenService(
         val filename = storageService.store(file, subfolder = "/property/kitchen/")
         val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
-            propertyId = p.property!!.propertyId,
+            propertyId = p.propertyId,
             name = fileUrl,
             path = p.path
         )
         val result = repository.save(data)
         return result
     }
+    suspend fun findPropertyIdIn(ids : List<Long>) = repository.findByPropertyIdIn(ids)
+
 //    fun getAll() : List<PropertyImageKitchen> = repository.findAll().stream().map { mapper.toDomain(it) }.toList()
 }

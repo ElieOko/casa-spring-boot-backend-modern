@@ -1,6 +1,7 @@
 package server.web.casa.app.actor.domain.model.request
 
 import jakarta.validation.constraints.NotNull
+import server.web.casa.app.user.domain.model.User
 
 data class PersonRequest(
     @NotNull
@@ -15,3 +16,5 @@ data class PersonRequest(
     val parrainId : Long? = 0,
     val numberCard : String? = ""
 )
+
+

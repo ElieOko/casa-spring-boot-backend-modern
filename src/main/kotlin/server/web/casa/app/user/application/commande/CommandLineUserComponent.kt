@@ -88,7 +88,7 @@ suspend fun createUser(){
             city = "Kinshasa",
            country = "CD"
            )
-        val data = authService.register(userSystem)
+        val data = authService.register(userSystem, accountItems)
         log.info("Enregistrement réussi avec succès***${data.first?.phone}")
     }
 }

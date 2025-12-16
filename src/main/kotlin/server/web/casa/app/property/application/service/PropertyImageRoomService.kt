@@ -3,12 +3,10 @@ package server.web.casa.app.property.application.service
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImageRoom
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageRoomEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageRoomRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
 import server.web.casa.utils.storage.FileSystemStorageService
-import server.web.casa.utils.storage.StorageService
 
 @Service
 class PropertyImageRoomService(
@@ -24,12 +22,13 @@ class PropertyImageRoomService(
         val filename = storageService.store(file, subfolder = "/property/room/")
         val fileUrl = "$server/property/room/$filename"
         val data = PropertyImageRoomEntity(
-            propertyId = p.property!!.propertyId,
+            propertyId = p.propertyId,
             name = fileUrl,
             path = p.path
         )
         val result = repository.save(data)
         return result
     }
+    suspend fun findPropertyIdIn(ids : List<Long>) = repository.findByPropertyIdIn(ids)
 //    fun getAll() : List<PropertyImageRoom> = repository.findAll().stream().map { mapper.toDomain(it) }.toList()
 }

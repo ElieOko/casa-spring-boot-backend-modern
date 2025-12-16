@@ -2,6 +2,7 @@ package server.web.casa.app.property.domain.model.request
 
 import jakarta.validation.constraints.NotNull
 import server.web.casa.app.property.domain.model.Feature
+import server.web.casa.app.property.domain.model.FeatureRequest
 
 data class PropertyRequest(
     @NotNull
@@ -43,7 +44,7 @@ data class PropertyRequest(
     val userId : Long,
     val latitude : Double? = null,
     val longitude : Double? = null,
-    val features : List<Feature> = emptyList(),
+    val features : List<FeatureRequest> = emptyList(),
     val propertyImage : List<PropertyImageRequest?> = emptyList(),
     val propertyImageRoom : List<PropertyImageRequest?> = emptyList(),
     val propertyImageLivingRoom : List<PropertyImageRequest?> = emptyList(),

@@ -56,7 +56,7 @@ data class UserRequest(
     val country : String
 )
 
-data class UserAuthRequest(val account : AccountRequest, val user : UserRequest)
+data class UserAuthRequest(val account : List<AccountRequest>, val user : UserRequest)
 
 fun UserAuthRequest.toDomain() = User(
     password = this.user.password,

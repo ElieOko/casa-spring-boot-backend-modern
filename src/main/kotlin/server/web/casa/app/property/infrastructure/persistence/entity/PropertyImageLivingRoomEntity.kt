@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.Table
 class PropertyImageLivingRoomEntity(
     @Id
     val id : Long = 0,
-    var propertyLivingId : Long,
+    var propertyId : Long,
     val name : String,
     val path : String
 )

@@ -6,5 +6,5 @@ data class Feature(
 )
 
 data class FeatureRequest(
-    val name : String,
+    val featureId : Long,
 )

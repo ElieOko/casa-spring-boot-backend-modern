@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.IdentifiantRequest
@@ -25,8 +26,9 @@ const val ROUTE_LOGIN = AuthRoute.LOGIN
 @Profile("dev")
 class AuthController(
     private val authService: AuthService,
-    private val accountService: AccountService,
+    private val accountService: TypeAccountService,
     private val auth: Auth,
+    private val servicePerson: PersonService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Création utilisateur")
@@ -34,15 +36,23 @@ class AuthController(
     suspend fun register(
         @Valid @RequestBody request : UserAuthRequest
     ): ResponseEntity<Map<String, Any?>> {
-        val account = accountService.findAccountWithType(request.account.account, request.account.typeAccount)
-        val userSystem = request.toDomain()
-        val data = authService.register(userSystem)
-        val response = mapOf(
-            "user" to data.first,
-            "token" to data.second,
-            "message" to "Votre compte ${account.name} a été créer avec succès"
-        )
-        return ResponseEntity.status(201).body(response)
+        val accountItems = request.account
+        if (accountItems.isNotEmpty()){
+          val account = accountItems.map {
+                accountService.findByIdTypeAccount(it.typeAccount)
+          }.first()
+            val userSystem = request.toDomain()
+            val data = authService.register(userSystem,accountItems)
+            val response = mapOf(
+                "user" to data.first,
+                "token" to data.second,
+                "message" to "Votre compte principal ${account.name} a été créer avec succès"
+            )
+            return ResponseEntity.status(201).body(response)
+        }
+        else{
+            throw Exception()
+        }
     }
 
     @Operation(summary = "Connexion utilisateur")
@@ -51,17 +61,7 @@ class AuthController(
       @Valid @RequestBody body: UserAuth
     ): ResponseEntity<Map<String, Any?>> {
       val data = authService.login(body.identifiant, body.password)
-      val profile : ProfileUser? = null
-//        profile = ProfileUser(
-//            firstname = actor.firstName,
-//            lastname = actor.lastName,
-//            fullname = actor.fullName,
-//            address = actor.address,
-//            images = actor.images,
-//            cardFront = actor.cardFront,
-//            cardBack = actor.cardBack,
-//            numberCard = actor.numberCard
-//        )
+      val profile = servicePerson.findByIdPerson(data.second!!.userId)
         try {
                 val response = mapOf(
                     "user" to data.second,

@@ -13,11 +13,13 @@ import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.*
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
+import server.web.casa.utils.ApiResponseWithMessage
 import java.time.LocalDate
 
 const val ROUTE_PROPERTY = PropertyRoute.PROPERTY
@@ -36,7 +38,6 @@ class PropertyController(
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
     private val quartierService: QuartierService,
-//    private val authSession : Auth
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -44,7 +45,7 @@ class PropertyController(
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest,
         requestHttp: HttpServletRequest
-    ): ResponseEntity<out Map<String, Any>> {
+    ): ApiResponseWithMessage<PropertyMasterDTO> {
 //       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
        val imageList = request.propertyImage
        val imageKitchen = request.propertyImageKitchen
@@ -77,25 +78,25 @@ class PropertyController(
                 quartierValue = request.quartierValue,
                 cityValue = request.cityValue,
                 address = request.address,
-                city = city,
+                city = city?.cityId,
                 postalCode = request.postalCode,
-                commune = commune,
-                features = request.features,
-                quartier = quartier,
+                commune = commune?.communeId,
+                quartier = quartier?.quartierId,
                 sold = request.sold,
                 transactionType = request.transactionType,
-                propertyType = propertyType,
-                user = user,
+                user = user.userId,
                 latitude = request.latitude,
-                longitude = request.longitude
+                longitude = request.longitude,
+                propertyTypeId = propertyType.propertyTypeId,
             )
-            val result = service.create(property)
-            val  propertyInstance = service.findByIdProperty(result.propertyId)
+            val result = service.create(property, request.features)
+
+            val  propertyInstance = service.findByIdProperty(result.property.propertyId)
             log.info("propertyInstance => ***${propertyInstance}***")
             if (imageList.isNotEmpty()){
                 imageList.forEach {
                      propertyImageService.create(PropertyImage(
-                        property = propertyInstance.first,
+                        propertyId = propertyInstance.first.propertyId,
                         name = it?.image!!
                     ),baseUrl)
                 }
@@ -104,7 +105,7 @@ class PropertyController(
 
                 imageRoom.forEach {
                     propertyImageRoomService.create(PropertyImageRoom(
-                        property = propertyInstance.first,
+                        propertyId = propertyInstance.first.propertyId,
                         name = it?.image!!
                     ),baseUrl)
                 }
@@ -113,7 +114,7 @@ class PropertyController(
             if (imageLivingRoom.isNotEmpty()){
                 imageLivingRoom.forEach {
                     val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
-                        property = propertyInstance.first,
+                        propertyId = propertyInstance.first.propertyId,
                         name = it?.image!!
                     ),baseUrl)
                     log.info("test => ***${result}***")
@@ -123,21 +124,17 @@ class PropertyController(
             if (imageKitchen.isNotEmpty()){
                 imageKitchen.forEach {
                     propertyImageKitchenService.create(PropertyImageKitchen(
-                        property = propertyInstance.first,
+                        propertyId = propertyInstance.first.propertyId,
                         name = it?.image!!
                     ),baseUrl)
                 }
             }
-            val response = mapOf(
-                "message" to "Enregistrement réussie pour la proprièté",
-                "properties" to result
+            return ApiResponseWithMessage(
+                data = result,
+                message = "Enregistrement réussie pour la proprièté",
             )
-            return ResponseEntity.status(201).body(response)
         }
-        val response = mapOf(
-            "message" to "erreur au niveau de la validation"
-        )
-        return ResponseEntity.badRequest().body(response)
+        throw Exception()
     }
 
     @Operation(summary = "Voir les Property")
@@ -222,18 +219,18 @@ class PropertyController(
         @PathVariable("userId") userId : Long,
         @PathVariable("propertyId") propertyId : Long,
         @Valid @RequestBody request: PropertyRequest
-    ): ResponseEntity<Property> {
+    ): ResponseEntity<PropertyMasterDTO> {
         val city = cityService.findByIdCity(request.cityId)
         userService.findIdUser(request.userId)
         val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
         val commune = communeService.findByIdCommune(request.communeId)
         val quartier =  quartierService.findByIdQuartier(request.quartierId)
         val property = service.findByIdProperty(propertyId)
-        if (property.first.user?.userId != userId){
+        if (property.first.user != userId){
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Cet auteur n'appartient pas à la proprièté.")
         }
-        property.first.propertyType = propertyType
+        property.first.propertyTypeId = propertyType.propertyTypeId
         property.first.title = request.title
         property.first.description = request.description
         property.first.address = request.address
@@ -247,9 +244,9 @@ class PropertyController(
         property.first.electric = request.electric
         property.first.water = request.water
         property.first.guarantee = request.guarantee
-        property.first.city = city
-        property.first.quartier = quartier
-        property.first.commune = commune
+        property.first.city = city?.cityId
+        property.first.quartier = quartier?.quartierId
+        property.first.commune = commune?.communeId
         property.first.price = request.price
         property.first.floor = request.floor
         property.first.quartierValue = request.quartierValue
@@ -259,7 +256,7 @@ class PropertyController(
         property.first.latitude = request.latitude
         property.first.longitude = request.longitude
         property.first.updatedAt = LocalDate.now()
-        val updated = service.create(property.first)
+        val updated = service.create(property.first, request.features)
         return ResponseEntity.ok(updated)
     }
 }

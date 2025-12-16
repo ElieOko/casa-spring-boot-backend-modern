@@ -1,7 +1,6 @@
 package server.web.casa.app.actor.application.service
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -29,5 +28,9 @@ class PersonService(
            return repository.save(model.toEntity()).toDomain()
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
+    }
+    suspend fun findByIdUser(userId : Long): Person? {
+       val profile: Person? = repository.findAll().filter { it.userId == userId }.firstOrNull()?.toDomain()
+       return profile
     }
 }

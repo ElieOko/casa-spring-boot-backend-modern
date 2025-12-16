@@ -7,9 +7,9 @@ import org.springframework.data.relational.core.mapping.Table
 @Table(name = "PropertyImages")
 class PropertyImageEntity(
     @Id
-    val id : Long = 0,
+    val id: Long = 0,
     @JsonBackReference
-    var propertyId : Long,
-    val name : String,
-    val path : String
+    var propertyId: Long?,
+    val name: String,
+    val path: String
 )

@@ -11,12 +11,13 @@ import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.*
 import server.web.casa.app.actor.domain.model.*
 import server.web.casa.app.actor.domain.model.join.master.PersonUserRequest
-import server.web.casa.app.actor.domain.model.join.master.PersonUserUpdateRequest
-import server.web.casa.app.actor.domain.model.request.PersonRequest
+import server.web.casa.app.actor.domain.model.join.master.toPerson
+import server.web.casa.app.actor.domain.model.join.master.toUser
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.route.actor.ActorRoute
 import server.web.casa.utils.*
+import kotlin.collections.isNotEmpty
 
 const val ROUTE_ACTOR_BAILLEUR = ActorRoute.BAILLEUR
 
@@ -29,53 +30,37 @@ class PersonController(
     private val authService: AuthService,
     private val userService: UserService,
     private val typeAccountService: TypeAccountService,
-    private val accountService: AccountService,
-//    private val typeCardService: TypeCardService,
+    private val accountService: AccountService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPerson(
         @Valid @RequestBody request: PersonUserRequest
     ): ResponseEntity<Map<String, Any?>> {
-        val account = accountService.findAccountWithType(request.account.account, request.account.typeAccount)
-        val parrain : User? = null
-        var paraintId : Long = 0
-        val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
-        if (request.actor.parrainId != null){
-            paraintId = request.actor.parrainId
-        }
-        val userSystem = User(
-            userId = 0,
-            password = request.user.password,
-            email = request.user.email,
-            phone = phone,
-            username = "@"+toPascalCase("${request.actor.firstName} ${request.actor.lastName}"),
-            city = request.user.city,
-            country =  request.user.country
-        )
-//            toPascalCase("${request.actor.firstName} ${request.actor.lastName}")
-        val userCreated = authService.register(userSystem)
-        val data = Person(
-            firstName = request.actor.firstName,
-            lastName = request.actor.lastName,
-            fullName = "${request.actor.firstName} ${request.actor.lastName}",
-            address = request.actor.address,
-            images = request.actor.images,
-            cardFront = request.actor.cardFront,
-            cardBack = request.actor.cardBack,
-            parrainId = null ,
-            userId = userCreated.first?.userId,
-            typeCardId = null,
-            numberCard = request.actor.numberCard,
+        val accountItems = request.account
+        if (accountItems.isNotEmpty()){
+            val account = accountItems.map {
+                typeAccountService.findByIdTypeAccount(it.typeAccount)
+            }.first()
+            val parrain : User? = null
+            var paraintId : Long = 0
+            val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+            if (request.actor.parrainId != null){
+                paraintId = request.actor.parrainId
+            }
+            val userSystem = request.toUser(phone)
+            val userCreated = authService.register(userSystem, accountItems)
+            val data = request.toPerson(userCreated.first!!.userId)
+            val state = service.create(data)
+            val response = mapOf(
+                "message" to "Votre compte ${account.name} a été créer avec succès",
+                "user" to userCreated.first,
+                "actor" to state,
+                "token" to userCreated.second
             )
-        val state = service.create(data)
-        val response = mapOf(
-            "message" to "Votre compte ${account.name} a été créer avec succès",
-            "user" to userCreated.first,
-            "actor" to state,
-            "token" to userCreated.second
-        )
-        return ResponseEntity.status(201).body(response)
+            return ResponseEntity.status(201).body(response)
+        }
+        throw ResponseStatusException(HttpStatus.CONFLICT)
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])

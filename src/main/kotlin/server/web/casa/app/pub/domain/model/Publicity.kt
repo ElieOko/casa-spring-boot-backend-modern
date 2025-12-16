@@ -15,6 +15,6 @@ data class Publicity(
 )
 //@Embeddable
 class Image(
-    val name: String,
-    val publicPath: String,
+    val name: String?,
+    val publicPath: String?,
 )

@@ -1,6 +1,5 @@
 package server.web.casa.app.property.domain.model
 
-import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
 
