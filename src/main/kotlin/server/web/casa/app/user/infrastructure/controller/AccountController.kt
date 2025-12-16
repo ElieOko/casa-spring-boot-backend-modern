@@ -5,19 +5,19 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.user.application.service.TypeAccountService
-import server.web.casa.app.user.domain.model.TypeAccount
+import server.web.casa.app.user.application.service.AccountService
+import server.web.casa.app.user.domain.model.Account
 import server.web.casa.utils.ApiResponse
 
 @RestController
 @RequestMapping
 @Profile("dev")
-class TypeAccountController(
-    private val service: TypeAccountService,
+class AccountController(
+    private val service: AccountService,
 ) {
-    @Operation(summary = "Liste de Type Accounts")
+    @Operation(summary = "Liste de Accounts")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllAccount(): ApiResponse<Flow<TypeAccount>> {
+    suspend fun getAllAccount(): ApiResponse<Flow<Account>> {
         val data = service.getAll()
         return ApiResponse(data)
     }

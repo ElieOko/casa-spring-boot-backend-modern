@@ -22,9 +22,7 @@ class UserController(
     val userService : UserService,
     val auth: Auth
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
-
     @Operation(summary = "Liste des utilisateurs")
     @GetMapping
     @Transactional

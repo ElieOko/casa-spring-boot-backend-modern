@@ -104,7 +104,5 @@ class UserService(
         repository.deleteById(id)
         return true
     }
-     fun account(id: Long): TypeAccount? {
-        return service.findByIdType(id)
-    }
+
 }

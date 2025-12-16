@@ -3,7 +3,9 @@ package server.web.casa.app.user.application.service
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
@@ -26,12 +28,11 @@ class TypeAccountService(
             TypeAccountEntity(it.typeAccountId,it.name).toDomain()
         }
     }
-    suspend fun findByIdTypeAccount(id : Long) : TypeAccount? {
-      val data = repository.findById(id)
-        return data?.toDomain()
-    }
-    suspend fun findByIdType(id : Long) : TypeAccount? {
-        val data = repository.findById(id)
-        return data?.toDomain()
+    suspend fun findByIdTypeAccount(id : Long) : TypeAccount {
+      val data = repository.findById(id) ?: throw ResponseStatusException(
+          HttpStatusCode.valueOf(404),
+          "ID Is Not Found."
+      )
+        return data.toDomain()
     }
 }
