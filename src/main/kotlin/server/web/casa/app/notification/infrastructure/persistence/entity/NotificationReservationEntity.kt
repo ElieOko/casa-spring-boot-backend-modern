@@ -11,7 +11,7 @@ class NotificationReservationEntity(
     val id : Long = 0,
     val reservationId : Long,
     val guestUserId : Long,
-    val hostUserId : UserEntity,
+    val hostUserId : Long,
     var hostUserState : Boolean? = null,
     var guestUserState: Boolean? = null,
     var guestUserDealConcluded: Boolean? = null,

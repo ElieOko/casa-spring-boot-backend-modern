@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class Publicity(
     val publicityId: Long = 0,
-    val user: UserDto?,
+    val user: Long?,
     val image: String?,
     val title: String,
     val description: String,

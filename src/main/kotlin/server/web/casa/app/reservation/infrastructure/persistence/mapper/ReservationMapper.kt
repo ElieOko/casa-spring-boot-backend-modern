@@ -8,8 +8,8 @@ import server.web.casa.app.user.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 
 fun ReservationEntity.toDomain() = Reservation(
-    reservationId = this.reservationId,
-    user = this.user!!.toDomain(),
+    reservationId = this.id,
+    user = this.userId,
     message = this.message,
     status = this.status,
     type = this.type,
@@ -19,13 +19,13 @@ fun ReservationEntity.toDomain() = Reservation(
     startDate = this.startDate,
     endDate = this.endDate,
     createdAt = this.createdAt,
-    property = this.property.toDomain()
+    property = this.propertyId
 )
 
 fun Reservation.toEntity() = ReservationEntity(
-    reservationId = this.reservationId,
-    user = this.user?.toEntityToDto(),
-    property = this.property.toEntity(),
+    id = this.reservationId,
+    userId = this.user,
+    propertyId = this.property,
     message = this.message,
     status = this.status,
     type = this.type,

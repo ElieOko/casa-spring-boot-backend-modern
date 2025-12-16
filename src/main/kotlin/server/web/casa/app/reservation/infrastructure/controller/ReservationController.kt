@@ -14,7 +14,6 @@ import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.reservation.domain.model.*
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
-import server.web.casa.app.reservation.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.route.reservation.ReservationRoute
@@ -44,13 +43,7 @@ class ReservationController(
     ): ResponseEntity<Map<String, Any?>> {
         val user = userService.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
-
-        if (user == null){
-            val responseNotFound = mapOf("error" to "User or property not found")
-            return ResponseEntity.ok().body(responseNotFound )
-        }
-
-        if(property.first.user == user){
+        if(property.first.user == user.userId){
             val responsePending = mapOf("error" to "You can't reserve your own property")
             return ResponseEntity.ok().body(responsePending )
         }
