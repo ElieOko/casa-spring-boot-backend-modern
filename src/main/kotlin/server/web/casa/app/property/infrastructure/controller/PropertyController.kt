@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import kotlinx.coroutines.flow.Flow
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.http.*
@@ -16,6 +17,7 @@ import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
+import server.web.casa.utils.ApiResponse
 import java.time.LocalDate
 
 const val ROUTE_PROPERTY = PropertyRoute.PROPERTY
@@ -55,7 +57,7 @@ class PropertyController(
        val quartier =  quartierService.findByIdQuartier(request.quartierId)
        val isProd = true
        val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
-        if (user != null && propertyType != null && imageList.isNotEmpty()){
+        if (imageList.isNotEmpty()){
             val property = Property(
                 title = request.title,
                 description = request.description,
@@ -91,7 +93,7 @@ class PropertyController(
             val  propertyInstance = service.findByIdProperty(result.propertyId)
             log.info("propertyInstance => ***${propertyInstance}***")
             if (imageList.isNotEmpty()){
-                imageList.map {
+                imageList.forEach {
                      propertyImageService.create(PropertyImage(
                         property = propertyInstance.first,
                         name = it?.image!!
@@ -100,7 +102,7 @@ class PropertyController(
             }
             if (imageRoom.isNotEmpty()){
 
-                imageRoom.map {
+                imageRoom.forEach {
                     propertyImageRoomService.create(PropertyImageRoom(
                         property = propertyInstance.first,
                         name = it?.image!!
@@ -109,7 +111,7 @@ class PropertyController(
             }
 
             if (imageLivingRoom.isNotEmpty()){
-                imageLivingRoom.map {
+                imageLivingRoom.forEach {
                     val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
                         property = propertyInstance.first,
                         name = it?.image!!
@@ -119,7 +121,7 @@ class PropertyController(
             }
 
             if (imageKitchen.isNotEmpty()){
-                imageKitchen.map {
+                imageKitchen.forEach {
                     propertyImageKitchenService.create(PropertyImageKitchen(
                         property = propertyInstance.first,
                         name = it?.image!!
@@ -160,10 +162,10 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByUser(
         @PathVariable("userId") userId : Long,
-    ): ResponseEntity<Map<String, List<Property>>> {
+    ): ApiResponse<Flow<Property>> {
         val data = service.getAllPropertyByUser(userId)
-        val response = mapOf("properties" to data)
-        return ResponseEntity.ok().body(response)
+//        val response = mapOf("properties" to data)
+        return ApiResponse(data)
     }
 
     @Operation(summary = "Get Property by ID")
@@ -222,7 +224,7 @@ class PropertyController(
         @Valid @RequestBody request: PropertyRequest
     ): ResponseEntity<Property> {
         val city = cityService.findByIdCity(request.cityId)
-        val user = userService.findIdUser(request.userId)
+        userService.findIdUser(request.userId)
         val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
         val commune = communeService.findByIdCommune(request.communeId)
         val quartier =  quartierService.findByIdQuartier(request.quartierId)
@@ -231,9 +233,7 @@ class PropertyController(
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Cet auteur n'appartient pas à la proprièté.")
         }
-        if (propertyType != null) {
-            property.first.propertyType = propertyType
-        }
+        property.first.propertyType = propertyType
         property.first.title = request.title
         property.first.description = request.description
         property.first.address = request.address

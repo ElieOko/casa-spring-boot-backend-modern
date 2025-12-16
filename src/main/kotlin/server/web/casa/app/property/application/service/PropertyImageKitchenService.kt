@@ -23,7 +23,7 @@ class PropertyImageKitchenService(
         val filename = storageService.store(file, subfolder = "/property/kitchen/")
         val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
-            propertyKitchen = p.property!!.toEntity(),
+            propertyId = p.property!!.propertyId,
             name = fileUrl,
             path = p.path
         )

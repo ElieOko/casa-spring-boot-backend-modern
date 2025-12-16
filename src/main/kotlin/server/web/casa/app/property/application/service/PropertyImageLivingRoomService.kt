@@ -23,7 +23,7 @@ class PropertyImageLivingRoomService(
         val filename = storageService.store(file, subfolder = "/property/living/")
         val fileUrl = "$server/property/living/$filename"
         val data = PropertyImageLivingRoomEntity(
-            propertyLiving = p.property!!.toEntity(),
+            propertyLivingId = p.property!!.propertyId,
             name = fileUrl,
             path = p.path
         )

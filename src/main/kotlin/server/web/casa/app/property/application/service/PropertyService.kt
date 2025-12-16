@@ -1,5 +1,9 @@
 package server.web.casa.app.property.application.service
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.*
 import org.springframework.http.HttpStatus
@@ -28,34 +32,34 @@ class PropertyService(
         sortOrder : String
     ) : Page<Property> {
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
-        val pageable = PageRequest.of(page,repository.findAll().size,sort)
+        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
         val page = repository.findAll(pageable)
         val data = page.map { it.toDomain() }
         return data
     }
 
-    suspend fun getAllPropertyByUser(userId : Long) : List<Property> {
-        val data = repository.findAll().filter { it.user?.userId == userId }
+    suspend fun getAllPropertyByUser(userId : Long): Flow<Property> {
+        val data = repository.findAll().filter { it.user == userId }
         return data.map { it.toDomain() }
     }
 
-    suspend fun findByIdProperty(id: Long): Pair<Property, List<Property>> {
-        val property = repository.findById(id).orElseThrow {
+    suspend fun findByIdProperty(id: Long): Pair<Property, Flow<Property>> {
+        val property = repository.findById(id)?: throw
                 ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
-            }
+
         val data = property.toDomain()
         //|| (it.propertyType == data.propertyType)
         var similary = repository.findAll()
             .filter { it.cityValue == data.cityValue }
             .filter { it.communeValue == data.communeValue }
             .filter { it.transactionType == data.transactionType }
-            .filter { it.propertyId != data.propertyId }
+            .filter { it.id != data.propertyId }
         if (data.city?.cityId == 1L){
             similary = repository.findAll()
-                .filter { it.city?.cityId == 1L }
-                .filter {it.commune?.communeId == data.commune?.communeId}
+                .filter { it.cityId == 1L }
+                .filter {it.communeId == data.commune?.communeId}
                 .filter {it.transactionType == data.transactionType }
-                .filter { it.propertyId != data.propertyId }
+                .filter { it.id != data.propertyId }
 //
 //                .filter { it.commune?.communeId == data.commune?.communeId}
 //                .filter { it.propertyId != data.propertyId }

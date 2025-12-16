@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.Table
 class PropertyImageKitchenEntity(
     @Id
     val id : Long = 0,
-    var propertyKitchenId : Long,
+    var propertyId : Long,
     val name : String,
     val path : String
 )

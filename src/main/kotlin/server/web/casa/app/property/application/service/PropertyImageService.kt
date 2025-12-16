@@ -29,7 +29,7 @@ class PropertyImageService(
         p.path = imageUri!!
 //        p.name = file.name
         val data = PropertyImageEntity(
-            property = p.property!!.toEntity(),
+            propertyId = p.property?.propertyId!!,
             name = fileUrl,
             path = p.path
         )
