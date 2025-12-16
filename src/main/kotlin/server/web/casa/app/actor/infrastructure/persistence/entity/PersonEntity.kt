@@ -20,3 +20,16 @@ class PersonEntity(
     val parrainId : Long? = null,
     val typeCard : Long? = null,
 )
+
+    /*
+    Ajoute deux champ : job => pour le service que user peut rendre
+    (work, job=> chauffeur, plombier...) et
+    acteurType => où on aura bailleur, commissionnaire et locateur, soit admin...
+    en gros ces sont les memes info de preference on ajoute ces deux champs
+    puis userId le différentie
+    ou soit pour job on cree une table intermediaire
+    au cas où un user aura plusieurs service rendre : user -userjob- job
+    avec userjob (userId et jobId)
+    si on doit ajouter des privileges specifiques on cree la table privilege
+    où on va attribuer à user en fonction de acteurType
+    */
