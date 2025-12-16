@@ -11,7 +11,6 @@ import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.address.infrastructure.persistence.mapper.toEntity
-import server.web.casa.app.ecosystem.application.service.realisation.RealisationArchitectServiceAction
 import server.web.casa.app.ecosystem.application.service.realisation.RealisationElectricienServiceAction
 import server.web.casa.app.ecosystem.application.service.task.AjusteurServiceAction
 import server.web.casa.app.ecosystem.application.service.task.ElectricienServiceAction

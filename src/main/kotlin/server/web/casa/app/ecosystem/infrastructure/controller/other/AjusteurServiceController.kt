@@ -11,11 +11,9 @@ import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.address.infrastructure.persistence.mapper.toEntity
-import server.web.casa.app.ecosystem.application.service.realisation.RealisationAjusteurServiceAction
 import server.web.casa.app.ecosystem.application.service.task.AjusteurServiceAction
 import server.web.casa.app.ecosystem.domain.model.realisation.AjusteurRealisation
 import server.web.casa.app.ecosystem.domain.model.task.AjusteurTask
-import server.web.casa.app.ecosystem.domain.request.AjusteurServiceRequest
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.ServiceAjusteurEntity
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.application.service.DeviseService
