@@ -7,10 +7,11 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.user.application.service.AccountService
 import server.web.casa.app.user.domain.model.Account
+import server.web.casa.route.account.AccountRoute
 import server.web.casa.utils.ApiResponse
 
 @RestController
-@RequestMapping
+@RequestMapping(AccountRoute.ACCOUNT)
 @Profile("dev")
 class AccountController(
     private val service: AccountService,
