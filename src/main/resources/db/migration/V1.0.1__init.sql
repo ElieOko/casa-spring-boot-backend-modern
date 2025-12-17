@@ -20,22 +20,17 @@ CREATE TABLE IF NOT EXISTS public.typecards (
 
 CREATE TABLE IF NOT EXISTS public.persons (
     id BIGSERIAL PRIMARY KEY,
-
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     full_name VARCHAR(200) NOT NULL,
-
     address TEXT,
     images TEXT,
-
     card_front TEXT,
     card_back TEXT,
     number_card TEXT,
-
     user_id BIGINT,
     parrain_id BIGINT,
     type_card_id BIGINT,
-
     CONSTRAINT fk_person_user
         FOREIGN KEY (user_id) REFERENCES public.users(id),
 

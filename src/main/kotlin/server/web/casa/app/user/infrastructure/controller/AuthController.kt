@@ -61,7 +61,7 @@ class AuthController(
       @Valid @RequestBody body: UserAuth
     ): ResponseEntity<Map<String, Any?>> {
       val data = authService.login(body.identifiant, body.password)
-      val profile = servicePerson.findByIdPerson(data.second!!.userId)
+      val profile = servicePerson.findByIdPerson(data.second?.userId!!)
         try {
                 val response = mapOf(
                     "user" to data.second,
@@ -136,7 +136,7 @@ class AuthController(
         val userConnect = auth.user()
         val new = user.newPassword
 //        val old = user.oldPassword
-        authService.changePassword(userConnect!!.userId,new)
+        authService.changePassword(userConnect?.userId!!,new)
         val message = mapOf(
             "message" to "Mot de passe changé avec succès"
         )

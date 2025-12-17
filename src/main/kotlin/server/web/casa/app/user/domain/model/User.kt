@@ -29,7 +29,7 @@ data class User(
 )
 
 data class UserDto(
-    val userId: Long = 0,
+    val userId: Long? = null,
     val email: String? = null,
     val username: String,
     val phone: String,

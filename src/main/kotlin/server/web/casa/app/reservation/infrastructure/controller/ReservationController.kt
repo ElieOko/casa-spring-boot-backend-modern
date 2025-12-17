@@ -69,7 +69,7 @@ class ReservationController(
         val userEntity = userR.findById(request.userId)
             //.orElseThrow { RuntimeException("User not found") }
 
-        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity?.id!!, userEntity!!.userId)
+        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity?.id!!, userEntity?.userId!!)
                                                 ?.takeIf { it.isNotEmpty() }
                                                 ?.last()
 

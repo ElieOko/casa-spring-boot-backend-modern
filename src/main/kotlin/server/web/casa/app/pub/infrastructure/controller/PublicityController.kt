@@ -67,7 +67,7 @@ class PublicityController(
         suspend fun getPubByUser(@PathVariable id: Long): ResponseEntity<Map<String, List<PublicityEntity?>>> {
             val user = userS.findIdUser(id)
                 ?: throw RuntimeException("User not found")
-            val pub = service.findByUser(user.userId)
+            val pub = service.findByUser(user.userId!!)
             val response = mapOf("pub" to pub)
             return ResponseEntity.ok(response)
         }

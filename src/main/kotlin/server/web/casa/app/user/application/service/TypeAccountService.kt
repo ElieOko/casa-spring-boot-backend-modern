@@ -25,7 +25,7 @@ class TypeAccountService(
     suspend fun getAll(): Flow<TypeAccount> {
         val data= repository.findAll()
         return data.map {
-            TypeAccountEntity(it.typeAccountId,it.name).toDomain()
+            TypeAccountEntity(it.id,it.name).toDomain()
         }
     }
     suspend fun findByIdTypeAccount(id : Long) : TypeAccount {

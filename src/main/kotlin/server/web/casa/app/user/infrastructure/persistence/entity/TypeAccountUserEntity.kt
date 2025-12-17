@@ -1,19 +1,23 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import server.web.casa.app.user.domain.model.TypeAccountUser
 
-@Table(name = "TypeAccountUsers")
+@Table(name = "type_account_users")
 class TypeAccountUserEntity(
     @Id
-    val typeAccountUserId : Long = 0,
+    @Column("id")
+    val id: Long? = null,
+    @Column("type_account_id")
     val typeAccountId: Long,
-    val userId: Long,
+    @Column("user_id")
+    val userId: Long
 )
 
 fun TypeAccountUserEntity.toDomain() = TypeAccountUser(
-    id = this.typeAccountUserId,
+    id = this.id,
     typeAccountId = this.typeAccountId,
     userId = this.userId,
 )

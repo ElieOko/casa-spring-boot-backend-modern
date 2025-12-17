@@ -9,7 +9,7 @@ import server.web.casa.app.user.domain.model.Account
 class AccountEntity(
     @Id
     @Column("id")
-    val id: Long = 0,
+    val id: Long? = null,
     @Column("name")
     val name: String,
     @Column("type_account_id")

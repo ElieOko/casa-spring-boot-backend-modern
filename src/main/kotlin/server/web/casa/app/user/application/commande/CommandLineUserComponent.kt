@@ -1,5 +1,7 @@
 package server.web.casa.app.user.application.commande
 
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
@@ -30,6 +32,9 @@ class CommandLineUserComponent(
         log.info(this::class.simpleName)
         log.info(version)
         try {
+                runBlocking {
+//                    createTypeAccountAll()
+                }
 //            createTypeAccount()
 //            createUser()
 //            getAllTypeAccount()
@@ -38,6 +43,16 @@ class CommandLineUserComponent(
             log.info(e.message)
         }
 
+    }
+    suspend fun createTypeAccountAll(){
+      val data = typeAccountRepository.saveAll<TypeAccountEntity>(
+          listOf(
+          TypeAccountEntity(name = "Client"),
+          TypeAccountEntity(name = "Proprietaire"),
+          TypeAccountEntity(name = "Prestataire de service"))
+        ).toList()
+
+        log.info("save type account all ${data.size}")
     }
 //    fun createTypeAccount(){
 //        val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(

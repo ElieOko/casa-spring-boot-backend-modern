@@ -50,7 +50,7 @@ class PersonController(
             }
             val userSystem = request.toUser(phone)
             val userCreated = authService.register(userSystem, accountItems)
-            val data = request.toPerson(userCreated.first!!.userId)
+            val data = request.toPerson(userCreated.first?.userId!!)
             val state = service.create(data)
             val response = mapOf(
                 "message" to "Votre compte ${account.name} a été créer avec succès",

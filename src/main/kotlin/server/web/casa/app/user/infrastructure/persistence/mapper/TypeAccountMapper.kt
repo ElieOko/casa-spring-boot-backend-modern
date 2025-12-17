@@ -6,7 +6,7 @@ import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEnt
 fun TypeAccountEntity.toDomain(): TypeAccount {
     val e = this
     return TypeAccount(
-        typeAccountId = e.typeAccountId,
+        typeAccountId = e.id,
         name = e.name,
     )
 }
@@ -14,7 +14,7 @@ fun TypeAccountEntity.toDomain(): TypeAccount {
 fun TypeAccount.toEntity(): TypeAccountEntity {
     val e = this
     return TypeAccountEntity(
-        typeAccountId = e.typeAccountId,
+        id = e.typeAccountId,
         name = e.name
     )
 }

@@ -4,7 +4,6 @@ import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import kotlin.time.ExperimentalTime
 
-
 fun UserEntity.toDomain(): UserDto {
     val entity = this
     return UserDto(

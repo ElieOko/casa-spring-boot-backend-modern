@@ -67,11 +67,11 @@ class AuthService(
         accountItems.forEach {
             serviceMultiAccount.save(TypeAccountUser(
                 id = 0,
-                userId = savedEntity.userId,
+                userId = savedEntity.userId!!,
                 typeAccountId = it.typeAccount
             ))
         }
-        val newAccessToken = jwtService.generateAccessToken(savedEntity.userId.toHexString())
+        val newAccessToken = jwtService.generateAccessToken(savedEntity.userId!!.toHexString())
         val userData : UserDto = savedEntity.toDomain()
         val result = Pair(userData,newAccessToken)
         return result
@@ -90,7 +90,7 @@ class AuthService(
             throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
         }
 
-        val newAccessToken = jwtService.generateAccessToken(user.userId.toHexString())
+        val newAccessToken = jwtService.generateAccessToken(user.userId!!.toHexString())
         val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
 
         storeRefreshToken(user.userId, newRefreshToken)
@@ -117,7 +117,7 @@ class AuthService(
     suspend fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
         val userSecurity = userRepository.findByPhoneOrEmail(user.identifier)
             ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
-       return Pair(userSecurity.userId,twilio.checkVerify(code = user.code, contact = user.identifier))
+       return Pair(userSecurity.userId!!,twilio.checkVerify(code = user.code, contact = user.identifier))
     }
     suspend fun changePassword(id : Long,new : String): UserDto {
         val data = userRepository.findById(id)
@@ -141,7 +141,7 @@ class AuthService(
         )
 
         val hashed = hashToken(refreshToken)
-            refreshTokenRepository.findByUserIdAndHashedToken(user.userId, hashed)
+            refreshTokenRepository.findByUserIdAndHashedToken(user.userId!!, hashed)
                 ?: throw ResponseStatusException(
                     HttpStatusCode.valueOf(403),
                     "Refresh token not recognized (maybe used or expired?)"
