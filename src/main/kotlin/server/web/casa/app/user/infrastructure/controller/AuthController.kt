@@ -38,17 +38,15 @@ class AuthController(
     ): ResponseEntity<Map<String, Any?>> {
         val accountItems = request.account
         if (accountItems.isNotEmpty()){
-          val account = accountItems.map {
-                accountService.findByIdTypeAccount(it.typeAccount)
-          }.first()
-            val userSystem = request.toDomain()
-            val data = authService.register(userSystem,accountItems)
-            val response = mapOf(
+          val account = accountItems.map { accountService.findByIdTypeAccount(it.typeAccount) }.first()
+          val userSystem = request.toDomain()
+          val data = authService.register(userSystem,accountItems)
+          val response = mapOf(
                 "user" to data.first,
                 "token" to data.second,
                 "message" to "Votre compte principal ${account.name} a été créer avec succès"
             )
-            return ResponseEntity.status(201).body(response)
+          return ResponseEntity.status(201).body(response)
         }
         else{
             throw Exception()
@@ -61,16 +59,14 @@ class AuthController(
       @Valid @RequestBody body: UserAuth
     ): ResponseEntity<Map<String, Any?>> {
       val data = authService.login(body.identifiant, body.password)
-      val profile = servicePerson.findByIdPerson(data.second?.userId!!)
         try {
-                val response = mapOf(
-                    "user" to data.second,
-                    "profile" to profile,
-                    "token" to data.first.accessToken,
-                    "refresh_token" to data.first.refreshToken,
-                    "message" to "Connexion réussie avec succès",
-                )
-                return ResponseEntity.ok().body(response)
+            val response = mapOf(
+                "user" to data.second,
+                "token" to data.first.accessToken,
+                "refresh_token" to data.first.refreshToken,
+                "message" to "Connexion réussie avec succès"
+            )
+            return ResponseEntity.ok().body(response)
         }
         catch (e: AuthenticationException){
             log.info(e.message)

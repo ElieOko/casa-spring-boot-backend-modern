@@ -12,7 +12,9 @@ import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.user.application.service.AuthService
 import server.web.casa.app.user.application.service.TypeAccountService
 import server.web.casa.app.user.domain.model.User
+import server.web.casa.app.user.infrastructure.persistence.entity.AccountEntity
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountEntity
+import server.web.casa.app.user.infrastructure.persistence.repository.AccountRepository
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountRepository
 
 @Component
@@ -21,6 +23,7 @@ import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccoun
 class CommandLineUserComponent(
     @Value("\${spring.application.version}")  private val version: String,
     val typeAccountRepository: TypeAccountRepository,
+    val accountRepository: AccountRepository,
     private val authService: AuthService,
     private val cityService: CityService,
     private val typeAccountService: TypeAccountService
@@ -33,6 +36,7 @@ class CommandLineUserComponent(
         log.info(version)
         try {
                 runBlocking {
+//                    createAccount()
 //                    createTypeAccountAll()
                 }
 //            createTypeAccount()
@@ -51,39 +55,33 @@ class CommandLineUserComponent(
           TypeAccountEntity(name = "Proprietaire"),
           TypeAccountEntity(name = "Prestataire de service"))
         ).toList()
-
         log.info("save type account all ${data.size}")
     }
-//    fun createTypeAccount(){
-//        val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(
-//            listOf(
-//                TypeAccountEntity(name = "admin"),//1
-//                TypeAccountEntity(name = "commissionnaire"),//2
-//                TypeAccountEntity(name = "bailleur"),//3
-//                TypeAccountEntity(name = "locataire"),//4
-//                TypeAccountEntity(name = "majordome"),//5
-//                TypeAccountEntity(name = "demenagement"),//6
-//                TypeAccountEntity(name = "electricien"),//7
-//                TypeAccountEntity(name = "salubrité"),//8
-//                TypeAccountEntity(name = "peintre"),//9
-//                TypeAccountEntity(name = "carrelleur"),//10
-//                TypeAccountEntity(name = "menusier"),//11
-//                TypeAccountEntity(name = "frigoriste"),//12
-//                TypeAccountEntity(name = "ajusteur"),//13
-//                TypeAccountEntity(name = "architect"),//14
-//                TypeAccountEntity(name = "chauffeur"),//15
-//                TypeAccountEntity(name = "plombier"),//16
-//                TypeAccountEntity(name = "maçon"),//18
-//            )
-//        )
+    suspend fun createAccount(){
+            val store = accountRepository.saveAll<AccountEntity>(
+            listOf(
+                AccountEntity(name = "commissionnaire", typeAccountId = 2),//2
+                AccountEntity(name = "bailleur", typeAccountId = 2),//3
+                AccountEntity(name = "gerant", typeAccountId = 2),//3
+                AccountEntity(name = "locataire", typeAccountId = 1),//4
+                AccountEntity(name = "majordome", typeAccountId = 3),//5
+                AccountEntity(name = "demenagement",typeAccountId = 3),//6
+                AccountEntity(name = "electricien",typeAccountId = 3),//7
+                AccountEntity(name = "salubrité",typeAccountId = 3),//8
+                AccountEntity(name = "peintre",typeAccountId = 3),//9
+                AccountEntity(name = "carrelleur",typeAccountId = 3),//10
+                AccountEntity(name = "menusier",typeAccountId = 3),//11
+                AccountEntity(name = "frigoriste",typeAccountId = 3),//12
+                AccountEntity(name = "ajusteur",typeAccountId = 3),//13
+                AccountEntity(name = "architect",typeAccountId = 3),//14
+                AccountEntity(name = "chauffeur",typeAccountId = 3),//15
+                AccountEntity(name = "plombier",typeAccountId = 3),//16
+                AccountEntity(name = "maçon",typeAccountId = 3),//18
+            )
+        ).toList()
+        log.info("Enregistrement réussi avec succès ${store.size}")
 //        log.info("Enregistrement réussi avec succès")
-//        log.info("@".repeat(12))
-//        store.forEach { typeAccountRepository->
-//            log.info("${typeAccountRepository?.name} ${typeAccountRepository?.typeAccountId}")
-////            log.info()
-//        }
-////        log.info("Enregistrement réussi avec succès")
-//    }
+    }
 //
 //    fun getAllTypeAccount(){
 //        typeAccountRepository.findAll().forEach { accountEntity ->

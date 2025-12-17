@@ -3,6 +3,7 @@ package server.web.casa.app.actor.infrastructure.controller.master
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
@@ -16,14 +17,13 @@ import server.web.casa.app.actor.domain.model.join.master.toUser
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.route.actor.ActorRoute
+import server.web.casa.route.actor.ActorRoute.MEMBER
 import server.web.casa.utils.*
 import kotlin.collections.isNotEmpty
 
-const val ROUTE_ACTOR_BAILLEUR = ActorRoute.BAILLEUR
-
-@Tag(name = "Personne", description = "Gestion des acteurs")
+@Tag(name = "Personne", description = "Gestion des Membres")
 @RestController
-@RequestMapping(ROUTE_ACTOR_BAILLEUR)
+@RequestMapping(MEMBER)
 @Profile(Mode.DEV)
 class PersonController(
     private val service : PersonService,
@@ -64,8 +64,8 @@ class PersonController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllPerson(): ApiResponse<Flow<Person>> {
-        return ApiResponse(service.findAllPerson())
+    suspend fun getAllPerson(): ApiResponse<List<Person>> {
+        return ApiResponse(service.findAllPerson().toList())
     }
 
 //    @Operation(summary = "Modification Person")

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.time.*
 
 @Table(name = "users")
-class UserEntity @OptIn(ExperimentalTime::class) constructor(
+class UserEntity(
     @Id
     @Column("id")
     val userId: Long? = null,
@@ -29,4 +31,5 @@ class UserEntity @OptIn(ExperimentalTime::class) constructor(
     @Column("country")
     val country: String? = "Democratic Republic of the Congo",
     @Column("created_at")
-    val createdAt: Instant = Clock.System.now())
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+)

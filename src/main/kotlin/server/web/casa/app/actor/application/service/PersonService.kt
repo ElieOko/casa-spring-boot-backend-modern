@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.domain.model.Person
 import server.web.casa.app.actor.domain.model.toEntity
+import server.web.casa.app.actor.infrastructure.persistence.entity.PersonEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 
@@ -21,6 +22,10 @@ class PersonService(
     }
     suspend fun findByIdPerson(id : Long): Person? {
         return repository.findById(id)?.toDomain()
+    }
+
+    suspend fun findByIdPersonUser(id : Long): Person {
+        return repository.findAll().filter { it.userId == id }.first().toDomain()
     }
     suspend fun update(id : Long,model: Person): Person {
        val data = repository.findById(id)

@@ -1,5 +1,8 @@
 package server.web.casa.app.user.application.service
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.app.user.infrastructure.persistence.entity.*
@@ -10,14 +13,18 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import server.web.casa.adaptater.provide.twilio.TwilioService
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.user.domain.model.TypeAccountUser
 import server.web.casa.app.user.domain.model.UserDto
+import server.web.casa.app.user.domain.model.UserFullDTO
 import server.web.casa.app.user.domain.model.request.AccountRequest
 import server.web.casa.app.user.domain.model.request.VerifyRequest
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.*
 import java.security.MessageDigest
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import kotlin.time.ExperimentalTime
 //sudo docker run --name casa-db -e POSTGRES_PASSWORD=root -e POSTGRES_DB=testdb e- POSTGRES_USERNAME=postgres -p 5434:5432 -d postgres
@@ -31,7 +38,12 @@ class AuthService(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val twilio : TwilioService,
     private val serviceMultiAccount: TypeAccountUserService,
+    private val typeAccountService: TypeAccountService,
+    private val accountService: AccountService,
+    private val servicePerson: PersonService,
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     data class TokenPair(
         val accessToken: String,
         val refreshToken: String
@@ -55,7 +67,6 @@ class AuthService(
         }
 
         val entity = UserEntity(
-            userId = 0,
             password = hashEncoder.encode(user.password),
             email = user.email,
             username = user.username,
@@ -63,21 +74,25 @@ class AuthService(
             city = user.city,
             country = user.country
         )
+        log.info("Creating user ${user.userId}")
         val savedEntity = userRepository.save(entity)
+//        throw Exception("stop ***")
         accountItems.forEach {
             serviceMultiAccount.save(TypeAccountUser(
-                id = 0,
                 userId = savedEntity.userId!!,
                 typeAccountId = it.typeAccount
             ))
         }
+
         val newAccessToken = jwtService.generateAccessToken(savedEntity.userId!!.toHexString())
+//        val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
+//        storeRefreshToken(savedEntity.userId, newRefreshToken)
         val userData : UserDto = savedEntity.toDomain()
         val result = Pair(userData,newAccessToken)
         return result
     }
 
-    suspend fun login(identifier: String, password: String): Pair<TokenPair, UserDto?> {
+    suspend fun login(identifier: String, password: String): Pair<TokenPair, UserFullDTO> {
         var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
         if (isEmailValid(identifier)){
             validIdentifier = identifier
@@ -90,16 +105,23 @@ class AuthService(
             throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
         }
 
+        log.info("Logging into user ${user.userId}")
         val newAccessToken = jwtService.generateAccessToken(user.userId!!.toHexString())
         val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
-
+        val accounts = serviceMultiAccount.getAll().filter { it.userId == user.userId }.toList()
+        val accountMultiple: List<AccountDTO> =  accounts.map {
+           val data = accountService.findByIdAccount(it.typeAccountId)
+            AccountDTO(
+                id = data.id,
+                name = data.name,
+                typeAccount = typeAccountService.findByIdTypeAccount(data.typeAccountId)
+            )
+        }.toList()
+        val profile = servicePerson.findByIdPersonUser(user.userId)
         storeRefreshToken(user.userId, newRefreshToken)
         val result = Pair(
-            TokenPair(
-                accessToken = newAccessToken,
-                refreshToken = newRefreshToken
-            )
-            ,user.toDomain())
+            TokenPair(accessToken = newAccessToken, refreshToken = newRefreshToken),
+            UserFullDTO(user.toDomain(), accountMultiple,profile))
         return result
     }
 
@@ -160,7 +182,9 @@ class AuthService(
     private suspend fun storeRefreshToken(userId: Long, rawRefreshToken: String) {
         val hashed = hashToken(rawRefreshToken)
         val expiryMs = jwtService.refreshTokenValidityMs
-        val expiresAt = Instant.now().plusMillis(expiryMs)
+        val instant = Instant.now().plusMillis(expiryMs)
+        val zoneId = ZoneId.systemDefault()
+        val expiresAt =  LocalDateTime.ofInstant(instant, zoneId)
         refreshTokenRepository.save(
             RefreshToken(
                 userId = userId,

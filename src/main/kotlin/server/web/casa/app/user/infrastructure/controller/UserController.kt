@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -27,10 +28,10 @@ class UserController(
     @GetMapping
     @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
-    suspend fun getListUser(): ApiResponse<Flow<UserDto>> {
+    suspend fun getListUser(): ApiResponse<List<UserDto>> {
         val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         logger.info("My ID -> $ownerId")
-        val data = userService.findAllUser()
+        val data = userService.findAllUser().toList()
         return ApiResponse(data)
     }
 
