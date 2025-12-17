@@ -3,7 +3,7 @@ package server.web.casa.app.reservation.domain.model
 import java.time.LocalDate
 
 data class Reservation(
-    val reservationId: Long = 0,
+    val reservationId: Long? = null,
     val user: Long ?,
     val property: Long,
     val message: String? = "",

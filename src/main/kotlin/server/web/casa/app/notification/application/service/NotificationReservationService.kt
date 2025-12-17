@@ -16,7 +16,7 @@ class  NotificationReservationService(
 ) {
     suspend fun create(notice: NotificationReservation): Boolean {
        repository.save(NotificationReservationEntity(
-           reservationId = notice.reservation.id,
+           reservationId = notice.reservation.id!!,
            guestUserId = notice.guestUser.userId,
            hostUserId = notice.hostUser.userId,
            guestUserState = true

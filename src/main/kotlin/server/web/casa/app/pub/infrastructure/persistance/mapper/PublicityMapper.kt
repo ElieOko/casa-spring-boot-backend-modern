@@ -4,7 +4,7 @@ import server.web.casa.app.pub.domain.model.Publicity
 import server.web.casa.app.pub.infrastructure.persistance.entity.PublicityEntity
 
 fun PublicityEntity.toDomain() = Publicity(
-    publicityId = this.publicityId,
+    publicityId = this.id,
     user = this.user,
     image = this.imagePath,
     title = this.title,
@@ -14,7 +14,7 @@ fun PublicityEntity.toDomain() = Publicity(
 )
 
 fun Publicity.toEntity() = PublicityEntity(
-    publicityId = this.publicityId,
+    id = this.publicityId,
     user = this.user,
     imagePath = this.image,
     title = this.title,

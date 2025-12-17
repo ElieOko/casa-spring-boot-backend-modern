@@ -1,16 +1,21 @@
 package server.web.casa.app.payment.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import server.web.casa.app.payment.domain.model.Devise
 
 @Table(name = "devises")
 class DeviseEntity(
     @Id
-    val id : Long = 0,
-    val name : String,
-    val code : String,
-    val tauxLocal : Double? = 22500.0,
+    @Column("id")
+    val id: Long? = null,
+    @Column("name")
+    val name: String,
+    @Column("code")
+    val code: String,
+    @Column("taux_local")
+    val tauxLocal: Double? = 22500.0
 )
 
 fun DeviseEntity.toDomain() = Devise(

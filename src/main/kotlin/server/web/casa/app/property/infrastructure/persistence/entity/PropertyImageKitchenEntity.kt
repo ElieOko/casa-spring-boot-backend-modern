@@ -1,14 +1,19 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
 
-@Table(name = "property_image_kitchens")
-class PropertyImageKitchenEntity(
+@Table("property_image_kitchens")
+data class PropertyImageKitchenEntity(
     @Id
-    val id: Long = 0,
-    var propertyId: Long?,
+    @Column("id")
+    val id: Long? = null,
+    @Column("property_id")
+    var propertyId: Long? = null,
+    @Column("name")
     val name: String,
+    @Column("path")
     val path: String
 )

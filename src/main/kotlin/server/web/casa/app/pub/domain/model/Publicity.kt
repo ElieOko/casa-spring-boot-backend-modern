@@ -5,7 +5,7 @@ import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
 
 data class Publicity(
-    val publicityId: Long = 0,
+    val publicityId: Long? = null,
     val user: Long?,
     val image: String?,
     val title: String,

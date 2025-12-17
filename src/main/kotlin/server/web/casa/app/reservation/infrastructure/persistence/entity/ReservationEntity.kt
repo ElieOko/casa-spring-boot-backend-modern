@@ -1,23 +1,38 @@
 package server.web.casa.app.reservation.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import server.web.casa.app.reservation.domain.model.*
+import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.domain.model.ReservationType
 import java.time.LocalDate
 
-@Table(name = "reservations")
- class ReservationEntity(
-    @Id
-    val id       : Long = 0,
-    val propertyId            : Long,
-    val userId                : Long ?,
-    val message             : String? = "",
-    val reservationHeure    : String? = "",
-    val status              : String = ReservationStatus.PENDING.name,
-    val type                : String = ReservationType.STANDARD.name,
-    val isActive            : Boolean = true,
-    val cancellationReason  : String? = "",
-    val startDate           : LocalDate,
-    val endDate             : LocalDate,
-    val createdAt           : LocalDate = LocalDate.now(),
+@Table("reservations")
+data class ReservationEntity(
+   @Id
+   @Column("id")
+   val id: Long? = null,
+   @Column("property_id")
+   val propertyId: Long,
+   @Column("user_id")
+   val userId: Long? = null,
+   @Column("message")
+   val message: String? = "",
+   @Column("reservation_heure")
+   val reservationHeure: String? = "",
+   @Column("status")
+   val status: String = ReservationStatus.PENDING.name,
+   @Column("type")
+   val type: String = ReservationType.STANDARD.name,
+   @Column("is_active")
+   val isActive: Boolean = true,
+   @Column("cancellation_reason")
+   val cancellationReason: String? = "",
+   @Column("start_date")
+   val startDate: LocalDate,
+   @Column("end_date")
+   val endDate: LocalDate,
+   @Column("created_at")
+   val createdAt: LocalDate = LocalDate.now()
 )
+

@@ -1,18 +1,26 @@
 package server.web.casa.app.pub.infrastructure.persistance.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import java.time.LocalDate
 
-@Table(name = "publicities")
-class PublicityEntity(
+@Table("publicities")
+data class PublicityEntity(
     @Id
-    val publicityId: Long = 0,
-    val user            : Long?,
-    val imagePath       : String? = null,
-    val title           : String,
-    val description     : String,
-    var isActive        : Boolean = true,
-    val createdAt       : LocalDate = LocalDate.now(),
+    @Column("id")
+    val id: Long? = null,
+    @Column("user_id")
+    val user: Long? = null,  // FK vers users.id
+    @Column("image_path")
+    val imagePath: String? = null,
+    @Column("title")
+    val title: String,
+    @Column("description")
+    val description: String,
+    @Column("is_active")
+    var isActive: Boolean = true,
+    @Column("created_at")
+    val createdAt: LocalDate = LocalDate.now()
 )

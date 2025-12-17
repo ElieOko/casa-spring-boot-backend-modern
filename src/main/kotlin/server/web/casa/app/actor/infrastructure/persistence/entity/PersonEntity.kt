@@ -1,24 +1,37 @@
 package server.web.casa.app.actor.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import server.web.casa.app.actor.domain.model.Person
 
 @Table(name = "persons")
 class PersonEntity(
     @Id
-    val id : Long? = 0,
-    val firstName : String,
-    val lastName : String,
-    val fullName : String,
-    val address : String? = "",
-    val images : String? = null,
-    val cardFront : String?,
-    val cardBack : String? = null,
-    val numberCard : String? =  null,
-    val userId : Long?,
-    val parrainId : Long? = null,
-    val typeCardId : Long? = null,
+    @Column("id")
+    val id: Long? = null,   // AUTO-INCREMENT
+    @Column("first_name")
+    val firstName: String,
+    @Column("last_name")
+    val lastName: String,
+    @Column("full_name")
+    val fullName: String,
+    @Column("address")
+    val address: String? = "",
+    @Column("images")
+    val images: String? = null,
+    @Column("card_front")
+    val cardFront: String?,
+    @Column("card_back")
+    val cardBack: String? = null,
+    @Column("number_card")
+    val numberCard: String? = null,
+    @Column("user_id")
+    val userId: Long?,
+    @Column("parrain_id")
+    val parrainId: Long? = null,
+    @Column("type_card_id")
+    val typeCardId: Long? = null
 )
 
 fun PersonEntity.toDomain() = Person(

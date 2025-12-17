@@ -33,12 +33,12 @@ class PropertyService(
         val result = repository.save(data)
         features.forEach {
             repositoryFeature.save(PropertyFeatureEntity(
-                propertyId = result.id,
+                propertyId = result.id!!,
                 featureId = it.featureId
             ))
         }
 
-        return toDomain(result.id)
+        return toDomain(result.id!!)
     }
     suspend fun getAll(
         page : Int,
@@ -54,7 +54,7 @@ class PropertyService(
     }
      suspend fun findAllRelation(): List<PropertyMasterDTO> = coroutineScope {
         val properties = repository.findAll().toList()
-        val propertyIds = properties.map { it.id }
+        val propertyIds = properties.map { it.id } as List<Long>
         // Récupération groupée
         val features = repositoryFeature.findByPropertyIdIn(propertyIds).toList()
         val images = propertyImageService.findPropertyIdIn(propertyIds).toList()

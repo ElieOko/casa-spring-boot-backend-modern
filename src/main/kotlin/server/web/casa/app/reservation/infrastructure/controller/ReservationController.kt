@@ -57,7 +57,7 @@ class ReservationController(
             isActive = true,
             reservationHeure = request.reservationHeure,
             userId = request.userId,
-            propertyId = property.first.propertyId,
+            propertyId = property.first.propertyId!!,
             message = request.message,
             startDate = request.startDate,
             endDate = request.endDate,
@@ -69,7 +69,7 @@ class ReservationController(
         val userEntity = userR.findById(request.userId)
             //.orElseThrow { RuntimeException("User not found") }
 
-        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity!!.id, userEntity!!.userId)
+        val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity?.id!!, userEntity!!.userId)
                                                 ?.takeIf { it.isNotEmpty() }
                                                 ?.last()
 
@@ -89,7 +89,7 @@ class ReservationController(
                 val responsePending = mapOf("error" to "You already have a pending reservation with this property")
                 return ResponseEntity.ok().body(responsePending )
             }else{
-                val updated = service.updateStatusById(reservationId, ReservationStatus.CANCELLED)
+                val updated = service.updateStatusById(reservationId!!, ReservationStatus.CANCELLED)
             }
         }
 
@@ -257,7 +257,7 @@ class ReservationController(
             val response = mapOf("error" to "reservation not found")
             return ResponseEntity.ok(response)
         }
-        val notification = notif.dealConcludedHost(reservation.id, true)
+        val notification = notif.dealConcludedHost(reservation.id!!, true)
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
         val notificationState = notif.stateReservationHost(reservation.id, true)
 
@@ -285,7 +285,7 @@ class ReservationController(
        @PathVariable state: Boolean
     ): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findId(reservationId)
-        val notification = if(reservation != null) notif.stateReservationHost(reservation.id, state) else null
+        val notification = if(reservation != null) notif.stateReservationHost(reservation.id!!, state) else null
         val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
         return ResponseEntity.ok(response)
     }
@@ -296,7 +296,7 @@ class ReservationController(
             val response = mapOf("error" to "reservation not found")
             return ResponseEntity.ok(response)
         }
-        val notification = notif.stateReservationGuestCancel(reservation.id)
+        val notification = notif.stateReservationGuestCancel(reservation.id!!)
         val propertyEntity = propertyR.findById(reservation.propertyId)
            // .takeIf{ it.isNotEmpty() }!!
            // .filter { entity -> entity!!.propertyId==reservation.property.propertyId }[0] //.filter { }//findById(reservation.property.propertyId)

@@ -3,7 +3,7 @@ package server.web.casa.app.property.domain.model
 import java.time.LocalDate
 
 data class Property(
-    val propertyId: Long = 0,
+    val propertyId: Long? = null,
     var title: String,
     var description: String? = "",
     var price: Double,
