@@ -45,10 +45,10 @@ class PropertyService(
         size : Int,
         sortBy : String,
         sortOrder : String
-    ) : Page<Property> {
+    ): Flow<Property> {
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
         val pageable = PageRequest.of(page,repository.findAll().count(),sort)
-        val page = repository.findAll(pageable)
+        val page = repository.findAll()
         val data = page.map { it.toDomain() }
         return data
     }
@@ -152,7 +152,7 @@ class PropertyService(
         size : Int,
         sortBy : String,
         sortOrder : String
-    ): Page<Property>{
+    ): Flow<Property>{
         val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
         val pageable = PageRequest.of(page,size,sort)
         val data = repository.filterProperty(
@@ -163,7 +163,7 @@ class PropertyService(
             commune = filterModel.commune,
             typeMaison = filterModel.typeMaison,
             room = filterModel.room,
-            pageable = pageable
+//            pageable = pageable
         )
         return data.map { it.toDomain() }
     }

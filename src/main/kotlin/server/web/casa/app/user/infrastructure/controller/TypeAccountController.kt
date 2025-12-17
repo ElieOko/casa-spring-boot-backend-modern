@@ -10,14 +10,14 @@ import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.utils.ApiResponse
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/v1/types")
 @Profile("dev")
 class TypeAccountController(
     private val service: TypeAccountService,
 ) {
     @Operation(summary = "Liste de Type Accounts")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllAccount(): ApiResponse<Flow<TypeAccount>> {
+    suspend fun getAllTypeAccountE(): ApiResponse<Flow<TypeAccount>> {
         val data = service.getAll()
         return ApiResponse(data)
     }

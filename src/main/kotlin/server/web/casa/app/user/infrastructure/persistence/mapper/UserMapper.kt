@@ -9,7 +9,6 @@ fun UserEntity.toDomain(): UserDto {
     val entity = this
     return UserDto(
         userId = entity.userId,
-        typeAccount = entity.typeAccount.toDomain(),
         email = entity.email,
         phone = entity.phone.toString(),
         username = entity.username.toString(),
@@ -26,7 +25,6 @@ fun UserDto.toEntityToDto(): UserEntity {
     return UserEntity(
         userId = user.userId,
         username = user.username,
-        typeAccount = user.typeAccount!!.toEntity(),
         email = user.email,
         phone = user.phone,
         city = user.city,
@@ -40,7 +38,6 @@ fun User.toEntity(): UserEntity {
     return UserEntity(
         userId = user.userId,
         username = user.username,
-        typeAccount = user.typeAccount!!.toEntity(),
         email = user.email,
         phone = user.phone,
         city = user.city,

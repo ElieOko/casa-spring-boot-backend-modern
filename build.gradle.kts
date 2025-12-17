@@ -1,7 +1,7 @@
 plugins {
 	kotlin("jvm") version "2.2.10"
 	kotlin("plugin.spring") version "2.2.10"
-	id("org.springframework.boot") version "4.0.0-SNAPSHOT"
+	id("org.springframework.boot") version "4.0.0"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "2.2.10"
 }
@@ -72,7 +72,10 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	compileOnly("org.projectlombok:lombok")
-//	implementation("io.r2dbc:r2dbc-postgresql")
+
+	implementation("io.r2dbc:r2dbc-postgresql")
+	implementation("io.r2dbc:r2dbc-pool:1.0.2.RELEASE")
+	implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
 //    runtimeOnly("org.postgresql:postgresql")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 //	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
@@ -80,6 +83,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-session-data-redis-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("org.springframework.boot:spring-boot-starter-r2dbc-test")
 	testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testImplementation("io.projectreactor:reactor-test")

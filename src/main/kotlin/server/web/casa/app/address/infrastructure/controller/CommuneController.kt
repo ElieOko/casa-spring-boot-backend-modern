@@ -29,7 +29,7 @@ class CommuneController(
         val district = districtService.findByIdDistrict(request.districtId)
         if (district != null){
             val data = Commune(
-                district = district ,
+                district = district.districtId ,
                 name = request.name
             )
           val result = service.saveCommune(data)

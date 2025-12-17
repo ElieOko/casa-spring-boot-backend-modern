@@ -32,7 +32,7 @@ class DistrictController(
         val city = cityService.findByIdCity(request.cityId)
         if (city != null){
             val data = District(
-                city = city ,
+                city = city.cityId ,
                 name = request.name
             )
           val result = service.saveDistrict(data)

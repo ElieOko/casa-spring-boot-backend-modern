@@ -11,15 +11,15 @@ import java.security.Principal
 class Auth(
     private val repository : UserRepository,
 ) {
-    fun user(): UserDto? {
+    suspend fun user(): UserDto? {
         SecurityContextHolder.getContext().authentication?.name?.let {
-            val data = repository.findById(it.toInt().toLong()).orElse(null)
-            return data.toDomain()
+            val data = repository.findById(it.toInt().toLong())
+            return data?.toDomain()
         }
         return null
     }
-    fun userStom(principal: Principal): UserDto? {
-        val data = repository.findById(principal.name.toInt().toLong()).orElse(null)
-        return data.toDomain()
+    suspend fun userStom(principal: Principal): UserDto? {
+        val data = repository.findById(principal.name.toInt().toLong())
+        return data?.toDomain()
     }
 }

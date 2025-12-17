@@ -1,7 +1,5 @@
 package server.web.casa.app.ecosystem.domain.model.realisation
 
-import server.web.casa.app.ecosystem.domain.model.task.ElectricienTask
-import server.web.casa.app.ecosystem.domain.model.task.toEntity
 
 //data class ElectricienRealisation(
 //    val id : Long = 0,

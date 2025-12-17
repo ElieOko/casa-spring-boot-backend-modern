@@ -17,7 +17,7 @@ class AccountController(
 ) {
     @Operation(summary = "Liste de Accounts")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllAccount(): ApiResponse<Flow<Account>> {
+    suspend fun getAllAccountE(): ApiResponse<Flow<Account>> {
         val data = service.getAll()
         return ApiResponse(data)
     }

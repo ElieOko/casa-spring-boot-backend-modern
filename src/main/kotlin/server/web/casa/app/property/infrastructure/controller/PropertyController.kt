@@ -139,7 +139,7 @@ class PropertyController(
 
     @Operation(summary = "Voir les Property")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllProperty(): ResponseEntity<Map<String, Page<Property>>> {
+    suspend fun getAllProperty(): ResponseEntity<Map<String, Flow<Property>>> {
        val page = 0
        val size = 15
        val sortBy = "title"
@@ -193,7 +193,7 @@ class PropertyController(
         @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
         @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
-    ): ResponseEntity<Map<String, Page<Property>>> {
+    ): ResponseEntity<Map<String, Flow<Property>>> {
         val data = service.filterProduct(
             filterModel = PropertyFilter(
                 transactionType = transactionType,

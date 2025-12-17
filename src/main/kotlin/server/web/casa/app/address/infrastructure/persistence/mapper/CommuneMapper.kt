@@ -7,13 +7,13 @@ fun CommuneEntity.toDomain() = Commune( communeId = this.communeId, name = this.
 
 fun CommuneEntity.toDomainOrigin() = Commune(
     communeId = this.communeId,
-    quartiers = this.quartier.map { it.toDomain() }.toList(),
-    district = this.district?.toDomain(),
+//    quartiers = this.,
+    district = this.districtId,
     name = this.name
 )
 
 fun Commune.toEntity() = CommuneEntity(
     communeId = this.communeId,
-    district = this.district?.toEntity(),
+    districtId = this.district,
     name = this.name
 )

@@ -1,5 +1,6 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.r2dbc.repository.Query
@@ -13,7 +14,7 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
 //        "propertyImageRoom",
 //        "propertyImageLivingRoom",
 //        "propertyImageKitchen"])
-    fun findAll(pageable: Pageable): Page<PropertyEntity>
+override fun findAll(): Flow<PropertyEntity>
 
     @Query("""
         SELECT r FROM PropertyEntity r 
@@ -32,6 +33,5 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
         @Param("commune") commune: Long,
         @Param("typeMaison")  typeMaison: Long,
         @Param("room")  room: Int,
-        pageable: Pageable
-    ) : Page<PropertyEntity>
+    ) : Flow<PropertyEntity>
 }

@@ -3,9 +3,6 @@ package server.web.casa.app.ecosystem.application.service.task
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.ecosystem.domain.model.task.ElectricienTask
-import server.web.casa.app.ecosystem.domain.model.task.toEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 
 //@Service
 //class ElectricienServiceAction(

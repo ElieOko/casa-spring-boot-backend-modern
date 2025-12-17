@@ -1,6 +1,5 @@
 package server.web.casa.app.user.application.commande
 
-import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.CommandLineRunner
@@ -35,41 +34,41 @@ class CommandLineUserComponent(
 //            createUser()
 //            getAllTypeAccount()
         }
-        catch (e : ConstraintViolationException){
+        catch (e : Exception){
             log.info(e.message)
         }
 
     }
-    fun createTypeAccount(){
-        val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(
-            listOf(
-                TypeAccountEntity(name = "admin"),//1
-                TypeAccountEntity(name = "commissionnaire"),//2
-                TypeAccountEntity(name = "bailleur"),//3
-                TypeAccountEntity(name = "locataire"),//4
-                TypeAccountEntity(name = "majordome"),//5
-                TypeAccountEntity(name = "demenagement"),//6
-                TypeAccountEntity(name = "electricien"),//7
-                TypeAccountEntity(name = "salubrité"),//8
-                TypeAccountEntity(name = "peintre"),//9
-                TypeAccountEntity(name = "carrelleur"),//10
-                TypeAccountEntity(name = "menusier"),//11
-                TypeAccountEntity(name = "frigoriste"),//12
-                TypeAccountEntity(name = "ajusteur"),//13
-                TypeAccountEntity(name = "architect"),//14
-                TypeAccountEntity(name = "chauffeur"),//15
-                TypeAccountEntity(name = "plombier"),//16
-                TypeAccountEntity(name = "maçon"),//18
-            )
-        )
-        log.info("Enregistrement réussi avec succès")
-        log.info("@".repeat(12))
-        store.forEach { typeAccountRepository->
-            log.info("${typeAccountRepository?.name} ${typeAccountRepository?.typeAccountId}")
-//            log.info()
-        }
+//    fun createTypeAccount(){
+//        val store: List<TypeAccountEntity?> = typeAccountRepository.saveAll<TypeAccountEntity>(
+//            listOf(
+//                TypeAccountEntity(name = "admin"),//1
+//                TypeAccountEntity(name = "commissionnaire"),//2
+//                TypeAccountEntity(name = "bailleur"),//3
+//                TypeAccountEntity(name = "locataire"),//4
+//                TypeAccountEntity(name = "majordome"),//5
+//                TypeAccountEntity(name = "demenagement"),//6
+//                TypeAccountEntity(name = "electricien"),//7
+//                TypeAccountEntity(name = "salubrité"),//8
+//                TypeAccountEntity(name = "peintre"),//9
+//                TypeAccountEntity(name = "carrelleur"),//10
+//                TypeAccountEntity(name = "menusier"),//11
+//                TypeAccountEntity(name = "frigoriste"),//12
+//                TypeAccountEntity(name = "ajusteur"),//13
+//                TypeAccountEntity(name = "architect"),//14
+//                TypeAccountEntity(name = "chauffeur"),//15
+//                TypeAccountEntity(name = "plombier"),//16
+//                TypeAccountEntity(name = "maçon"),//18
+//            )
+//        )
 //        log.info("Enregistrement réussi avec succès")
-    }
+//        log.info("@".repeat(12))
+//        store.forEach { typeAccountRepository->
+//            log.info("${typeAccountRepository?.name} ${typeAccountRepository?.typeAccountId}")
+////            log.info()
+//        }
+////        log.info("Enregistrement réussi avec succès")
+//    }
 //
 //    fun getAllTypeAccount(){
 //        typeAccountRepository.findAll().forEach { accountEntity ->
@@ -77,18 +76,18 @@ class CommandLineUserComponent(
 //        }
 //    }
 //
-suspend fun createUser(){
-       val account = typeAccountService.findByIdTypeAccount(1)
-//       val city = cityService.findByIdCity(1)
-       val userSystem = User(
-            password = "1234",
-            typeAccount = account,
-            email = "elieoko100@gmail.com",
-            phone = "0827824163",
-            city = "Kinshasa",
-           country = "CD"
-           )
-        val data = authService.register(userSystem, accountItems)
-        log.info("Enregistrement réussi avec succès***${data.first?.phone}")
-    }
+//suspend fun createUser(){
+//       val account = typeAccountService.findByIdTypeAccount(1)
+////       val city = cityService.findByIdCity(1)
+//       val userSystem = User(
+//            password = "1234",
+//            typeAccount = account,
+//            email = "elieoko100@gmail.com",
+//            phone = "0827824163",
+//            city = "Kinshasa",
+//           country = "CD"
+//           )
+//        val data = authService.register(userSystem, accountItems)
+//        log.info("Enregistrement réussi avec succès***${data.first?.phone}")
+//    }
 }

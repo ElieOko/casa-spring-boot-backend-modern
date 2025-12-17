@@ -44,15 +44,9 @@ class FavoriteController(
         val user = userS.findIdUser(request.userId)
         val property = prop.findByIdProperty(request.propertyId)
 
-        if (user == null) {
-            return ResponseEntity.badRequest().body(
-                mapOf("error" to "User and property must not be null.")
-            )
-        }
-
         val favorite = Favorite(
-            user = user,
-            property = property.first,
+            userId = user.userId,
+            propertyId = property.first.propertyId,
             createdAt = LocalDate.now()
         )
        val existingFavorite = service.getFavoriteIfExist(propR.findById(request.propertyId)!!, userR.findById(request.userId)!!)?.firstOrNull()
