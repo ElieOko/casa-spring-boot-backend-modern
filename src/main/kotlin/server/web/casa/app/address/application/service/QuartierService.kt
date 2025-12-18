@@ -19,8 +19,8 @@ class QuartierService(
 
     suspend fun findAllQuartier() = repository.findAll().map { it.toDomain() }.toList()
 
-    suspend fun findByIdQuartier(id : Long) : Quartier?{
-        val data = repository.findById(id)//.orElse(null)
+    suspend fun findByIdQuartier(id: Long?) : Quartier?{
+        val data = if (id == null) null else repository.findById(id)
         return data?.toDomain()
     }
 }

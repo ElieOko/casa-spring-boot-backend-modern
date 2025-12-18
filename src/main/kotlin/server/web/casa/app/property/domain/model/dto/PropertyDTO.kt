@@ -4,7 +4,8 @@ import server.web.casa.app.property.domain.model.AddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 
 data class PropertyDTO(
-    val propertyId: Long = 0,
+    val propertyId: Long? = null,
+    val userId: Long?,
     var title: String,
     var description: String? = "",
     var price: Double,
@@ -23,8 +24,8 @@ data class PropertyDTO(
     val isAvailable: Boolean = true,
 )
 data class GeoDTO(
-    val lat: Double?,
-    val lng: Double?,
+    var lat: Double?,
+    var lng: Double?,
 )
 fun PropertyEntity.toPropertyDTO() = PropertyDTO(
     propertyId = this.propertyTypeId,
@@ -44,6 +45,7 @@ fun PropertyEntity.toPropertyDTO() = PropertyDTO(
     sold = this.sold,
     transactionType = this.transactionType,
     isAvailable = this.isAvailable,
+    userId = this.user
 )
 
 fun PropertyEntity.toAddressDTO() = AddressDTO(
@@ -52,7 +54,7 @@ fun PropertyEntity.toAddressDTO() = AddressDTO(
     quartierValue = this.quartierValue,
     cityValue = this.cityValue,
     countryValue = this.countryValue,
-    postalCode = this.postalCode
+    postalCode = this.postalCode,
 )
 
 fun PropertyEntity.toGeo() = GeoDTO(this.latitude, this.longitude)

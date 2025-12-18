@@ -21,15 +21,15 @@ class PropertyImageService(
         log.info("file ****taille:${file.size}")
         log.info("file ****name:${file.name}")
         val imageUri = gcsService.uploadFile(file,"property/images/")
-        val filename = storageService.store(file, subfolder = "/property/images/")
-        val fileUrl = "$server/property/images/$filename"
-        log.info("public url local $fileUrl")
+//        val filename = storageService.store(file, subfolder = "/property/images/")
+//        val fileUrl = "$server/property/images/$filename"
+        log.info("public url local ")
 //        log.info("file uri ****name:${imageUri}")
         p.path = imageUri!!
 //        p.name = file.name
         val data = PropertyImageEntity(
             propertyId = p.propertyId,
-            name = fileUrl,
+            name = "",
             path = p.path
         )
         val result = repository.save(data)

@@ -1,5 +1,6 @@
 package server.web.casa.app.actor.domain.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import server.web.casa.app.actor.infrastructure.persistence.entity.PersonEntity
 
 class Person(
@@ -12,8 +13,11 @@ class Person(
     val cardFront : String?,
     val cardBack : String? = null,
     val numberCard : String? = null,
+    @JsonIgnore
     val userId : Long?,
+    @JsonIgnore
     val parrainId : Long? = null,
+    @JsonIgnore
     val typeCardId : Long? = null,
 )
 

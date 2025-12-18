@@ -23,19 +23,15 @@ data class PropertyRequest(
     val quartierValue: String? = "",
     val cityValue: String? = "",
     val countryValue: String? = "",
-    @NotNull
-    val cityId : Long,
-    @NotNull
-    val communeId : Long,
-    @NotNull
-    val quartierId : Long,
-    @NotNull
-    val electric : Int?=0,
+    val cityId : Long? = null,
+    val communeId : Long? = null,
+    val quartierId : Long? = null,
+    val electric : Int? = 0,
     @NotNull
     val water : Int?=0,
     val postalCode : String?,
-    val quartier : String,
-    val sold : Boolean,
+    val quartier : String ="",
+    val sold : Boolean = false,
     @NotNull
     val transactionType : String,
     @NotNull

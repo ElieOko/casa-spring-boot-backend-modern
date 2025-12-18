@@ -6,6 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 
 @Table(name = "communes")
 class CommuneEntity(
+    @Id
     @Column("id")
     val id: Long? = null,
     @Column("district_id")

@@ -1,6 +1,9 @@
 package server.web.casa.app.property.domain.model
 
 
+import server.web.casa.app.address.domain.model.City
+import server.web.casa.app.address.domain.model.Country
+import server.web.casa.app.address.domain.model.Quartier
 import server.web.casa.app.property.domain.model.dto.Images
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 
@@ -16,10 +19,10 @@ data class Image(
     val kitchen: List<PropertyImageKitchenEntity?>,
 )
 data class AddressDTO(
-    val address : String,
-    val communeValue: String? = "",
-    val quartierValue: String? = "",
-    val cityValue: String? = "",
-    val countryValue: String? = "",
-    val postalCode: String?,
+    var address : String,
+    var communeValue: String? = "",
+    var quartierValue: String? = "",
+    var cityValue: String? = "",
+    var countryValue: String? = "",
+    var postalCode: String?,
 )

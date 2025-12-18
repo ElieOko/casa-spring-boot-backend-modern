@@ -61,7 +61,7 @@ class AuthController(
       val data = authService.login(body.identifiant, body.password)
         try {
             val response = mapOf(
-                "user" to data.second,
+                "member" to data.second,
                 "token" to data.first.accessToken,
                 "refresh_token" to data.first.refreshToken,
                 "message" to "Connexion réussie avec succès"

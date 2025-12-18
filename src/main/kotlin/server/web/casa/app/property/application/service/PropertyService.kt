@@ -7,6 +7,9 @@ import org.springframework.data.domain.*
 import org.springframework.http.*
 import org.springframework.stereotype.*
 import org.springframework.web.server.*
+import server.web.casa.app.address.application.service.CityService
+import server.web.casa.app.address.application.service.CommuneService
+import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.filter.*
@@ -25,10 +28,13 @@ class PropertyService(
     private val userService: UserService,
     private val propertyTypeService: PropertyTypeService,
     private val featureService: FeatureService,
-    private val repositoryFeature : PropertyFeatureRepository
+    private val repositoryFeature : PropertyFeatureRepository,
+    private val cityService: CityService,
+    private val communeService: CommuneService,
+    private val quartierService: QuartierService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-    suspend fun create(p: Property, features: List<FeatureRequest>): PropertyMasterDTO {
+    suspend fun create(p: PropertyMasterDTO, features: List<FeatureRequest>): PropertyMasterDTO {
         val data = p.toEntity()
         val result = repository.save(data)
         features.forEach {
@@ -40,19 +46,15 @@ class PropertyService(
 
         return toDomain(result.id!!)
     }
-    suspend fun getAll(
-        page : Int,
-        size : Int,
-        sortBy : String,
-        sortOrder : String
-    ): Flow<Property> {
-        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
-        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
-        val page = repository.findAll()
-        val data = page.map { it.toDomain() }
-        return data
+    suspend fun getAll(page : Int, size : Int, sortBy : String, sortOrder : String): List<PropertyMasterDTO> {
+//        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
+//        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
+//        val page = repository.findAll()
+//        val data = page.map { it.toDomain() }
+        return findAllRelation()
     }
-     suspend fun findAllRelation(): List<PropertyMasterDTO> = coroutineScope {
+
+    suspend fun findAllRelation(): List<PropertyMasterDTO> = coroutineScope {
         val properties = repository.findAll().toList()
         val propertyIds = properties.map { it.id } as List<Long>
         // Récupération groupée
@@ -78,6 +80,11 @@ class PropertyService(
                     kitchen = kitchenImagesByProperty[property.id] ?: emptyList()
                 ).toImage(),
                 address = property.toAddressDTO(),
+                localAddress = LocalAddressDTO(
+                    city = cityService.findByIdCity(property.cityId),
+                    commune = communeService.findByIdCommune(property.communeId),
+                    quartier = quartierService.findByIdQuartier(property.quartierId)
+                ),
                 geoZone = property.toGeo(),
                 postBy = userService.findIdUser(property.user!!).username,
                 typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
@@ -87,7 +94,7 @@ class PropertyService(
     }
 
     private suspend fun toDomain(id : Long): PropertyMasterDTO = coroutineScope {
-        val property = repository.findById(id)
+        val property = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
         val propertyIds = listOf(id)
         // Récupération groupée
         val features = repositoryFeature.findByPropertyIdIn(propertyIds).toList()
@@ -111,31 +118,36 @@ class PropertyService(
                 kitchen = kitchenImagesByProperty[id] ?: emptyList()
             ).toImage(),
             address = property.toAddressDTO(),
+            localAddress = LocalAddressDTO(
+                city = cityService.findByIdCity(property.cityId),
+                commune = communeService.findByIdCommune(property.communeId),
+                quartier = quartierService.findByIdQuartier(property.quartierId)
+            ),
             geoZone = property.toGeo(),
             postBy = userService.findIdUser(property.user!!).username,
             typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
             features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
         )
     }
-    suspend fun getAllPropertyByUser(userId : Long): Flow<Property> {
-        val data = repository.findAll().filter { it.user == userId }
-        return data.map { it.toDomain() }
+    suspend fun getAllPropertyByUser(userId : Long): List<PropertyMasterDTO> {
+        val data = findAllRelation().filter { it.property.userId == userId }
+        return data
     }
-    suspend fun findByIdProperty(id: Long): Pair<Property, Flow<Property>> {
-        val property = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
-        val data = property.toDomain()
+    suspend fun findByIdProperty(id: Long): Pair<PropertyMasterDTO, Flow<Property>> {
+        val property = toDomain(id)
+        val data = property
         //|| (it.propertyType == data.propertyType)
         var similary = repository.findAll()
-            .filter { it.cityValue == data.cityValue }
-            .filter { it.communeValue == data.communeValue }
-            .filter { it.transactionType == data.transactionType }
-            .filter { it.id != data.propertyId }
-        if (data.city == 1L){
+            .filter { it.cityValue == data.address.cityValue }
+            .filter { it.communeValue == data.address.communeValue }
+            .filter { it.transactionType == data.property.transactionType }
+            .filter { it.id != data.property.propertyId }
+        if (data.localAddress.city?.cityId == 1L){
             similary = repository.findAll()
                 .filter { it.cityId == 1L }
-                .filter {it.communeId == data.commune}
-                .filter {it.transactionType == data.transactionType }
-                .filter { it.id != data.propertyId }
+                .filter {it.communeId == data.localAddress.commune?.communeId}
+                .filter {it.transactionType == data.property.transactionType }
+                .filter { it.id != data.property.propertyId }
 //
 //                .filter { it.commune?.communeId == data.commune?.communeId}
 //                .filter { it.propertyId != data.propertyId }

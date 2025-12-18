@@ -18,8 +18,8 @@ class CommuneService(
     }
     suspend fun findAllCommune() = repository.findAll().map { it.toDomainOrigin() }.toList()
 
-    suspend fun findByIdCommune(id : Long) : Commune? {
-        val data = repository.findById(id)//.orElse(null)
-        return data?.toDomain()
+    suspend fun findByIdCommune(id: Long?): Commune? {
+        val data = if (id != null) repository.findById(id) else null
+       return data?.toDomain()
     }
 }
