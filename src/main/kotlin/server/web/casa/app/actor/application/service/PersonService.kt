@@ -24,8 +24,8 @@ class PersonService(
         return repository.findById(id)?.toDomain()
     }
 
-    suspend fun findByIdPersonUser(id : Long): Person {
-        return repository.findAll().filter { it.userId == id }.first().toDomain()
+    suspend fun findByIdPersonUser(id : Long): Person? {
+        return repository.findAll().filter { it.userId == id }.firstOrNull()?.toDomain()
     }
     suspend fun update(id : Long,model: Person): Person {
        val data = repository.findById(id)

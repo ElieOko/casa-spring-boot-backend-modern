@@ -1,5 +1,6 @@
 package server.web.casa.app.user.application.service
 
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
@@ -92,38 +93,39 @@ class AuthService(
         return result
     }
 
-    suspend fun login(identifier: String, password: String): Pair<TokenPair, UserFullDTO> {
-        var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
-        if (isEmailValid(identifier)){
-            validIdentifier = identifier
-        }
+    suspend fun login(identifier: String, password: String): Pair<TokenPair, UserFullDTO>  =
+        coroutineScope {
+            var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
+            if (isEmailValid(identifier)){
+                validIdentifier = identifier
+            }
 
-        val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
-            ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
+            val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
+                ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
 
-        if(!hashEncoder.matches(password, user.password.toString())) {
-            throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
-        }
+            if(!hashEncoder.matches(password, user.password.toString())) {
+                throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
+            }
 
-        log.info("Logging into user ${user.userId}")
-        val newAccessToken = jwtService.generateAccessToken(user.userId!!.toHexString())
-        val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
-        val accounts = serviceMultiAccount.getAll().filter { it.userId == user.userId }.toList()
-        val accountMultiple: List<AccountDTO> =  accounts.map {
-           val data = accountService.findByIdAccount(it.typeAccountId)
-            AccountDTO(
-                id = data.id,
-                name = data.name,
-                typeAccount = typeAccountService.findByIdTypeAccount(data.typeAccountId)
-            )
-        }.toList()
-        val profile = servicePerson.findByIdPersonUser(user.userId)
-        storeRefreshToken(user.userId, newRefreshToken)
-        val result = Pair(
-            TokenPair(accessToken = newAccessToken, refreshToken = newRefreshToken),
-            UserFullDTO(user.toDomain(), accountMultiple,profile))
-        return result
-    }
+            log.info("Logging into user ${user.userId}")
+            val newAccessToken = jwtService.generateAccessToken(user.userId!!.toHexString())
+            val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
+            val accounts = serviceMultiAccount.getAll().filter { it.userId == user.userId }.toList()
+            val accountMultiple: List<AccountDTO> =  accounts.map {
+                val data = accountService.findByIdAccount(it.typeAccountId)
+                AccountDTO(
+                    id = data.id,
+                    name = data.name,
+                    typeAccount = typeAccountService.findByIdTypeAccount(data.typeAccountId)
+                )
+            }.toList()
+            val profile = servicePerson.findByIdPersonUser(user.userId)
+            storeRefreshToken(user.userId, newRefreshToken)
+            val result = Pair(
+                TokenPair(accessToken = newAccessToken, refreshToken = newRefreshToken),
+                UserFullDTO(user.toDomain(), accountMultiple,profile))
+            result
+     }
 
     suspend fun generateOTP(identifier: String): Triple<String?, String, String> {
         var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
