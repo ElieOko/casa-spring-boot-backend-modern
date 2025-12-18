@@ -6,5 +6,5 @@ import server.web.casa.app.user.infrastructure.persistence.entity.AccountDTO
 data class UserFullDTO(
     val user: UserDto,
     val accounts: List<AccountDTO>,
-    val profile: Person
+    val profile: Person?
 )

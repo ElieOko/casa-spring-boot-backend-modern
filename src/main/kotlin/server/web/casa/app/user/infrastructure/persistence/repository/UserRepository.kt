@@ -9,7 +9,7 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
 
     @Query("SELECT * FROM users WHERE email = :identifier OR phone = :identifier")
-   suspend fun findByPhoneOrEmail(identifier: String):UserEntity?
+   suspend fun findByPhoneOrEmail(identifier: String) : UserEntity?
 //    suspend fun findByEmailOrPhone(email: String, phone: String): Mono<UserEntity>?
 
 
