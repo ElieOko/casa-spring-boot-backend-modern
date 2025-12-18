@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import org.slf4j.LoggerFactory
 import org.springframework.http.*
@@ -44,19 +45,19 @@ class PropertyController(
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest,
         requestHttp: HttpServletRequest
-    ): ApiResponseWithMessage<PropertyMasterDTO> {
-//       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-       val imageList = request.propertyImage
-       val imageKitchen = request.propertyImageKitchen
-       val imageRoom = request.propertyImageRoom
-       val imageLivingRoom = request.propertyImageLivingRoom
-       val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
-       val user = userService.findIdUser(request.userId)
-       val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
+    ): ApiResponseWithMessage<PropertyMasterDTO> = coroutineScope {
+        //       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+        val imageList = request.propertyImage
+        val imageKitchen = request.propertyImageKitchen
+        val imageRoom = request.propertyImageRoom
+        val imageLivingRoom = request.propertyImageLivingRoom
+        val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
+        val user = userService.findIdUser(request.userId)
+        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
 //       val commune = communeService.findByIdCommune(request.communeId)
-       val quartier =  if (request.quartierId != null) quartierService.findByIdQuartier(request.quartierId) else null
-       val isProd = true
-       val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
+        val quartier =  if (request.quartierId != null) quartierService.findByIdQuartier(request.quartierId) else null
+        val isProd = true
+        val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
         if (imageList.isNotEmpty()){
             val property = Property(
                 title = request.title,
@@ -93,7 +94,7 @@ class PropertyController(
             log.info("propertyInstance => ***${propertyInstance}***")
             if (imageList.isNotEmpty()){
                 imageList.forEach {
-                     propertyImageService.create(PropertyImage(
+                    propertyImageService.create(PropertyImage(
                         propertyId = propertyInstance.first.property.propertyId,
                         name = it?.image!!
                     ),baseUrl)
@@ -124,17 +125,17 @@ class PropertyController(
                     ),baseUrl)
                 }
             }
-            return ApiResponseWithMessage(
+             ApiResponseWithMessage(
                 data = result,
                 message = "Enregistrement réussie pour la proprièté",
             )
         }
-        throw Exception()
+        throw Exception("")
     }
 
     @Operation(summary = "Voir les Property")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllProperty(): ResponseEntity<Map<String, List<PropertyMasterDTO>>> {
+    suspend fun getAllProperty(): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
        val page = 0
        val size = 15
        val sortBy = "title"
@@ -146,7 +147,7 @@ class PropertyController(
            sortOrder = sortOrder
        ).toList()
        val response = mapOf("properties" to data)
-        return ResponseEntity.ok().body(response)
+       ResponseEntity.ok().body(response)
     }
 
     @Operation(summary = "Get Property by User")
@@ -154,10 +155,9 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByUser(
         @PathVariable("userId") userId : Long,
-    ): ApiResponse<List<PropertyMasterDTO>> {
+    ): ApiResponse<List<PropertyMasterDTO>> = coroutineScope {
         val data = service.getAllPropertyByUser(userId)
-//        val response = mapOf("properties" to data)
-        return ApiResponse(data)
+         ApiResponse(data)
     }
 
     @Operation(summary = "Get Property by ID")

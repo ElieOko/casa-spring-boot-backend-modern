@@ -130,7 +130,7 @@ class PropertyService(
         )
     }
     suspend fun getAllPropertyByUser(userId : Long): List<PropertyMasterDTO> {
-        val data = findAllRelation().filter { it.property.userId == userId }
+        val data = findAllRelation().filter { it.property.userId == userId }.toList()
         return data
     }
     suspend fun findByIdProperty(id: Long): Pair<PropertyMasterDTO, Flow<Property>> {
