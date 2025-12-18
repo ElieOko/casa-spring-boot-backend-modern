@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.reservation.infrastructure.persistence.repository.ReservationRepository
@@ -20,8 +22,8 @@ class ReservationService(
         return result
     }
 
-     suspend fun findAllReservation() : List<ReservationEntity> {
-        return repoR.findAll().map { it }.toList()
+     suspend fun findAllReservation() : Flux<ReservationEntity> {
+        return repoR.findAll().map { it }.toList() as Flux<ReservationEntity>
     }
 
      suspend fun findId(id: Long): ReservationEntity? {
