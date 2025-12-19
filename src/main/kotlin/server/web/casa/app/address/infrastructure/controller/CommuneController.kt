@@ -2,6 +2,7 @@ package server.web.casa.app.address.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import kotlinx.coroutines.coroutineScope
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
@@ -46,9 +47,9 @@ class CommuneController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllCommune(): ResponseEntity<Map<String, List<Commune>>> {
+    suspend fun getAllCommune(): ResponseEntity<Map<String, List<Commune>>> = coroutineScope {
         val data = service.findAllCommune()
         val response = mapOf("communes" to data)
-        return ResponseEntity.ok().body(response)
+        ResponseEntity.ok().body(response)
     }
 }
