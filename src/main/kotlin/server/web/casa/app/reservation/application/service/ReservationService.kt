@@ -23,8 +23,8 @@ class ReservationService(
         return result
     }
 
-     suspend fun findAllReservation() : Flow<ReservationEntity> {
-        return repoR.findAll().map { it }
+     suspend fun findAllReservation() : List<ReservationEntity> {
+        return repoR.findAll().map { it }.toList()
     }
 
      suspend fun findId(id: Long): ReservationEntity? {
@@ -57,32 +57,32 @@ class ReservationService(
     suspend fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, propertyId: Long): List<ReservationEntity>? {
         return repoR.findByStartDateAndEndDateProperty(starDate, endDate, propertyId)?.map { it }?.toList()
     }
-    suspend fun findByUserProperty(propertyId: Long , userId: Long): Flow<ReservationEntity>? {
-        return repoR.findByUserProperty(propertyId, userId)?.map { it }
+    suspend fun findByUserProperty(propertyId: Long , userId: Long): List<ReservationEntity>? {
+        return repoR.findByUserProperty(propertyId, userId)?.map { it }?.toList()
     }
         //update
 
-    suspend fun updateStatusById(id: Long, status: ReservationStatus):Int{
+    suspend fun updateStatusById(id: Long, status: ReservationStatus):Mono<Int>{
           return repoR.updateStatusById(id, status)
         }
 
-    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Int{
+    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Mono<Int>{
         return repoR.cancelOrKeepReservation(id, isActive, reason, status)
     }
     //delete
 
-    suspend fun deleteReservationById(id: Long):Int{
+    suspend fun deleteReservationById(id: Long):Mono<Int>{
         val success = repoR.deleteByIdReservation(id)
         return success
     }
 
-    suspend fun deleteAllReservationByUser(user: Long):Int{
+    suspend fun deleteAllReservationByUser(user: Long):Mono<Int>{
         val success = repoR.deleteAllByUserReservation (user)
         return success
     }
 
 
-    suspend fun deleteAllReservationByProperty(property: Long):Int{
+    suspend fun deleteAllReservationByProperty(property: Long):Mono<Int>{
         val success = repoR.deleteAllByPropertyReservation(property)
         return success
     }
