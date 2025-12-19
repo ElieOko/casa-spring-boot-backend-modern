@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import kotlinx.coroutines.flow.Flow
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.reservation.infrastructure.persistence.repository.ReservationRepository
@@ -22,8 +23,8 @@ class ReservationService(
         return result
     }
 
-     suspend fun findAllReservation() : Flux<ReservationEntity> {
-        return repoR.findAll().map { it }.toList() as Flux<ReservationEntity>
+     suspend fun findAllReservation() : Flow<ReservationEntity> {
+        return repoR.findAll().map { it }
     }
 
      suspend fun findId(id: Long): ReservationEntity? {
@@ -56,8 +57,8 @@ class ReservationService(
     suspend fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, propertyId: Long): List<ReservationEntity>? {
         return repoR.findByStartDateAndEndDateProperty(starDate, endDate, propertyId)?.map { it }?.toList()
     }
-    suspend fun findByUserProperty(propertyId: Long , userId: Long): List<ReservationEntity>? {
-        return repoR.findByUserProperty(propertyId, userId)?.map { it }?.toList()
+    suspend fun findByUserProperty(propertyId: Long , userId: Long): Flow<ReservationEntity>? {
+        return repoR.findByUserProperty(propertyId, userId)?.map { it }
     }
         //update
 

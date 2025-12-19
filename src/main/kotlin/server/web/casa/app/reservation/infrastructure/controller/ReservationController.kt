@@ -21,6 +21,7 @@ import server.web.casa.utils.Mode
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.flow.*
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -43,6 +44,7 @@ class ReservationController(
     ): ResponseEntity<Map<String, Any?>> {
         val user = userService.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
+
         if(property.first.property.userId == user.userId){
             val responsePending = mapOf("error" to "You can't reserve your own property")
             return ResponseEntity.ok().body(responsePending )
@@ -70,8 +72,12 @@ class ReservationController(
             //.orElseThrow { RuntimeException("User not found") }
 
         val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity?.id!!, userEntity?.userId!!)
-                                                ?.takeIf { it.isNotEmpty() }
-                                                ?.last()
+                                                //?.takeIf { it.isNotEmpty() }
+                                                ?.lastOrNull()
+       /* val reservations = service.findByUserProperty(propertyEntity.id, userEntity.userId)
+        reservations.collectList()
+             .map { list -> list.lastOrNull() }
+        */
 
         val format = DateTimeFormatter.ofPattern("HH:mm:ss")
 
@@ -138,7 +144,7 @@ class ReservationController(
         return ResponseEntity.status(201).body(response)
     }
     @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getAllReservation(): ResponseEntity<Map<String, List<ReservationEntity>>>
+     suspend fun getAllReservation(): ResponseEntity<Map<String, Flow<ReservationEntity>>>
     {
         val data = service.findAllReservation()
         val response = mapOf("reservation" to data)
