@@ -19,7 +19,7 @@ class PersonEntity(
     @Column("address")
     val address: String? = "",
     @Column("images")
-    val images: String? = null,
+    var images: String? = null,
     @Column("card_front")
     val cardFront: String?,
     @Column("card_back")

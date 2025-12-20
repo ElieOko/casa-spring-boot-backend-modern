@@ -10,8 +10,8 @@ class Person(
     val fullName : String,
     val address : String? = "",
     val images : String? = null,
-    val cardFront : String?,
-    val cardBack : String? = null,
+    var cardFront : String? = null,
+    var cardBack : String? = null,
     val numberCard : String? = null,
     @JsonIgnore
     val userId : Long?,
