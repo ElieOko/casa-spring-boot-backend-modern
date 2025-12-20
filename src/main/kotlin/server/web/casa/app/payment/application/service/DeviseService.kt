@@ -21,9 +21,11 @@ class DeviseService(
         return data.map{it.toDomain()}
     }
 
-    suspend fun getById(id : Long): Devise {
-        val data = repository.findById(id) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette devise n'existe pas")
-        return data.toDomain()
+    suspend fun getById(id : Long?): Devise? {
+        if (id != null) {
+            val data = repository.findById(id) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette devise n'existe pas")
+            return data.toDomain()
+        }
+        return null
     }
-
 }

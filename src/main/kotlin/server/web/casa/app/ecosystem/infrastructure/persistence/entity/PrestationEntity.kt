@@ -32,7 +32,7 @@ class PrestationEntity(
     @Column("max_price")
     val maxPrice: Double = 0.0,
     @Column("address")
-    val address: String,
+    val address: String? = null,
     @Column("commune_value")
     val communeValue: String? = "",
     @Column("quartier_value")

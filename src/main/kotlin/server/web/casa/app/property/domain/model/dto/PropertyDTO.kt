@@ -28,7 +28,7 @@ data class GeoDTO(
     var lng: Double?,
 )
 fun PropertyEntity.toPropertyDTO() = PropertyDTO(
-    propertyId = this.propertyTypeId,
+    propertyId = this.id,
     title = this.title,
     description = this.description,
     price = this.price,

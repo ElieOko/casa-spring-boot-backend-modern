@@ -57,6 +57,7 @@ class PropertyService(
     suspend fun findAllRelation(): List<PropertyMasterDTO> = coroutineScope {
         val properties = repository.findAll().toList()
         val propertyIds = properties.map { it.id } as List<Long>
+        val propertyList = mutableListOf<PropertyMasterDTO>()
         // Récupération groupée
         val features = repositoryFeature.findByPropertyIdIn(propertyIds).toList()
         val images = propertyImageService.findPropertyIdIn(propertyIds).toList()
@@ -70,8 +71,8 @@ class PropertyService(
         val livingRoomImagesByProperty = livingRoomImages.groupBy { it.propertyId }
         val kitchenImagesByProperty = kitchenImages.groupBy { it.propertyId }
         // Assemblage final
-        properties.map { property ->
-            PropertyMasterDTO(
+        properties.forEach { property ->
+            propertyList.add(PropertyMasterDTO(
                 property = property.toPropertyDTO(),
                 images = ImageDTO(
                     main = imagesByProperty[property.id] ?: emptyList(),
@@ -89,8 +90,9 @@ class PropertyService(
                 postBy = userService.findIdUser(property.user!!).username,
                 typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
                 features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
-            )
+            ))
         }
+        propertyList
     }
 
     private suspend fun toDomain(id : Long): PropertyMasterDTO = coroutineScope {
