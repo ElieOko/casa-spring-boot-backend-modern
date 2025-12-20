@@ -56,8 +56,9 @@ class PropertyService(
 
     suspend fun findAllRelation(): List<PropertyMasterDTO> = coroutineScope {
         val properties = repository.findAll().toList()
-        val propertyIds = properties.map { it.id } as List<Long>
         val propertyList = mutableListOf<PropertyMasterDTO>()
+        val propertyIds: List<Long> = properties.map { it.id!! }
+        //val propertyIds = properties.map { it.id } as List<Long>
         // Récupération groupée
         val features = repositoryFeature.findByPropertyIdIn(propertyIds).toList()
         val images = propertyImageService.findPropertyIdIn(propertyIds).toList()

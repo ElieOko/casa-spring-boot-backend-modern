@@ -14,6 +14,7 @@ import server.web.casa.app.property.application.service.FavoriteService
 import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.property.domain.model.Favorite
 import server.web.casa.app.property.domain.model.request.FavoriteRequest
+import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
@@ -44,14 +45,14 @@ class FavoriteController(
         val user = userS.findIdUser(request.userId)
         val property = prop.findByIdProperty(request.propertyId)
 
-        val favorite = Favorite(
+        val favorite = FavoriteEntity(
             userId = user.userId,
             propertyId = property.first.property.propertyId,
             createdAt = LocalDate.now()
         )
-       val existingFavorite = service.getFavoriteIfExist(propR.findById(request.propertyId)!!, userR.findById(request.userId)!!)?.firstOrNull()
+       val existingFavorite = service.getFavoriteIfExist(property.first.property.propertyId!!, user.userId!!)
+       val savedFavorite = if (!existingFavorite.isNullOrEmpty()) existingFavorite else service.create(favorite)
 
-        val savedFavorite = existingFavorite ?: service.create(favorite)
         val response = mapOf(
             "message" to "Property '${property.first.property.propertyId}' added to favorites successfully.",
             "user" to user,
@@ -61,29 +62,29 @@ class FavoriteController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFavorite(): ApiResponse<Flow<Favorite>> {
+    suspend fun getAllFavorite(): ApiResponse<List<FavoriteEntity>> {
         val data = service.getAll()
         return ApiResponse(data)
     }
 
     @GetMapping("/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<Favorite>?>> {
-        val user = userR.findById(user)?:throw ResponseStatusException(
+    suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteEntity>?>> {
+        val user = userR.findById(user) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "ID Is Not Found."
         )
-        val favorite = service.getUserFavoriteProperty(user)
+        val favorite = service.getUserFavoriteProperty(user.userId!!)
         val response = mapOf("favorites" to favorite)
         return ResponseEntity.ok().body(response)
     }
 
     @GetMapping("/property/{property}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getOneFavoriteProperty(@PathVariable property: Long):ResponseEntity<Map<String, List<Favorite>?>> {
-        val property = propR.findById (property)?:throw ResponseStatusException(
+    suspend fun getOneFavoriteProperty(@PathVariable property: Long):ResponseEntity<Map<String, List<FavoriteEntity>?>> {
+        val property = propR.findById (property) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "ID Is Not Found."
         )
-        val favorite = service.getOneFavoritePropertyCount(property)
+        val favorite = service.getOneFavoritePropertyCount(property.id!!)
         val response = mapOf("favorites" to favorite)
         return ResponseEntity.ok().body(response)
     }
@@ -96,9 +97,9 @@ class FavoriteController(
     }
     @DeleteMapping("/delete/{userId}/{propertyId}")
     suspend fun deleteFavorite(@PathVariable userId: Long, @PathVariable propertyId:Long): ResponseEntity<Map<String, String>> {
-        val existingFavorite = service.getFavoriteIfExist(propR.findById(propertyId)!!, userR.findById(userId)!!)?.firstOrNull()
+        val existingFavorite = service.getFavoriteIfExist(propertyId, userId)?.firstOrNull()
 
-        val deleteFavorite = existingFavorite?.favoriteId?.let {
+        val deleteFavorite = existingFavorite?.id?.let {
             service.deleteById(it)
         }
         val response = mapOf("message" to "Favorite deleted successfully")
@@ -107,11 +108,11 @@ class FavoriteController(
 
     @DeleteMapping("/user/delete/{userId}")
     suspend fun deleteAllFavoriteByUser(@PathVariable userId: Long): ResponseEntity<Map<String, String>> {
-        val user = userR.findById(userId)?:throw ResponseStatusException(
+        val user = userR.findById(userId) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "ID Is Not Found."
         )
-        service.deleteAllFavoriteUser(user)
+        service.deleteAllFavoriteUser(user.userId!!)
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
     }
