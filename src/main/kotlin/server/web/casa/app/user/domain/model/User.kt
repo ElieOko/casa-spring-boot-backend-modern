@@ -69,3 +69,10 @@ fun UserAuthRequest.toDomain() = User(
 data class RefreshRequest(
     val refreshToken: String
 )
+
+data class ImageUserRequest(
+    @NotNull
+    val userId : Long,
+    @NotNull
+    val image : String
+)

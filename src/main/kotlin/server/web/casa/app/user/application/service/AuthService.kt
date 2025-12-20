@@ -44,14 +44,12 @@ class AuthService(
     private val servicePerson: PersonService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-
     data class TokenPair(
         val accessToken: String,
         val refreshToken: String
     )
-
     @OptIn(ExperimentalTime::class)
-     suspend fun register(user: User, accountItems: List<AccountRequest>): Pair<UserDto?, String> {
+    suspend fun register(user: User, accountItems: List<AccountRequest>): Pair<UserDto?, String> {
          val phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
 
@@ -92,7 +90,6 @@ class AuthService(
         val result = Pair(userData,newAccessToken)
         return result
     }
-
     suspend fun login(identifier: String, password: String): Pair<TokenPair, UserFullDTO>  =
         coroutineScope {
             var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
@@ -126,7 +123,6 @@ class AuthService(
                 UserFullDTO(user.toDomain(), accountMultiple,profile))
             result
      }
-
     suspend fun generateOTP(identifier: String): Triple<String?, String, String> {
         var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
         if (isEmailValid(identifier)){
@@ -137,7 +133,6 @@ class AuthService(
        val status = twilio.generateVerifyOTP(identifier)
        return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur numero non prises en charge",identifier)
     }
-
     suspend fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
         val userSecurity = userRepository.findByPhoneOrEmail(user.identifier)
             ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
@@ -152,7 +147,6 @@ class AuthService(
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
     }
-
     @Transactional
     suspend fun refresh(refreshToken: String): TokenPair {
         if(!jwtService.validateRefreshToken(refreshToken)) {
@@ -179,7 +173,6 @@ class AuthService(
                 refreshToken = newRefreshToken
             )
     }
-
     @OptIn(ExperimentalTime::class)
     private suspend fun storeRefreshToken(userId: Long, rawRefreshToken: String) {
         val hashed = hashToken(rawRefreshToken)
@@ -195,7 +188,6 @@ class AuthService(
             )
         )
     }
-
     private fun hashToken(token: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val hashBytes = digest.digest(token.encodeToByteArray())
