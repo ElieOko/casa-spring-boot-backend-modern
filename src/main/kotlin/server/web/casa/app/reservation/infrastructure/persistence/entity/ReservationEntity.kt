@@ -13,7 +13,7 @@ data class ReservationEntity(
    @Column("id")
    val id: Long? = null,
    @Column("property_id")
-   val propertyId: Long,
+   val propertyId: Long? = null,
    @Column("user_id")
    val userId: Long? = null,
    @Column("message")

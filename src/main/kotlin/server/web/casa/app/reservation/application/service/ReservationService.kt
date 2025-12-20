@@ -4,6 +4,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import kotlinx.coroutines.flow.Flow
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.reservation.infrastructure.persistence.repository.ReservationRepository
@@ -59,27 +62,27 @@ class ReservationService(
     }
         //update
 
-    suspend fun updateStatusById(id: Long, status: ReservationStatus):Int{
+    suspend fun updateStatusById(id: Long, status: ReservationStatus):Mono<Int>{
           return repoR.updateStatusById(id, status)
         }
 
-    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Int{
+    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Mono<Int>{
         return repoR.cancelOrKeepReservation(id, isActive, reason, status)
     }
     //delete
 
-    suspend fun deleteReservationById(id: Long):Int{
+    suspend fun deleteReservationById(id: Long):Mono<Int>{
         val success = repoR.deleteByIdReservation(id)
         return success
     }
 
-    suspend fun deleteAllReservationByUser(user: Long):Int{
+    suspend fun deleteAllReservationByUser(user: Long):Mono<Int>{
         val success = repoR.deleteAllByUserReservation (user)
         return success
     }
 
 
-    suspend fun deleteAllReservationByProperty(property: Long):Int{
+    suspend fun deleteAllReservationByProperty(property: Long):Mono<Int>{
         val success = repoR.deleteAllByPropertyReservation(property)
         return success
     }
