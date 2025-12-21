@@ -79,13 +79,14 @@ class ReservationController(
             val status = lastStatusReservationUserProperty.status
             val reservationHeure = lastStatusReservationUserProperty.reservationHeure
             val reservationId = lastStatusReservationUserProperty.id
+            val timeNow = LocalTime.now()
             val startInterval = LocalTime.parse(reservationHeure!!, format)
             val endInterval = startInterval.plusHours(1)
             val timeRequest = LocalTime.parse(request.reservationHeure, format)
 
-
-            if (status == ReservationStatus.PENDING.toString() && !timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval)
-            ){
+            if(status == ReservationStatus.PENDING.toString() && timeNow.isAfter(endInterval))
+            {
+                //!timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval
                 val updated = service.updateStatusById(reservationId!!, ReservationStatus.CANCELLED)
             }
         }
