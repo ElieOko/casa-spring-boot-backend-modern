@@ -57,26 +57,26 @@ interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Lon
                            @Param("userId") userId: Long): Flow<ReservationEntity> ?
 
     //use with @Transactional when you call it
-
+    @Modifying
     @Query("UPDATE reservations SET status = :status WHERE id = :id")
      fun updateStatusById(@Param("id") id: Long, @Param("status") status: ReservationStatus): Mono<Int>
 
-
+    @Modifying
     @Query("UPDATE reservations SET is_active = :isActive, status = :status, cancellation_reason = :reason WHERE id = :id")
      fun cancelOrKeepReservation(@Param("id") id: Long,
                                  @Param("isActive") isActive: Boolean,
                                  @Param("reason") reason: String?,
                                  @Param("status") status: ReservationStatus): Mono<Int>
 
-
-     @Query("DELETE FROM reservations WHERE id = :id")
+    @Modifying
+    @Query("DELETE FROM reservations WHERE id = :id")
      fun deleteByIdReservation(@Param("id") id: Long): Mono<Int>
 
-
+    @Modifying
     @Query("DELETE FROM reservations WHERE user_id = :userId")
     fun deleteAllByUserReservation(@Param("userId") userId: Long): Mono<Int>
 
-
+    @Modifying
     @Query("DELETE FROM reservations WHERE property_id = :propertyId")
     fun deleteAllByPropertyReservation(@Param("propertyId") propertyId: Long): Mono<Int>
 }

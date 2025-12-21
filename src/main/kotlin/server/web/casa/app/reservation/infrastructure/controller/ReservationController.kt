@@ -86,14 +86,10 @@ class ReservationController(
 
             if (status == ReservationStatus.PENDING.toString() && !timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval)
             ){
-                val responsePending = mapOf("error" to "You already have a pending reservation with this property")
-                return ResponseEntity.ok().body(responsePending )
-            }else{
                 val updated = service.updateStatusById(reservationId!!, ReservationStatus.CANCELLED)
             }
         }
 
-        //if close or cancel we can verify the last before adding
         val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, propertyEntity.id)
 
         val propertyBooked = lastReservationProperty
@@ -131,7 +127,8 @@ class ReservationController(
         val response = mapOf(
             "message" to "Votre reservation à la date du ${reservationCreate.startDate} au ${reservationCreate.endDate} a été créée avec succès",
             "reservation" to reservationCreate,
-            "user" to user,
+            "user" to userEntity,
+            "proprietaire" to  userR.findById( propertyEntity.user),
             "property" to property,
             "notificationSendState" to notification
         )
@@ -209,15 +206,33 @@ class ReservationController(
     @PutMapping("/update/status/{id}")
     suspend fun updateReservation(
         @PathVariable id: Long,
-        @RequestBody status: ReservationStatus
-    ): ResponseEntity<Map<String, ReservationEntity?>> {
-        val updated = service.updateStatusById(id, status)
-        val reservation = service.findId(id)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        @RequestBody request:RequestUpdate
+    ): ResponseEntity<Map<String, Any?>> {
+
+        val userRequest = userR.findById(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
+        val reservation = service.findId(id) ?: return ResponseEntity.ok(mapOf("error" to "reservation not found"))
+
+        val userId = reservation.userId
+        val proprioId = propertyR.findById( reservation.propertyId!!)
+
+        val proprioCheck = userRequest.userId == proprioId?.user
+        val emetCheck = userRequest.userId == userId
+
+        if(emetCheck || proprioCheck){
+            if (proprioCheck){
+                val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
+                return ResponseEntity.ok(mapOf("reservation" to updated))
+            }
+
+            if(request.status != ReservationStatus.APPROVED){
+                val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
+                return ResponseEntity.ok(mapOf("reservation" to updated))
+            }
+        }
+        return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
 
-    @PutMapping("/cancel/{id}")
+  /*  @PutMapping("/cancel/{id}")
     suspend fun cancelReservation(
         @PathVariable id: Long,
         @RequestBody reason: String?
@@ -237,7 +252,7 @@ class ReservationController(
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
-    }
+    }*/
 
     @DeleteMapping("/delete/{id}")
     suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
@@ -306,4 +321,9 @@ class ReservationController(
         return ResponseEntity.ok(response)
     }
 }
-
+class RequestUpdate(
+    val status: ReservationStatus,
+    val reason: String?,
+    //val isActive: Boolean = true,
+    val userId: Long
+)

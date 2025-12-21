@@ -60,27 +60,33 @@ class ReservationService(
     suspend fun findByUserProperty(propertyId: Long , userId: Long): List<ReservationEntity>? {
         return repoR.findByUserProperty(propertyId, userId)?.map { it }?.toList()
     }
-        //update
 
-    suspend fun updateStatusById(id: Long, status: ReservationStatus):Mono<Int>{
-          return repoR.updateStatusById(id, status)
+    suspend fun updateStatusById(id: Long, status: ReservationStatus):ReservationEntity {
+        val entity = repoR.findById(id)
+            entity?.status = status.toString()
+            repoR.save(entity!!)
+        return repoR.findById(id)!!
         }
 
-    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus):Mono<Int>{
-        return repoR.cancelOrKeepReservation(id, isActive, reason, status)
+    suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus): ReservationEntity {
+        val entity = repoR.findById(id)
+            entity?.status = status.toString()
+            entity?.isActive = isActive
+            entity?.cancellationReason = reason
+            repoR.save(entity!!)
+        return repoR.findById(id)!!
     }
     //delete
 
-    suspend fun deleteReservationById(id: Long):Mono<Int>{
-        val success = repoR.deleteByIdReservation(id)
-        return success
+    suspend fun deleteReservationById(id: Long): Boolean{
+        val success= repoR.deleteById(id)
+        return true
     }
 
     suspend fun deleteAllReservationByUser(user: Long):Mono<Int>{
         val success = repoR.deleteAllByUserReservation (user)
         return success
     }
-
 
     suspend fun deleteAllReservationByProperty(property: Long):Mono<Int>{
         val success = repoR.deleteAllByPropertyReservation(property)
