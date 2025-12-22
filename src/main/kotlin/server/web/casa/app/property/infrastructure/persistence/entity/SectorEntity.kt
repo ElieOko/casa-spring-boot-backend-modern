@@ -12,7 +12,7 @@ class SectorEntity(
     val id: Long? = null,
     @Column("name")
     val name: String,
-    @Column("description")
+    @Column("isActive")
     val isActive : Boolean = true,
 )
 
