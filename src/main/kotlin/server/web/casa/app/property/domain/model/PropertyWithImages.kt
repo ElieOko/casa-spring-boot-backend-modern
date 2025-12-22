@@ -1,9 +1,5 @@
 package server.web.casa.app.property.domain.model
 
-
-import server.web.casa.app.address.domain.model.City
-import server.web.casa.app.address.domain.model.Country
-import server.web.casa.app.address.domain.model.Quartier
 import server.web.casa.app.property.domain.model.dto.Images
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 

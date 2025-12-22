@@ -6,3 +6,8 @@ data class PropertyImage(
     var name : String = "",
     var path : String = ""
 )
+
+data class ImageRequestStandard(
+    var id : Long,
+    var name : String = ""
+)

@@ -10,7 +10,7 @@ class Agence(
     val phone1 : String = "",
     val phone2 : String = "",
     val address : String = "",
-    val logo : String = "",
+    var logo : String? = "",
 )
 
 fun Agence.toEntity() = AgenceEntity(
