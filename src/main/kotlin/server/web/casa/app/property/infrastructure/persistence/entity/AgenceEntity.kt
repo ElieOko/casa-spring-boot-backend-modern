@@ -23,7 +23,7 @@ class AgenceEntity(
     @Column("address")
     val address : String = "",
     @Column("logo")
-    val logo : String = "",
+    val logo : String? = "",
 )
 
 fun AgenceEntity.toDomain() = Agence(
