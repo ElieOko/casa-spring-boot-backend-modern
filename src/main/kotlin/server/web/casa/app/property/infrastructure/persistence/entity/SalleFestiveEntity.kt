@@ -51,6 +51,8 @@ class SalleFestiveEntity(
     var isAvailable: Boolean = true,
     @Column("is_decore")
     var isDecore: Boolean = false,
+    @Column("piste_danse")
+    var pisteDanse: Boolean = false,
     @Column("created_at")
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updated_at")
