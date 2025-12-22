@@ -1,10 +1,12 @@
 package server.web.casa.app.prestation.application
 
 import kotlinx.coroutines.flow.toList
+import org.springframework.stereotype.Service
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.prestation.infrastructure.persistance.repository.SollicitationRepository
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 
+@Service
 class SollicitationService(
     private val p: SollicitationRepository
 ) {
