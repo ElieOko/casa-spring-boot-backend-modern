@@ -21,6 +21,8 @@ class SalleFuneraireEntity(
     val capacityPeople: String? = "",
     @Column("price")
     val price : Double? = null,
+    @Column("usage")
+    val usage: String? = "conference, etc",
     @Column("address")
     val address: String,
     @Column("commune_value")
@@ -33,6 +35,8 @@ class SalleFuneraireEntity(
     val countryValue: String? = "",
     @Column("city_id")
     val cityId: Long? = null,
+    @Column("electric")
+    val electric: Int? = 0,
     @Column("postal_code")
     val postalCode: String? = "",
     @Column("commune_id")
