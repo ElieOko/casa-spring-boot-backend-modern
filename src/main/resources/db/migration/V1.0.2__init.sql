@@ -338,3 +338,26 @@ CREATE TABLE IF NOT EXISTS public.prestation_images (
         REFERENCES public.prestations(id)
         ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS public.sollicitations (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT,
+    prestation_id BIGINT NULL,
+    devise_id BIGINT NULL,
+    budget DOUBLE PRECISION,
+    description TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    created_at DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    CONSTRAINT fk_sollicitations_user
+        FOREIGN KEY (user_id)
+        REFERENCES public.users(id),
+
+    CONSTRAINT fk_sollicitations_prestation
+        FOREIGN KEY (prestation_id)
+        REFERENCES public.prestations(id),
+
+    CONSTRAINT fk_sollicitations_devise
+        FOREIGN KEY (devise_id)
+        REFERENCES public.devises(id)
+);
