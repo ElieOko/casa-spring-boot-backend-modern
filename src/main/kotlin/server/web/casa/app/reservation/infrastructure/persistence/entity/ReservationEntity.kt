@@ -21,13 +21,13 @@ data class ReservationEntity(
    @Column("reservation_heure")
    val reservationHeure: String? = "",
    @Column("status")
-   val status: String = ReservationStatus.PENDING.name,
+   var status: String = ReservationStatus.PENDING.name,
    @Column("type")
    val type: String = ReservationType.STANDARD.name,
    @Column("is_active")
-   val isActive: Boolean = true,
+   var isActive: Boolean = true,
    @Column("cancellation_reason")
-   val cancellationReason: String? = "",
+   var cancellationReason: String? = "",
    @Column("start_date")
    val startDate: LocalDate,
    @Column("end_date")

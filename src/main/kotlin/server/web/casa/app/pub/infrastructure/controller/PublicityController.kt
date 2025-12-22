@@ -71,6 +71,12 @@ class PublicityController(
             val response = mapOf("pub" to pub)
             return ResponseEntity.ok(response)
         }
+    @GetMapping("/date/{createdAt}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getPubByDate(@PathVariable createdAt: LocalDate): ResponseEntity<Map<String, List<PublicityEntity?>>> {
+        val pub = service.findByCreated(createdAt)
+        val response = mapOf("pub" to pub)
+        return ResponseEntity.ok(response)
+    }
         @PutMapping("/update/active/{id}")
         suspend fun updateReservation(
             @PathVariable id: Long,
