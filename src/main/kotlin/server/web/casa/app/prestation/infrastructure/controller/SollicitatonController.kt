@@ -12,11 +12,14 @@ import server.web.casa.app.prestation.application.SollicitationService
 import server.web.casa.app.prestation.domain.request.SollicitationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.user.application.service.UserService
+import server.web.casa.route.sollicitation.SollicitationRoute
 import server.web.casa.utils.Mode
+
+const val ROUTE_SOLLICITATION = SollicitationRoute.SOLLICITATION
 
 @Tag(name = "Sollicitation", description = "Sollicitation de prestation")
 @RestController
-
+@RequestMapping(ROUTE_SOLLICITATION)
 @Profile(Mode.DEV)
 class SollicitatonController(
     private val service: SollicitationService,
