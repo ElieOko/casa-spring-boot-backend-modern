@@ -71,7 +71,7 @@ class PrestationController(
 
     @Operation(summary = "Voir les Prestaions service")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllPrestation(): ResponseEntity<Map<String, List<Prestation>>> = coroutineScope {
+    suspend fun getAllPrestation() = coroutineScope {
         val response = mapOf("prestations" to prestationService.getAllData().toList())
         ResponseEntity.ok().body(response)
     }
