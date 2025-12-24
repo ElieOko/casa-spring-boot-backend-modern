@@ -3,20 +3,27 @@ package server.web.casa.app.ecosystem.application.service
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.ecosystem.domain.model.Prestation
+import server.web.casa.app.ecosystem.domain.model.PrestationDTO
+import server.web.casa.app.ecosystem.domain.model.PrestationDTOMaster
 import server.web.casa.app.ecosystem.domain.model.toEntity
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationImageRepository
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationRepository
 import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountUserRepository
+import kotlin.collections.map
 
 @Service
 class PrestationService(
     private val repository: PrestationRepository,
     private val account : TypeAccountUserRepository,
+    val repositoryImage: PrestationImageRepository
     ) {
    suspend fun create(data : Prestation) =  coroutineScope{
        if (repository.countByUserId(data.userId) == 2L) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous ne pouvez pas créer plus de 2 prestations")
@@ -33,9 +40,21 @@ class PrestationService(
         certification.isCertified = true
         return Pair("Service certifié avec succès",repository.save(certification).toDomain())
     }
-   suspend fun getAllData(): Flow<Prestation> = coroutineScope {
-       val data = repository.findAllFilter()
-       data.map{it.toDomain()}
+   suspend fun getAllData()= coroutineScope {
+       val data = repository.findAllFilter().toList()
+       val prestationList = mutableListOf<PrestationDTOMaster>()
+       val ids: List<Long> = data.map { it.id!! }
+       val images = repositoryImage.findByPrestationIdIn(ids).toList()
+       val imagesByPrestation = images.groupBy { it.prestationId }
+       data.forEach { pres->
+          prestationList.add(
+              PrestationDTOMaster(
+                  prestation = pres.toDomain(),
+                  image = imagesByPrestation[pres.id]?.map { it.toDomain() } ?: emptyList()
+              )
+          )
+       }
+       prestationList
     }
    suspend fun canUpdate(id : Long, data: Prestation): Pair<String, Prestation> {
         val entity =  repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas")
