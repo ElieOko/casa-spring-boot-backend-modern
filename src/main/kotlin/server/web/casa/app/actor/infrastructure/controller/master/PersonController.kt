@@ -1,8 +1,9 @@
 package server.web.casa.app.actor.infrastructure.controller.master
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -15,8 +16,8 @@ import server.web.casa.app.actor.domain.model.join.master.PersonUserRequest
 import server.web.casa.app.actor.domain.model.join.master.toPerson
 import server.web.casa.app.actor.domain.model.join.master.toUser
 import server.web.casa.app.user.application.service.*
+import server.web.casa.app.user.domain.model.ImageUserRequest
 import server.web.casa.app.user.domain.model.User
-import server.web.casa.route.actor.ActorRoute
 import server.web.casa.route.actor.ActorRoute.MEMBER
 import server.web.casa.utils.*
 import kotlin.collections.isNotEmpty
@@ -78,4 +79,15 @@ class PersonController(
 //        userService.updateUsername(request.user.userId,"@"+toPascalCase(bailleur.firstName + bailleur.lastName))
 //        return ResponseEntity.ok(updated)
 //    }
+    @Operation(summary = "Modification Photo de profile")
+    @PutMapping("/{id}/profile")
+    suspend fun updatePersonImage(
+        @PathVariable("id") id : Long,
+        @RequestBody @Valid request: ImageUserRequest
+    ) : ResponseEntity<Map<String, Any>> = coroutineScope{
+        val person = service.findByIdPerson(id)
+        val updated = service.changeFile(request,person?.userId!!)
+        val response = mapOf("person" to updated, "message" to "Image de profile modifier avec succès")
+        ResponseEntity.ok(response)
+    }
 }
