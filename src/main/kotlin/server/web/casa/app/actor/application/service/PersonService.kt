@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.domain.model.Person
+import server.web.casa.app.actor.domain.model.request.PersonRequest
 import server.web.casa.app.actor.domain.model.toEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
@@ -56,17 +57,21 @@ class PersonService(
         val result = repository.save(person)
         result.toDomain()
     }
-    suspend fun update(person : Person) = coroutineScope {
-        val data = repository.findById(person.id!!)?:  throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
-        if (person.cardBack != null && person.cardFront != null) {
-            val file = base64ToMultipartFile(person.cardBack!!, "profile")
-            val file2 = base64ToMultipartFile(person.cardFront!!, "profile")
+    suspend fun update(person : PersonRequest, id : Long): Person = coroutineScope {
+        val data = repository.findById(id)?:  throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
+        if ((person.cardBack != null && person.cardFront != null) && (person.cardBack.isNotEmpty() && person.cardFront.isNotEmpty())) {
+            val file = base64ToMultipartFile(person.cardBack, "profile")
+            val file2 = base64ToMultipartFile(person.cardFront, "profile")
             val imageUri = gcsService.uploadFile(file,"card/")
             val imageUri2 = gcsService.uploadFile(file2,"card/")
             log.info("public url local ")
-            person.cardFront = imageUri2
-            person.cardBack = imageUri
+            data.cardFront = imageUri2
+            data.cardBack = imageUri
             repository.save(data).toDomain()
         }
+        data.address = person.address
+        data.lastName = person.lastName
+        data.firstName = person.firstName
+        repository.save(data).toDomain()
     }
 }
