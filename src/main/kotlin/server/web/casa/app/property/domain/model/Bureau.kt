@@ -65,14 +65,16 @@ class BureauRequest(
 data class BureauDTOMaster(
     val bureau: Bureau,
     val devise: Devise?,
-    val images : List<BureauImage?>
+    val images : List<BureauImage?>,
+    val feature: List<Feature>
 )
 
 data class BureauDto(
    @NotNull
    val bureau: BureauRequest,
    @NotNull
-   val images : List<ImageRequest>
+   val images : List<ImageRequest>,
+   val features : List<FeatureRequest> = emptyList(),
 )
 
 fun Bureau.toEntity() = BureauEntity(

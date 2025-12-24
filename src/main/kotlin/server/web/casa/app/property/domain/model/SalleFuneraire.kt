@@ -107,12 +107,14 @@ data class SalleFuneraireDTOMaster(
     val funeraire: SalleFuneraire,
     val devise: Devise?,
     val postBy : String,
-    val images : List<SalleFuneraireImage?>
+    val images : List<SalleFuneraireImage?>,
+    val feature: List<Feature>
 )
 
 data class SalleFuneraireRequest(
     @NotNull
     val funeraire :SalleFuneraireDTO ,
     @NotNull
-    val images : List<ImageRequest>
+    val images : List<ImageRequest>,
+    val features : List<FeatureRequest> = emptyList(),
 )
