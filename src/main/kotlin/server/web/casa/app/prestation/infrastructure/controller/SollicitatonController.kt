@@ -11,6 +11,8 @@ import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.application.SollicitationService
 import server.web.casa.app.prestation.domain.request.SollicitationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
+import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.infrastructure.controller.RequestUpdate
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.sollicitation.SollicitationRoute
 import server.web.casa.utils.Mode
@@ -65,6 +67,34 @@ class SollicitatonController(
         val response = mapOf("sollicitation" to data)
         return ResponseEntity.ok(response)
     }
+    @PutMapping("/update/status/{id}")
+    suspend fun updateSollicitationStatus(
+        @PathVariable id: Long,
+        @RequestBody request:RequestUpdateStatus
+    ): ResponseEntity<Map<String, Any?>> {
+
+        val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
+        val sollicitation = service.findById(id) ?: return ResponseEntity.ok(mapOf("error" to "sollicitation not found"))
+
+        val userId = sollicitation.userId
+        val prestateurId = prestS.getById ( sollicitation.prestationId!!).userId
+
+        val prestateurCheck = userRequest.userId == prestateurId
+        val sollicitateur = userRequest.userId == userId
+
+        if(prestateurCheck || sollicitateur){
+            if (prestateurCheck){
+                val updated = service.updateStatus(sollicitation,  request.status)
+                return ResponseEntity.ok(mapOf("sollicitation" to updated))
+            }
+
+            if(request.status != ReservationStatus.APPROVED){
+                val updated = service.updateStatus(sollicitation,  request.status)
+                return ResponseEntity.ok(mapOf("sollicitation" to updated))
+            }
+        }
+        return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
+    }
 
     @DeleteMapping("/delete/{id}")
     suspend fun deleteById(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
@@ -76,3 +106,7 @@ class SollicitatonController(
         }
     }
 }
+data class RequestUpdateStatus(
+    val userId: Long,
+    val status: ReservationStatus
+)

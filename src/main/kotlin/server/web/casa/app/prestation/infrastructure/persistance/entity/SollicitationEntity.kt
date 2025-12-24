@@ -3,6 +3,7 @@ package server.web.casa.app.prestation.infrastructure.persistance.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import server.web.casa.app.reservation.domain.model.ReservationStatus
 import java.time.LocalDate
 
 @Table("sollicitations")
@@ -24,7 +25,10 @@ data class SollicitationEntity(
     val budegt: Double?,
 
     @Column("description")
-    val description: String,
+    val description: String?,
+
+    @Column("status")
+    var status: String = ReservationStatus.PENDING.name,
 
     @Column("start_date")
     val startDate: LocalDate,
