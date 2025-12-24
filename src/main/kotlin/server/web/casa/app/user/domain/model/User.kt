@@ -72,7 +72,5 @@ data class RefreshRequest(
 
 data class ImageUserRequest(
     @NotNull
-    val userId : Long,
-    @NotNull
     val image : String
 )
