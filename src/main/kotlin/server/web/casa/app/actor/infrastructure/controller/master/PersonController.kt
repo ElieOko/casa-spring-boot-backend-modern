@@ -15,6 +15,7 @@ import server.web.casa.app.actor.domain.model.*
 import server.web.casa.app.actor.domain.model.join.master.PersonUserRequest
 import server.web.casa.app.actor.domain.model.join.master.toPerson
 import server.web.casa.app.actor.domain.model.join.master.toUser
+import server.web.casa.app.actor.domain.model.request.PersonRequest
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.ImageUserRequest
 import server.web.casa.app.user.domain.model.User
@@ -37,7 +38,7 @@ class PersonController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPerson(
         @Valid @RequestBody request: PersonUserRequest
-    ): ResponseEntity<Map<String, Any?>> {
+    ): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val accountItems = request.account
         if (accountItems.isNotEmpty()){
             val account = accountItems.map {
@@ -59,7 +60,7 @@ class PersonController(
                 "actor" to state,
                 "token" to userCreated.second
             )
-            return ResponseEntity.status(201).body(response)
+            ResponseEntity.status(201).body(response)
         }
         throw ResponseStatusException(HttpStatus.CONFLICT)
     }
@@ -69,16 +70,16 @@ class PersonController(
         return ApiResponse(service.findAllPerson().toList())
     }
 
-//    @Operation(summary = "Modification Person")
-//    @PutMapping("/{id}")
-//    suspend fun updatePerson(
-//        @PathVariable("id") id : Long,
-//        @RequestBody @Valid request: PersonUserUpdateRequest
-//    ) : ResponseEntity<Person> {
-//        val updated = service.update(id,request.user)
-//        userService.updateUsername(request.user.userId,"@"+toPascalCase(bailleur.firstName + bailleur.lastName))
-//        return ResponseEntity.ok(updated)
-//    }
+    @Operation(summary = "Modification Person")
+    @PutMapping("/{id}")
+    suspend fun updatePerson(
+        @PathVariable("id") id : Long,
+        @RequestBody @Valid request: PersonRequest
+    ) : ResponseEntity<Person> = coroutineScope {
+        val updated = service.update(request,id)
+        userService.updateUsername(updated.userId!!,"@"+toPascalCase(updated.firstName + updated.lastName))
+        ResponseEntity.ok(updated)
+    }
     @Operation(summary = "Modification Photo de profile")
     @PutMapping("/{id}/profile")
     suspend fun updatePersonImage(
