@@ -44,6 +44,7 @@ class JwtAuthFilter(
             "/api/accounts",
             "/api/accounts/**",
             "/api/members",
+            "/api/cards",
             "/api/members/**",
             "/api/districts",
             "/api/quartiers",
