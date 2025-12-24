@@ -39,7 +39,8 @@ fun Property.toDto() = PropertyMasterDTO(
         floor = this.floor,
         sold = this.sold,
         transactionType = this.transactionType,
-        isAvailable = this.isAvailable
+        isAvailable = this.isAvailable,
+        createdAt = this.createdAt,
     ),
     postBy = "",
     address = AddressDTO(

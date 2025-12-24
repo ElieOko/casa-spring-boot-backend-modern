@@ -2,6 +2,7 @@ package server.web.casa.app.property.domain.model.dto
 
 import server.web.casa.app.property.domain.model.AddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
+import java.time.LocalDate
 
 data class PropertyDTO(
     val propertyId: Long? = null,
@@ -22,6 +23,7 @@ data class PropertyDTO(
     var sold: Boolean,
     var transactionType: String,
     val isAvailable: Boolean = true,
+    val createdAt: LocalDate = LocalDate.now()
 )
 data class GeoDTO(
     var lat: Double?,
@@ -45,7 +47,8 @@ fun PropertyEntity.toPropertyDTO() = PropertyDTO(
     sold = this.sold,
     transactionType = this.transactionType,
     isAvailable = this.isAvailable,
-    userId = this.user
+    userId = this.user,
+    createdAt = this.createdAt,
 )
 
 fun PropertyEntity.toAddressDTO() = AddressDTO(
