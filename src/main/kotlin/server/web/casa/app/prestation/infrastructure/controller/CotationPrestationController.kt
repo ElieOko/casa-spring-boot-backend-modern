@@ -11,10 +11,11 @@ import server.web.casa.app.prestation.application.SollicitationService
 import server.web.casa.app.prestation.domain.request.CotationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.CotationPrestationEntity
 import server.web.casa.app.user.application.service.UserService
+import server.web.casa.route.sollicitation.CotationRoute
 import server.web.casa.utils.Mode
 import java.time.LocalDateTime
 
-const val ROUTE_COTATION = "api/cotations"
+const val ROUTE_COTATION = CotationRoute.COTATION
 
 @Tag(name = "Cotation", description = "cotation de prestation")
 @RestController
