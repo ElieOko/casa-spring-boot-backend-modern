@@ -6,6 +6,6 @@ import server.web.casa.app.ecosystem.infrastructure.persistence.entity.Prestatio
 import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountUserEntity
 
 interface TypeAccountUserRepository : CoroutineCrudRepository<TypeAccountUserEntity, Long> {
-    @Query("SELECT * FROM type_account_users WHERE user_id = :userId OR type_account_id = :typeAccountId")
+    @Query("SELECT * FROM type_account_users WHERE user_id = :userId AND type_account_id = :typeAccountId")
     suspend fun findByUserAndAccount(userId: Long, typeAccountId : Long) : TypeAccountUserEntity?
 }
