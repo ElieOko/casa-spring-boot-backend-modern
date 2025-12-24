@@ -19,54 +19,54 @@ import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.application.service.BureauImageService
 import server.web.casa.app.property.application.service.BureauService
+import server.web.casa.app.property.application.service.FestiveImageService
+import server.web.casa.app.property.application.service.SalleFestiveService
 import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.BureauDto
 import server.web.casa.app.property.domain.model.ImageRequestStandard
+import server.web.casa.app.property.domain.model.SalleFestiveRequest
 import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponseWithMessage
 
-@Tag(name = "Bureau", description = "")
+@Tag(name = "Festive", description = "")
 @RestController
-@RequestMapping(PropertyRoute.PROPERTY_BUREAU)
-class BureauController(
-    private val service: BureauService,
+@RequestMapping(PropertyRoute.PROPERTY_FESTIVE)
+class SalleFestiveController(
+    private val service: SalleFestiveService,
     private val devise : DeviseService,
     private val userService: UserService,
-    private val bureauImageService: BureauImageService,
+    private val imageService: FestiveImageService,
     private val cityService: CityService,
     private val communeService: CommuneService,
     private val quartierService: QuartierService
 ) {
 
-    @Operation(summary = "Création bureau")
+    @Operation(summary = "Création salle festive")
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun createBureau(
-        @Valid @RequestBody request: BureauDto,
+    suspend fun createFestive(
+        @Valid @RequestBody request: SalleFestiveRequest,
     ) = coroutineScope{
-        val city = if (request.bureau.cityId != null) cityService.findByIdCity(request.bureau.cityId) else null
-        val commune = communeService.findByIdCommune(request.bureau.communeId)
-        val quartier =  if (request.bureau.quartierId != null) quartierService.findByIdQuartier(request.bureau.quartierId) else null
-        devise.getById(request.bureau.deviseId)
-        userService.findIdUser(request.bureau.userId!!)
-        request.bureau.cityId =  city?.cityId
-        request.bureau.communeId = commune?.communeId
-        request.bureau.quartierId = quartier?.quartierId
+        val city = if (request.festive.cityId != null) cityService.findByIdCity(request.festive.cityId) else null
+        val commune = communeService.findByIdCommune(request.festive.communeId)
+        val quartier =  if (request.festive.quartierId != null) quartierService.findByIdQuartier(request.festive.quartierId) else null
+        request.festive.cityId =  city?.cityId
+        request.festive.communeId = commune?.communeId
+        request.festive.quartierId = quartier?.quartierId
+        devise.getById(request.festive.deviseId)
+        userService.findIdUser(request.festive.userId!!)
         if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
-        val data = service.create(request.bureau.toDomain())
-        request.images.forEach { bureauImageService.create(ImageRequestStandard(data.id!!,it.image)) }
-        ApiResponseWithMessage(
-           data = data,
-            message = "Enregistrement réussie pour la proprièté bureau",
-        )
+        val data = service.create(request.festive.toDomain())
+        request.images.forEach { imageService.create(ImageRequestStandard(data.id!!,it.image)) }
+        ApiResponseWithMessage(data = data, message = "Enregistrement réussie pour la proprièté festive")
     }
 
-    @Operation(summary = "List des bureaux")
+    @Operation(summary = "Listes des salles festives")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllBureau() = coroutineScope {
-        val data = service.getAllBureau()
-        val response = mapOf("bureaux" to data)
+    suspend fun getAllFestive() = coroutineScope {
+        val data = service.getAll()
+        val response = mapOf("festives" to data)
         ResponseEntity.ok().body(response)
     }
 }
