@@ -70,8 +70,8 @@ class PersonService(
             repository.save(data).toDomain()
         }
         data.address = person.address
-        data.lastName = person.lastName
-        data.firstName = person.firstName
+        data.lastName = person.lastName.ifEmpty { data.lastName }
+        data.firstName = person.firstName.ifEmpty { data.firstName }
         repository.save(data).toDomain()
     }
 }
