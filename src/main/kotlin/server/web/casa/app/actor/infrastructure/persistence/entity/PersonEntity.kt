@@ -11,19 +11,19 @@ class PersonEntity(
     @Column("id")
     val id: Long? = null,   // AUTO-INCREMENT
     @Column("first_name")
-    val firstName: String,
+    var firstName: String,
     @Column("last_name")
-    val lastName: String,
+    var lastName: String,
     @Column("full_name")
     val fullName: String,
     @Column("address")
-    val address: String? = "",
+    var address: String? = "",
     @Column("images")
     var images: String? = null,
     @Column("card_front")
-    val cardFront: String?,
+    var cardFront: String?,
     @Column("card_back")
-    val cardBack: String? = null,
+    var cardBack: String? = null,
     @Column("number_card")
     val numberCard: String? = null,
     @Column("user_id")
