@@ -51,12 +51,12 @@ class UserService(
         return allEntityUser.map { it.toDomain() }
     }
 
-    suspend fun findIdUser(id : Long) : UserDto {
+    suspend fun findIdUser(id : Long) : UserDto = coroutineScope {
         val userEntity = repository.findById(id)?:throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "ID Is Not Found."
         )
-        return userEntity.toDomain()
+        userEntity.toDomain()
 //        }?: throw EntityNotFoundException("Aucun $name avec cet identifiant $id")
 
     }
