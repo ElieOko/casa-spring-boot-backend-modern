@@ -3,6 +3,7 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import server.web.casa.app.property.domain.model.SalleFuneraireImage
 import server.web.casa.app.property.domain.model.VacanceImage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,4 +23,13 @@ data class SalleFuneraireImageEntity(
     var isAvailable: Boolean = true,
     @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
+)
+
+fun SalleFuneraireImageEntity.toDomain() = SalleFuneraireImage(
+    id = this.id,
+    name = this.name,
+    path = this.path,
+    isAvailable = this.isAvailable,
+    createdAt = this.createdAt,
+    salleFuneraireId = this.salleFuneraireId,
 )

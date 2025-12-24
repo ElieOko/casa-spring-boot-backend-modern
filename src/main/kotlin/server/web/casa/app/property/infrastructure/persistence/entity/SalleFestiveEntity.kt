@@ -2,6 +2,7 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.*
+import server.web.casa.app.property.domain.model.SalleFestive
 import java.time.LocalDate
 
 @Table(name = "salle_festives")
@@ -23,6 +24,8 @@ class SalleFestiveEntity(
     val capacityPeople: Long? = null,
     @Column("electric")
     val electric: Int? = 0,
+    @Column("water")
+    val water: Int? = 0,
     @Column("price")
     val price : Double? = null,
     @Column("address")
@@ -57,4 +60,33 @@ class SalleFestiveEntity(
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updated_at")
     val updatedAt: LocalDate = LocalDate.now()
+)
+
+fun SalleFestiveEntity.toDomain()= SalleFestive(
+    id = this.id,
+    userId = this.userId,
+    deviseId = this.deviseId,
+    title = this.title,
+    description = this.description,
+    usage = this.usage,
+    capacityPeople = this.capacityPeople,
+    electric = this.electric,
+    price = this.price,
+    address = this.address,
+    water= this.water,
+    postalCode = this.postalCode,
+    pisteDanse = this.pisteDanse,
+    communeId = this.communeId,
+    quartierId = this.quartierId,
+    cityId = this.cityId,
+    updatedAt = this.updatedAt,
+    createdAt = this.createdAt,
+    isDecore = this.isDecore,
+    isAvailable = this.isAvailable,
+    latitude = this.latitude,
+    longitude = this.longitude,
+    communeValue = this.communeValue,
+    quartierValue = this.quartierValue,
+    countryValue = this.countryValue,
+    cityValue = this.cityValue
 )
