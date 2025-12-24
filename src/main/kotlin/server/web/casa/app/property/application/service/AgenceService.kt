@@ -1,6 +1,7 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
@@ -25,8 +26,13 @@ class AgenceService(
         repository.findAll().map { it.toDomain() }.toList()
     }
 
+    suspend fun getAllByUser(userId : Long): List<Agence?> = coroutineScope{
+        val data = repository.getAllByUser(userId)
+        data.map {it?.toDomain()}.toList()
+    }
+
     suspend fun create(agence: Agence): Agence = coroutineScope {
-        if (repository.countByUserId(agence.userId) != 0L) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas")
+        if (repository.countByUserId(agence.userId) != 0L) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous ne pouvez pas créer plusieurs Agences")
         val file = base64ToMultipartFile(agence.logo?:"", "agence")
         val imageUri = gcsService.uploadFile(file,"agence/")
         agence.logo = imageUri
