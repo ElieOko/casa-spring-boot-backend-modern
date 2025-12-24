@@ -4,6 +4,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
+import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.payment.domain.model.Devise
+import server.web.casa.app.payment.infrastructure.persistence.entity.DeviseEntity
 import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.BureauDTOMaster
 import server.web.casa.app.property.domain.model.toEntity
@@ -16,7 +19,8 @@ import kotlin.collections.map
 @Service
 class BureauService(
     private val repository: BureauRepository,
-    private val bureauImageRepository: BureauImageRepository
+    private val bureauImageRepository: BureauImageRepository,
+    private val devise: DeviseService
 ) {
     suspend fun getAllBureau() = coroutineScope{
        val data =  repository.findAll().toList()
@@ -26,7 +30,7 @@ class BureauService(
        val imageByBureau: Map<Long, List<BureauImageEntity>> = images.groupBy { it.bureauId }
 
        data.forEach { bureau->
-            bureauList.add(BureauDTOMaster(bureau = bureau.toDomain() , images = imageByBureau[bureau.id]?.map { it.toDomain() }?:emptyList()))
+            bureauList.add(BureauDTOMaster(bureau = bureau.toDomain() , images = imageByBureau[bureau.id]?.map { it.toDomain() }?:emptyList(), devise = devise.getById(bureau.deviseId!!)))
         }
        bureauList
     }

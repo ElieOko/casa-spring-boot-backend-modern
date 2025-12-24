@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Null
 import server.web.casa.app.ecosystem.domain.request.ImageRequest
+import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.infrastructure.persistence.entity.BureauEntity
 import java.time.LocalDateTime
 
@@ -39,6 +40,7 @@ class BureauRequest(
 
 data class BureauDTOMaster(
     val bureau: Bureau,
+    val devise: Devise?,
     val images : List<BureauImage?>
 )
 
