@@ -17,7 +17,7 @@ data class CotationPrestationEntity(
     @Column("cote")
     val cote            : Float,
     @Column("commentaire")
-    val commentaire     : String,
+    val commentaire     : String?,
     @Column("is_active")
     val isActive        : Boolean,
     @Column("created_at")

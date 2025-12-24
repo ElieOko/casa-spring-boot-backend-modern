@@ -24,7 +24,7 @@ data class SollicitationEntity(
     val budegt: Double?,
 
     @Column("description")
-    val description: String,
+    val description: String?,
 
     @Column("start_date")
     val startDate: LocalDate,

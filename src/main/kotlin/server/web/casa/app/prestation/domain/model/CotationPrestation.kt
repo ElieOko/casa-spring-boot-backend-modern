@@ -8,7 +8,7 @@ data class CotationPrestation(
     val userId          : Long,
     val sollicitationId : Long,
     val cote            : Float,
-    val commentaire     : String,
+    val commentaire     : String?,
     val isActive        : Boolean,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
