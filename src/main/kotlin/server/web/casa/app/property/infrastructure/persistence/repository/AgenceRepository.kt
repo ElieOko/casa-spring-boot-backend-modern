@@ -6,9 +6,9 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.AgenceEntity
 
 interface AgenceRepository : CoroutineCrudRepository<AgenceEntity, Long>{
-    @Query("SELECT COUNT(*) FROM agences WHERE user_id = :userId")
+    @Query("SELECT COUNT(*) FROM agencies WHERE user_id = :userId")
     suspend fun countByUserId(userId: Long) : Long
 
-    @Query("SELECT * FROM agences WHERE user_id = :userId")
+    @Query("SELECT * FROM agencies WHERE user_id = :userId")
     suspend fun getAllByUser(userId: Long) : Flow<AgenceEntity?>
 }
