@@ -19,11 +19,11 @@ class PropertyImageRoomService(
         val imageUri = gcsService.uploadFile(file,"property/room/")
         p.path = imageUri!!
 //        p.name = file.name
-        val filename = storageService.store(file, subfolder = "/property/room/")
-        val fileUrl = "$server/property/room/$filename"
+//        val filename = storageService.store(file, subfolder = "/property/room/")
+//        val fileUrl = "$server/property/room/$filename"
         val data = PropertyImageRoomEntity(
             propertyId = p.propertyId,
-            name = fileUrl,
+            name = "",
             path = p.path
         )
         val result = repository.save(data)

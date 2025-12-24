@@ -19,11 +19,11 @@ class PropertyImageKitchenService(
         val imageUri = gcsService.uploadFile(file,"property/kitchen/")
         p.path = imageUri!!
 //        p.name = file.name
-        val filename = storageService.store(file, subfolder = "/property/kitchen/")
-        val fileUrl = "$server/property/kitchen/$filename"
+//        val filename = storageService.store(file, subfolder = "/property/kitchen/")
+//        val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
             propertyId = p.propertyId,
-            name = fileUrl,
+            name = "",
             path = p.path
         )
         val result = repository.save(data)
