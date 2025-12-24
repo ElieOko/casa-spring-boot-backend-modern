@@ -49,6 +49,8 @@ class JwtAuthFilter(
             "/api/quartiers",
             "/auth/login",
             "/api/property",
+            "/api/prestations",
+            "/api/prestations/**",
             "/api/property/**",
             "/auth/register",
             "/otp/**",
