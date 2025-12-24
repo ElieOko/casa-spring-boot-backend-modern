@@ -38,31 +38,26 @@ class PersonController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPerson(
         @Valid @RequestBody request: PersonUserRequest
-    ): ResponseEntity<Map<String, Any?>> = coroutineScope {
+    ) = coroutineScope {
         val accountItems = request.account
-        if (accountItems.isNotEmpty()){
-            val account = accountItems.map {
-                typeAccountService.findByIdTypeAccount(it.typeAccount)
-            }.first()
-            val parrain : User? = null
-            var paraintId : Long = 0
-            val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
-            if (request.actor.parrainId != null){
-                paraintId = request.actor.parrainId
-            }
-            val userSystem = request.toUser(phone)
-            val userCreated = authService.register(userSystem, accountItems)
-            val data = request.toPerson(userCreated.first?.userId!!)
-            val state = service.create(data)
-            val response = mapOf(
-                "message" to "Votre compte ${account.name} a été créer avec succès",
-                "user" to userCreated.first,
-                "actor" to state,
-                "token" to userCreated.second
-            )
-            ResponseEntity.status(201).body(response)
-        }
-        throw ResponseStatusException(HttpStatus.CONFLICT)
+        if (accountItems.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisissez au moins un type de comptes.")
+        val account = accountItems.map { typeAccountService.findByIdTypeAccount(it.typeAccount) }.first()
+        val parrain : User? = null
+        var paraintId : Long = 0
+        val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+        if (request.actor.parrainId != null) paraintId = request.actor.parrainId
+
+        val userSystem = request.toUser(phone)
+        val userCreated = authService.register(userSystem, accountItems)
+        val data = request.toPerson(userCreated.first?.userId!!)
+        val state = service.create(data)
+        val response = mapOf(
+            "message" to "Votre compte ${account.name} a été créer avec succès",
+            "user" to userCreated.first,
+            "actor" to state,
+            "token" to userCreated.second
+        )
+        ResponseEntity.status(201).body(response)
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
