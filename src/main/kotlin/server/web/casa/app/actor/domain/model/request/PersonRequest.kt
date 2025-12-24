@@ -18,3 +18,9 @@ data class PersonRequest(
 )
 
 
+data class PersonProfileRequest(
+    @NotNull
+    val images : String? = "",
+    @NotNull
+    val userId : Long,
+)
