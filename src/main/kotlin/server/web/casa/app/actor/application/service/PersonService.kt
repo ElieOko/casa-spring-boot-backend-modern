@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.domain.model.Person
 import server.web.casa.app.actor.domain.model.toEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.PersonEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.user.domain.model.ImageUserRequest
@@ -29,8 +28,8 @@ class PersonService(
     suspend fun findAllPerson(): Flow<Person> {
         return repository.findAll().map { it.toDomain() }
     }
-    suspend fun findByIdPerson(id : Long): Person? {
-        return repository.findById(id)?.toDomain()
+    suspend fun findByIdPerson(id : Long): Person? = coroutineScope  {
+        repository.findById(id)?.toDomain() ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "ID $id not found.")
     }
     suspend fun findByIdPersonUser(id : Long): Person? {
         return repository.findAll().filter { it.userId == id }.firstOrNull()?.toDomain()
@@ -46,8 +45,8 @@ class PersonService(
        val profile: Person? = repository.findAll().filter { it.userId == userId }.firstOrNull()?.toDomain()
        return profile
     }
-    suspend fun changeFile(imageUser:ImageUserRequest) = coroutineScope {
-        val person = repository.findByUser(imageUser.userId)?: throw Exception()
+    suspend fun changeFile(imageUser: ImageUserRequest, userId: Long) = coroutineScope {
+        val person = repository.findByUser(userId)?: throw Exception()
         val file = base64ToMultipartFile(imageUser.image, "profile")
         log.info("file ****taille:${file.size}")
         log.info("file ****name:${file.name}")
@@ -55,7 +54,7 @@ class PersonService(
         log.info("public url local ")
         person.images =imageUri
         val result = repository.save(person)
-        result
+        result.toDomain()
     }
     suspend fun update(person : Person) = coroutineScope {
         val data = repository.findById(person.id!!)?:  throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
