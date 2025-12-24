@@ -57,7 +57,7 @@ class SalleFuneraireController(
         request.funeraire.quartierId = quartier?.quartierId
         userService.findIdUser(request.funeraire.userId!!)
         if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
-        val data = service.create(request.funeraire.toDomain())
+        val data = service.create(request.funeraire.toDomain(), request.features)
         request.images.forEach { imageService.create(ImageRequestStandard(data.id!!,it.image)) }
         ApiResponseWithMessage(data = data, message = "Enregistrement réussie pour la proprièté funeraire")
     }

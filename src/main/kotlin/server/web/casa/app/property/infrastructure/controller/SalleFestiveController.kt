@@ -57,7 +57,7 @@ class SalleFestiveController(
         devise.getById(request.festive.deviseId)
         userService.findIdUser(request.festive.userId!!)
         if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
-        val data = service.create(request.festive.toDomain())
+        val data = service.create(request.festive.toDomain(), request.features)
         request.images.forEach { imageService.create(ImageRequestStandard(data.id!!,it.image)) }
         ApiResponseWithMessage(data = data, message = "Enregistrement réussie pour la proprièté festive")
     }

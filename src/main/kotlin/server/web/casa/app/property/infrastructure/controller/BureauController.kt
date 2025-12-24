@@ -54,7 +54,7 @@ class BureauController(
         request.bureau.communeId = commune?.communeId
         request.bureau.quartierId = quartier?.quartierId
         if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
-        val data = service.create(request.bureau.toDomain())
+        val data = service.create(request.bureau.toDomain(),request.features)
         request.images.forEach { bureauImageService.create(ImageRequestStandard(data.id!!,it.image)) }
         ApiResponseWithMessage(
            data = data,
