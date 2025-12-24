@@ -75,10 +75,11 @@ class PersonController(
     suspend fun updatePerson(
         @PathVariable("id") id : Long,
         @RequestBody @Valid request: PersonRequest
-    ) : ResponseEntity<Person> = coroutineScope {
+    ) = coroutineScope {
         val updated = service.update(request,id)
         userService.updateUsername(updated.userId!!,"@"+toPascalCase(updated.firstName + updated.lastName))
-        ResponseEntity.ok(updated)
+        val response = mapOf("message" to "Person updated successfully", "person" to updated)
+        ResponseEntity.ok(response)
     }
     @Operation(summary = "Modification Photo de profile")
     @PutMapping("/{id}/profile")
