@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import server.web.casa.adaptater.provide.twilio.TwilioService
 import server.web.casa.app.actor.application.service.PersonService
-import server.web.casa.app.user.domain.model.TypeAccountUser
+import server.web.casa.app.user.domain.model.AccountUser
 import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.domain.model.UserFullDTO
 import server.web.casa.app.user.domain.model.request.AccountRequest
@@ -38,10 +38,11 @@ class AuthService(
     private val hashEncoder: HashEncoder,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val twilio : TwilioService,
-    private val serviceMultiAccount: TypeAccountUserService,
+    private val serviceMultiAccount: AccountUserService,
     private val typeAccountService: TypeAccountService,
     private val accountService: AccountService,
     private val servicePerson: PersonService,
+    private val repositoryUserAccount : AccountUserRepository
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     data class TokenPair(
@@ -77,10 +78,12 @@ class AuthService(
         val savedEntity = userRepository.save(entity)
 //        throw Exception("stop ***")
         accountItems.forEach {
-            serviceMultiAccount.save(TypeAccountUser(
-                userId = savedEntity.userId!!,
-                typeAccountId = it.typeAccount
-            ))
+            serviceMultiAccount.save(
+                AccountUser(
+                    userId = savedEntity.userId!!,
+                    accountId = it.typeAccount
+                )
+            )
         }
 
         val newAccessToken = jwtService.generateAccessToken(savedEntity.userId!!.toHexString())
@@ -109,7 +112,7 @@ class AuthService(
             val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
             val accounts = serviceMultiAccount.getAll().filter { it.userId == user.userId }.toList()
             val accountMultiple: List<AccountDTO> =  accounts.map {
-                val data = accountService.findByIdAccount(it.typeAccountId)
+                val data = accountService.findByIdAccount(it.accountId)
                 AccountDTO(
                     id = data.id,
                     name = data.name,
