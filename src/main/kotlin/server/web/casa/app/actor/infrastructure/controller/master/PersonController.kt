@@ -41,7 +41,7 @@ class PersonController(
     ) = coroutineScope {
         val accountItems = request.account
         if (accountItems.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisissez au moins un type de comptes.")
-        val account = accountItems.map { typeAccountService.findByIdTypeAccount(it.typeAccount) }.first()
+        val account = accountItems.map { accountService.findByIdAccount(it.typeAccount)}.first()
         val parrain : User? = null
         var paraintId : Long = 0
         val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
