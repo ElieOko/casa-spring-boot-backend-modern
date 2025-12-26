@@ -46,3 +46,18 @@ data class PropertyRequest(
     val propertyImageLivingRoom : List<PropertyImageRequest?> = emptyList(),
     val propertyImageKitchen : List<PropertyImageRequest?> = emptyList()
 )
+
+data class PropertyImagesRequest(
+    val propertyImage : List<ImageRequest?> = emptyList(),
+    val propertyImageRoom : List<ImageRequest?> = emptyList(),
+    val propertyImageLivingRoom : List<ImageRequest?> = emptyList(),
+    val propertyImageKitchen : List<ImageRequest?> = emptyList()
+)
+
+data class PropertyImageChangeRequest(
+    val propertyImage : List<ImageChangeRequest?> = emptyList(),
+    val propertyImageRoom : List<ImageChangeRequest?> = emptyList(),
+    val propertyImageLivingRoom : List<ImageChangeRequest?> = emptyList(),
+    val propertyImageKitchen : List<ImageChangeRequest?> = emptyList()
+)
+
