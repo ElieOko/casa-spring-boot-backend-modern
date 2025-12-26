@@ -1,14 +1,14 @@
 package server.web.casa.app.user.domain.model
 
-import server.web.casa.app.user.infrastructure.persistence.entity.TypeAccountUserEntity
+import server.web.casa.app.user.infrastructure.persistence.entity.AccountUserEntity
 
-data class TypeAccountUser(
+data class AccountUser(
     val id: Long? = null,
     val userId: Long,
-    val typeAccountId:Long
+    val accountId:Long
 )
-fun TypeAccountUser.toEntity() = TypeAccountUserEntity(
+fun AccountUser.toEntity() = AccountUserEntity(
     id = this.id,
-    typeAccountId = this.typeAccountId,
+    accountId = this.accountId,
     userId = this.userId,
 )
