@@ -1,28 +1,23 @@
 package server.web.casa.app.ecosystem.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.ecosystem.domain.model.Prestation
-import server.web.casa.app.ecosystem.domain.model.PrestationDTO
 import server.web.casa.app.ecosystem.domain.model.PrestationDTOMaster
 import server.web.casa.app.ecosystem.domain.model.toEntity
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationImageRepository
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationRepository
-import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountUserRepository
+import server.web.casa.app.user.infrastructure.persistence.repository.AccountUserRepository
 import kotlin.collections.map
 
 @Service
 class PrestationService(
     private val repository: PrestationRepository,
-    private val account : TypeAccountUserRepository,
+    private val account : AccountUserRepository,
     val repositoryImage: PrestationImageRepository
     ) {
    suspend fun create(data : Prestation) =  coroutineScope{
