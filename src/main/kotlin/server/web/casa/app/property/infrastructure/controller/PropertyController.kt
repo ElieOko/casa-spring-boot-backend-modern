@@ -224,10 +224,7 @@ class PropertyController(
         val commune = communeService.findByIdCommune(request.communeId)
         val quartier =  quartierService.findByIdQuartier(request.quartierId)
         val property = service.findByIdProperty(propertyId)
-        if (property.first.property.userId != userId){
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Cet auteur n'appartient pas à la proprièté.")
-        }
+        if (property.first.property.userId != userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet auteur n'appartient pas à la proprièté.")
         property.first.typeProperty.propertyTypeId = propertyType.propertyTypeId
         property.first.property.title = request.title
         property.first.property.description = request.description
@@ -253,7 +250,7 @@ class PropertyController(
         property.first.property.surface = request.surface
         property.first.geoZone.lat = request.latitude
         property.first.geoZone.lng = request.longitude
-        val updated = service.create(property.first, request.features)
+        val updated = service.update(property.first)
         return ResponseEntity.ok(updated)
     }
 }
