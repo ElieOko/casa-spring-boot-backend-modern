@@ -12,7 +12,7 @@ data class PropertyImageRoomEntity(
     @Column("property_id")
     var propertyId: Long? = null,
     @Column("name")
-    val name: String,
+    var name: String,
     @Column("path")
-    val path: String
+    var path: String
 )
