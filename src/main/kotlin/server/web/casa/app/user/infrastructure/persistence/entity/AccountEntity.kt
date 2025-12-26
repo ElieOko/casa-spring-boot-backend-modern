@@ -21,7 +21,7 @@ data class AccountDTO(
     val name: String,
     val typeAccount : TypeAccount,
 )
-fun AccountEntity.toTypeAccount(name: String) = TypeAccount(
+fun AccountEntity.toAccount(name: String) = TypeAccount(
     typeAccountId = this.typeAccountId,
     name = name,
 )
