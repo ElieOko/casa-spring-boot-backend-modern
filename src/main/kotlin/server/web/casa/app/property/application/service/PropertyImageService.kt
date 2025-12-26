@@ -26,10 +26,10 @@ class PropertyImageService(
         log.info("public url local ")
 //        log.info("file uri ****name:${imageUri}")
         p.path = imageUri!!
-//        p.name = file.name
+        p.name = file.name
         val data = PropertyImageEntity(
             propertyId = p.propertyId,
-            name = "",
+            name = p.name,
             path = p.path
         )
         val result = repository.save(data)

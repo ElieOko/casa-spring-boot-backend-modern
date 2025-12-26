@@ -20,7 +20,7 @@ class BureauImageService(
         val imageUri = gcsService.uploadFile(file,"bureau/")
         val data = BureauImageEntity(
             bureauId = images.id,
-            name = "",
+            name = file.name,
             path = imageUri
         )
         val result = repository.save(data)

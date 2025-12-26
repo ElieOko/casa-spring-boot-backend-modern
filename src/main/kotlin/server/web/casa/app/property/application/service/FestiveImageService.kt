@@ -22,7 +22,7 @@ class FestiveImageService(
         val imageUri = gcsService.uploadFile(file,"festive/")
         val data = SalleFestiveImageEntity(
             salleFestiveId = images.id,
-            name = "",
+            name = file.name,
             path = imageUri
         )
         val result = repository.save(data)

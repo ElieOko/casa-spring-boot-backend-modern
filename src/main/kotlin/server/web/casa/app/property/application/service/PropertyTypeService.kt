@@ -22,7 +22,7 @@ class PropertyTypeService(
     suspend fun findByIdPropertyType(id : Long) : PropertyType {
         val data = repository.findById(id)?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
-            "ID Is Not Found."
+            "ID Is Not Found. Property type"
         )
         return data.toDomain()
     }

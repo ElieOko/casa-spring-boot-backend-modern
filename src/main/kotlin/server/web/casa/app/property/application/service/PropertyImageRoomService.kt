@@ -18,12 +18,12 @@ class PropertyImageRoomService(
         val file = base64ToMultipartFile(p.name,"room")
         val imageUri = gcsService.uploadFile(file,"property/room/")
         p.path = imageUri!!
-//        p.name = file.name
+        p.name = file.name
 //        val filename = storageService.store(file, subfolder = "/property/room/")
 //        val fileUrl = "$server/property/room/$filename"
         val data = PropertyImageRoomEntity(
             propertyId = p.propertyId,
-            name = "",
+            name = p.name,
             path = p.path
         )
         val result = repository.save(data)

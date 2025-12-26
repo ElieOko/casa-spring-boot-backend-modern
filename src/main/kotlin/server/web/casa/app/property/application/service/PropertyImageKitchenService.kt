@@ -23,7 +23,7 @@ class PropertyImageKitchenService(
 //        val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
             propertyId = p.propertyId,
-            name = "",
+            name = p.name,
             path = p.path
         )
         val result = repository.save(data)
