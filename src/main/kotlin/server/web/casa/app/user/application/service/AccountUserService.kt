@@ -7,23 +7,22 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.user.infrastructure.persistence.repository.AccountRepository
-import server.web.casa.app.user.infrastructure.persistence.repository.TypeAccountUserRepository
+import server.web.casa.app.user.infrastructure.persistence.repository.AccountUserRepository
 import server.web.casa.utils.Mode
 
 @Service
 @Profile(Mode.DEV)
-class TypeAccountUserService(
-    private val repository: TypeAccountUserRepository,
+class AccountUserService(
+    private val repository: AccountUserRepository,
 ) {
-    suspend fun save(data: TypeAccountUser): TypeAccountUser {
+    suspend fun save(data: AccountUser): AccountUser {
         val data = data.toEntity()
         val result = repository.save(data)
         return result.toDomain()
     }
     suspend fun getAll() = repository.findAll().map { it.toDomain() }
 
-    suspend fun findByIdAccount(id : Long): TypeAccountUser {
+    suspend fun findByIdAccount(id : Long): AccountUser {
       val data = repository.findById(id)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "ID Is Not Found.")
         return data.toDomain()
     }
