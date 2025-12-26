@@ -34,7 +34,7 @@ class PropertyService(
     private val quartierService: QuartierService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-    suspend fun create(p: PropertyMasterDTO, features: List<FeatureRequest>): PropertyMasterDTO {
+    suspend fun create(p: PropertyMasterDTO, features: List<FeatureRequest>): PropertyMasterDTO  = coroutineScope {
         val data = p.toEntity()
         val result = repository.save(data)
         features.forEach {
@@ -43,8 +43,12 @@ class PropertyService(
                 featureId = it.featureId
             ))
         }
-
-        return toDomain(result.id!!)
+        toDomain(result.id!!)
+    }
+    suspend fun update(p: PropertyMasterDTO) = coroutineScope {
+        val data = p.toEntity()
+        val result = repository.save(data)
+        toDomain(result.id!!)
     }
     suspend fun getAll(page : Int, size : Int, sortBy : String, sortOrder : String): List<PropertyMasterDTO> {
 //        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
