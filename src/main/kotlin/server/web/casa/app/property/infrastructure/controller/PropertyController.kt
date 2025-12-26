@@ -16,6 +16,9 @@ import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.dto.toDto
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
+import server.web.casa.app.property.domain.model.request.ImageChangeRequest
+import server.web.casa.app.property.domain.model.request.PropertyImageChangeRequest
+import server.web.casa.app.property.domain.model.request.PropertyImagesRequest
 import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
@@ -253,4 +256,42 @@ class PropertyController(
         val updated = service.update(property.first)
         return ResponseEntity.ok(updated)
     }
+
+    @Operation(summary = "Modification Property")
+    @PutMapping("/image/{propertyId}")
+    suspend fun updateFile(
+        @PathVariable("propertyId") propertyId : Long,
+        @Valid @RequestBody request: PropertyImageChangeRequest
+    ) = coroutineScope {
+        service.findByIdProperty(propertyId)
+        val result = if (request.propertyImage.isNotEmpty()) propertyImageService.updateFile(propertyId,request.propertyImage) else false
+        val result2 = if (request.propertyImageRoom.isNotEmpty()) propertyImageRoomService.updateFile(propertyId,request.propertyImageRoom) else false
+        val result3 = if (request.propertyImageKitchen.isNotEmpty()) propertyImageKitchenService.updateFile(propertyId,request.propertyImageKitchen) else false
+        val result4 = if (request.propertyImageLivingRoom.isNotEmpty()) propertyImageLivingRoomService.updateFile(propertyId,request.propertyImageLivingRoom) else false
+        val message = mutableMapOf("message" to "Modification effectuée avec succès")
+        if (result || result4 || result3 || result2)  ResponseEntity.ok(message) else {
+            message["message"] = "Aucune modification n'a été effectuée"
+            ResponseEntity.badRequest().body(message)
+        }
+    }
+
+    @Operation(summary = "Suppression Property")
+    @DeleteMapping("/image/{propertyId}")
+    suspend fun deleteFile(
+        @PathVariable("propertyId") propertyId : Long,
+        @Valid @RequestBody request: PropertyImagesRequest
+    ) = coroutineScope{
+        service.findByIdProperty(propertyId)
+        val result = if (request.propertyImage.isNotEmpty()) propertyImageService.deleteFile(propertyId,request.propertyImage) else false
+        val result2 = if (request.propertyImageRoom.isNotEmpty()) propertyImageRoomService.deleteFile(propertyId,request.propertyImageRoom) else false
+        val result3 = if (request.propertyImageKitchen.isNotEmpty()) propertyImageKitchenService.deleteFile(propertyId,request.propertyImageKitchen) else false
+        val result4 = if (request.propertyImageLivingRoom.isNotEmpty()) propertyImageLivingRoomService.deleteFile(propertyId,request.propertyImageLivingRoom) else false
+        val message = mutableMapOf("message" to "Suppression effectuée avec succès")
+        if (result || result4 || result3 || result2)  ResponseEntity.ok(message) else {
+            message["message"] = "Aucune suppression n'a été effectuée"
+            ResponseEntity.badRequest().body(message)
+        }
+    }
+
+
 }
