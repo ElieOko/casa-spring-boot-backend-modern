@@ -3,6 +3,7 @@ package server.web.casa.app.property.domain.model.dto
 import server.web.casa.app.address.domain.model.City
 import server.web.casa.app.address.domain.model.Commune
 import server.web.casa.app.address.domain.model.Quartier
+import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.domain.model.AddressDTO
 import server.web.casa.app.property.domain.model.Feature
 import server.web.casa.app.property.domain.model.Property
@@ -14,11 +15,14 @@ class PropertyMasterDTO(
     val images: Images? = null,
     val postBy : String,
     val address :AddressDTO,
+    val devise: Devise?,
     val localAddress : LocalAddressDTO,
     val geoZone : GeoDTO,
     val typeProperty: PropertyType,
     val features :List<Feature> = emptyList(),
 )
+
+
 
 fun Property.toDto() = PropertyMasterDTO(
     property = PropertyDTO(
@@ -38,6 +42,7 @@ fun Property.toDto() = PropertyMasterDTO(
         bathroom = this.bathroom,
         floor = this.floor,
         sold = this.sold,
+        deviseId = this.deviseId,
         transactionType = this.transactionType,
         isAvailable = this.isAvailable,
         createdAt = this.createdAt,
@@ -58,10 +63,12 @@ fun Property.toDto() = PropertyMasterDTO(
     ),
     geoZone = GeoDTO(this.latitude, this.longitude),
     typeProperty = PropertyType(this.propertyTypeId, ""),
+    devise = Devise(id = this.deviseId,"","",0.0),
 )
 
 fun PropertyMasterDTO.toEntity() = PropertyEntity(
     id = this.property.propertyId,
+
     title = this.property.title,
     description = this.property.description,
     price = this.property.price,
@@ -90,7 +97,9 @@ fun PropertyMasterDTO.toEntity() = PropertyEntity(
     user = this.property.userId,
     latitude = this.geoZone.lat,
     longitude = this.geoZone.lng,
-    isAvailable = this.property.isAvailable
+    isAvailable = this.property.isAvailable,
+    deviseId = this.property.deviseId,
+
 )
 
 data class LocalAddressDTO(

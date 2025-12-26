@@ -10,6 +10,8 @@ data class PropertyRequest(
     val description : String? = "",
     @NotNull
     val price : Double,
+    @NotNull
+    val deviseId : Long,
     val surface : Double? = null,
     val rooms : Int? = 0,
     val bedrooms : Int? = 0,

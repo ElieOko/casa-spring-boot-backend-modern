@@ -3,6 +3,8 @@ package server.web.casa.app.property.domain.model
 import jakarta.validation.constraints.NotNull
 import server.web.casa.app.ecosystem.domain.request.ImageRequest
 import server.web.casa.app.payment.domain.model.Devise
+import server.web.casa.app.property.domain.model.dto.GeoDTO
+import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.SalleFuneraireEntity
 import java.time.LocalDate
 
@@ -13,6 +15,8 @@ class SalleFuneraire(
     val title: String,
     val description: String? = "",
     val capacityPeople: String? = "",
+    val transactionType: String = "",
+    val propertyTypeId: Long? = 0,
     val price : Double? = null,
     val address: String,
     val communeValue: String? = "",
@@ -53,6 +57,8 @@ fun SalleFuneraire.toEntity() = SalleFuneraireEntity(
     quartierId = this.quartierId,
     cityId = this.cityId,
     countryValue = this.countryValue,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
 )
 class SalleFuneraireDTO(
     @NotNull
@@ -67,6 +73,10 @@ class SalleFuneraireDTO(
     val price : Double? = null,
     @NotNull
     val address: String,
+    @NotNull
+    val transactionType: String = "",
+    @NotNull
+    val propertyTypeId: Long? = 0,
     val communeValue: String? = "",
     val quartierValue: String? = "",
     val cityValue: String? = "",
@@ -102,19 +112,58 @@ fun SalleFuneraireDTO.toDomain() = SalleFuneraire(
     quartierId = this.quartierId,
     cityId = this.cityId,
     countryValue = this.countryValue,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
 )
 data class SalleFuneraireDTOMaster(
     val funeraire: SalleFuneraire,
     val devise: Devise?,
     val postBy : String,
     val images : List<SalleFuneraireImage?>,
-    val feature: List<Feature>
+    val feature: List<Feature>,
+    val address :AddressDTO,
+    val geoZone : GeoDTO,
+    val localAddress : LocalAddressDTO,
+    val typeProperty: PropertyType,
 )
 
+data class FuneraireDTO(
+    var id: Long? = null,
+    val userId : Long? = null,
+    val deviseId : Long? = null,
+    val title: String,
+    val description: String? = "",
+    val capacityPeople: String? = "",
+    val transactionType: String = "",
+    val propertyTypeId: Long? = 0,
+    val price : Double? = null,
+    val electric: Int? = 0,
+    val water: Int? = 0,
+    var isAvailable: Boolean = true,
+    val createdAt: LocalDate = LocalDate.now(),
+    val updatedAt: LocalDate = LocalDate.now()
+)
 data class SalleFuneraireRequest(
     @NotNull
     val funeraire :SalleFuneraireDTO ,
     @NotNull
     val images : List<ImageRequest>,
     val features : List<FeatureRequest> = emptyList(),
+)
+
+fun SalleFuneraire.toDTO() = FuneraireDTO(
+    id = this.id,
+    userId = this.userId,
+    title = this.title,
+    description = this.description,
+    capacityPeople = this.capacityPeople,
+    price = this.price,
+    deviseId = this.deviseId,
+    electric = this.electric,
+    water = this.water,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
+    isAvailable = this.isAvailable,
+    createdAt = this.createdAt,
+    updatedAt = this.updatedAt,
 )

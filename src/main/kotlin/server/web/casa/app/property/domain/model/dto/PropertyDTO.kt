@@ -7,6 +7,7 @@ import java.time.LocalDate
 data class PropertyDTO(
     val propertyId: Long? = null,
     val userId: Long?,
+    val deviseId : Long,
     var title: String,
     var description: String? = "",
     var price: Double,
@@ -31,6 +32,7 @@ data class GeoDTO(
 )
 fun PropertyEntity.toPropertyDTO() = PropertyDTO(
     propertyId = this.id,
+    deviseId = this.deviseId,
     title = this.title,
     description = this.description,
     price = this.price,

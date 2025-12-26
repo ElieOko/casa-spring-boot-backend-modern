@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Null
 import server.web.casa.app.ecosystem.domain.request.ImageRequest
 import server.web.casa.app.payment.domain.model.Devise
+import server.web.casa.app.property.domain.model.dto.GeoDTO
+import server.web.casa.app.property.domain.model.dto.Images
+import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
+import server.web.casa.app.property.domain.model.dto.PropertyDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.BureauEntity
 import java.time.LocalDateTime
 
@@ -24,6 +28,8 @@ class Bureau(
     val postalCode: String? = "",
     var communeId: Long? = 0,
     var quartierId: Long? = 0,
+    val transactionType: String = "",
+    val propertyTypeId: Long? = 0,
     val communeValue: String? = "",
     val quartierValue: String? = "",
     val cityValue: String? = "",
@@ -37,12 +43,17 @@ class Bureau(
 class BureauRequest(
     @NotNull
     val userId : Long? = null,
+    @NotNull
     val deviseId : Long? = null,
     @NotNull
     val title: String,
     val description: String? = "",
     @NotNull
     val price: Double? = null,
+    @NotNull
+    val transactionType: String,
+    @NotNull
+    val propertyTypeId: Long?,
     val roomMeet: Int? = 0,
     val electric: Int? = 0,
     val water: Int? = 0,
@@ -63,10 +74,15 @@ class BureauRequest(
 )
 
 data class BureauDTOMaster(
-    val bureau: Bureau,
+    val bureau: BureauDTO,
     val devise: Devise?,
+    val postBy : String,
+    val address :AddressDTO,
+    val localAddress : LocalAddressDTO,
+    val geoZone : GeoDTO,
     val images : List<BureauImage?>,
-    val feature: List<Feature>
+    val feature: List<Feature>,
+    val typeProperty: PropertyType,
 )
 
 data class BureauDto(
@@ -99,6 +115,8 @@ fun Bureau.toEntity() = BureauEntity(
     communeId = this.communeId,
     quartierId = this.quartierId,
     cityId = this.cityId,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
     postalCode = this.postalCode,
     createdAt = this.createdAt
 )
@@ -108,6 +126,8 @@ fun BureauRequest.toDomain() = Bureau(
     deviseId = this.deviseId,
     title = this.title,
     water = this.water,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
     numberPiece = this.numberPiece,
     electric = this.electric,
     description = this.description,
@@ -125,4 +145,35 @@ fun BureauRequest.toDomain() = Bureau(
     quartierId = this.quartierId,
     cityId = this.cityId,
     postalCode = this.postalCode,
+)
+
+ data class BureauDTO(
+     var id: Long? = null,
+     val userId : Long? = null,
+     val title: String,
+     val description: String? = "",
+     val price: Double? = null,
+     val electric: Int? = 0,
+     val water: Int? = 0,
+     val transactionType: String = "",
+     val propertyTypeId: Long? = 0,
+     val roomMeet: Int? = 0,
+     val numberPiece: Int? = 0,
+     val isEquip: Boolean = false,
+     val createdAt: LocalDateTime = LocalDateTime.now(),
+ )
+fun Bureau.toDT0() = BureauDTO(
+    id = this.id,
+    userId = this.userId,
+    title = this.title,
+    description = this.description,
+    price = this.price,
+    electric = this.electric,
+    water = this.water,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
+    roomMeet = this.roomMeet,
+    numberPiece = this.numberPiece,
+    isEquip = this.isEquip,
+    createdAt = this.createdAt,
 )
