@@ -3,13 +3,13 @@ package server.web.casa.app.property.application.service
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.slf4j.*
-import org.springframework.data.domain.*
 import org.springframework.http.*
 import org.springframework.stereotype.*
 import org.springframework.web.server.*
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
+import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.filter.*
@@ -31,7 +31,8 @@ class PropertyService(
     private val repositoryFeature : PropertyFeatureRepository,
     private val cityService: CityService,
     private val communeService: CommuneService,
-    private val quartierService: QuartierService
+    private val quartierService: QuartierService,
+    private val devise: DeviseService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     suspend fun create(p: PropertyMasterDTO, features: List<FeatureRequest>): PropertyMasterDTO  = coroutineScope {
@@ -79,6 +80,7 @@ class PropertyService(
         properties.forEach { property ->
             propertyList.add(PropertyMasterDTO(
                 property = property.toPropertyDTO(),
+                devise = devise.getById(property.deviseId),
                 images = ImageDTO(
                     main = imagesByProperty[property.id] ?: emptyList(),
                     room = roomImagesByProperty[property.id] ?: emptyList(),
@@ -117,7 +119,8 @@ class PropertyService(
         val kitchenImagesByProperty = kitchenImages.groupBy { it.propertyId }
         // Assemblage final
         PropertyMasterDTO(
-            property = property!!.toPropertyDTO(),
+            property = property.toPropertyDTO(),
+            devise = devise.getById(property.deviseId),
             images = ImageDTO(
                 main = imagesByProperty[id] ?: emptyList(),
                 room = roomImagesByProperty[id] ?: emptyList(),
@@ -141,8 +144,8 @@ class PropertyService(
         return data
     }
     suspend fun findByIdProperty(id: Long): Pair<PropertyMasterDTO, Flow<Property>> {
-        val property = toDomain(id)
-        val data = property
+        val data = toDomain(id)
+
         //|| (it.propertyType == data.propertyType)
         var similary = repository.findAll()
             .filter { it.cityValue == data.address.cityValue }
@@ -155,12 +158,6 @@ class PropertyService(
                 .filter {it.communeId == data.localAddress.commune?.communeId}
                 .filter {it.transactionType == data.property.transactionType }
                 .filter { it.id != data.property.propertyId }
-//
-//                .filter { it.commune?.communeId == data.commune?.communeId}
-//                .filter { it.propertyId != data.propertyId }
-//                .filter {
-//                    it.transactionType == data.transactionType
-//                }
         }
         val key = Pair(data,similary.map{it.toDomain()})
         return key
@@ -172,8 +169,8 @@ class PropertyService(
         sortBy : String,
         sortOrder : String
     ): Flow<Property>{
-        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
-        val pageable = PageRequest.of(page,size,sort)
+//        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
+//        val pageable = PageRequest.of(page,size,sort)
         val data = repository.filterProperty(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,

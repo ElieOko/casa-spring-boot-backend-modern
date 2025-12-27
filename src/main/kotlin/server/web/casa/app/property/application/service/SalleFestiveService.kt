@@ -1,30 +1,31 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.address.application.service.CityService
+import server.web.casa.app.address.application.service.CommuneService
+import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.payment.domain.model.Devise
-import server.web.casa.app.payment.infrastructure.persistence.entity.DeviseEntity
-import server.web.casa.app.property.domain.model.Bureau
-import server.web.casa.app.property.domain.model.BureauDTOMaster
 import server.web.casa.app.property.domain.model.FeatureRequest
 import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFestiveDTOMaster
+import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
+import server.web.casa.app.property.domain.model.toDTO
 import server.web.casa.app.property.domain.model.toEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.FestiveFeatureEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyFeatureEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.toAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.property.infrastructure.persistence.repository.BureauImageRepository
-import server.web.casa.app.property.infrastructure.persistence.repository.BureauRepository
+import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
 import server.web.casa.app.property.infrastructure.persistence.repository.FestiveFeatureRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveImageRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveRepository
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.get
 import kotlin.collections.map
+import kotlin.collections.toList
 
 @Service
 class SalleFestiveService(
@@ -34,6 +35,10 @@ class SalleFestiveService(
     private val userService: UserService,
     private val repositoryFeature: FestiveFeatureRepository,
     private val featureService: FeatureService,
+    private val cityService: CityService,
+    private val communeService: CommuneService,
+    private val quartierService: QuartierService,
+    private val propertyTypeService: PropertyTypeService,
 ) {
     suspend fun getAll() = coroutineScope{
        val data =  repository.findAll().toList()
@@ -46,14 +51,27 @@ class SalleFestiveService(
        data.forEach { m->
            dataList.add(
                SalleFestiveDTOMaster(
-                   festive = m.toDomain() ,
+                   festive = m.toDomain().toDTO() ,
                    images = imageByModel[m.id]?.map { it.toDomain() }?:emptyList(),
                    devise = devise.getById(m.deviseId!!),
+                   address = m.toAddressDTO(),
+                   localAddress = LocalAddressDTO(
+                       city = cityService.findByIdCity(m.cityId),
+                       commune = communeService.findByIdCommune(m.communeId),
+                       quartier = quartierService.findByIdQuartier(m.quartierId)
+                   ),
+                   geoZone = m.toGeo(),
                    postBy = userService.findIdUser(m.userId!!).username,
-                   feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
+                   feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
+                   typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
                ))
         }
         dataList
+    }
+
+    suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{
+        val data = getAll().filter { it.festive.userId == userId }.toList()
+        data
     }
 
     suspend fun create(data : SalleFestive,features: List<FeatureRequest>) = coroutineScope {
@@ -65,5 +83,9 @@ class SalleFestiveService(
             ))
         }
         result
+    }
+
+    suspend fun findById(id : Long) = coroutineScope {
+        repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle festive.")
     }
 }
