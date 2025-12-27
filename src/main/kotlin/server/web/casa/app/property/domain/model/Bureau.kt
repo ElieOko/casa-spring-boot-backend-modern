@@ -29,7 +29,7 @@ class Bureau(
     var communeId: Long? = 0,
     var quartierId: Long? = 0,
     val transactionType: String = "",
-    val propertyTypeId: Long? = 0,
+    var propertyTypeId: Long? = 0,
     val communeValue: String? = "",
     val quartierValue: String? = "",
     val cityValue: String? = "",

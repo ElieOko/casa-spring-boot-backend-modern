@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -24,9 +25,12 @@ import server.web.casa.app.property.application.service.BureauImageService
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.property.application.service.PropertyTypeService
 import server.web.casa.app.property.domain.model.BureauDto
+import server.web.casa.app.property.domain.model.BureauRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.request.ImageChange
 import server.web.casa.app.property.domain.model.request.ImageChangeOther
+import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
@@ -108,6 +112,7 @@ class BureauController(
             ResponseEntity.badRequest().body(message)
         }
     }
+
     @Operation(summary = "Get Bureau by User")
     @GetMapping("/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -116,5 +121,29 @@ class BureauController(
     ) = coroutineScope {
         val data = service.getAllPropertyByUser(userId)
         ApiResponse(data)
+    }
+
+    @Operation(summary = "Modification Bureau")
+    @PutMapping("/owner/{bureauId}")
+    suspend fun updateBureau(
+        @PathVariable("bureauId") bureauId : Long,
+        @Valid @RequestBody request: BureauRequest
+    ) = coroutineScope {
+        userService.findIdUser(request.userId!!)
+        val bureau = service.findById(bureauId)
+        if (bureau.userId != request.userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté bureau.")
+        val city = cityService.findByIdCity(request.cityId)
+        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId!!)
+        val commune = communeService.findByIdCommune(request.communeId)
+        val quartier =  quartierService.findByIdQuartier(request.quartierId)
+        val data = request.toDomain()
+        data.cityId = city?.cityId
+        data.propertyTypeId = propertyType.propertyTypeId
+        data.id = bureauId
+        data.communeId = commune?.communeId
+        data.quartierId = quartier?.quartierId
+        service.update(data)
+        val message = mutableMapOf("message" to "Modification effectuée avec succès")
+        ResponseEntity.ok(message)
     }
 }

@@ -5,24 +5,12 @@ import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
+import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.property.domain.model.Bureau
-import server.web.casa.app.property.domain.model.BureauDTOMaster
-import server.web.casa.app.property.domain.model.FeatureRequest
+import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
-import server.web.casa.app.property.domain.model.toDT0
-import server.web.casa.app.property.domain.model.toEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.BureauFeatureEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.toAddressDTO
-import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
-import server.web.casa.app.property.infrastructure.persistence.repository.BureauFeatureRepository
-import server.web.casa.app.property.infrastructure.persistence.repository.BureauImageRepository
-import server.web.casa.app.property.infrastructure.persistence.repository.BureauRepository
+import server.web.casa.app.property.infrastructure.persistence.entity.*
+import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.map
 import kotlin.collections.toList
@@ -85,8 +73,13 @@ class BureauService(
         }
         result
     }
-
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de Bureau.")
+    }
+
+    suspend fun update(p: Bureau) = coroutineScope {
+        val data = p.toEntity()
+        val result = repository.save(data)
+        result.toDomain()
     }
 }
