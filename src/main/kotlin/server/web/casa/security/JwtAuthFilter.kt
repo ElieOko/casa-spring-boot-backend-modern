@@ -50,6 +50,7 @@ class JwtAuthFilter(
             "/api/quartiers",
             "/auth/login",
             "/api/property",
+            "/api/devises",
             "/api/agences",
             "/api/sectors",
             "/api/prestations",

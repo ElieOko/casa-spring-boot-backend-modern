@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -101,5 +102,29 @@ class SalleFestiveController(
             message["message"] = "Aucune suppression n'a été effectuée"
             ResponseEntity.badRequest().body(message)
         }
+    }
+
+    @Operation(summary = "Modification Salle Festive")
+    @PutMapping("/owner/{festiveId}")
+    suspend fun updateBureau(
+        @PathVariable("festiveId") festiveId : Long,
+        @Valid @RequestBody request: SalleFestiveDTO
+    ) = coroutineScope {
+        userService.findIdUser(request.userId!!)
+        val bureau = service.findById(festiveId)
+        if (bureau.userId != request.userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté bureau.")
+        val city = cityService.findByIdCity(request.cityId)
+        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId!!)
+        val commune = communeService.findByIdCommune(request.communeId)
+        val quartier =  quartierService.findByIdQuartier(request.quartierId)
+        val data = request.toDomain()
+        data.cityId = city?.cityId
+        data.propertyTypeId = propertyType.propertyTypeId
+        data.id = festiveId
+        data.communeId = commune?.communeId
+        data.quartierId = quartier?.quartierId
+        service.update(data)
+        val message = mutableMapOf("message" to "Modification effectuée avec succès")
+        ResponseEntity.ok(message)
     }
 }

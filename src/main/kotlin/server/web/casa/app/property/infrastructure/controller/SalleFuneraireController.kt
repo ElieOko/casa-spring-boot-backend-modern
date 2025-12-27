@@ -100,4 +100,28 @@ class SalleFuneraireController(
             ResponseEntity.badRequest().body(message)
         }
     }
+
+    @Operation(summary = "Modification Salle Funeraire")
+    @PutMapping("/owner/{funeraireId}")
+    suspend fun updateBureau(
+        @PathVariable("funeraireId") funeraireId : Long,
+        @Valid @RequestBody request: SalleFuneraireDTO
+    ) = coroutineScope {
+        userService.findIdUser(request.userId!!)
+        val bureau = service.findById(funeraireId)
+        if (bureau.userId != request.userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté bureau.")
+        val city = cityService.findByIdCity(request.cityId)
+        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId!!)
+        val commune = communeService.findByIdCommune(request.communeId)
+        val quartier =  quartierService.findByIdQuartier(request.quartierId)
+        val data = request.toDomain()
+        data.cityId = city?.cityId
+        data.propertyTypeId = propertyType.propertyTypeId
+        data.id = funeraireId
+        data.communeId = commune?.communeId
+        data.quartierId = quartier?.quartierId
+        service.update(data)
+        val message = mutableMapOf("message" to "Modification effectuée avec succès")
+        ResponseEntity.ok(message)
+    }
 }

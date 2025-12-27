@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.FeatureRequest
+import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFuneraire
 import server.web.casa.app.property.domain.model.SalleFuneraireDTOMaster
 import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
@@ -78,5 +79,11 @@ class SalleFuneraireService(
 
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle funeraire.")
+    }
+
+    suspend fun update(p: SalleFuneraire) = coroutineScope {
+        val data = p.toEntity()
+        val result = repository.save(data)
+        result.toDomain()
     }
 }

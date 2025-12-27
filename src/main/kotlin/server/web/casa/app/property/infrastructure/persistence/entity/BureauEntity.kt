@@ -55,6 +55,8 @@ class BureauEntity(
     val transactionType: String = "",
     @Column("property_type_id")
     val propertyTypeId: Long? = null,
+    @Column("is_available")
+    var isAvailable: Boolean = true,
     @Column("latitude")
     val latitude: Double? = null,
     @Column("longitude")
@@ -76,6 +78,7 @@ fun BureauEntity.toDomain() = Bureau(
     numberPiece = this.numberPiece,
     isEquip = this.isEquip,
     address = this.address,
+    isAvailable = this.isAvailable,
     createdAt = this.createdAt
 )
 

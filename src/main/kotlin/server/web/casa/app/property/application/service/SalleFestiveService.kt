@@ -9,6 +9,7 @@ import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.FeatureRequest
 import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFestiveDTOMaster
@@ -87,5 +88,11 @@ class SalleFestiveService(
 
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle festive.")
+    }
+
+    suspend fun update(p: SalleFestive) = coroutineScope {
+        val data = p.toEntity()
+        val result = repository.save(data)
+        result.toDomain()
     }
 }
