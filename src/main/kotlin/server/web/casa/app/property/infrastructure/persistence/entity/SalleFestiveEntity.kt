@@ -2,7 +2,9 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.*
+import server.web.casa.app.property.domain.model.AddressDTO
 import server.web.casa.app.property.domain.model.SalleFestive
+import server.web.casa.app.property.domain.model.dto.GeoDTO
 import java.time.LocalDate
 
 @Table(name = "salle_festives")
@@ -42,6 +44,10 @@ class SalleFestiveEntity(
     val cityId: Long? = null,
     @Column("postal_code")
     val postalCode: String? = "",
+    @Column("transaction_type")
+    val transactionType: String = "",
+    @Column("property_type_id")
+    val propertyTypeId: Long? = null,
     @Column("commune_id")
     val communeId: Long? = null,
     @Column("quartier_id")
@@ -88,5 +94,18 @@ fun SalleFestiveEntity.toDomain()= SalleFestive(
     communeValue = this.communeValue,
     quartierValue = this.quartierValue,
     countryValue = this.countryValue,
-    cityValue = this.cityValue
+    cityValue = this.cityValue,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
 )
+
+fun SalleFestiveEntity.toAddressDTO() = AddressDTO(
+    address = this.address,
+    communeValue = this.communeValue,
+    quartierValue = this.quartierValue,
+    cityValue = this.cityValue,
+    countryValue = this.countryValue,
+    postalCode = this.postalCode,
+)
+
+fun SalleFestiveEntity.toGeo() = GeoDTO(this.latitude, this.longitude)

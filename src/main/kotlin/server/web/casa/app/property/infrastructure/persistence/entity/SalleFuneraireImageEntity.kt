@@ -16,9 +16,9 @@ data class SalleFuneraireImageEntity(
     @Column("salle_funeraire_id")
     val salleFuneraireId : Long,
     @Column("name")
-    val name: String,
+    var name: String,
     @Column("path")
-    val path: String?,
+    var path: String?,
     @Column("is_available")
     var isAvailable: Boolean = true,
     @Column("created_at")

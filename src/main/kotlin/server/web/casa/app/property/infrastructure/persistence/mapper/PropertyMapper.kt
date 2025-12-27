@@ -36,6 +36,7 @@ fun PropertyEntity.toDomain()  = Property(
     propertyTypeId = this.propertyTypeId,
     createdAt = this.createdAt,
     updatedAt = this.updatedAt,
+    deviseId = this.deviseId
 )
 
 fun Property.toEntity() = PropertyEntity(
@@ -69,6 +70,7 @@ fun Property.toEntity() = PropertyEntity(
     latitude = this.latitude,
     longitude = this.longitude,
     isAvailable = this.isAvailable,
+    deviseId = this.deviseId,
     createdAt = this.createdAt,
     updatedAt = this.updatedAt
 )

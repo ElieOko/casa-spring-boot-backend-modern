@@ -63,3 +63,11 @@ data class PropertyImageChangeRequest(
     val propertyImageKitchen : List<ImageChangeRequest?> = emptyList()
 )
 
+data class ImageChange(
+    val images : List<ImageChangeRequest?> = emptyList(),
+)
+data class ImageChangeOther(
+    val images : List<ImageChangeOtherRequest?> = emptyList(),
+)
+
+

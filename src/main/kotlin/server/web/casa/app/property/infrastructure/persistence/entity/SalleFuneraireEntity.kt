@@ -2,7 +2,9 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.*
+import server.web.casa.app.property.domain.model.AddressDTO
 import server.web.casa.app.property.domain.model.SalleFuneraire
+import server.web.casa.app.property.domain.model.dto.GeoDTO
 import java.time.LocalDate
 
 @Table(name = "salle_funeraires")
@@ -50,6 +52,10 @@ class SalleFuneraireEntity(
     val latitude: Double? = null,
     @Column("longitude")
     val longitude: Double? = null,
+    @Column("transaction_type")
+    val transactionType: String = "",
+    @Column("property_type_id")
+    val propertyTypeId: Long? = null,
     @Column("is_available")
     var isAvailable: Boolean = true,
     @Column("created_at")
@@ -78,7 +84,19 @@ fun SalleFuneraireEntity.toDomain() = SalleFuneraire(
     communeId = this.communeId,
     quartierId = this.quartierId,
     cityId = this.cityId,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
     countryValue = this.countryValue,
     updatedAt = this.updatedAt,
     createdAt = this.createdAt,
 )
+fun SalleFuneraireEntity.toAddressDTO() = AddressDTO(
+    address = this.address,
+    communeValue = this.communeValue,
+    quartierValue = this.quartierValue,
+    cityValue = this.cityValue,
+    countryValue = this.countryValue,
+    postalCode = this.postalCode,
+)
+
+fun SalleFuneraireEntity.toGeo() = GeoDTO(this.latitude, this.longitude)

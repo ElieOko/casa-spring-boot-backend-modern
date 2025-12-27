@@ -8,3 +8,7 @@ data class ImageChangeRequest(
     val name : String,
     val old : String,
 )
+
+data class ImageChangeOtherRequest(
+    val name : String
+)

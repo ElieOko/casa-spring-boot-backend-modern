@@ -1,6 +1,5 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
-
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -45,6 +44,8 @@ data class PropertyEntity(
     val cityValue: String? = "",
     @Column("country_value")
     val countryValue: String? = "",
+    @Column("devise_id")
+    val deviseId : Long,
     @Column("city_id")
     val cityId: Long? = null,
     @Column("postal_code")

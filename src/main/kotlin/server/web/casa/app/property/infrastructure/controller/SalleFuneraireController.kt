@@ -4,31 +4,20 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.*
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
+import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.property.application.service.BureauImageService
-import server.web.casa.app.property.application.service.BureauService
-import server.web.casa.app.property.application.service.FuneraireImageService
-import server.web.casa.app.property.application.service.SalleFuneraireService
-import server.web.casa.app.property.domain.model.Bureau
-import server.web.casa.app.property.domain.model.BureauDto
-import server.web.casa.app.property.domain.model.ImageRequestStandard
-import server.web.casa.app.property.domain.model.SalleFuneraireRequest
+import server.web.casa.app.property.application.service.*
+import server.web.casa.app.property.domain.model.*
+import server.web.casa.app.property.domain.model.request.ImageChange
+import server.web.casa.app.property.domain.model.request.PropertyImageChangeRequest
+import server.web.casa.app.property.domain.model.request.PropertyImagesRequest
 import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.utils.*
 
 @Tag(name = "Funeraire", description = "")
 @RestController
@@ -40,7 +29,8 @@ class SalleFuneraireController(
     private val imageService: FuneraireImageService,
     private val cityService: CityService,
     private val communeService: CommuneService,
-    private val quartierService: QuartierService
+    private val quartierService: QuartierService,
+    private val propertyTypeService: PropertyTypeService
 ) {
 
     @Operation(summary = "Création bureau")
@@ -48,6 +38,8 @@ class SalleFuneraireController(
     suspend fun createFuneraire(
         @Valid @RequestBody request: SalleFuneraireRequest,
     ) = coroutineScope{
+        if (request.funeraire.propertyTypeId != 7L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au salle funeraire")
+        propertyTypeService.findByIdPropertyType(request.funeraire.propertyTypeId)
         val city = if (request.funeraire.cityId != null) cityService.findByIdCity(request.funeraire.cityId) else null
         val commune = communeService.findByIdCommune(request.funeraire.communeId)
         val quartier =  if (request.funeraire.quartierId != null) quartierService.findByIdQuartier(request.funeraire.quartierId) else null
@@ -68,5 +60,44 @@ class SalleFuneraireController(
         val data = service.getAll()
         val response = mapOf("funeraires" to data)
         ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Get Salle Funeraire by User")
+    @GetMapping("/owner/{userId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllFuneraireByUser(
+        @PathVariable("userId") userId : Long,
+    ) = coroutineScope {
+        val data = service.getAllPropertyByUser(userId)
+        ApiResponse(data)
+    }
+    @Operation(summary = "Modification Salle festive")
+    @PutMapping("/image/{funeraireId}")
+    suspend fun updateFile(
+        @PathVariable("funeraireId") funeraireId : Long,
+        @Valid @RequestBody request: ImageChange
+    ) = coroutineScope {
+        service.findById(funeraireId)
+        val result = if (request.images.isNotEmpty()) imageService.updateFile(funeraireId,request.images) else false
+        val message = mutableMapOf("message" to "Modification effectuée avec succès")
+        if (result)  ResponseEntity.ok(message) else {
+            message["message"] = "Aucune modification n'a été effectuée"
+            ResponseEntity.badRequest().body(message)
+        }
+    }
+
+    @Operation(summary = "Suppression Salle festive")
+    @DeleteMapping("/image/{funeraireId}")
+    suspend fun deleteFile(
+        @PathVariable("funeraireId") funeraireId : Long,
+        @Valid @RequestBody request: PropertyImagesRequest
+    ) = coroutineScope{
+        service.findById(funeraireId)
+        val result = if (request.propertyImage.isNotEmpty()) imageService.deleteFile(funeraireId,request.propertyImage) else false
+        val message = mutableMapOf("message" to "Suppression effectuée avec succès")
+        if (result)  ResponseEntity.ok(message) else {
+            message["message"] = "Aucune suppression n'a été effectuée"
+            ResponseEntity.badRequest().body(message)
+        }
     }
 }

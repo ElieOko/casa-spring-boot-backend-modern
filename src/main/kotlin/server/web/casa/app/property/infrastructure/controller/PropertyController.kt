@@ -11,15 +11,13 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
+import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.dto.toDto
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
-import server.web.casa.app.property.domain.model.request.ImageChangeRequest
-import server.web.casa.app.property.domain.model.request.PropertyImageChangeRequest
-import server.web.casa.app.property.domain.model.request.PropertyImagesRequest
-import server.web.casa.app.property.domain.model.request.PropertyRequest
+import server.web.casa.app.property.domain.model.request.*
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
@@ -40,6 +38,7 @@ class PropertyController(
     private val propertyImageLivingRoomService: PropertyImageLivingRoomService,
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
+    private val devise : DeviseService,
     private val quartierService: QuartierService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -50,6 +49,7 @@ class PropertyController(
         requestHttp: HttpServletRequest
     ): ApiResponseWithMessage<PropertyMasterDTO> = coroutineScope {
         //       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+        devise.getById(request.deviseId)
         val imageList = request.propertyImage
         val imageKitchen = request.propertyImageKitchen
         val imageRoom = request.propertyImageRoom
@@ -94,6 +94,7 @@ class PropertyController(
             latitude = request.latitude,
             longitude = request.longitude,
             propertyTypeId = propertyType.propertyTypeId,
+            deviseId = request.deviseId
         )
         val result = service.create(property.toDto(), request.features)
         val propertyInstance = service.findByIdProperty(result.property.propertyId!!)
@@ -227,7 +228,7 @@ class PropertyController(
         val commune = communeService.findByIdCommune(request.communeId)
         val quartier =  quartierService.findByIdQuartier(request.quartierId)
         val property = service.findByIdProperty(propertyId)
-        if (property.first.property.userId != userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet auteur n'appartient pas à la proprièté.")
+        if (property.first.property.userId != userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté.")
         property.first.typeProperty.propertyTypeId = propertyType.propertyTypeId
         property.first.property.title = request.title
         property.first.property.description = request.description
@@ -292,6 +293,5 @@ class PropertyController(
             ResponseEntity.badRequest().body(message)
         }
     }
-
 
 }

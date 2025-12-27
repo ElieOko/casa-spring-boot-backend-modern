@@ -2,6 +2,7 @@ package server.web.casa.app.payment.application.service
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -16,9 +17,9 @@ class DeviseService(
 ) {
     suspend fun create(data : Devise) = repository.save(data.toEntity()).toDomain()
 
-    fun getAllData(): Flow<Devise> {
+    suspend fun getAllData(): List<Devise> {
         val data = repository.findAll()
-        return data.map{it.toDomain()}
+        return data.map{it.toDomain()}.toList()
     }
 
     suspend fun getById(id : Long?): Devise? {

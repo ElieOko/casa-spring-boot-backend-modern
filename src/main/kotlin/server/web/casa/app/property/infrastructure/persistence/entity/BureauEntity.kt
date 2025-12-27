@@ -3,7 +3,9 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import server.web.casa.app.property.domain.model.AddressDTO
 import server.web.casa.app.property.domain.model.Bureau
+import server.web.casa.app.property.domain.model.dto.GeoDTO
 import java.time.LocalDateTime
 
 @Table(name = "bureau")
@@ -49,6 +51,10 @@ class BureauEntity(
     val communeId: Long? = null,
     @Column("quartier_id")
     val quartierId: Long? = null,
+    @Column("transaction_type")
+    val transactionType: String = "",
+    @Column("property_type_id")
+    val propertyTypeId: Long? = null,
     @Column("latitude")
     val latitude: Double? = null,
     @Column("longitude")
@@ -63,6 +69,8 @@ fun BureauEntity.toDomain() = Bureau(
     deviseId = this.deviseId,
     title = this.title,
     description = this.description,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
     price = this.price,
     roomMeet = this.roomMeet,
     numberPiece = this.numberPiece,
@@ -70,3 +78,14 @@ fun BureauEntity.toDomain() = Bureau(
     address = this.address,
     createdAt = this.createdAt
 )
+
+fun BureauEntity.toAddressDTO() = AddressDTO(
+    address = this.address,
+    communeValue = this.communeValue,
+    quartierValue = this.quartierValue,
+    cityValue = this.cityValue,
+    countryValue = this.countryValue,
+    postalCode = this.postalCode,
+)
+
+fun BureauEntity.toGeo() = GeoDTO(this.latitude, this.longitude)
