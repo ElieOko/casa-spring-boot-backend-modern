@@ -24,6 +24,10 @@ class FavoriteService(
         val result = repository.save(f)
         return toFavoriteDTO(result)
     }
+    suspend fun getById(id: Long): FavoriteDTO? {
+        val fav = repository.findById(id) ?: return null
+        return toFavoriteDTO(fav)
+    }
     suspend fun getAll() = repository.findAll().map {
         toFavoriteDTO(it)
     }.toList()
@@ -44,6 +48,9 @@ class FavoriteService(
     }
     suspend fun deleteById(favoriteId: Long) {
         return repository.deleteById(favoriteId)
+    }
+    suspend fun deleteAll() {
+        return repository.deleteAll()
     }
     suspend fun deleteAllFavoriteUser(user: Long): Boolean {
        val getAll = repository.findAll().filter{ it.userId == user }.toList()
