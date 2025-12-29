@@ -5,26 +5,17 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.toList
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
-import server.web.casa.app.ecosystem.application.service.PrestationImageService
-import server.web.casa.app.ecosystem.application.service.PrestationService
-import server.web.casa.app.ecosystem.domain.model.Prestation
+import org.springframework.http.*
+import org.springframework.web.bind.annotation.*
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.ecosystem.application.service.*
 import server.web.casa.app.ecosystem.domain.model.PrestationImage
 import server.web.casa.app.ecosystem.domain.model.toDomain
 import server.web.casa.app.ecosystem.domain.request.PrestationRequest
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.ecosystem.Service
+import server.web.casa.utils.ApiResponse
 
 @Tag(name = "Prestation Service", description = "Gestion des prestations services")
 @RestController
@@ -74,5 +65,25 @@ class PrestationController(
     suspend fun getAllPrestation() = coroutineScope {
         val response = mapOf("prestations" to prestationService.getAllData().toList())
         ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Get Prestaion by ID")
+    @GetMapping("/{prestationId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPrestaionById(
+        @PathVariable("prestationId") prestationId : Long,
+    ) = coroutineScope {
+        val data = prestationService.getByIdPrestation(prestationId)
+        ApiResponse(data)
+    }
+
+    @Operation(summary = "Get Prestaion by User")
+    @GetMapping("/owner/{userId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPrestaionByUser(
+        @PathVariable("userId") userId : Long,
+    ) = coroutineScope {
+        val data = prestationService.getAllPrestationByUser(userId)
+        ApiResponse(data)
     }
 }
