@@ -1,6 +1,5 @@
 package server.web.casa.app.ecosystem.domain.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.jetbrains.annotations.NotNull
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.PrestationEntity
 import java.time.LocalDateTime
@@ -13,6 +12,7 @@ class Prestation(
     val title : String = "",
     val description : String?="",
     val experience : String = "",
+    var profile : String? = "",
     val plageJourPrestation : String = "",
     val plageHeurePrestation : String = "",
     val minPrice: Double = 0.0,
@@ -38,6 +38,8 @@ class PrestationDTO(
     val deviseId : Long? = null,
     @NotNull
     val title : String = "",
+    @NotNull
+    val profile : String = "",
     val description : String?="",
     @NotNull
     val experience : String = "",
@@ -57,6 +59,7 @@ class PrestationDTO(
 fun PrestationDTO.toDomain()= Prestation(
     id = null,
     userId = this.userId,
+    profile = this.profile,
     serviceId = this.serviceId,
     deviseId = this.deviseId,
     title = this.title,
@@ -83,6 +86,7 @@ fun Prestation.toEntity() = PrestationEntity(
     userId = this.userId,
     serviceId = this.serviceId,
     deviseId = this.deviseId,
+    profile = this.profile,
     title = this.title,
     description = this.description,
     experience = this.experience,
