@@ -8,22 +8,34 @@ import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.ecosystem.domain.model.Prestation
 import server.web.casa.app.ecosystem.domain.model.PrestationDTOMaster
 import server.web.casa.app.ecosystem.domain.model.toEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.PrestationEntity
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationImageRepository
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationRepository
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.AccountUserRepository
+import server.web.casa.utils.base64ToMultipartFile
+import server.web.casa.utils.gcs.GcsService
+import kotlin.collections.get
 import kotlin.collections.map
+import kotlin.collections.toList
 
 @Service
 class PrestationService(
     private val repository: PrestationRepository,
     private val account : AccountUserRepository,
+    private val userService : UserService,
+    private val gcsService: GcsService,
     val repositoryImage: PrestationImageRepository
     ) {
+    private val model = "profile"
    suspend fun create(data : Prestation) =  coroutineScope{
+       val file = base64ToMultipartFile(data.profile?:"", "${model}_prestation")
        if (repository.countByUserId(data.userId) == 2L) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous ne pouvez pas créer plus de 2 prestations")
        account.findByUserAndAccount(data.userId, data.serviceId) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas dans votre compte")
        val result = repository.findByUserAndService(data.userId,data.serviceId)
+       val imageUri = gcsService.uploadFile(file,"prestation/$model/")
+       data.profile = imageUri!!
        if (result != null) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous avez récemment créer une prestation") else repository.save(data.toEntity()).toDomain()
    }
    suspend fun canCertified(id : Long): Pair<String, Prestation> {
@@ -37,26 +49,40 @@ class PrestationService(
     }
    suspend fun getAllData()= coroutineScope {
        val data = repository.findAllFilter().toList()
-       val prestationList = mutableListOf<PrestationDTOMaster>()
-       val ids: List<Long> = data.map { it.id!! }
-       val images = repositoryImage.findByPrestationIdIn(ids).toList()
-       val imagesByPrestation = images.groupBy { it.prestationId }
-       data.forEach { pres->
-          prestationList.add(
-              PrestationDTOMaster(
-                  prestation = pres.toDomain(),
-                  image = imagesByPrestation[pres.id]?.map { it.toDomain() } ?: emptyList()
-              )
-          )
-       }
-       prestationList
+       compactModel(data)
     }
+
+    private suspend fun compactModel(model : List<PrestationEntity>) = coroutineScope {
+        val prestationList = mutableListOf<PrestationDTOMaster>()
+        val ids =  model.map { it.id!! }
+        val images = repositoryImage.findByPrestationIdIn(ids).toList()
+        val imagesByPrestation = images.groupBy { it.prestationId }
+        model.forEach { pres->
+            prestationList.add(
+                PrestationDTOMaster(
+                    prestation = pres.toDomain(),
+                    image = imagesByPrestation[pres.id]?.map { it.toDomain() } ?: emptyList(),
+                    postBy = userService.findIdUser(pres.userId).username
+                )
+            )
+        }
+        prestationList
+    }
+
+    suspend fun getAllPrestationByUser(userId : Long) = coroutineScope {
+        val data = repository.findAllFindByUser(userId).toList()
+        compactModel(data)
+    }
+
    suspend fun canUpdate(id : Long, data: Prestation): Pair<String, Prestation> {
         val entity =  repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas")
         return Pair("Modification effectué avec succès",repository.save(entity).toDomain())
     }
-   suspend fun getById(id : Long): Prestation {
-        val data = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas")
-        return data.toDomain()
+   suspend fun getByIdPrestation(id : Long) = coroutineScope {
+        val data = repository.findByIdPrestation(id).toList()
+        if (data.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas")
+        compactModel(data)
     }
+
+    suspend fun getById(id: Long)  = repository.findById(id)
 }

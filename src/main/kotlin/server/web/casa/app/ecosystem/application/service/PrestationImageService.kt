@@ -17,19 +17,16 @@ class PrestationImageService(
     private val storageService: FileSystemStorageService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val model = "electricien"
+    private val model = "prestation"
     suspend fun create(p : PrestationImage,server : String): PrestationImage {
         val file = base64ToMultipartFile(p.name, "${model}_realisation")
         log.info("file ****taille:${file.size}")
         log.info("file ****name:${file.name}")
-        val imageUri = gcsService.uploadFile(file,"realisation/$model/")
-//        val filename = storageService.store(file, subfolder = "/realisation/$model/")
-//        val fileUrl = "$server/realisation/$model/$filename"
-//        log.info("public url local $fileUrl")
+        val imageUri = gcsService.uploadFile(file,"$model/")
         p.path = imageUri!!
         val data = PrestationImageEntity(
             prestationId = p.prestationId,
-            name = "",
+            name = file.originalFilename!!,
             path = p.path
         )
         return repository.save(data).toDomain()
