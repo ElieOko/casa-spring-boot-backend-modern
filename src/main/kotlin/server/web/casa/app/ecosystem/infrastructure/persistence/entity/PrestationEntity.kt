@@ -21,6 +21,8 @@ class PrestationEntity(
     val title : String = "",
     @Column("description")
     val description : String?="",
+    @Column("profile")
+    val profile : String?="",
     @Column("experience")
     val experience : String = "",
     @Column("plage_jour_prestation")
@@ -60,6 +62,7 @@ fun PrestationEntity.toDomain() = Prestation(
     userId = this.userId,
     serviceId = this.serviceId,
     deviseId = this.deviseId,
+    profile = this.profile,
     title = this.title,
     description = this.description,
     experience = this.experience,
