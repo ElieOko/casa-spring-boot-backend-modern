@@ -16,4 +16,10 @@ interface PrestationRepository : CoroutineCrudRepository<PrestationEntity, Long>
 
     @Query("SELECT * FROM prestations WHERE is_active = true and is_certified = true")
     suspend fun findAllFilter() : Flow<PrestationEntity>
+
+    @Query("SELECT * FROM prestations WHERE is_active = true and is_certified = true and id = :id")
+    suspend fun findByIdPrestation(id : Long) :Flow<PrestationEntity>
+
+    @Query("SELECT * FROM prestations WHERE is_active = true and is_certified = true and user_id = :userId")
+    suspend fun findAllFindByUser(userId: Long) : Flow<PrestationEntity>
 }
