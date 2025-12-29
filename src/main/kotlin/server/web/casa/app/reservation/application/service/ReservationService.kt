@@ -23,99 +23,63 @@ class ReservationService(
 ) {
      suspend fun createReservation(reservation: ReservationEntity): ReservationDTO {
         val result = repoR.save(reservation)
-        return ReservationDTO(
-             reservation = result,
-            property = propS.findByIdProperty(result.propertyId!!).first
-        )
+        return toEntityDTO(result)
     }
 
      suspend fun findAllReservation() : List<ReservationDTO> {
 
-         return repoR.findAll().map { it-> ReservationDTO(
-             reservation = it,
-             property = propS.findByIdProperty(it.propertyId!!).first
-         )}.toList()
+         return repoR.findAll().map{toEntityDTO(it)}.toList()
     }
 
      suspend fun findById(id: Long): ReservationDTO? {
          val reservation = repoR.findById(id) ?: return null
-         return ReservationDTO(
-             reservation = reservation,
-             property = propS.findByIdProperty(reservation.propertyId!!).first
-         )
+         return toEntityDTO(reservation)
          //return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
 
     suspend fun findByProperty(property: Long): List<ReservationDTO>? {
         return repoR.findByProperty(property)?.map {
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+                toEntityDTO(it)
             }?.toList()
     }
     suspend fun findByUser(userId: Long): List<ReservationDTO>?{
         return repoR.findByUser(userId).let {list-> list?.map{
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+                toEntityDTO(it)
             }?.toList() ?: emptyList() }
     }
     suspend fun findByStatus(status: ReservationStatus): List<ReservationDTO>{
         return repoR.findAllByStatus(status).let {list-> list?.map{
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+            toEntityDTO(it)
         }?.toList() ?: emptyList() }
     }
     suspend fun findByMonth(month: Int, year: Int): List<ReservationDTO>{
         return repoR.findAllByMonthAndYear(month, year).let { list-> list?.map{
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+            toEntityDTO(it)
         }?.toList() ?: emptyList() }
     }
     suspend fun findByPYear(year : Int) : List<ReservationDTO>{
       return repoR.findAllByYear( year)?.map{
-              it-> ReservationDTO(
-                  reservation = it,
-                  property = propS.findByIdProperty(it.propertyId!!).first
-              )
+          toEntityDTO(it)
       }?.toList() ?: emptyList()
     }
     suspend fun findByDate(inputDate: LocalDate): List<ReservationDTO> {
         return repoR.findAllByDate(inputDate).map{
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+            toEntityDTO(it)
         }.toList()
     }
     suspend fun findByInterval(starDate : LocalDate, endDate: LocalDate): List<ReservationDTO>? {
       return repoR.findAllInInterval(starDate, endDate)?.map {
-              it-> ReservationDTO(
-                  reservation = it,
-                  property = propS.findByIdProperty(it.propertyId!!).first
-              )
+          toEntityDTO(it)
       }?.toList()
     }
     suspend fun findByStartDateAndEndDateProperty(starDate : LocalDate, endDate: LocalDate, propertyId: Long): List<ReservationDTO>? {
         return repoR.findByStartDateAndEndDateProperty(starDate, endDate, propertyId)?.map {
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+                toEntityDTO(it)
              }?.toList()
     }
     suspend fun findByUserProperty(propertyId: Long , userId: Long): List<ReservationDTO>? {
         return repoR.findByUserProperty(propertyId, userId)?.map {
-                it-> ReservationDTO(
-                    reservation = it,
-                    property = propS.findByIdProperty(it.propertyId!!).first
-                )
+            toEntityDTO(it)
         }?.toList()
     }
 
@@ -124,10 +88,7 @@ class ReservationService(
                 entity?.status = status.toString()
                 repoR.save(entity!!)
             val reservation = repoR.findById(id)!!
-            return ReservationDTO(
-                reservation = reservation,
-                property = propS.findByIdProperty(reservation.propertyId!!).first
-            )
+            return toEntityDTO(reservation)
         }
 
     suspend fun cancelOrKeepReservation(id: Long,isActive: Boolean, reason: String?, status: ReservationStatus): ReservationDTO {
@@ -137,10 +98,7 @@ class ReservationService(
             entity?.cancellationReason = reason
             repoR.save(entity!!)
         val reservation = repoR.findById(id)!!
-        return ReservationDTO(
-            reservation = reservation,
-            property = propS.findByIdProperty(reservation.propertyId!!).first
-        )
+        return toEntityDTO(reservation)
     }
     //delete
 
@@ -163,4 +121,11 @@ class ReservationService(
         val success = repoR.deleteAllByPropertyReservation(property)
         return success
     }
+
+    suspend fun toEntityDTO(it: ReservationEntity): ReservationDTO =
+        ReservationDTO(
+            reservation = it,
+            property = propS.findByIdProperty(it.propertyId!!).first
+        )
+
 }
