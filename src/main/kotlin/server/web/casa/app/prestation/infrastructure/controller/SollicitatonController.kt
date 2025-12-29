@@ -77,7 +77,7 @@ class SollicitatonController(
         val sollicitation = service.findById(id) ?: return ResponseEntity.ok(mapOf("error" to "sollicitation not found"))
 
         val userId = sollicitation.userId
-        val prestateurId = prestS.getById ( sollicitation.prestationId!!).userId
+        val prestateurId = prestS.getById ( sollicitation.prestationId!!)?.userId
 
         val prestateurCheck = userRequest.userId == prestateurId
         val sollicitateur = userRequest.userId == userId
