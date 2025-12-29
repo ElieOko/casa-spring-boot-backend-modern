@@ -1,5 +1,8 @@
 package server.web.casa.app.reservation.domain.model
 
+import server.web.casa.app.property.domain.model.dto.PropertyDTO
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
+import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import java.time.LocalDate
 
 data class Reservation(
@@ -15,4 +18,9 @@ data class Reservation(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val createdAt: LocalDate = LocalDate.now(),
+)
+
+data class ReservationDTO(
+    val reservation: ReservationEntity?,
+    val property: PropertyMasterDTO?
 )

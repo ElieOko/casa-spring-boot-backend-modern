@@ -14,7 +14,7 @@ data class PublicityEntity(
     @Column("user_id")
     val user: Long? = null,  // FK vers users.id
     @Column("image_path")
-    val imagePath: String? = null,
+    var imagePath: String? = null,
     @Column("title")
     val title: String,
     @Column("description")
