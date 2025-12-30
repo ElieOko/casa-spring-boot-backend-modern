@@ -21,7 +21,6 @@ import server.web.casa.app.user.domain.model.ImageUserRequest
 import server.web.casa.app.user.domain.model.User
 import server.web.casa.route.actor.ActorRoute.MEMBER
 import server.web.casa.utils.*
-import kotlin.collections.isNotEmpty
 
 @Tag(name = "Personne", description = "Gestion des Membres")
 @RestController
@@ -72,8 +71,8 @@ class PersonController(
         @RequestBody @Valid request: PersonRequest
     ) = coroutineScope {
         val updated = service.update(request,id)
-        userService.updateUsername(updated.userId!!,"@"+toPascalCase(updated.firstName + updated.lastName))
-        val response = mapOf("message" to "Person updated successfully", "person" to updated)
+        userService.updateUsername(updated.second.userId!!,"@"+toPascalCase(updated.second.firstName + updated.second.lastName))
+        val response = mapOf("message" to "Person updated successfully", "person" to updated.second, "user" to updated.first)
         ResponseEntity.ok(response)
     }
     @Operation(summary = "Modification Photo de profile")

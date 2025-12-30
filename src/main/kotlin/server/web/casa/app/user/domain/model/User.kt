@@ -28,15 +28,22 @@ data class User(
     val createdStart: LocalDateTime? = LocalDateTime.now()
 )
 
+data class UserUpdate(
+    val email: String? = "",
+    val phone: String? = "",
+    val city: String = "",
+    val country : String = "",
+)
+
 data class UserDto(
     val userId: Long? = null,
-    val email: String? = null,
+    var email: String? = null,
     val username: String,
-    val phone: String,
-    val city: String,
-    val country : String? = "Democratic Republic of the Congo",
+    var phone: String,
+    var city: String,
+    var country : String? = "Democratic Republic of the Congo",
     val isPremium : Boolean,
-    val isCertified: Boolean
+    var isCertified: Boolean
 )
 
 data class UserRequest(

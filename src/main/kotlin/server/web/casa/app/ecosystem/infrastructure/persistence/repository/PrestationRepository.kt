@@ -14,12 +14,12 @@ interface PrestationRepository : CoroutineCrudRepository<PrestationEntity, Long>
     @Query("SELECT COUNT(*) FROM prestations WHERE user_id = :userId")
     suspend fun countByUserId(userId: Long) : Long
 
-    @Query("SELECT * FROM prestations WHERE is_active = true and is_certified = true")
+    @Query("SELECT * FROM prestations WHERE is_active = true ")
     suspend fun findAllFilter() : Flow<PrestationEntity>
 
-    @Query("SELECT * FROM prestations WHERE is_active = true and is_certified = true and id = :id")
+    @Query("SELECT * FROM prestations WHERE is_active = true and id = :id")
     suspend fun findByIdPrestation(id : Long) :Flow<PrestationEntity>
 
-    @Query("SELECT * FROM prestations WHERE is_active = true and is_certified = true and user_id = :userId")
+    @Query("SELECT * FROM prestations WHERE is_active = true and user_id = :userId")
     suspend fun findAllFindByUser(userId: Long) : Flow<PrestationEntity>
 }

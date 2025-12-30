@@ -3,6 +3,7 @@ package server.web.casa.app.actor.application.service
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -11,16 +12,20 @@ import server.web.casa.app.actor.domain.model.request.PersonRequest
 import server.web.casa.app.actor.domain.model.toEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.ImageUserRequest
+import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
-import server.web.casa.utils.storage.FileSystemStorageService
+import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 
 @Service
 class PersonService(
     private val repository: PersonRepository,
     private val gcsService: GcsService,
-    private val storageService: FileSystemStorageService,
+//    private val storageService: FileSystemStorageService,
+    private val userService: UserService,
+    private val repositoryUser: UserRepository
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     suspend fun create(model: Person): Person {
@@ -52,26 +57,48 @@ class PersonService(
         log.info("file ****taille:${file.size}")
         log.info("file ****name:${file.name}")
         val imageUri = gcsService.uploadFile(file,"profil/")
-        log.info("public url local ")
+//        log.info("public url local ")
         person.images =imageUri
         val result = repository.save(person)
         result.toDomain()
     }
-    suspend fun update(person : PersonRequest, id : Long): Person = coroutineScope {
+    suspend fun update(person : PersonRequest, id : Long) = coroutineScope {
         val data = repository.findById(id)?:  throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
+        val user  = repositoryUser.findById(data.userId!!)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
+        val email = person.user.email?.ifEmpty { "" }
+        val phone = person.user.phone?.ifEmpty { "" }
+        person.user.city.ifEmpty { user.city }
+        person.user.country.ifEmpty { user.country }
+        val identifier = repositoryUser.findByPhoneOrEmail(email!!)
+        if (identifier == null){
+            user.email = email
+        }
+        if (phone != ""){
+            val phone2 =  normalizeAndValidatePhoneNumberUniversal(phone) ?: throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+            val identifier = repositoryUser.findByPhoneOrEmail(phone!!)
+            if (identifier == null){
+                user.phone = phone2
+            }
+        }
+       user.country = person.user.country.ifEmpty { user.country }
+       user.city = person.user.city.ifEmpty { user.city }
         if ((person.cardBack != null && person.cardFront != null) && (person.cardBack.isNotEmpty() && person.cardFront.isNotEmpty())) {
             val file = base64ToMultipartFile(person.cardBack, "profile")
             val file2 = base64ToMultipartFile(person.cardFront, "profile")
             val imageUri = gcsService.uploadFile(file,"card/")
             val imageUri2 = gcsService.uploadFile(file2,"card/")
+            user.isCertified = true
             log.info("public url local ")
             data.cardFront = imageUri2
             data.cardBack = imageUri
             repository.save(data).toDomain()
         }
-        data.address = person.address
-        data.lastName = person.lastName.ifEmpty { data.lastName }
-        data.firstName = person.firstName.ifEmpty { data.firstName }
-        repository.save(data).toDomain()
+       data.address = person.address
+       data.lastName = person.lastName.ifEmpty { data.lastName }
+       data.firstName = person.firstName.ifEmpty { data.firstName }
+       val userState = repositoryUser.save(user)
+       val member = repository.save(data).toDomain()
+       Pair(userState,member)
     }
 }

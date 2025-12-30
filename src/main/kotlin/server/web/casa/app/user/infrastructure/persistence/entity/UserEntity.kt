@@ -27,9 +27,9 @@ class UserEntity(
     @Column("is_certified")
     var isCertified: Boolean = false,
     @Column("phone")
-    val phone: String?=null,
+    var phone: String?=null,
     @Column("country")
-    val country: String? = "Democratic Republic of the Congo",
+    var country: String? = "Democratic Republic of the Congo",
     @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
 )

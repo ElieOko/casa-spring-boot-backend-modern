@@ -19,7 +19,7 @@ fun UserEntity.toDomain(): UserDto {
 }
 
 @OptIn(ExperimentalTime::class)
-fun UserDto.toEntityToDto(): UserEntity {
+fun UserDto.toEntityToDto(password: String): UserEntity {
     val user = this
     return UserEntity(
         userId = user.userId,
@@ -27,7 +27,9 @@ fun UserDto.toEntityToDto(): UserEntity {
         email = user.email,
         phone = user.phone,
         city = user.city,
+        password = password,
         country = user.country,
+        isPremium = user.isPremium,
     )
 }
 
