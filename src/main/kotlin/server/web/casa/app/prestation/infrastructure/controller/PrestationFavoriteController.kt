@@ -12,9 +12,10 @@ import server.web.casa.app.prestation.domain.model.FavoritePrestationDTO
 import server.web.casa.app.prestation.domain.request.FavoritePrestationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.FavoritePrestationEntity
 import server.web.casa.app.user.application.service.UserService
+import server.web.casa.route.favorite.FavoritePrestationRoute
 import server.web.casa.utils.Mode
 
-const val ROUTE_FAVORITE_PRESTATION = "api/favorite/prestation"
+const val ROUTE_FAVORITE_PRESTATION = FavoritePrestationRoute.FAVORITE_PATH
 
 @Tag(name = "Favorite Prestation", description = "Favorite Prestation's Management")
 @RestController
