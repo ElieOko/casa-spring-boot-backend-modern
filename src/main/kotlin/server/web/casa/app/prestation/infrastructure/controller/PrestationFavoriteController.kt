@@ -57,30 +57,30 @@ class PrestationFavoriteController(
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, FavoritePrestationDTO?>>{
-        val f = service.findById(id)
-        return ResponseEntity.ok().body(mapOf("data" to f))
+        val find = service.findById(id)
+        return ResponseEntity.ok().body(mapOf("data" to find))
     }
 
     @GetMapping("/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByUser(@PathVariable userId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
-        val f = service.findByUserId( userId)
-        return ResponseEntity.ok(mapOf("data" to f))
+        val find = service.findByUserId( userId)
+        return ResponseEntity.ok(mapOf("data" to find))
     }
     @GetMapping("/{prestationId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByPrestation(@PathVariable prestationId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
-        val f = service.findByPrestationId(prestationId)
-        return ResponseEntity.ok(mapOf("data" to f))
+        val find = service.findByPrestationId(prestationId)
+        return ResponseEntity.ok(mapOf("data" to find))
     }
     @GetMapping("/{userId}/{prestationId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByUserPrestation(@PathVariable userId: Long, @PathVariable prestationId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
-        val f = service.findByPrestationIdAndUserId(prestationId, userId)
-       return ResponseEntity.ok(mapOf("data" to f))
+        val find = service.findByPrestationIdAndUserId(prestationId, userId)
+       return ResponseEntity.ok(mapOf("data" to find))
     }
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun deleteById(@PathVariable id: Long): ResponseEntity<Map<String, String>>{
-        val f = service.findById(id)
-        if (f != null) service.deleteById(f.favorite.id!!) else return ResponseEntity.badRequest().body(mapOf("error" to "favorite not found"))
+        val find = service.findById(id)
+        if (find != null) service.deleteById(find.favorite.id!!) else return ResponseEntity.badRequest().body(mapOf("error" to "favorite not found"))
         return ResponseEntity.ok().body(mapOf("message" to "Favorite deleted"))
     }
 

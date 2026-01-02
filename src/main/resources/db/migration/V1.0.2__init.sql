@@ -361,3 +361,18 @@ CREATE TABLE IF NOT EXISTS public.sollicitations (
         FOREIGN KEY (devise_id)
         REFERENCES public.devises(id)
 );
+
+CREATE TABLE IF NOT EXISTS favorite_prestations (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    prestation_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_favorite_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_favorite_prestation
+        FOREIGN KEY (prestation_id) REFERENCES prestations(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
