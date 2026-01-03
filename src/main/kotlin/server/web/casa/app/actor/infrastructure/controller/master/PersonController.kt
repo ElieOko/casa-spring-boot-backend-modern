@@ -16,6 +16,7 @@ import server.web.casa.app.actor.domain.model.join.master.PersonUserRequest
 import server.web.casa.app.actor.domain.model.join.master.toPerson
 import server.web.casa.app.actor.domain.model.join.master.toUser
 import server.web.casa.app.actor.domain.model.request.PersonRequest
+import server.web.casa.app.actor.domain.model.request.PersonRequest2
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.ImageUserRequest
 import server.web.casa.app.user.domain.model.User
@@ -68,7 +69,7 @@ class PersonController(
     @PutMapping("/{id}")
     suspend fun updatePerson(
         @PathVariable("id") id : Long,
-        @RequestBody @Valid request: PersonRequest
+        @RequestBody @Valid request: PersonRequest2
     ) = coroutineScope {
         val updated = service.update(request,id)
         userService.updateUsername(updated.second.userId!!,"@"+toPascalCase(updated.second.firstName + updated.second.lastName))

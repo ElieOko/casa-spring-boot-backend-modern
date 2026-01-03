@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.domain.model.Person
 import server.web.casa.app.actor.domain.model.request.PersonRequest
+import server.web.casa.app.actor.domain.model.request.PersonRequest2
 import server.web.casa.app.actor.domain.model.toEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
+import server.web.casa.app.actor.infrastructure.persistence.repository.TypeCardRepository
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.ImageUserRequest
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
@@ -23,6 +25,7 @@ import server.web.casa.utils.normalizeAndValidatePhoneNumberUniversal
 class PersonService(
     private val repository: PersonRepository,
     private val gcsService: GcsService,
+    private val cardRepository: TypeCardRepository,
 //    private val storageService: FileSystemStorageService,
     private val userService: UserService,
     private val repositoryUser: UserRepository
@@ -62,17 +65,20 @@ class PersonService(
         val result = repository.save(person)
         result.toDomain()
     }
-    suspend fun update(person : PersonRequest, id : Long) = coroutineScope {
-        val data = repository.findById(id)?:  throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
-        val user  = repositoryUser.findById(data.userId!!)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid.")
-        val email = person.user.email?.ifEmpty { "" }
+    suspend fun update(person : PersonRequest2, id : Long) = coroutineScope {
+        val data = repository.findById(id)?:  throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid au niveau de l'identifiant du membre.")
+        val user  = repositoryUser.findById(data.userId!!)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "Information invalid au niveau de l'utilisateur.")
+        val email = person.user.email
         val phone = person.user.phone?.ifEmpty { "" }
         person.user.city.ifEmpty { user.city }
         person.user.country.ifEmpty { user.country }
-        val identifier = repositoryUser.findByPhoneOrEmail(email!!)
-        if (identifier == null){
-            user.email = email
+        if(email?.isNotEmpty() == true) {
+            val identifier = repositoryUser.findByPhoneOrEmail(email)
+            if (identifier == null){
+                user.email = email
+            }
         }
+
         if (phone != ""){
             val phone2 =  normalizeAndValidatePhoneNumberUniversal(phone) ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
@@ -81,17 +87,30 @@ class PersonService(
                 user.phone = phone2
             }
         }
+
        user.country = person.user.country.ifEmpty { user.country }
        user.city = person.user.city.ifEmpty { user.city }
-        if ((person.cardBack != null && person.cardFront != null) && (person.cardBack.isNotEmpty() && person.cardFront.isNotEmpty())) {
-            val file = base64ToMultipartFile(person.cardBack, "profile")
+        if (person.typeCardId == null) throw ResponseStatusException(HttpStatusCode.valueOf(404), "La carte n'a pas été envoyée")
+        cardRepository.findById(person.typeCardId)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "Carte invalide")
+        if (person.typeCardId != 2L && person.cardBack?.isNotEmpty() == true) {
+            if ((person.cardBack != null && person.cardFront != null) && (person.cardBack.isNotEmpty() && person.cardFront.isNotEmpty())) {
+                val file = base64ToMultipartFile(person.cardBack, "profile")
+                val file2 = base64ToMultipartFile(person.cardFront, "profile")
+                val imageUri = gcsService.uploadFile(file,"card/")
+                val imageUri2 = gcsService.uploadFile(file2,"card/")
+                user.isCertified = true
+                log.info("public url local ")
+                data.cardFront = imageUri2
+                data.cardBack = imageUri
+                repository.save(data).toDomain()
+            }
+        }
+        if (person.cardFront?.isNotEmpty() == true && person.cardBack?.isEmpty() == true) {
+            person.cardFront.ifEmpty { throw ResponseStatusException(HttpStatusCode.valueOf(404), "Précisez votre carte") }
             val file2 = base64ToMultipartFile(person.cardFront, "profile")
-            val imageUri = gcsService.uploadFile(file,"card/")
             val imageUri2 = gcsService.uploadFile(file2,"card/")
             user.isCertified = true
-            log.info("public url local ")
             data.cardFront = imageUri2
-            data.cardBack = imageUri
             repository.save(data).toDomain()
         }
        data.address = person.address

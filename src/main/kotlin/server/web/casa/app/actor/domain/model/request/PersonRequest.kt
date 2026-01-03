@@ -16,9 +16,22 @@ data class PersonRequest(
     val typeCardId : Long? = 0,
     val parrainId : Long? = 0,
     val numberCard : String? = "",
-    val user : UserUpdate,
 )
 
+data class PersonRequest2(
+    @NotNull
+    val lastName: String,
+    @NotNull
+    val firstName: String,
+    val address : String? = "",
+    val images : String? = "",
+    val cardFront : String? = "",
+    val cardBack : String? ="",
+    val typeCardId : Long? = 0,
+    val parrainId : Long? = 0,
+    val numberCard : String? = "",
+    val user : UserUpdate,
+)
 
 data class PersonProfileRequest(
     @NotNull
