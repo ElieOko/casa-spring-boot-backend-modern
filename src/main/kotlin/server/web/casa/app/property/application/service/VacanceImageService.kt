@@ -20,7 +20,7 @@ class VacanceImageService(
         val imageUri = gcsService.uploadFile(file,"vacance/")
         val data = VacanceImageEntity(
             vacanceId = images.id,
-            name = "",
+            name = file.originalFilename!!,
             path = imageUri
         )
         val result = repository.save(data)
