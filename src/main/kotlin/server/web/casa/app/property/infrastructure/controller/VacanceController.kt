@@ -8,8 +8,10 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.AgenceService
+import server.web.casa.app.property.application.service.VacanceImageService
 import server.web.casa.app.property.application.service.VacanceService
 import server.web.casa.app.property.domain.model.Agence
+import server.web.casa.app.property.domain.model.ImageRequestStandard
 import server.web.casa.app.property.domain.model.request.VacanceRequest
 import server.web.casa.app.property.domain.model.request.toDomain
 import server.web.casa.route.property.PropertyRoute.PROPERTY_VACANCE
@@ -23,6 +25,7 @@ import server.web.casa.utils.ApiResponseWithMessage
 class VacanceController(
     private val service: VacanceService,
     private val agenceService: AgenceService,
+    private val imageService: VacanceImageService
 ) {
     @Operation(summary = "Création vacance")
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -35,8 +38,11 @@ class VacanceController(
         if (agence.isEmpty()) ResponseEntity.badRequest().body("Vous devez avoir une agence au minimum un pour poster un site touristique")
         request.agenceId = agence.first()?.id
         val data = service.create(request.toDomain())
-
-
+        request.images.forEach { imageService.create(ImageRequestStandard(data.id!!,it?.name!!)) }
+        ApiResponseWithMessage(
+            data = data,
+            message = "Enregistrement réussie pour la votre cite de vacance",
+        )
     }
 
     @Operation(summary = "List des vacance")
