@@ -48,5 +48,6 @@ class VacanceController(
     @Operation(summary = "List des vacance")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllVacance() = coroutineScope {
+        ApiResponse(service.getAllVacance())
     }
 }
