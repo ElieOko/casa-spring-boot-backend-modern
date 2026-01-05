@@ -3,6 +3,7 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import server.web.casa.app.property.domain.model.Hotel
 import java.time.LocalDate
 
 @Table(name = "hotels")
@@ -46,4 +47,23 @@ class HotelEntity(
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updated_at")
     val updatedAt: LocalDate = LocalDate.now()
+)
+
+fun HotelEntity.toDomain() = Hotel(
+    id = this.id,
+    userId = this.userId,
+    title = this.title,
+    description = this.description,
+    address = this.address,
+    image = this.image,
+    communeId = this.communeId,
+    quartierId = this.quartierId,
+    cityId = this.cityId,
+    countryValue = this.countryValue,
+    communeValue = this.communeValue,
+    latitude = this.latitude,
+    longitude = this.longitude,
+    quartierValue = this.quartierValue,
+    postalCode = this.postalCode,
+    isAvailable = this.isAvailable,
 )

@@ -1,5 +1,6 @@
 package server.web.casa.app.property.domain.model
 
+import server.web.casa.app.property.infrastructure.persistence.entity.HotelEntity
 import java.time.LocalDate
 
 class Hotel(
@@ -22,4 +23,23 @@ class Hotel(
     var isAvailable: Boolean = true,
     val createdAt: LocalDate = LocalDate.now(),
     val updatedAt: LocalDate = LocalDate.now()
+)
+
+fun Hotel.toEntity() = HotelEntity(
+    id = this.id,
+    userId = this.userId,
+    title = this.title,
+    description = this.description,
+    address = this.address,
+    image = this.image,
+    communeId = this.communeId,
+    quartierId = this.quartierId,
+    cityId = this.cityId,
+    countryValue = this.countryValue,
+    communeValue = this.communeValue,
+    latitude = this.latitude,
+    longitude = this.longitude,
+    quartierValue = this.quartierValue,
+    postalCode = this.postalCode,
+    isAvailable = this.isAvailable,
 )
