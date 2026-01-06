@@ -10,12 +10,10 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.AgenceService
 import server.web.casa.app.property.application.service.VacanceImageService
 import server.web.casa.app.property.application.service.VacanceService
-import server.web.casa.app.property.domain.model.Agence
 import server.web.casa.app.property.domain.model.ImageRequestStandard
 import server.web.casa.app.property.domain.model.request.VacanceRequest
 import server.web.casa.app.property.domain.model.request.toDomain
 import server.web.casa.route.property.PropertyRoute.PROPERTY_VACANCE
-import server.web.casa.route.utils.AgenceRoute.AGENCE
 import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.ApiResponseWithMessage
 
