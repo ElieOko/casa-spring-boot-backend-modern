@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.ecosystem.application.service.PrestationService
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.prestation.domain.model.FavoritePrestationDTO
 import server.web.casa.app.prestation.infrastructure.persistance.entity.FavoritePrestationEntity
 import server.web.casa.app.prestation.infrastructure.persistance.repository.FavoritePrestationRepository
@@ -18,7 +19,7 @@ class FavoritePrestationService(
     suspend fun toDTO(it: FavoritePrestationEntity) = FavoritePrestationDTO(
         favorite = it,
         user = userS.findIdUser(it.userId!!),
-        prestation = prestS.getById(it.prestationId!!)
+        prestation = prestS.getById(it.prestationId!!)!!.toDomain()
     )
 
     suspend fun create(f: FavoritePrestationEntity): FavoritePrestationDTO{
