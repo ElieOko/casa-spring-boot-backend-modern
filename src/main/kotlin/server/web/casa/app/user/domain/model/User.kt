@@ -47,7 +47,6 @@ data class UserDto(
 )
 
 data class UserRequest(
-    @NotNull
 //    @field:NotBlank(message = "Le phone est obligatoire")
 //    @field:Size(min = 8, message = "Ce numero est invalide car il ne respecte pas le nommage")
     val phone : String? = null,
