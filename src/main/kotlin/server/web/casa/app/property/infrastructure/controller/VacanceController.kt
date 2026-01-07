@@ -48,4 +48,6 @@ class VacanceController(
     suspend fun getAllVacance() = coroutineScope {
         ApiResponse(service.getAllVacance())
     }
+
+
 }
