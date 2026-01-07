@@ -56,11 +56,11 @@ class PropertyService(
 //        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
 //        val page = repository.findAll()
 //        val data = page.map { it.toDomain() }
-        return findAllRelation()
+        val properties = repository.findAll().toList()
+        return findAllRelation(properties)
     }
 
-    suspend fun findAllRelation(): List<PropertyMasterDTO> = coroutineScope {
-        val properties = repository.findAll().toList()
+    suspend fun findAllRelation(properties : List<PropertyEntity>): List<PropertyMasterDTO> = coroutineScope {
         val propertyList = mutableListOf<PropertyMasterDTO>()
         val propertyIds: List<Long> = properties.map { it.id!! }
         //val propertyIds = properties.map { it.id } as List<Long>
@@ -140,7 +140,8 @@ class PropertyService(
         )
     }
     suspend fun getAllPropertyByUser(userId : Long): List<PropertyMasterDTO> {
-        val data = findAllRelation().filter { it.property.userId == userId }.toList()
+        val properties = repository.findAll().toList()
+        val data = findAllRelation(properties).filter { it.property.userId == userId }.toList()
         return data
     }
     suspend fun findByIdProperty(id: Long): Pair<PropertyMasterDTO, Flow<Property>> {
@@ -168,10 +169,8 @@ class PropertyService(
         size : Int,
         sortBy : String,
         sortOrder : String
-    ): Flow<Property>{
-//        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
-//        val pageable = PageRequest.of(page,size,sort)
-        val data = repository.filterProperty(
+    ) = coroutineScope{
+        val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,
             maxPrice = filterModel.maxPrice,
@@ -179,8 +178,9 @@ class PropertyService(
             commune = filterModel.commune,
             typeMaison = filterModel.typeMaison,
             room = filterModel.room,
-//            pageable = pageable
-        )
-        return data.map { it.toDomain() }
+            cityValue = filterModel.cityValue,
+            communeValue = filterModel.communeValue,
+        ).toList()
+        findAllRelation(data)
     }
 }
