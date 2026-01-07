@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.MediaType
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.AgenceService
 import server.web.casa.app.property.domain.model.Agence
@@ -31,6 +32,16 @@ class AgenceController(
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllAgence(): ApiResponse<List<Agence>> = coroutineScope {
         val data = service.getAllAgence()
+        ApiResponse(data)
+    }
+
+    @Operation(summary = "List des agences")
+    @GetMapping("/owner/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllAgenceByUser(
+        @PathVariable("userId") userId : Long,
+    )= coroutineScope {
+//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+        val data = service.getAllByUser(userId)
         ApiResponse(data)
     }
 }
