@@ -188,14 +188,16 @@ class PropertyController(
         @Parameter(description = "Prix minimun") @RequestParam minPrice : Double,
         @Parameter(description = "Prix maximun") @RequestParam maxPrice : Double,
         @Parameter(description = "Type de maison") @RequestParam typeMaison : Long,
-        @Parameter(description = "Ville") @RequestParam city : Long,
-        @Parameter(description = "Commune") @RequestParam commune : Long,
+        @Parameter(description = "Ville") @RequestParam city : Long?,
+        @Parameter(description = "Commune") @RequestParam commune : Long?,
+        @Parameter(description = "Ville value") @RequestParam cityValue : String?,
+        @Parameter(description = "Commune value") @RequestParam communeValue : String?,
         @Parameter(description = "Chambre") @RequestParam room : Int,
         @Parameter(description = "Page number(0-based)") @RequestParam(defaultValue = "0") page : Int,
         @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
         @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
-    ): ResponseEntity<Map<String, Flow<Property>>> {
+    ) = coroutineScope {
         val data = service.filterProduct(
             filterModel = PropertyFilter(
                 transactionType = transactionType,
@@ -204,7 +206,9 @@ class PropertyController(
                 city = city,
                 commune = commune,
                 typeMaison = typeMaison,
-                room = room
+                room = room,
+                cityValue = cityValue,
+                communeValue = communeValue,
             ),
             page = page,
             size = size,
@@ -212,7 +216,7 @@ class PropertyController(
             sortOrder = sortOrder
         )
         val response = mapOf("properties" to data)
-        return ResponseEntity.ok().body(response)
+         ResponseEntity.ok().body(response)
     }
 
     @Operation(summary = "Modification Property")
