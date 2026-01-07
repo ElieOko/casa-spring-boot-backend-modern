@@ -15,9 +15,9 @@ data class VacanceImageEntity(
     @Column("vacance_id")
     val vacanceId : Long,
     @Column("name")
-    val name: String,
+    var name: String,
     @Column("path")
-    val path: String?,
+    var path: String?,
     @Column("is_available")
     var isAvailable: Boolean = true,
     @Column("created_at")

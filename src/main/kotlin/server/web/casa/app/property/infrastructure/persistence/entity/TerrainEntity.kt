@@ -3,6 +3,7 @@ package server.web.casa.app.property.infrastructure.persistence.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.*
 import server.web.casa.app.property.domain.model.AddressDTO
+import server.web.casa.app.property.domain.model.Terrain
 import server.web.casa.app.property.domain.model.dto.GeoDTO
 import java.time.LocalDateTime
 
@@ -65,3 +66,27 @@ fun TerrainEntity.toAddressDTO() = AddressDTO(
 )
 
 fun TerrainEntity.toGeo() = GeoDTO(this.latitude, this.longitude)
+
+fun TerrainEntity.toDomain() = Terrain(
+    id = this.id,
+    userId = this.userId,
+    title = this.title,
+    description = this.description,
+    deviseId = this.deviseId,
+    price = this.price,
+    surface = this.surface,
+    address = this.address,
+    communeId = this.communeId,
+    quartierId = this.quartierId,
+    cityId = this.cityId,
+    countryValue = this.countryValue,
+    cityValue = this.cityValue,
+    postalCode = this.postalCode,
+    communeValue = this.communeValue,
+    isAvailable = this.isAvailable,
+    latitude = latitude,
+    longitude = longitude,
+    createdAt = createdAt,
+    transactionType = this.transactionType,
+    propertyTypeId = this.propertyTypeId,
+)

@@ -103,7 +103,7 @@ class SalleFuneraireController(
 
     @Operation(summary = "Modification Salle Funeraire")
     @PutMapping("/owner/{funeraireId}")
-    suspend fun updateBureau(
+    suspend fun updateFuneraire(
         @PathVariable("funeraireId") funeraireId : Long,
         @Valid @RequestBody request: SalleFuneraireDTO
     ) = coroutineScope {

@@ -1,9 +1,11 @@
 package server.web.casa.app.property.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.CityService
@@ -24,10 +27,13 @@ import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.application.service.BureauImageService
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.property.application.service.PropertyTypeService
+import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.BureauDto
 import server.web.casa.app.property.domain.model.BureauRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
+import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
+import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.ImageChange
 import server.web.casa.app.property.domain.model.request.ImageChangeOther
 import server.web.casa.app.property.domain.model.request.PropertyRequest
@@ -146,4 +152,43 @@ class BureauController(
         val message = mutableMapOf("message" to "Modification effectuée avec succès")
         ResponseEntity.ok(message)
     }
+
+    @GetMapping(ROUTE_PROPERTY_FILTER,produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Get property by sold into price, room, city, commune with pagination and sorting")
+    suspend fun getAllBureauFilter(
+        @Parameter(description = "Transaction Type") @RequestParam transactionType : String,
+        @Parameter(description = "Prix minimun") @RequestParam minPrice : Double,
+        @Parameter(description = "Prix maximun") @RequestParam maxPrice : Double,
+        @Parameter(description = "Type de maison") @RequestParam typeMaison : Long,
+        @Parameter(description = "Ville") @RequestParam city : Long?,
+        @Parameter(description = "Commune") @RequestParam commune : Long?,
+        @Parameter(description = "Ville value") @RequestParam cityValue : String?,
+        @Parameter(description = "Commune value") @RequestParam communeValue : String?,
+        @Parameter(description = "Chambre") @RequestParam room : Int,
+        @Parameter(description = "Page number(0-based)") @RequestParam(defaultValue = "0") page : Int,
+        @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
+        @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
+        @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
+    ) = coroutineScope {
+        val data = service.filter(
+            filterModel = PropertyFilter(
+                transactionType = transactionType,
+                minPrice = minPrice,
+                maxPrice = maxPrice,
+                city = city,
+                commune = commune,
+                typeMaison = typeMaison,
+                room = room,
+                cityValue = cityValue,
+                communeValue = communeValue,
+            ),
+            page = page,
+            size = size,
+            sortBy = sortBy,
+            sortOrder = sortOrder
+        )
+        val response = mapOf("properties" to data)
+        ResponseEntity.ok().body(response)
+    }
+
 }
