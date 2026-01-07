@@ -30,7 +30,7 @@ class AgenceController(
 
     @Operation(summary = "List des agences")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllAgence(): ApiResponse<List<Agence>> = coroutineScope {
+    suspend fun getAllAgence() = coroutineScope {
         val data = service.getAllAgence()
         ApiResponse(data)
     }

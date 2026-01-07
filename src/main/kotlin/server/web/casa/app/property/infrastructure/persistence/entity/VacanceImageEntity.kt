@@ -24,7 +24,7 @@ data class VacanceImageEntity(
     val createdAt: LocalDateTime = LocalDateTime.now(),
 )
 
-fun VacanceImage.toDomain() = VacanceImage(
+fun VacanceImageEntity.toDomain() = VacanceImage(
     id = this.id,
     vacanceId = this.vacanceId,
     name = this.name,

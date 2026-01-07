@@ -7,7 +7,7 @@ data class VacanceImage(
     val id: Long? = null,
     val vacanceId : Long,
     val name: String = "",
-    val path: String = "",
+    val path: String? = "",
     var isAvailable: Boolean = true,
     val createdAt: LocalDateTime = LocalDateTime.now(),
 )

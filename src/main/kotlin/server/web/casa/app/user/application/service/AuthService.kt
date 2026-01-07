@@ -51,8 +51,11 @@ class AuthService(
     )
     @OptIn(ExperimentalTime::class)
     suspend fun register(user: User, accountItems: List<AccountRequest>): Pair<UserDto?, String> {
-         val phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(
+        var phone = ""
+            if (user.phone != null) {
+                phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+        }
 
         if(userRepository.findByPhoneOrEmail(phone) != null) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Cet identifiant existe dans la plateforme.")
