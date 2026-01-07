@@ -3,6 +3,7 @@ package server.web.casa.app.user.infrastructure.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
@@ -37,14 +38,13 @@ class UserController(
 
     @Operation(summary = "Detail utilisateur")
     @GetMapping("/{id}")
-    @Transactional
+//    @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getUser(
         @PathVariable("id") id : Long
-    ) : ResponseEntity<UserDto> {
-//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+    ) = coroutineScope {
         val data = userService.findIdUser(id)
-        return ResponseEntity.ok().body(data)
+        ResponseEntity.ok().body(data)
     }
 
     @Operation(summary = "Modification utilisateur")
