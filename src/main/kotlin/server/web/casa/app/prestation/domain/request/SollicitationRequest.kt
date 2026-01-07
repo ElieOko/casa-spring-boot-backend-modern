@@ -11,7 +11,7 @@ data class SollicitationRequest(
     @NotNull
     val deviseId: Long,
     @NotNull
-    val budegt: Double,
+    val budget: Double,
     @NotNull
     val description: String,
     @NotNull

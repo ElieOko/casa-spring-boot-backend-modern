@@ -87,7 +87,7 @@ data class BureauDTOMaster(
     val typeProperty: PropertyType,
 )
 
-data class BureauDto(
+data class BureauDtoRequest(
    @NotNull
    val bureau: BureauRequest,
    @NotNull

@@ -41,7 +41,7 @@ class SollicitatonController(
             userId = checkUser.userId,
             prestationId = checkPrestation.id,
             deviseId = checkDevise.id,
-            budegt = req.budegt,
+            budegt = req.budget,
             description = req.description,
             startDate = req.startDate,
             endDate = req.endDate,

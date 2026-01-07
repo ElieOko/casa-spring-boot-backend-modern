@@ -377,3 +377,21 @@
 --        FOREIGN KEY (prestation_id) REFERENCES prestations(id)
 --        ON DELETE CASCADE ON UPDATE CASCADE
 --);
+
+CREATE TABLE IF NOT EXISTS cotation_prestation (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    sollicitation_id BIGINT NOT NULL,
+    cote REAL NOT NULL,
+    commentaire TEXT,
+    is_active BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cotation_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_cotation_sollicitation
+        FOREIGN KEY (sollicitation_id) REFERENCES sollicitations(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);

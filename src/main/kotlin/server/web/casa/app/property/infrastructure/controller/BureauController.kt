@@ -28,7 +28,7 @@ import server.web.casa.app.property.application.service.BureauImageService
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.property.application.service.PropertyTypeService
 import server.web.casa.app.property.domain.model.Bureau
-import server.web.casa.app.property.domain.model.BureauDto
+import server.web.casa.app.property.domain.model.BureauDtoRequest
 import server.web.casa.app.property.domain.model.BureauRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
 import server.web.casa.app.property.domain.model.Property
@@ -60,7 +60,7 @@ class BureauController(
     @Operation(summary = "Création bureau")
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createBureau(
-        @Valid @RequestBody request: BureauDto,
+        @Valid @RequestBody request: BureauDtoRequest,
     ) = coroutineScope{
 //        propertyTypeService.findByIdPropertyType(request.bureau.propertyTypeId?:0)
         if (request.bureau.propertyTypeId != 4L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au bureaux")
