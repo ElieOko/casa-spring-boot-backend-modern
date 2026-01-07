@@ -45,7 +45,8 @@ class PrestationFavoriteController(
             prestationId = prestation.id
         )
         val verify = service.findByPrestationIdAndUserId(prestation.id!!, user.userId!!)
-        val created = verify ?: service.create(data)
+        //val created = verify ?: service.create(data)
+        val created = verify?.takeIf { it.isNotEmpty() } ?: service.create(data)
         return ResponseEntity.status(201).body(mapOf("data" to created))
     }
 
@@ -61,12 +62,12 @@ class PrestationFavoriteController(
         return ResponseEntity.ok().body(mapOf("data" to find))
     }
 
-    @GetMapping("/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByUserPrestation(@PathVariable userId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
         val find = service.findByUserId( userId)
         return ResponseEntity.ok(mapOf("data" to find))
     }
-    @GetMapping("/{prestationId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/prestation/{prestationId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByPrestationFavorite(@PathVariable prestationId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
         val find = service.findByPrestationId(prestationId)
         return ResponseEntity.ok(mapOf("data" to find))
