@@ -1,83 +1,82 @@
 package server.web.casa.app.reservation.infrastructure.persistence.repository
 
+import org.springframework.data.r2dbc.repository.Modifying
+import org.springframework.data.r2dbc.repository.Query
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
-import org.springframework.data.jpa.repository.*
 import org.springframework.data.repository.query.Param
-import jakarta.transaction.Transactional
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import org.springframework.transaction.annotation.Transactional
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import java.time.LocalDate
+import kotlinx.coroutines.flow.Flow
+import reactor.core.publisher.Mono
 
-interface ReservationRepository : JpaRepository<ReservationEntity, Long>{
+interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Long>{
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.createdAt = :date")
-    fun findAllByDate(@Param("date") date: LocalDate): List<ReservationEntity>
+    @Query("SELECT * FROM reservations WHERE created_at = :date")
+    fun findAllByDate(@Param("date") date: LocalDate): Flow<ReservationEntity>
 
     @Query(
         """
         SELECT * FROM reservations 
         WHERE EXTRACT(MONTH FROM created_at) = :month 
           AND EXTRACT(YEAR FROM created_at) = :year
-    """,
-        nativeQuery = true
+    """
     )
-     fun findAllByMonthAndYear(@Param("month") month: Int, @Param("year") year: Int): List<ReservationEntity>?
+     fun findAllByMonthAndYear(@Param("month") month: Int, @Param("year") year: Int): Flow<ReservationEntity>?
 
-     @Query("SELECT r FROM ReservationEntity r WHERE EXTRACT(YEAR FROM r.createdAt) = :year")
-    fun findAllByYear(@Param("year") year: Int): List<ReservationEntity>?
+     @Query("SELECT * FROM reservations  WHERE EXTRACT(YEAR FROM created_at) = :year")
+    fun findAllByYear(@Param("year") year: Int): Flow<ReservationEntity>?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.status = :status")
-     fun findAllByStatus(@Param("status") staus: ReservationStatus): List<ReservationEntity>?
+    @Query("SELECT * FROM reservations  WHERE status = :status")
+     fun findAllByStatus(@Param("status") staus: ReservationStatus): Flow<ReservationEntity>?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate <= :endDate AND r.endDate >= :startDate")
+    @Query("SELECT * FROM reservations WHERE start_date >= :startDate AND end_date <= :endDate")
      fun findAllInInterval(
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate
-    ): List<ReservationEntity> ?
+    ): Flow<ReservationEntity> ?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.startDate = :endDate AND r.endDate = :startDate AND r.property = :property")
+    @Query("SELECT * FROM reservations  WHERE start_date = :startDate AND end_date = :endDate AND property_id = :propertyId")
     fun findByStartDateAndEndDateProperty(
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate,
-        @Param("property") property: PropertyEntity
-    ): List<ReservationEntity> ?
+        @Param("propertyId") propertyId: Long
+    ): Flow<ReservationEntity>?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.user = :user")
-     fun findByUser(@Param("user") user: UserEntity): List<ReservationEntity>?
+    @Query("SELECT * FROM reservations  WHERE user_id = :userId")
+     fun findByUser(@Param("userId") userId: Long): Flow<ReservationEntity>?
 
-    @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property")
-     fun findByProperty(@Param("property") property: PropertyEntity): List<ReservationEntity> ?
+    @Query("SELECT * FROM reservations WHERE property_id = :propertyId")
+     fun findByProperty(@Param("propertyId") propertyId: Long): Flow<ReservationEntity> ?
 
-     @Query("SELECT r FROM ReservationEntity r WHERE r.property = :property AND r.user = :user")
-    fun findByUserProperty(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): List<ReservationEntity> ?
+     @Query("SELECT * FROM reservations WHERE property_id = :propertyId AND user_id = :userId")
+    fun findByUserProperty(@Param("propertyId") propertyId: Long,
+                           @Param("userId") userId: Long): Flow<ReservationEntity> ?
 
     //use with @Transactional when you call it
-    @Transactional
     @Modifying
-    @Query("UPDATE ReservationEntity r SET r.status = :status WHERE r.id = :id")
-     fun updateStatusById(@Param("id") id: Long, @Param("status") status: ReservationStatus): Int
+    @Query("UPDATE reservations SET status = :status WHERE id = :id")
+     fun updateStatusById(@Param("id") id: Long, @Param("status") status: ReservationStatus): Mono<Int>
 
-    @Transactional
     @Modifying
-    @Query("UPDATE ReservationEntity r SET r.isActive = :isActive, r.status = :status, r.cancellationReason = :reason WHERE r.id = :id")
+    @Query("UPDATE reservations SET is_active = :isActive, status = :status, cancellation_reason = :reason WHERE id = :id")
      fun cancelOrKeepReservation(@Param("id") id: Long,
                                  @Param("isActive") isActive: Boolean,
                                  @Param("reason") reason: String?,
-                                 @Param("status") status: ReservationStatus): Int
+                                 @Param("status") status: ReservationStatus): Mono<Int>
 
-     @Transactional
-     @Modifying
-     @Query("DELETE FROM ReservationEntity r WHERE r.id = :id")
-     fun deleteByIdReservation(@Param("id") id: Long): Int
-
-    @Transactional
     @Modifying
-    @Query("DELETE FROM ReservationEntity r WHERE r.user = :user")
-    fun deleteAllByUserReservation(@Param("user") user: UserEntity): Int
+    @Query("DELETE FROM reservations WHERE id = :id")
+     fun deleteByIdReservation(@Param("id") id: Long): Mono<Int>
 
-    @Transactional
     @Modifying
-    @Query("DELETE FROM ReservationEntity r WHERE r.property = :property")
-    fun deleteAllByPropertyReservation(@Param("property") property: PropertyEntity): Int
+    @Query("DELETE FROM reservations WHERE user_id = :userId")
+    fun deleteAllByUserReservation(@Param("userId") userId: Long): Mono<Int>
+
+    @Modifying
+    @Query("DELETE FROM reservations WHERE property_id = :propertyId")
+    fun deleteAllByPropertyReservation(@Param("propertyId") propertyId: Long): Mono<Int>
 }

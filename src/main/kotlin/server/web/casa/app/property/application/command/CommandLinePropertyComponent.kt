@@ -1,14 +1,18 @@
 package server.web.casa.app.property.application.command
 
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
+import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.infrastructure.persistence.repository.CityRepository
 import server.web.casa.app.address.infrastructure.persistence.repository.CommuneRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 import server.web.casa.app.property.infrastructure.persistence.repository.*
+import server.web.casa.app.user.application.service.AccountService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.utils.Mode
 
@@ -16,20 +20,26 @@ import server.web.casa.utils.Mode
 @Order(6)
 @Profile(Mode.DEV)
 class CommandLinePropertyComponent(
-   private val typePropertyRepository: PropertyTypeRepository,
-  private val feature: FeatureRepository,
-   private val userRepository: UserRepository,
-   private val propertyRepository: PropertyRepository,
-   private val communeRepository: CommuneRepository,
-   private val cityRepository: CityRepository
+    private val typePropertyRepository: PropertyTypeRepository,
+    private val feature: FeatureRepository,
+    private val communeService: CommuneService,
+    private val userRepository: UserRepository,
+    private val propertyRepository: PropertyRepository,
+    private val communeRepository: CommuneRepository,
+    private val cityRepository: CityRepository
 
 
 ) : CommandLineRunner {
     private val log = LoggerFactory.getLogger(this::class.java)
     override fun run(vararg args: String) {
         try {
-//            createTypeProperty()
-//            createFeature()
+
+            runBlocking {
+//                createTypeProperty()
+//                createFeature()
+              val test = communeService.findByIdCommune(1)
+                log.info("Found commune ${test?.name}")
+            }
 //            createProperty()
         }
         catch (e : Exception){
@@ -78,8 +88,8 @@ class CommandLinePropertyComponent(
 //            val result = propertyRepository.save(property)
 //            log.info("***property success******")
 //    }
-    fun createTypeProperty(){
-        typePropertyRepository.saveAll(
+   suspend fun createTypeProperty(){
+      val data =  typePropertyRepository.saveAll(
             listOf(
                 PropertyTypeEntity(
                     name = "Studio",
@@ -114,12 +124,12 @@ class CommandLinePropertyComponent(
                     description = "",
                 )
             )
-        )
-        log.info("save type property")
+        ).toList()
+        log.info("save type property ${data.size}")
     }
 //
-    fun createFeature(){
-        feature.saveAll(
+suspend fun createFeature(){
+      val data = feature.saveAll(
             listOf(
                 FeatureEntity(name = "Wifi"),
                 FeatureEntity(name = "Climatisation"),
@@ -135,7 +145,7 @@ class CommandLinePropertyComponent(
                 FeatureEntity(name = "Sécurité"),
                 FeatureEntity(name = "Animaux acceptés"),
             )
-        )
-        log.info("save features")
+        ).toList()
+        log.info("save features ${data.size}")
     }
 }

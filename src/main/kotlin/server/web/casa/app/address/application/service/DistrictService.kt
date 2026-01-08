@@ -1,5 +1,7 @@
 package server.web.casa.app.address.application.service
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.address.domain.model.District
 import server.web.casa.app.address.infrastructure.persistence.mapper.*
@@ -17,5 +19,5 @@ class DistrictService(
     }
     suspend fun findAllDistrict() = repository.findAll().map { it.toDomain() }.toList()
 
-    suspend fun findByIdDistrict(id : Long) = repository.findById(id).orElse(null).toDomain()
+    suspend fun findByIdDistrict(id : Long) = repository.findById(id)?.toDomain()
 }

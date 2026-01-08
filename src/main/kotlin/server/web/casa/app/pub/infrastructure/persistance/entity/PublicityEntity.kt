@@ -1,33 +1,26 @@
 package server.web.casa.app.pub.infrastructure.persistance.entity
 
-import jakarta.persistence.*
-import server.web.casa.app.pub.domain.model.Image
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import java.time.LocalDate
 
-@Table(name = "publicity")
-@Entity
-class PublicityEntity(
+@Table("publicities")
+data class PublicityEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val publicityId: Long = 0,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user            : UserEntity?,
-
-    @Embedded
-    val image           : Image? = null,
-
-    @Column(nullable = false, length = 100)
-    val title           : String,
-
-    @Column(nullable = false, length = 500)
-    val description     : String,
-
-    @Column("isActive")
-    var isActive        : Boolean = true,
-
-    @Column("createdAt")
-    val createdAt       : LocalDate = LocalDate.now(),
+    @Column("id")
+    val id: Long? = null,
+    @Column("user_id")
+    val user: Long? = null,  // FK vers users.id
+    @Column("image_path")
+    var imagePath: String? = null,
+    @Column("title")
+    val title: String,
+    @Column("description")
+    val description: String,
+    @Column("is_active")
+    var isActive: Boolean = true,
+    @Column("created_at")
+    val createdAt: LocalDate = LocalDate.now()
 )

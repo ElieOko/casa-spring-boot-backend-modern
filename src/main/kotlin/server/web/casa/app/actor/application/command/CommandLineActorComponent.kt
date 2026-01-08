@@ -1,5 +1,7 @@
 package server.web.casa.app.actor.application.command
 
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
@@ -18,7 +20,9 @@ class CommandLineActorComponent(
     private val log = LoggerFactory.getLogger(this::class.java)
     override fun run(vararg args: String) {
         try {
-//            createCard()
+//            runBlocking {
+//                createCard()
+//            }
 //            log.info(normalizeAndValidatePhoneNumberUniversal("00243827824163"))
 //            log.info("*************")
 //            isEmailValid("elieoko100@gmail.com")
@@ -38,14 +42,15 @@ class CommandLineActorComponent(
 
     }
 //
-    fun createCard(){
-        typeCardRepository.saveAll(
+suspend fun createCard(){
+      val test = typeCardRepository.saveAll(
             listOf(
-                TypeCardEntity(name = "Carte d'électeur", typeCardId = 0),
-                TypeCardEntity(name = "Visa", typeCardId = 0),
-                TypeCardEntity(name = "Autres", typeCardId = 0)
+                TypeCardEntity(name = "Carte d'électeur", typeCardId = null),
+                TypeCardEntity(name = "Visa", typeCardId = null),
+                TypeCardEntity(name = "Permis", typeCardId = null),
+                TypeCardEntity(name = "Permis", typeCardId = null)
             )
-        )
-        log.info("save card")
+        ).toList()
+        log.info("save card ${test.size}")
     }
 }

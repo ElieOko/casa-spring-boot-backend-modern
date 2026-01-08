@@ -1,47 +1,38 @@
 package server.web.casa.app.reservation.infrastructure.persistence.entity
 
-import jakarta.persistence.*
-import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.reservation.domain.model.*
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.domain.model.ReservationType
 import java.time.LocalDate
 
-@Table(name = "reservations")
-@Entity
- class ReservationEntity(
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val reservationId       : Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn("propertyId")
-    val property            : PropertyEntity,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn("userId")
-    val user                : UserEntity ?,
-    @OneToMany(
-        mappedBy = "reservation",
-        cascade = [CascadeType.REMOVE],
-        orphanRemoval = true
-    )
-    val notification: MutableList<NotificationReservationEntity> = mutableListOf(),
-    @Column(name = "message", nullable = true)
-    val message             : String? = "",
-    @Column(name = "reservationHeure", nullable = true)
-    val reservationHeure    : String? = "",
-    @Column(name = "status")
-    val status              : ReservationStatus = ReservationStatus.PENDING,
-    @Column("type_reservation")
-    val type                : ReservationType = ReservationType.STANDARD,
-    @Column(name = "isActive")
-    val isActive            : Boolean = true,
-    @Column(name = "cancellationReason", nullable = true)
-    val cancellationReason  : String? = "",
-    @Column(name = "startDate")
-    val startDate           : LocalDate,
-    @Column(name = "endDate")
-    val endDate             : LocalDate,
-    @Column("createdAt")
-    val createdAt           : LocalDate = LocalDate.now(),
+@Table("reservations")
+data class ReservationEntity(
+   @Id
+   @Column("id")
+   val id: Long? = null,
+   @Column("property_id")
+   val propertyId: Long? = null,
+   @Column("user_id")
+   val userId: Long? = null,
+   @Column("message")
+   val message: String? = "",
+   @Column("reservation_heure")
+   val reservationHeure: String? = "",
+   @Column("status")
+   var status: String = ReservationStatus.PENDING.name,
+   @Column("type")
+   val type: String = ReservationType.STANDARD.name,
+   @Column("is_active")
+   var isActive: Boolean = true,
+   @Column("cancellation_reason")
+   var cancellationReason: String? = "",
+   @Column("start_date")
+   val startDate: LocalDate,
+   @Column("end_date")
+   val endDate: LocalDate,
+   @Column("created_at")
+   val createdAt: LocalDate = LocalDate.now()
 )
+

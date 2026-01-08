@@ -1,18 +1,22 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import kotlin.time.*
 
-@Entity
 @Table(name = "refresh_tokens")
-data class RefreshToken @OptIn(ExperimentalTime::class) constructor(
+class RefreshToken(
     @Id
-    @Column("userId")
+    @Column("id")
+    val id: Long? = null,
+    @Column("user_id")
     val userId: Long,
-    @Column(name = "expires_at")
-    val expiresAt: java.time.Instant?,
-    @Column("hashedToken")
+    @Column("expires_at")
+    val expiresAt:  LocalDateTime = LocalDateTime.now(),
+    @Column("hashed_token")
     val hashedToken: String,
-    @Column("createdAt")
-    val createdAt: Instant = Clock.System.now()
+    @Column("created_at")
+    val createdAt: LocalDateTime = LocalDateTime.now()
 )

@@ -1,18 +1,16 @@
 package server.web.casa.app.address.infrastructure.persistence.entity
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
-@Table(name = "districts")
-class DistrictEntity(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Table("districts")
+data class DistrictEntity(
+    @Id
     @Column("id")
-    val districtId  : Long = 0,
-    @ManyToOne(optional = true)
-    @JoinColumn("city_id")
-    val city      : CityEntity?,
+    val id: Long? = null,
+    @Column("city_id")
+    val cityId: Long?,
     @Column("name")
-    val name        : String,
-    @OneToMany(mappedBy = "district", fetch = FetchType.LAZY)
-    val commune: List<CommuneEntity> = emptyList()
+    val name: String
 )

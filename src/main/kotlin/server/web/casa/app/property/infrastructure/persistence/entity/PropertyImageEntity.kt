@@ -1,21 +1,19 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonBackReference
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
-@Table(name = "PropertyImages")
-class PropertyImageEntity(
+@Table("property_images")
+data class PropertyImageEntity(
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val propertyImageId : Long = 0,
-    @ManyToOne
-    @JoinColumn("property_id")
-    @JsonBackReference
-    var property : PropertyEntity,
-    @Column(name = "name")
-    val name : String,
-    @Column(name = "path_image")
-    val path : String
+    @Column("id")
+    val id: Long? = null,
+    @Column("property_id")
+    var propertyId: Long? = null,
+    @Column("name")
+    var name: String,
+    @Column("path")
+    var path: String
 )

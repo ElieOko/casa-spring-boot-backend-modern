@@ -1,8 +1,10 @@
 package server.web.casa.app.property.domain.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 data class PropertyType(
-    val propertyTypeId : Long = 0,
+    var propertyTypeId : Long = 0,
     val name : String,
-    val description : String? = "",
-    val property : List<Property?> = emptyList()
+    @JsonIgnore
+    val description : String? = ""
 )

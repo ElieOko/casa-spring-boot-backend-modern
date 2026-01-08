@@ -1,5 +1,7 @@
 package server.web.casa.utils
 
+import java.util.Base64
+
 fun transformRoute(location : String): String {
     var transform = location.lowercase()
     val state = transform.contains("_")
@@ -14,3 +16,12 @@ fun locationApi(source: String,location: String): String {
     return "/$src/$endpoint"
 }
 
+
+fun isBase64(input: String): Boolean {
+    return try {
+        Base64.getDecoder().decode(input)
+        true
+    } catch (e: IllegalArgumentException) {
+        false
+    }
+}

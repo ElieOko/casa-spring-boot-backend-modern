@@ -1,18 +1,16 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
-@Table(name = "PropertyTypes")
+@Table(name = "property_types")
 class PropertyTypeEntity(
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val propertyTypeId : Long = 0,
-    @Column(name = "name")
-    val name : String,
-    @Column(name = "description", nullable = true)
-    val description : String? = "",
-    @OneToMany(mappedBy = "propertyType")
-    val property : List<PropertyEntity?> = emptyList(),
+    @Column("id")
+    val id: Long? = null,
+    @Column("name")
+    val name: String,
+    @Column("description")
+    val description: String? = ""
 )

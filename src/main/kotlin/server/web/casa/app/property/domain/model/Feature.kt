@@ -1,10 +1,10 @@
 package server.web.casa.app.property.domain.model
 
 data class Feature(
-    val featureId : Long = 0,
+    val featureId : Long? = null,
     val name : String = "",
 )
 
 data class FeatureRequest(
-    val name : String,
+    val featureId : Long,
 )

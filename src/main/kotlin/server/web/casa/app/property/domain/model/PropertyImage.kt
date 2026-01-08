@@ -2,7 +2,12 @@ package server.web.casa.app.property.domain.model
 
 data class PropertyImage(
     val propertyImageId : Long = 0,
-    var property : Property?=null,
+    var propertyId : Long?=null,
     var name : String = "",
     var path : String = ""
+)
+
+data class ImageRequestStandard(
+    var id : Long,
+    var name : String = ""
 )

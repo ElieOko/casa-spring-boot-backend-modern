@@ -2,6 +2,7 @@ package server.web.casa.utils.gcs
 
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.storage.*
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
@@ -36,9 +37,17 @@ class GcsService(
         return blob?.mediaLink
     }
 
-    fun deleteFile(fileName: String?) {
-        val blobId = BlobId.of(bucketConfig?.bucketName, bucketConfig?.subdirectory + "/" + fileName)
-        storage?.delete(blobId)
+   suspend fun deleteFile(fileName: String?,directory : String = ""): Boolean? = coroutineScope {
+       try {
+           val blobId = BlobId.of("casanayo-bucket", "casa" + "/" + directory + fileName)
+           val result = storage?.delete(blobId)
+           result
+       }
+       catch (e : Exception){
+           log.info("*************** " + e.message)
+           null
+       }
+
     }
 
     fun getFile(fileName: String?): Blob? {
