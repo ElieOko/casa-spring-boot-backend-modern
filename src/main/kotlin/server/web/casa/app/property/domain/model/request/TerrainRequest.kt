@@ -31,7 +31,6 @@ data class TerrainRequest(
     var isAvailable: Boolean = true,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    @NotNull
     val images : List<ImageRequest>,
 )
 fun TerrainRequest.toDomain() = Terrain(
