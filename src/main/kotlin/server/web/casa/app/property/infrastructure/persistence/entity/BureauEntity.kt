@@ -59,6 +59,8 @@ class BureauEntity(
     var isAvailable: Boolean = true,
     @Column("latitude")
     val latitude: Double? = null,
+    @Column("sold")
+    var sold: Boolean = false,
     @Column("longitude")
     val longitude: Double? = null,
     @Column("created_at")
@@ -79,7 +81,8 @@ fun BureauEntity.toDomain() = Bureau(
     isEquip = this.isEquip,
     address = this.address,
     isAvailable = this.isAvailable,
-    createdAt = this.createdAt
+    createdAt = this.createdAt,
+    sold = this.sold
 )
 
 fun BureauEntity.toAddressDTO() = AddressDTO(
