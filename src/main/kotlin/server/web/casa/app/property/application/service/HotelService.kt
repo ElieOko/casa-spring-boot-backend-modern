@@ -48,7 +48,13 @@ class HotelService(
     }
     suspend fun getAllByUser(userId : Long) = coroutineScope{
         val data = hotelRepository.getAllByUser(userId)
-        data.map {it?.toDomain()}.toList()
-
+        val hotel = mutableListOf<HotelGlobal>()
+        data.map {it?.toDomain()}.toList().forEach { hotel.add(
+            HotelGlobal(
+                hotel = it!!,
+                structure =  chambre.getAllChambreByHotel(it.id?:0)
+            )
+        ) }
+        hotel.toList()
     }
 }

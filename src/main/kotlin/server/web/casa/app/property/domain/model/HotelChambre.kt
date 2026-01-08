@@ -1,5 +1,7 @@
 package server.web.casa.app.property.domain.model
 
+import org.jetbrains.annotations.NotNull
+import server.web.casa.app.ecosystem.domain.request.ImageRequest
 import server.web.casa.app.property.infrastructure.persistence.entity.HotelChambreEntity
 import java.time.LocalDate
 
@@ -15,6 +17,35 @@ class HotelChambre(
     var isAvailable: Boolean = true,
     val createdAt: LocalDate = LocalDate.now(),
     val updatedAt: LocalDate = LocalDate.now()
+)
+
+class HotelChambreRequest(
+    @NotNull
+    val userId: Long? = null,
+    @NotNull
+    var hotelId: Long? = null,
+    @NotNull
+    val deviseId: Long? = null,
+    @NotNull
+    val title: String,
+    val description: String? = "",
+    val numberPiece: Long? = null,
+    @NotNull
+    val price : Double? = null,
+    val priceHeure : String? = "",
+    var isAvailable: Boolean = true,
+    val images : List<ImageRequest>,
+)
+
+fun HotelChambreRequest.toDomain() = HotelChambre(
+    hotelId = hotelId,
+    deviseId = deviseId,
+    title = title,
+    description = description,
+    numberPiece = numberPiece,
+    price = price,
+    priceHeure = priceHeure,
+    isAvailable = isAvailable,
 )
 
 fun HotelChambre.toEntity() = HotelChambreEntity(

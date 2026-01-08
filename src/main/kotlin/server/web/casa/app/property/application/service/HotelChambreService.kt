@@ -36,4 +36,6 @@ class HotelChambreService(
         }
         hotelList
     }
+
+    suspend fun getAll() = coroutineScope { repository.findAll().toList() }
 }
