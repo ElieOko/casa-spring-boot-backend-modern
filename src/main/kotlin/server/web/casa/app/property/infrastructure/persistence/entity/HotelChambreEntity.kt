@@ -10,8 +10,10 @@ class HotelChambreEntity(
     @Id
     @Column("id")
     val id: Long? = null,
-    @Column("user_id")
+    @Column("hotel_id")
     val hotelId: Long? = null,
+    @Column("devise_id")
+    val deviseId: Long? = null,
     @Column("title")
     val title: String,
     @Column("description")
