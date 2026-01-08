@@ -126,15 +126,15 @@ class SalleFuneraireController(
     }
 
     @Operation(summary = "Sold")
-    @GetMapping("/sold/{propertyId}",
+    @PutMapping("/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInFuneraire(
         @PathVariable("propertyId") propertyId : Long,
-        @RequestBody status : Boolean
-    ){
-        val message = mutableMapOf("message" to if(status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
         val data = service.findById(propertyId)
-        data.sold = status
+        data.sold = request.status
         service.createOrUpdate(data)
         ResponseEntity.badRequest().body(message)
     }
@@ -144,11 +144,11 @@ class SalleFuneraireController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableFuneraire(
         @PathVariable("propertyId") propertyId : Long,
-        @RequestBody status : Boolean
-    ){
-        val message = mutableMapOf("message" to if(status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
         val data= service.findById(propertyId)
-        data.isAvailable = status
+        data.isAvailable = request.status
         service.createOrUpdate(data)
         ResponseEntity.badRequest().body(message)
     }

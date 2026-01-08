@@ -24,6 +24,7 @@ import server.web.casa.app.property.application.service.TerrainImageService
 import server.web.casa.app.property.application.service.TerrainService
 import server.web.casa.app.property.domain.model.BureauDtoRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
+import server.web.casa.app.property.domain.model.StatusState
 import server.web.casa.app.property.domain.model.request.TerrainRequest
 import server.web.casa.app.property.domain.model.request.toDomain
 import server.web.casa.app.property.domain.model.toDomain
@@ -76,15 +77,15 @@ class TerrainController(
         ResponseEntity.ok().body(response)
     }
     @Operation(summary = "Sold")
-    @GetMapping("/sold/{propertyId}",
+    @PutMapping("/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInTerrain(
         @PathVariable("propertyId") propertyId : Long,
-        @RequestBody status : Boolean
-    ){
-        val message = mutableMapOf("message" to if(status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
         val data = service.findById(propertyId)
-        data.sold = status
+        data.sold = request.status
         service.createOrUpdate(data)
         ResponseEntity.badRequest().body(message)
     }
@@ -94,11 +95,11 @@ class TerrainController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableTerrain(
         @PathVariable("propertyId") propertyId : Long,
-        @RequestBody status : Boolean
-    ){
-        val message = mutableMapOf("message" to if(status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
         val data= service.findById(propertyId)
-        data.isAvailable = status
+        data.isAvailable = request.status
         service.createOrUpdate(data)
         ResponseEntity.badRequest().body(message)
     }
