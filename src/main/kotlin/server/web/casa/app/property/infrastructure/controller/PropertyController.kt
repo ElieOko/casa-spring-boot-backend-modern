@@ -303,7 +303,7 @@ class PropertyController(
     @Operation(summary = "Sold")
     @GetMapping("/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun soldOutOrInBureau(
+    suspend fun soldOutOrIn(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody status : Boolean
     ){

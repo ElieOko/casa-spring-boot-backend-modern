@@ -209,7 +209,7 @@ class BureauController(
     @Operation(summary = "Enable or disable")
     @PutMapping("/enable/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun toEnableOrDisable(
+    suspend fun toEnableOrDisableBureau(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody status : Boolean
     ){
