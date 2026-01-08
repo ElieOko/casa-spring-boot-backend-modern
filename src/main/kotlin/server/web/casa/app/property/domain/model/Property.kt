@@ -33,7 +33,7 @@ data class Property(
     val user: Long?,
     var latitude: Double? = null,
     var longitude: Double? = null,
-    val isAvailable: Boolean = true,
+    var isAvailable: Boolean = true,
     val createdAt: LocalDate = LocalDate.now(),
     var updatedAt: LocalDate = LocalDate.now(),
 )
