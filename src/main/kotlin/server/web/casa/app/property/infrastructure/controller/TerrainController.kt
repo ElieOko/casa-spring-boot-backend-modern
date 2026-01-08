@@ -30,6 +30,7 @@ import server.web.casa.app.property.domain.model.request.toDomain
 import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
+import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.ApiResponseWithMessage
 
 @Tag(name = "Terrain", description = "")
@@ -102,5 +103,14 @@ class TerrainController(
         data.isAvailable = request.status
         service.createOrUpdate(data)
         ResponseEntity.badRequest().body(message)
+    }
+    @Operation(summary = "Get Terrain by User")
+    @GetMapping("/owner/{userId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllTerrainByUser(
+        @PathVariable("userId") userId : Long,
+    ) = coroutineScope {
+        val data = service.getAllPropertyByUser(userId)
+        ApiResponse(data)
     }
 }
