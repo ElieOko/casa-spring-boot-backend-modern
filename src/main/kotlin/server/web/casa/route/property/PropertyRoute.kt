@@ -13,6 +13,7 @@ object PropertyRoute {
     const val PROPERTY_HOTEL = "${GlobalRoute.ROOT}/${PropertyFeatures.PROPERTY_HOTEL_PATH}"
     const val PROPERTY_FESTIVE = "${GlobalRoute.ROOT}/${PropertyFeatures.PROPERTY_FESTIVE_PATH}"
     const val PROPERTY_FUNERAIRE = "${GlobalRoute.ROOT}/${PropertyFeatures.PROPERTY_FUNERAIRE_PATH}"
+    const val PROPERTY_TERRAIN = "${GlobalRoute.ROOT}/${PropertyFeatures.PROPERTY_TERRAIN_PATH}"
 }
 
 object PropertyFeatures{
@@ -24,6 +25,7 @@ object PropertyFeatures{
     const val PROPERTY_FESTIVE_PATH = "$PROPERTY_PATH/festives"
     const val PROPERTY_FUNERAIRE_PATH = "$PROPERTY_PATH/funeraires"
     const val PROPERTY_FEATURE_PATH = "$PROPERTY_PATH/features"
+    const val PROPERTY_TERRAIN_PATH = "$PROPERTY_PATH/terrains"
     const val PROPERTY_TYPE_PATH = "$PROPERTY_PATH/types"
     const val PROPERTY_FILTER_PATH = "/filter"
 }
