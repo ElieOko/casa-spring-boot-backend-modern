@@ -15,16 +15,16 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
 //        "propertyImageRoom",
 //        "propertyImageLivingRoom",
 //        "propertyImageKitchen"])
-override fun findAll(): Flow<PropertyEntity>
     @Query("""
-        SELECT * FROM properties
-        WHERE transaction_type = :transactionType
-        AND price BETWEEN :minPrice AND :maxPrice
-        AND ((:city IS NULL AND (:cityValue IS NULL OR city_value = :cityValue) ) OR city_id = :city)
-        OR(rooms = :room)
-        OR ((:commune IS NULL AND (:communeValue IS NULL OR commune_value = :communeValue)) OR commune_id = :commune)
-        AND property_type_id = :typeMaison
-    """)
+            SELECT * FROM properties
+            WHERE transaction_type = :transactionType
+            AND is_available = true
+            AND price BETWEEN :minPrice AND :maxPrice
+            AND ((:city IS NULL AND (:cityValue IS NULL OR city_value = :cityValue) ) OR city_id = :city)
+            OR(rooms = :room)
+            OR ((:commune IS NULL AND (:communeValue IS NULL OR commune_value = :communeValue)) OR commune_id = :commune)
+            AND property_type_id = :typeMaison
+        """)
     fun filter(
         @Param("transactionType") transactionType: String,
         @Param("minPrice") minPrice: Double,
@@ -38,21 +38,8 @@ override fun findAll(): Flow<PropertyEntity>
     ) : Flow<PropertyEntity>
 
     @Query("""
-        SELECT r FROM PropertyEntity r 
-        WHERE r.transactionType = :transactionType 
-        OR (r.price BETWEEN :minPrice AND :maxPrice)
-        OR (r.commune.id = :commune)
-        OR (r.city.id = :city)
-        OR (r.propertyType.id = :typeMaison)
-        OR (r.rooms = :room)
+        SELECT * FROM properties
+        WHERE is_available = true
     """)
-    fun filterProperty(
-        @Param("transactionType") transactionType: String,
-        @Param("minPrice") minPrice: Double,
-        @Param("maxPrice") maxPrice: Double,
-        @Param("city") city: Long,
-        @Param("commune") commune: Long,
-        @Param("typeMaison")  typeMaison: Long,
-        @Param("room")  room: Int,
-    ) : Flow<PropertyEntity>
+    override fun findAll(): Flow<PropertyEntity>
 }

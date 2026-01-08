@@ -15,6 +15,7 @@ interface TerrainRepository  : CoroutineCrudRepository<TerrainEntity, Long> {
         OR(rooms = :room)
         OR ((:commune IS NULL AND (:communeValue IS NULL OR commune_value = :communeValue)) OR commune_id = :commune)
         AND property_type_id = :typeMaison
+        AND is_available = true
     """)
     fun filter(
         @Param("transactionType") transactionType: String,
@@ -26,4 +27,10 @@ interface TerrainRepository  : CoroutineCrudRepository<TerrainEntity, Long> {
         @Param("communeValue") communeValue: String?,
         @Param("typeMaison")  typeMaison: Long,
     ) : Flow<TerrainEntity>
+
+    @Query("""
+        SELECT * FROM terrains
+        WHERE is_available = true
+    """)
+    override fun findAll():Flow<TerrainEntity>
 }
