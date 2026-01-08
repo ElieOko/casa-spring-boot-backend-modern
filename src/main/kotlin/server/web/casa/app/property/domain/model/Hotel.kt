@@ -9,7 +9,7 @@ class Hotel(
     val title: String,
     val description: String? = "",
     val address: String,
-    val image: String,
+    var image: String,
     val communeValue: String? = "",
     val quartierValue: String? = "",
     val cityValue: String? = "",
