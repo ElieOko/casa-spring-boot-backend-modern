@@ -53,12 +53,13 @@ class AuthService(
     suspend fun register(user: User, accountItems: List<AccountRequest>): Pair<UserDto?, String> {
         var phone = normalizeAndValidatePhoneNumberUniversal(user.phone)
         var state = false
-            if (phone != null ) {
-                phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
-                if(userRepository.findByPhoneOrEmail(phone) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Cet identifiant existe dans la plateforme.")
-                state = true
+            if (user.phone != null) {
+                if (user.phone.isNotEmpty()){
+                    phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+                    if(userRepository.findByPhoneOrEmail(phone) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Cet identifiant existe dans la plateforme.")
+                    state = true
+                }
             }
-
         if (user.email != null){
             if(user.email.isNotEmpty()){
                 if(userRepository.findByPhoneOrEmail(user.email) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse existe dans la plateforme.")
