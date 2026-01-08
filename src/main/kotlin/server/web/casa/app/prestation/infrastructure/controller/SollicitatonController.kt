@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.ecosystem.application.service.PrestationService
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.application.SollicitationService
+import server.web.casa.app.prestation.domain.model.FavoritePrestationDTO
+import server.web.casa.app.prestation.domain.model.SollicitationDTO
 import server.web.casa.app.prestation.domain.request.SollicitationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.reservation.domain.model.ReservationStatus
@@ -54,7 +56,7 @@ class SollicitatonController(
     }
 
     @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllSollicitations(): ResponseEntity<Map<String, List<SollicitationEntity>>>{
+    suspend fun getAllSollicitations(): ResponseEntity<Map<String, List<SollicitationDTO>>>{
         return ResponseEntity.ok().body(
             mapOf(
                 "sollicitation" to service.findAll().toList()
@@ -62,10 +64,15 @@ class SollicitatonController(
     }
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getSollicitationById(@PathVariable id: Long): ResponseEntity<Map<String, SollicitationEntity?>> {
+    suspend fun getSollicitationById(@PathVariable id: Long): ResponseEntity<Map<String, SollicitationDTO?>> {
         val data = service.findById(id)
         val response = mapOf("sollicitation" to data)
         return ResponseEntity.ok(response)
+    }
+    @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getByUserId(@PathVariable userId: Long): ResponseEntity<Map<String, List<SollicitationDTO>?>>{
+        val find = service.findByUserId(userId)
+        return ResponseEntity.ok(mapOf("data" to find))
     }
     @PutMapping("/update/status/{id}")
     suspend fun updateSollicitationStatus(
@@ -76,20 +83,20 @@ class SollicitatonController(
         val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
         val sollicitation = service.findById(id) ?: return ResponseEntity.ok(mapOf("error" to "sollicitation not found"))
 
-        val userId = sollicitation.userId
-        val prestateurId = prestS.getById ( sollicitation.prestationId!!)?.userId
+        val userId = sollicitation.user.userId
+        val prestateurId = prestS.getById ( sollicitation.prestation.id!!)?.userId
 
         val prestateurCheck = userRequest.userId == prestateurId
         val sollicitateur = userRequest.userId == userId
 
         if(prestateurCheck || sollicitateur){
             if (prestateurCheck){
-                val updated = service.updateStatus(sollicitation,  request.status)
+                val updated = service.updateStatus(sollicitation.sollicitation,  request.status)
                 return ResponseEntity.ok(mapOf("sollicitation" to updated))
             }
 
             if(request.status != ReservationStatus.APPROVED){
-                val updated = service.updateStatus(sollicitation,  request.status)
+                val updated = service.updateStatus(sollicitation.sollicitation,  request.status)
                 return ResponseEntity.ok(mapOf("sollicitation" to updated))
             }
         }
