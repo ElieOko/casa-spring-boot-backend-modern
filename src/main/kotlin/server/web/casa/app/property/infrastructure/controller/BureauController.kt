@@ -195,11 +195,12 @@ class BureauController(
     @Operation(summary = "Bureau sold")
     @GetMapping("/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun soldOutBureau(
+    suspend fun soldOutOrInBureau(
         @PathVariable("propertyId") propertyId : Long,
+        @RequestBody status : Boolean
     ){
         val data = service.findById(propertyId).toEntity()
-        data.sold = true
+        data.sold = status
     }
 
     @Operation(summary = "Bureau enable or disable")
