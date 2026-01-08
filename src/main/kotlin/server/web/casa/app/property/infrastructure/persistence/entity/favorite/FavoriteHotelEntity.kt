@@ -1,3 +1,17 @@
 package server.web.casa.app.property.infrastructure.persistence.entity.favorite
 
-data class FavoriteHotelEntity()
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
+
+@Table("favorite_hotels")
+data class FavoriteHotelEntity(
+    @Column("id")
+    val id          : Long,
+    @Column("user_id")
+    val userId      : Long,
+    @Column("hotel_id")
+    val hotelId     : Long,
+    @Column("created_at")
+    val createdAt   : LocalDateTime = LocalDateTime.now()
+)

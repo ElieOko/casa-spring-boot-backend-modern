@@ -32,14 +32,14 @@ class CotationPrestationController(
     ):ResponseEntity <Map<String, Any?>>{
         val checkUser = userS.findIdUser(req.userId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "user not found"))
         val checkSollicitation = solS.findById(req.sollicitationId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "prestation not found"))
-        val prestateur = userS.findIdUser(checkSollicitation.userId!!)
+        val prestateur = userS.findIdUser(checkSollicitation.user.userId!!)
        val checkCoteMaxFive = if (req.cote >= 6 ) return ResponseEntity.badRequest()
                                 .body(mapOf("error" to "Cote doit etre inferieure ou egale à 5"))
                                 else null
 
         val data = CotationPrestationEntity(
             userId = checkUser.userId!! ,
-            sollicitationId = checkSollicitation.id!!,
+            sollicitationId = checkSollicitation.sollicitation.id!!,
             cote = req.cote,
             commentaire = req.commentaire,
             isActive = true,
