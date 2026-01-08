@@ -14,6 +14,7 @@ import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.filter.*
 import server.web.casa.app.property.infrastructure.persistence.entity.*
+import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.mapper.*
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.*
@@ -182,5 +183,11 @@ class PropertyService(
             communeValue = filterModel.communeValue,
         ).toList()
         findAllRelation(data)
+    }
+    suspend fun createOrUpdate(model : Property) =  coroutineScope{
+        repository.save(model.toEntity())
+    }
+    suspend fun findById(id : Long) = coroutineScope {
+        repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
     }
 }
