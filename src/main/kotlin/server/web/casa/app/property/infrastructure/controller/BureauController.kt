@@ -192,7 +192,7 @@ class BureauController(
         ResponseEntity.ok().body(response)
     }
 
-    @Operation(summary = "Bureau sold")
+    @Operation(summary = "Sold")
     @GetMapping("/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInBureau(
@@ -203,7 +203,7 @@ class BureauController(
         data.sold = status
     }
 
-    @Operation(summary = "Bureau enable or disable")
+    @Operation(summary = "Enable or disable")
     @PutMapping("/enable/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisable(
