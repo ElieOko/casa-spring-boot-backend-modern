@@ -33,4 +33,10 @@ interface TerrainRepository  : CoroutineCrudRepository<TerrainEntity, Long> {
         WHERE is_available = true
     """)
     override fun findAll():Flow<TerrainEntity>
+
+    @Query("""
+        SELECT * FROM terrains
+        WHERE user_id = :userId
+    """)
+    fun findAllByUser(userId: Long):Flow<TerrainEntity>
 }
