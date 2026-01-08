@@ -26,6 +26,8 @@ class SalleFuneraireEntity(
     val price : Double? = null,
     @Column("usage")
     val usage: String? = "conference, etc",
+    @Column("sold")
+    var sold: Boolean = false,
     @Column("address")
     val address: String,
     @Column("commune_value")
@@ -71,6 +73,7 @@ fun SalleFuneraireEntity.toDomain() = SalleFuneraire(
     description = this.description,
     capacityPeople = this.capacityPeople,
     price = this.price,
+    sold = this.sold,
     deviseId = this.deviseId,
     postalCode = this.postalCode,
     longitude = this.longitude,

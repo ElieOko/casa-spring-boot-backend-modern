@@ -6,6 +6,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import server.web.casa.app.property.infrastructure.persistence.entity.BureauEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.SalleFuneraireEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.TerrainEntity
 
 interface SalleFuneraireRepository : CoroutineCrudRepository<SalleFuneraireEntity, Long>{
     @Query("""
@@ -15,6 +16,7 @@ interface SalleFuneraireRepository : CoroutineCrudRepository<SalleFuneraireEntit
         AND ((:city IS NULL AND (:cityValue IS NULL OR city_value = :cityValue) ) OR city_id = :city)
         OR ((:commune IS NULL AND (:communeValue IS NULL OR commune_value = :communeValue)) OR commune_id = :commune)
         AND property_type_id = :typeMaison
+        AND is_available = true
     """)
     fun filter(
         @Param("transactionType") transactionType: String,
@@ -26,4 +28,10 @@ interface SalleFuneraireRepository : CoroutineCrudRepository<SalleFuneraireEntit
         @Param("communeValue") communeValue: String?,
         @Param("typeMaison")  typeMaison: Long,
     ) : Flow<SalleFuneraireEntity>
+
+    @Query("""
+        SELECT * FROM salle_funeraires
+        WHERE is_available = true
+    """)
+    override fun findAll():Flow<SalleFuneraireEntity>
 }

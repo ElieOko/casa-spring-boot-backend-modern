@@ -7,7 +7,7 @@ import server.web.casa.app.property.domain.model.SalleFestiveImage
 import server.web.casa.app.property.domain.model.TerrainImage
 import java.time.LocalDateTime
 
-@Table("terrau_images")
+@Table("terrain_images")
 data class TerrainImageEntity(
     @Id
     @Column("id")

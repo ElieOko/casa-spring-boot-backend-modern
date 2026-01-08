@@ -1,6 +1,7 @@
 package server.web.casa.app.property.domain.model
 
 import jakarta.validation.constraints.NotNull
+import org.springframework.data.relational.core.mapping.Column
 import server.web.casa.app.ecosystem.domain.request.ImageRequest
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.domain.model.dto.GeoDTO
@@ -18,6 +19,7 @@ class SalleFuneraire(
     val transactionType: String = "",
     var propertyTypeId: Long? = 0,
     val price : Double? = null,
+    var sold: Boolean = false,
     val address: String,
     val communeValue: String? = "",
     val quartierValue: String? = "",
@@ -56,6 +58,7 @@ fun SalleFuneraire.toEntity() = SalleFuneraireEntity(
     communeId = this.communeId,
     quartierId = this.quartierId,
     cityId = this.cityId,
+    sold = this.sold,
     countryValue = this.countryValue,
     transactionType = this.transactionType,
     propertyTypeId = this.propertyTypeId,

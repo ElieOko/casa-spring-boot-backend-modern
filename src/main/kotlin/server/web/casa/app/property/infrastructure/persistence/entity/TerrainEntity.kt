@@ -34,6 +34,8 @@ class TerrainEntity(
     val countryValue: String? = "",
     @Column("city_id")
     val cityId: Long? = null,
+    @Column("sold")
+    var sold: Boolean = false,
     @Column("postal_code")
     val postalCode: String? = "",
     @Column("commune_id")
@@ -75,6 +77,7 @@ fun TerrainEntity.toDomain() = Terrain(
     deviseId = this.deviseId,
     price = this.price,
     surface = this.surface,
+    sold=this.sold,
     address = this.address,
     communeId = this.communeId,
     quartierId = this.quartierId,

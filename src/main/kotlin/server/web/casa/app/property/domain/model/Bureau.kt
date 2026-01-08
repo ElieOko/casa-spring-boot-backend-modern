@@ -38,6 +38,7 @@ class Bureau(
     var cityId: Long? = 0,
     val latitude: Double? = null,
     val longitude: Double? = null,
+    var sold: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
 )
 
@@ -121,7 +122,8 @@ fun Bureau.toEntity() = BureauEntity(
     transactionType = this.transactionType,
     propertyTypeId = this.propertyTypeId,
     postalCode = this.postalCode,
-    createdAt = this.createdAt
+    createdAt = this.createdAt,
+    sold = this.sold
 )
 
 fun BureauRequest.toDomain() = Bureau(

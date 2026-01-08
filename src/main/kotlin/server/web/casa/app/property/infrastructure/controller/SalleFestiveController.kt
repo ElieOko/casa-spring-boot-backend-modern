@@ -127,4 +127,32 @@ class SalleFestiveController(
         val message = mutableMapOf("message" to "Modification effectuée avec succès")
         ResponseEntity.ok(message)
     }
+
+    @Operation(summary = "Sold")
+    @PutMapping("/sold/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun soldOutOrInFestive(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        val data = service.findById(propertyId)
+        data.sold = request.status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
+    }
+
+    @Operation(summary = "Enable or disable")
+    @PutMapping("/enable/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun toEnableOrDisableFestive(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        val data= service.findById(propertyId)
+        data.isAvailable = request.status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
+    }
 }

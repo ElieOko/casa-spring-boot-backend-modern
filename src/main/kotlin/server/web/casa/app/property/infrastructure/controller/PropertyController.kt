@@ -18,10 +18,12 @@ import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.dto.toDto
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.*
+import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.ApiResponseWithMessage
+import kotlin.collections.mutableMapOf
 
 const val ROUTE_PROPERTY = PropertyRoute.PROPERTY
 const val ROUTE_PROPERTY_FILTER = PropertyRoute.PROPERTY_FILTER
@@ -296,6 +298,34 @@ class PropertyController(
             message["message"] = "Aucune suppression n'a été effectuée"
             ResponseEntity.badRequest().body(message)
         }
+    }
+
+    @Operation(summary = "Sold")
+    @PutMapping("/sold/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun soldOutOrIn(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody request : StatusState
+    ) = coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        val data = service.findById(propertyId)
+        data.sold = request.status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
+    }
+
+    @Operation(summary = "Enable or disable")
+    @PutMapping("/enable/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun toEnableOrDisable(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody request : StatusState
+    ) = coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        val data= service.findById(propertyId)
+        data.isAvailable = request.status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
     }
 
 }

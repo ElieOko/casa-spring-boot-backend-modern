@@ -32,12 +32,14 @@ import server.web.casa.app.property.domain.model.BureauDtoRequest
 import server.web.casa.app.property.domain.model.BureauRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
 import server.web.casa.app.property.domain.model.Property
+import server.web.casa.app.property.domain.model.StatusState
 import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.ImageChange
 import server.web.casa.app.property.domain.model.request.ImageChangeOther
 import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.property.domain.model.toDomain
+import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
@@ -189,6 +191,34 @@ class BureauController(
         )
         val response = mapOf("properties" to data)
         ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Sold")
+    @PutMapping("/sold/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun soldOutOrInBureau(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        val data = service.findById(propertyId)
+        data.sold = request.status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
+    }
+
+    @Operation(summary = "Enable or disable")
+    @PutMapping("/enable/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun toEnableOrDisableBureau(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody request : StatusState
+    )= coroutineScope{
+        val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        val data= service.findById(propertyId)
+        data.isAvailable = request.status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
     }
 
 }
