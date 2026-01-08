@@ -17,7 +17,7 @@ data class PersonUserRequest(
     val actor : PersonRequest
 )
 
-fun PersonUserRequest.toUser(phone : String) = User(
+fun PersonUserRequest.toUser(phone: String?) = User(
     password = this.user.password,
     email = this.user.email,
     username = "@"+toPascalCase("${this.actor.firstName} ${this.actor.lastName}"),

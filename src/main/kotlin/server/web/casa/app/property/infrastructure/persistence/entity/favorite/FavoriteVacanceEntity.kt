@@ -1,3 +1,3 @@
 package server.web.casa.app.property.infrastructure.persistence.entity.favorite
 
-data class FavoriteVacanceEntity()
+ class FavoriteVacanceEntity()
