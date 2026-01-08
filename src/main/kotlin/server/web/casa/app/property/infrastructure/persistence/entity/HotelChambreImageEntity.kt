@@ -14,9 +14,9 @@ class HotelChambreImageEntity(
     @Column("hotel_chambre_id")
     val hotelChambreId: Long? = null,
     @Column("name")
-    val name: String,
+    var name: String,
     @Column("path")
-    val path: String?,
+    var path: String?,
     @Column("is_available")
     var isAvailable: Boolean = true,
     @Column("created_at")
