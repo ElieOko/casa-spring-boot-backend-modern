@@ -43,6 +43,8 @@ class HotelEntity(
     val longitude: Double? = null,
     @Column("is_available")
     var isAvailable: Boolean = true,
+    @Column("property_type_id")
+    val propertyTypeId: Long? = null,
     @Column("created_at")
     val createdAt: LocalDate = LocalDate.now(),
     @Column("updated_at")
@@ -58,6 +60,7 @@ fun HotelEntity.toDomain() = Hotel(
     image = this.image,
     communeId = this.communeId,
     quartierId = this.quartierId,
+    propertyTypeId = this.propertyTypeId,
     cityId = this.cityId,
     countryValue = this.countryValue,
     communeValue = this.communeValue,

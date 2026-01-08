@@ -7,17 +7,16 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.Terrain
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.dto.toDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.*
-import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.*
+import kotlin.collections.get
 import kotlin.collections.map
 
 @Service
@@ -31,8 +30,7 @@ class TerrainService(
     private val userService: UserService,
     private val propertyTypeService: PropertyTypeService,
 ) {
-    suspend fun getAll() = coroutineScope{
-        val data =  repository.findAll().toList()
+    private suspend fun findAll(data: List<TerrainEntity>) = coroutineScope {
         val terrain = mutableListOf<TerrainMasterDTO>()
         val bureauIds: List<Long> = data.map { it.id!! }
         val images = terrainImage.findByTerrainIdIn(bureauIds).toList()
@@ -57,9 +55,13 @@ class TerrainService(
         }
         terrain
     }
+    suspend fun getAll() = coroutineScope{
+        val data =  repository.findAll().toList()
+        findAll(data)
+    }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{
-        val data = getAll().filter { it.terrain.userId == userId }.toList()
-        data
+        val data = repository.findAllByUser(userId).toList()
+        findAll(data)
     }
     suspend fun create(data : Terrain) = coroutineScope {
         repository.save(data.toEntity()).toDomain()

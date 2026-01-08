@@ -9,24 +9,21 @@ import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.FeatureRequest
-import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFestiveDTOMaster
 import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
 import server.web.casa.app.property.domain.model.toDTO
 import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.FestiveFeatureEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.SalleFestiveEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.toAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
-import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.FestiveFeatureRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveImageRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveRepository
 import server.web.casa.app.user.application.service.UserService
-import kotlin.collections.get
 import kotlin.collections.map
 import kotlin.collections.toList
 
@@ -43,39 +40,36 @@ class SalleFestiveService(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
 ) {
-    suspend fun getAll() = coroutineScope{
-       val data =  repository.findAll().toList()
-       val dataList = mutableListOf<SalleFestiveDTOMaster>()
-       val ids : List<Long> = data.map { it.id!! }
-       val images = imageRepository.findBySalleFestiveIdIn(ids).toList()
-       val features = repositoryFeature.findByFestiveIdIn(ids).toList()
-       val imageByModel = images.groupBy { it.salleFestiveId }
-       val featureByModel = features.groupBy { it.festiveId }
-       data.forEach { m->
-           dataList.add(
-               SalleFestiveDTOMaster(
-                   festive = m.toDomain().toDTO() ,
-                   images = imageByModel[m.id]?.map { it.toDomain() }?:emptyList(),
-                   devise = devise.getById(m.deviseId!!),
-                   address = m.toAddressDTO(),
-                   localAddress = LocalAddressDTO(
-                       city = cityService.findByIdCity(m.cityId),
-                       commune = communeService.findByIdCommune(m.communeId),
-                       quartier = quartierService.findByIdQuartier(m.quartierId)
-                   ),
-                   geoZone = m.toGeo(),
-                   postBy = userService.findIdUser(m.userId!!).username,
-                   feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
-                   typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
-               ))
+    private suspend fun findAll(data: List<SalleFestiveEntity>) = coroutineScope {
+        val dataList = mutableListOf<SalleFestiveDTOMaster>()
+        val ids : List<Long> = data.map { it.id!! }
+        val images = imageRepository.findBySalleFestiveIdIn(ids).toList()
+        val features = repositoryFeature.findByFestiveIdIn(ids).toList()
+        val imageByModel = images.groupBy { it.salleFestiveId }
+        val featureByModel = features.groupBy { it.festiveId }
+        data.forEach { m->
+            dataList.add(
+                SalleFestiveDTOMaster(
+                    festive = m.toDomain().toDTO() ,
+                    images = imageByModel[m.id]?.map { it.toDomain() }?:emptyList(),
+                    devise = devise.getById(m.deviseId!!),
+                    address = m.toAddressDTO(),
+                    localAddress = LocalAddressDTO(
+                        city = cityService.findByIdCity(m.cityId),
+                        commune = communeService.findByIdCommune(m.communeId),
+                        quartier = quartierService.findByIdQuartier(m.quartierId)
+                    ),
+                    geoZone = m.toGeo(),
+                    postBy = userService.findIdUser(m.userId!!).username,
+                    feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
+                    typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
+                ))
         }
         dataList
     }
+    suspend fun getAll() = coroutineScope{ findAll(repository.findAll().toList()) }
 
-    suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{
-        val data = getAll().filter { it.festive.userId == userId }.toList()
-        data
-    }
+    suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{findAll(repository.findAllByUser(userId).toList()) }
 
     suspend fun create(data : SalleFestive,features: List<FeatureRequest>) = coroutineScope {
        val result = repository.save(data.toEntity()).toDomain()

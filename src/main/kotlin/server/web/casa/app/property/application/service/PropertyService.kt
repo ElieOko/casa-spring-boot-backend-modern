@@ -140,11 +140,8 @@ class PropertyService(
             features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
         )
     }
-    suspend fun getAllPropertyByUser(userId : Long): List<PropertyMasterDTO> {
-        val properties = repository.findAll().toList()
-        val data = findAllRelation(properties).filter { it.property.userId == userId }.toList()
-        return data
-    }
+    suspend fun getAllPropertyByUser(userId : Long) = coroutineScope { findAllRelation(repository.findAllByUser(userId).toList()) }
+
     suspend fun findByIdProperty(id: Long): Pair<PropertyMasterDTO, Flow<Property>> {
         val data = toDomain(id)
 
