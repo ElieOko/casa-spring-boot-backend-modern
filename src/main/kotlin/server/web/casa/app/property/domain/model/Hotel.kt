@@ -1,14 +1,21 @@
 package server.web.casa.app.property.domain.model
 
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Null
 import server.web.casa.app.property.infrastructure.persistence.entity.HotelEntity
 import java.time.LocalDate
 
 class Hotel(
+    @Null
     val id: Long? = null,
+    @NotNull
     val userId: Long? = null,
+    @NotNull
     val title: String,
     val description: String? = "",
+    @NotNull
     val address: String,
+    @NotNull
     var image: String,
     val communeValue: String? = "",
     val quartierValue: String? = "",

@@ -4,9 +4,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
+import server.web.casa.app.property.domain.model.Agence
 import server.web.casa.app.property.domain.model.Hotel
 import server.web.casa.app.property.domain.model.dto.HotelGlobal
-import server.web.casa.app.property.domain.model.dto.VacanceAgence
 import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.HotelRepository
@@ -29,7 +29,7 @@ class HotelService(
             throw Exception(e.message, e)
         }
     }
-    suspend fun getAll() = coroutineScope { hotelRepository.findAll().map { it.toDomain() }.toList() }
+//    suspend fun getAll() = coroutineScope { hotelRepository.findAll().map { it.toDomain() }.toList() }
     suspend fun getAllHotel() = coroutineScope{
         val hotel = mutableListOf<HotelGlobal>()
         hotelRepository.findAll().collect {
@@ -42,7 +42,13 @@ class HotelService(
         }
         hotel.toList()
     }
-    private suspend fun findAll() = coroutineScope{
+
+    private suspend fun findAll() = coroutineScope {
+
+    }
+    suspend fun getAllByUser(userId : Long) = coroutineScope{
+        val data = hotelRepository.getAllByUser(userId)
+        data.map {it?.toDomain()}.toList()
 
     }
 }
