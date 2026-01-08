@@ -38,6 +38,7 @@ import server.web.casa.app.property.domain.model.request.ImageChange
 import server.web.casa.app.property.domain.model.request.ImageChangeOther
 import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.property.domain.model.toDomain
+import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
@@ -189,6 +190,27 @@ class BureauController(
         )
         val response = mapOf("properties" to data)
         ResponseEntity.ok().body(response)
+    }
+
+    @Operation(summary = "Bureau sold")
+    @GetMapping("/sold/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun soldOutBureau(
+        @PathVariable("propertyId") propertyId : Long,
+    ){
+        val data = service.findById(propertyId).toEntity()
+        data.sold = true
+    }
+
+    @Operation(summary = "Bureau enable or disable")
+    @PutMapping("/enable/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun toEnableOrDisable(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody status : Boolean
+    ){
+        val data = service.findById(propertyId).toEntity()
+        data.isAvailable = status
     }
 
 }
