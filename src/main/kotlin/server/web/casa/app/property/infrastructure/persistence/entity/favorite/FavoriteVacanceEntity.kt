@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
 @Table("favorite_vacances")
-data class FavoriteVacanceEntity(
+class FavoriteVacanceEntity(
     @Id
     @Column("id")
     val id          : Long,

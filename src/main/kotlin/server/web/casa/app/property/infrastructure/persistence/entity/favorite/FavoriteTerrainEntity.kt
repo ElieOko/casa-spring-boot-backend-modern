@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
 @Table("favorite_terrains")
-data class FavoriteTerrainEntity(
+class FavoriteTerrainEntity(
     @Column("id")
     val id          : Long,
     @Column("user_id")
