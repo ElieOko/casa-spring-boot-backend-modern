@@ -38,7 +38,7 @@ class Bureau(
     var cityId: Long? = 0,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val sold: Boolean = false,
+    var sold: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
 )
 

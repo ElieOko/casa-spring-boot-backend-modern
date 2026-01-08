@@ -1,5 +1,6 @@
 package server.web.casa.app.property.domain.model
 
+import org.springframework.data.relational.core.mapping.Column
 import server.web.casa.app.address.domain.model.*
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.domain.model.dto.*
@@ -14,6 +15,7 @@ class Terrain(
     val deviseId : Long? = null,
     val price: Double? = null,
     val surface : String? = "",
+    var sold: Boolean = false,
     val address: String,
     val communeValue: String? = "",
     val quartierValue: String? = "",
@@ -39,6 +41,7 @@ fun Terrain.toEntity() = TerrainEntity(
     deviseId = this.deviseId,
     price = this.price,
     surface = this.surface,
+    sold = this.sold,
     address = this.address,
     communeId = this.communeId,
     quartierId = this.quartierId,
