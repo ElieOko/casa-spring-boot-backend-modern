@@ -17,14 +17,14 @@ interface BureauRepository : CoroutineCrudRepository<BureauEntity, Long>{
         AND is_available = true
     """)
     fun filter(
-        @Param("transactionType") transactionType: String,
-        @Param("minPrice") minPrice: Double,
-        @Param("maxPrice") maxPrice: Double,
-        @Param("city") city: Long?,
-        @Param("cityValue") cityValue: String?,
-        @Param("commune") commune: Long?,
-        @Param("communeValue") communeValue: String?,
-        @Param("typeMaison")  typeMaison: Long,
+        transactionType: String,
+        minPrice: Double,
+        maxPrice: Double,
+        city: Long?,
+        cityValue: String?,
+        commune: Long?,
+        communeValue: String?,
+        typeMaison: Long,
     ) : Flow<BureauEntity>
 
     @Query("""
@@ -32,4 +32,10 @@ interface BureauRepository : CoroutineCrudRepository<BureauEntity, Long>{
         WHERE is_available = true
     """)
     override fun findAll():Flow<BureauEntity>
+
+    @Query("""
+        SELECT * FROM bureau
+        WHERE user_id = :userId
+    """)
+    fun findAllByUser(userId: Long):Flow<BureauEntity>
 }

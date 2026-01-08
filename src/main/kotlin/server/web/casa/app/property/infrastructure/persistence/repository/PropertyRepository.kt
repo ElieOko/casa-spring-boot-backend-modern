@@ -26,15 +26,15 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
             AND property_type_id = :typeMaison
         """)
     fun filter(
-        @Param("transactionType") transactionType: String,
-        @Param("minPrice") minPrice: Double,
-        @Param("maxPrice") maxPrice: Double,
-        @Param("city") city: Long?,
-        @Param("cityValue") cityValue: String?,
-        @Param("commune") commune: Long?,
-        @Param("communeValue") communeValue: String?,
-        @Param("typeMaison")  typeMaison: Long,
-        @Param("room")  room: Int,
+       transactionType: String,
+       minPrice: Double,
+       maxPrice: Double,
+       city: Long?,
+       cityValue: String?,
+       commune: Long?,
+       communeValue: String?,
+       typeMaison: Long,
+       room: Int,
     ) : Flow<PropertyEntity>
 
     @Query("""
@@ -42,4 +42,10 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
         WHERE is_available = true
     """)
     override fun findAll(): Flow<PropertyEntity>
+
+    @Query("""
+        SELECT * FROM properties
+        WHERE user_id = :userId
+    """)
+    fun findAllByUser(userId: Long):Flow<PropertyEntity>
 }

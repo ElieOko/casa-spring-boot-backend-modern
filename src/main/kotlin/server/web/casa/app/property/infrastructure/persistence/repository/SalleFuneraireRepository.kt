@@ -19,14 +19,14 @@ interface SalleFuneraireRepository : CoroutineCrudRepository<SalleFuneraireEntit
         AND is_available = true
     """)
     fun filter(
-        @Param("transactionType") transactionType: String,
-        @Param("minPrice") minPrice: Double,
-        @Param("maxPrice") maxPrice: Double,
-        @Param("city") city: Long?,
-        @Param("cityValue") cityValue: String?,
-        @Param("commune") commune: Long?,
-        @Param("communeValue") communeValue: String?,
-        @Param("typeMaison")  typeMaison: Long,
+       transactionType: String,
+       minPrice: Double,
+       maxPrice: Double,
+       city: Long?,
+       cityValue: String?,
+       commune: Long?,
+       communeValue: String?,
+       typeMaison: Long,
     ) : Flow<SalleFuneraireEntity>
 
     @Query("""
@@ -34,4 +34,10 @@ interface SalleFuneraireRepository : CoroutineCrudRepository<SalleFuneraireEntit
         WHERE is_available = true
     """)
     override fun findAll():Flow<SalleFuneraireEntity>
+
+    @Query("""
+        SELECT * FROM salle_funeraires
+        WHERE user_id = :userId
+    """)
+    fun findAllByUser(userId: Long):Flow<SalleFuneraireEntity>
 }
