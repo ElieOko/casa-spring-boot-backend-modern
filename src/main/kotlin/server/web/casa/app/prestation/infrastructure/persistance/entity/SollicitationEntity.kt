@@ -22,7 +22,7 @@ data class SollicitationEntity(
     val deviseId: Long?,
 
     @Column("budget")
-    val budegt: Double?,
+    val budget: Double?,
 
     @Column("description")
     val description: String?,

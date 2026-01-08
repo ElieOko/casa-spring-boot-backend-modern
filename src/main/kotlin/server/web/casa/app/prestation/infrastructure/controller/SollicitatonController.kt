@@ -41,10 +41,10 @@ class SollicitatonController(
             userId = checkUser.userId,
             prestationId = checkPrestation.id,
             deviseId = checkDevise.id,
-            budegt = req.budget,
+            budget = req.budget,
             description = req.description,
             startDate = req.startDate,
-            endDate = req.endDate,
+            endDate = req.endDate
         )
         val created = service.create(data)
         return ResponseEntity.ok(mapOf(
