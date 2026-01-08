@@ -5,14 +5,14 @@ import server.web.casa.app.property.infrastructure.persistence.entity.favorite.F
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
 
-data class FavoriteTerrain(
+ class FavoriteTerrain(
     val id          : Long,
     val userId      : Long,
     val terrainId   : Long,
     val createdAt   : LocalDateTime = LocalDateTime.now()
 )
 
-data class FavoriteTerrainDTO(
+ class FavoriteTerrainDTO(
     val favorite    : FavoriteTerrainEntity,
     val user        : UserDto,
     val terrain     : Terrain

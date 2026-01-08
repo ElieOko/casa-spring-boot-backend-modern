@@ -5,7 +5,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.favorite.F
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
 
-data class FavoriteHotel(
+ class FavoriteHotel(
     val id          : Long,
 
     val userId      : Long,
@@ -14,7 +14,7 @@ data class FavoriteHotel(
 
     val createdAt   : LocalDateTime = LocalDateTime.now()
 )
-data class FavoriteHotelDTO(
+ class FavoriteHotelDTO(
     val favorite    : FavoriteHotelEntity,
     val user        : UserDto,
     //val hotel       : Hotel
