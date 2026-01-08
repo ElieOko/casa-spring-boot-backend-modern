@@ -1,38 +1,51 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.EntityGraph
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.SalleFestiveEntity
 
-interface PropertyRepository : JpaRepository<PropertyEntity, Long> {
-    @EntityGraph(attributePaths = [
-        "propertyImage",
-        "propertyImageRoom",
-        "propertyImageLivingRoom",
-        "propertyImageKitchen"])
-    override fun findAll(pageable: Pageable): Page<PropertyEntity>
+interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
+//    @EntityGraph(attributePaths = [
+//        "propertyImage",
+//        "propertyImageRoom",
+//        "propertyImageLivingRoom",
+//        "propertyImageKitchen"])
+    @Query("""
+            SELECT * FROM properties
+            WHERE transaction_type = :transactionType
+            AND is_available = true
+            AND price BETWEEN :minPrice AND :maxPrice
+            AND ((:city IS NULL AND (:cityValue IS NULL OR city_value = :cityValue) ) OR city_id = :city)
+            OR(rooms = :room)
+            OR ((:commune IS NULL AND (:communeValue IS NULL OR commune_value = :communeValue)) OR commune_id = :commune)
+            AND property_type_id = :typeMaison
+        """)
+    fun filter(
+       transactionType: String,
+       minPrice: Double,
+       maxPrice: Double,
+       city: Long?,
+       cityValue: String?,
+       commune: Long?,
+       communeValue: String?,
+       typeMaison: Long,
+       room: Int,
+    ) : Flow<PropertyEntity>
 
     @Query("""
-        SELECT r FROM PropertyEntity r 
-        WHERE r.transactionType = :transactionType 
-        OR (r.price BETWEEN :minPrice AND :maxPrice)
-        OR (r.commune.id = :commune)
-        OR (r.city.id = :city)
-        OR (r.propertyType.id = :typeMaison)
-        OR (r.rooms = :room)
+        SELECT * FROM properties
+        WHERE is_available = true
     """)
-    fun filterProperty(
-        @Param("transactionType") transactionType: String,
-        @Param("minPrice") minPrice: Double,
-        @Param("maxPrice") maxPrice: Double,
-        @Param("city") city: Long,
-        @Param("commune") commune: Long,
-        @Param("typeMaison")  typeMaison: Long,
-        @Param("room")  room: Int,
-        pageable: Pageable
-    ) : Page<PropertyEntity>
+    override fun findAll(): Flow<PropertyEntity>
+
+    @Query("""
+        SELECT * FROM properties
+        WHERE user_id = :userId
+    """)
+    fun findAllByUser(userId: Long):Flow<PropertyEntity>
 }

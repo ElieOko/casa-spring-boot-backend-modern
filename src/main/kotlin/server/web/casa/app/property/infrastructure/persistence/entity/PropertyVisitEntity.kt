@@ -1,28 +1,28 @@
 package server.web.casa.app.property.infrastructure.persistence.entity
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
-@Table(name = "PropertyVisits")
-@Entity
-class PropertyVisitEntity(
+@Table("property_visits")
+data class PropertyVisitEntity(
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val propertyVisitId     : Long,
-    @Column(name = "propertyId")
-    val propertyId          : Int,
-    @Column(name = "userId")
-    val userId              : Int,
-    @Column(name = "message")
-    val message             : String,
-    @Column(name = "visitDate")
-    val visitDate           : String,
-    @Column(name = "visitHour")
-    val visitHour           : String,
-    @Column(name = "status")
-    val status              : String,
-    @Column(name = "ipAddress")
-    val ipAddress           : String,
-    @Column(name = "cancellationReason")
-    val cancellationReason  : String
+    @Column("id")
+    val id: Long? = null,
+    @Column("property_id")
+    val propertyId: Long,
+    @Column("user_id")
+    val userId: Long,
+    @Column("message")
+    val message: String,
+    @Column("visit_date")
+    val visitDate: String,
+    @Column("visit_hour")
+    val visitHour: String,
+    @Column("status")
+    val status: String,
+    @Column("ip_address")
+    val ipAddress: String,
+    @Column("cancellation_reason")
+    val cancellationReason: String
 )

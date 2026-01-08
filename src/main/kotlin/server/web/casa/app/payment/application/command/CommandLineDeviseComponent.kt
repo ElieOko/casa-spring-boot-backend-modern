@@ -1,5 +1,7 @@
 package server.web.casa.app.payment.application.command
 
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
@@ -27,15 +29,18 @@ class CommandLineDeviseComponent(
 //            createTypeProperty()
 //            createFeature()
 //            createProperty()
-          //  createDevise()
-            log.info("save devise")
+//            createDevise()
+//            runBlocking {
+//                createDevise()
+//            }
+
         }
         catch (e : Exception){
 
         }
     }
-    fun createDevise(){
-        repository.saveAll(
+    suspend fun createDevise(){
+       val test = repository.saveAll(
             listOf(
                 DeviseEntity(
                     name = "Franc Congolais",
@@ -48,7 +53,8 @@ class CommandLineDeviseComponent(
                     tauxLocal = 1.0
                 ),
             )
-        )
+        ).toList()
+        log.info("save devise ${test.size}")
     }
 
 }

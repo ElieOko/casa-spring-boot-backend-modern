@@ -16,7 +16,7 @@ class NotificationController(
     @Transactional
     @MessageMapping("/sendMessage")
     @SendTo("/topic/properties")
-    fun notificationProperties(principal: Principal): Map<String, String> {
+    suspend fun notificationProperties(principal: Principal): Map<String, String> {
         val user = auth.userStom(principal)
         log.info("**********user->${user?.phone}")
         Thread.sleep(1000)

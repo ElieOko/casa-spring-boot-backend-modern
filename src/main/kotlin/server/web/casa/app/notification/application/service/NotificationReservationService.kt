@@ -1,5 +1,8 @@
 package server.web.casa.app.notification.application.service
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.notification.domain.model.request.NotificationReservation
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
@@ -11,55 +14,54 @@ class  NotificationReservationService(
     private val repository: NotificationReservationRepository,
     private val reservationService: ReservationService
 ) {
-    fun create(notice: NotificationReservation): Boolean {
+    suspend fun create(notice: NotificationReservation): Boolean {
        repository.save(NotificationReservationEntity(
-           reservation = notice.reservation,
-           guestUser = notice.guestUser,
-           hostUser = notice.hostUser,
+           reservationId = notice.reservation.id!!,
+           guestUserId = notice.guestUser.userId!!,
+           hostUserId = notice.hostUser.userId!!,
            guestUserState = true
        )).let {
            return true
        }
     }
 
-    fun dealConcludedHost(reservation : Long, state : Boolean): Boolean {
+    suspend fun dealConcludedHost(reservation : Long, state : Boolean): Boolean {
       val data = repository.findAll().filter { entity ->
-            entity.reservation.reservationId == reservation
-        }[0]
+            entity.reservationId == reservation
+        }.first()
         data.hostUserDealConcluded = state
         repository.save(data)
         return state
     }
 
-    fun dealConcludedGuest(reservation : Long, state : Boolean): Boolean {
+    suspend fun dealConcludedGuest(reservation : Long, state : Boolean): Boolean {
         val data = repository.findAll().filter { entity ->
-            entity.reservation.reservationId == reservation
-        }[0]
+            entity.reservationId == reservation
+        }.first()
         data.guestUserDealConcluded = state
         repository.save(data)
         return state
     }
 
-    fun stateReservationHost(reservation : Long, state : Boolean): Boolean {
+    suspend fun stateReservationHost(reservation : Long, state : Boolean): Boolean {
         val data = repository.findAll().filter { entity ->
-            entity.reservation.reservationId == reservation
-        }[0]
+            entity.reservationId == reservation
+        }.first()
         data.hostUserState = state
         repository.save(data)
         return state
     }
 
-    fun stateReservationGuestCancel(reservation : Long): Boolean {
+    suspend fun stateReservationGuestCancel(reservation : Long): Boolean {
         val data = repository.findAll().filter { entity ->
-            entity.reservation.reservationId == reservation
-        }[0]
+            entity.reservationId == reservation
+        }.first()
         data.guestUserState = false
         repository.save(data)
         return false
     }
-    fun deleteByReservation(reservation: Long): Boolean {
-        val notificationDelete = repository.findAll()
-            .filter { entity -> entity.reservation.reservationId == reservation }
+    suspend fun deleteByReservation(reservation: Long): Boolean {
+        val notificationDelete = repository.findAll().filter { entity -> entity.reservationId == reservation }.toList()
         repository.deleteAll(notificationDelete)
         return notificationDelete.isNotEmpty()
     }

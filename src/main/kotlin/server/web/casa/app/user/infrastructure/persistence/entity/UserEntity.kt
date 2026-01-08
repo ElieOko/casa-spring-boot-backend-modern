@@ -1,91 +1,35 @@
 package server.web.casa.app.user.infrastructure.persistence.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import jakarta.persistence.*
-import server.web.casa.app.actor.infrastructure.persistence.entity.master.*
-import server.web.casa.app.actor.infrastructure.persistence.entity.other.*
-import server.web.casa.app.actor.infrastructure.persistence.entity.second.DemenagementEntity
-import server.web.casa.app.actor.infrastructure.persistence.entity.second.MajordomeEntity
-import server.web.casa.app.ecosystem.infrastructure.persistence.entity.menusier.ServiceMenusierEntity
-import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.time.*
 
 @Table(name = "users")
-@Entity
-data class UserEntity @OptIn(ExperimentalTime::class) constructor(
+class UserEntity(
     @Id
     @Column("id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val userId: Long = 0,
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn("typeAccountId")
-    val typeAccount: TypeAccountEntity,
-//    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "city")
+    val userId: Long? = null,
+    @Column("city")
     var city: String? = null,
-    @Column("password", nullable = false)
     @JsonIgnore
+    @Column("password")
     var password: String? = "",
-    @Column("email", nullable = true)
+    @Column("email")
     var email: String? = null,
-    @Column("username", nullable = true)
+    @Column("username")
     var username: String? = null,
-    @Column("isPremium", nullable = true)
+    @Column("is_premium")
     var isPremium: Boolean = false,
-    @Column("isCertified", nullable = true)
+    @Column("is_certified")
     var isCertified: Boolean = false,
-    @Column("phone", nullable = true)
-    val phone: String?=null,
-    @Column("country", nullable = true)
-    val country: String? = "Democratic Republic of the Congo",
-    @Column("createdAt")
-    val createdAt: Instant = Clock.System.now(),
-    @OneToMany(mappedBy = "user")
-    val properties : List<PropertyEntity> = emptyList(),
-    @OneToMany(mappedBy = "guestUser")
-    val guestUser : List<NotificationReservationEntity> = emptyList(),
-    @OneToMany(mappedBy = "hostUser")
-    val hostUser : List<NotificationReservationEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val bailleur: List<BailleurEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val commissionnaire: List<CommissionnaireEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val locataire: List<LocataireEntity> = emptyList(),
-    @OneToMany(mappedBy = "parrain")
-    val parrainBailleur: List<BailleurEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val reservation : List<ReservationEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val majordome: List<MajordomeEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val ajusteur: List<AjusteurEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val architect: List<ArchitecteEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val frigoriste: List<FrigoristeEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val carreleur: List<CarreleurEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val chauffeur : List<ChauffeurEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val electricien: List<ElectricienEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val macon: List<MaconEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val menusier: List<MenusierEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val peintre : List<PeintreEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val serviceMenusier : List<ServiceMenusierEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val plombier: List<PlombierEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val salubrite : List<SalubriteEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val demenagement : List<DemenagementEntity> = emptyList(),
-    @OneToMany(mappedBy = "user")
-    val typeAccountUser: List<TypeAccountUserEntity> = emptyList()
-    )
+    @Column("phone")
+    var phone: String?=null,
+    @Column("country")
+    var country: String? = "Democratic Republic of the Congo",
+    @Column("created_at")
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+)

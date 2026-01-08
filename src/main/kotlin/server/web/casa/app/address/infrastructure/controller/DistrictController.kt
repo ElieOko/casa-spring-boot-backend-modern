@@ -6,11 +6,8 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.DistrictService
-import server.web.casa.app.address.domain.model.Commune
 import server.web.casa.app.address.domain.model.District
-import server.web.casa.app.address.domain.model.request.CommuneRequest
 import server.web.casa.app.address.domain.model.request.DistrictRequest
 import server.web.casa.route.address.AddressRoute
 import server.web.casa.utils.Mode
@@ -32,7 +29,7 @@ class DistrictController(
         val city = cityService.findByIdCity(request.cityId)
         if (city != null){
             val data = District(
-                city = city ,
+                city = city.cityId ,
                 name = request.name
             )
           val result = service.saveDistrict(data)

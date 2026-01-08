@@ -1,8 +1,10 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
-import org.springframework.data.jpa.repository.JpaRepository
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageKitchenEntity
 
-interface PropertyImageRepository : JpaRepository<PropertyImageEntity, Long> {
+interface PropertyImageRepository : CoroutineCrudRepository<PropertyImageEntity, Long>{
+    fun findByPropertyIdIn(propertyIds: List<Long>): Flow<PropertyImageEntity>
 }

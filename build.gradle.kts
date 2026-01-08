@@ -1,7 +1,7 @@
 plugins {
 	kotlin("jvm") version "2.2.10"
 	kotlin("plugin.spring") version "2.2.10"
-	id("org.springframework.boot") version "4.0.0-SNAPSHOT"
+	id("org.springframework.boot") version "4.0.0"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "2.2.10"
 }
@@ -30,7 +30,7 @@ extra["springCloudGcpVersion"] = "7.3.1"
 extra["springCloudVersion"] = "2025.0.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+//	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     //vonage
 //    implementation("com.vonage:server-sdk-kotlin:2.1.1")
     //twilio
@@ -39,8 +39,7 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-session-data-redis")
     //websocket
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-//    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-//    implementation("io.r2dbc:r2dbc-postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     //reactive
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
@@ -73,13 +72,21 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	compileOnly("org.projectlombok:lombok")
+
+	implementation("io.r2dbc:r2dbc-postgresql")
+	implementation("io.r2dbc:r2dbc-pool:1.0.2.RELEASE")
+	implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
+	implementation("org.springframework.boot:spring-boot-starter-flyway")
     runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("org.flywaydb:flyway-database-postgresql:11.19.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 //	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	annotationProcessor("org.projectlombok:lombok")
+	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
     testImplementation("org.springframework.boot:spring-boot-starter-session-data-redis-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("org.springframework.boot:spring-boot-starter-r2dbc-test")
 	testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testImplementation("io.projectreactor:reactor-test")

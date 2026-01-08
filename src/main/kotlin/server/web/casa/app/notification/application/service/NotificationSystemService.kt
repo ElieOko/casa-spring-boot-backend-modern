@@ -9,7 +9,7 @@ import server.web.casa.app.notification.infrastructure.persistence.repository.No
 class NotificationSystemService(
     private val repository: NotificationSystemRepository,
 ) {
-    fun create(notice : NotificationSystem): NotificationSystem {
+    suspend fun create(notice : NotificationSystem): NotificationSystem {
         val data = repository.save(notice.toEntity())
            return data.toDomain()
     }

@@ -1,5 +1,8 @@
 package server.web.casa.app.address.application.command
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
@@ -8,6 +11,7 @@ import org.springframework.stereotype.Component
 import server.web.casa.app.address.domain.model.request.QuartierRequest
 import server.web.casa.app.address.infrastructure.persistence.entity.*
 import server.web.casa.app.address.infrastructure.persistence.repository.*
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.utils.KinshasaDistrict
 import server.web.casa.utils.Mode
 import kotlin.jvm.optionals.toList
@@ -25,12 +29,15 @@ class CommandLineAddressComponent(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun run(vararg args: String) {
-        log.info("***********************")
+        log.info("********block***************")
         try {
-//            createCountry()
-//            createCity()
-//            createDistrict()
-//            createCommune()
+       //     runBlocking {
+//                createCountry()
+//                createCity()
+//                createDistrict()
+//                createCommune()
+//             //   createQuartier()
+   //         }
 //            createQuartier()
 //            log.info("quartier")
 //            log.info(quartierRepository.findAll()[0].commune?.name)
@@ -39,166 +46,182 @@ class CommandLineAddressComponent(
         }
     }
 
-    fun createCity(){
-        val country = countryRepository.findById(1).toList()
+    suspend fun createCity(){
+        //val country = countryRepository.findById(1).toList()
         cityRepository.save(CityEntity(
-            cityId = 0,
-            country = country[0],
+            id= null,
+            countryId = 1,
             name ="Kinshasa",
         ))
         log.info("save city")
     }
-     fun createCountry(){
+    suspend fun createCountry(){
         countryRepository.save(
             CountryEntity(
-                countryId = 0,
+                id = null,
                 name = "République démocratique du Congo"
             )
         )
         log.info("save country")
     }
-//
-    fun createDistrict(){
+////
+suspend fun createDistrict(){
         try {
-            val city = cityRepository.findById(1).orElse(null)
-            if (city != null){
-                districtRepository.saveAll(
+//            val city = cityRepository.findById(1).orElse(null)
+            val city : Long = 1
+            val state = districtRepository.saveAll(
                     listOf(
                         DistrictEntity(
-                            city = city,
+                            id = null,
+                            cityId = 1,
                             name = KinshasaDistrict.FUNA
                         ),
                         DistrictEntity(
-                            city = city,
+                            id = null,
+                            cityId = city,
                             name = KinshasaDistrict.MONT_AMBA
                         ),
                         DistrictEntity(
-                            city = city,
+                            cityId = city,
                             name = KinshasaDistrict.LUKUNGA
                         ),
                         DistrictEntity(
-                            city = city,
+                            cityId = city,
                             name = KinshasaDistrict.TSHANGU
                         )
                     )
-                )
-                log.info("save district")
-            }
+                ).toList()
+                log.info("save district ${state.size}")
         } catch (e : Exception){TODO()
 
         }
     }
-//
-    fun createCommune(){
-        val districtFuna = districtRepository.findById(1).orElse(null)
-        val districtMontAmba = districtRepository.findById(2).orElse(null)
-        val districtLukunga = districtRepository.findById(3).orElse(null)
-        val districtTshangu = districtRepository.findById(4).orElse(null)
-
-        communeRepository.saveAll(
+////
+suspend fun createCommune(){
+        val districtFuna = 1L
+        val districtMontAmba = 2L
+        val districtLukunga = 3L
+        val districtTshangu = 4L
+        val data = communeRepository.saveAll(
             listOf(
                 CommuneEntity(
-                    district = districtFuna,
+                    id = null,
+                    districtId = districtFuna,
                     name = "Bandalungwa"
                 ),
                 CommuneEntity(
-                    district = districtLukunga,
+                    id = null,
+                    districtId = districtLukunga,
                     name = "Barumbu"
                 ),
                 CommuneEntity(
-                    district = districtFuna,
+                    id = null,
+                    districtId = districtFuna,
                     name = "Bumbu"
                 ),
                 CommuneEntity(
-                    district = districtLukunga,
+                    id = null,
+                    districtId = districtLukunga,
                     name = "Gombe"
                 ),
                 CommuneEntity(
-                    district = districtFuna,
+                    id = null,
+                    districtId = districtFuna,
                     name = "Kalamu"
                 ),
                 CommuneEntity(
-                    district = districtFuna,
+                    districtId = districtFuna,
                     name = "Kasa-Vubu"
                 ),
                 CommuneEntity(
-                    district = districtTshangu,
+                    id = null,
+                    districtId = districtTshangu,
                     name = "Kimbanseke"
                 ),
                 CommuneEntity(
-                    district = districtLukunga,
+                    id = null,
+                    districtId = districtLukunga,
                     name = "Kinshasa"
                 ),
                 CommuneEntity(
-                    district = districtLukunga,
+                    id = null,
+                    districtId = districtLukunga,
                     name = "Kintambo"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    id = null,
+                    districtId = districtMontAmba,
                     name = "Kisenso"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    id = null,
+                    districtId = districtMontAmba,
                     name = "Lemba"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    id = null,
+                    districtId = districtMontAmba,
                     name = "Limete"
                 ),
                 CommuneEntity(
-                    district = districtLukunga,
+                    id = null,
+                    districtId = districtLukunga,
                     name = "Lingwala"
                 ),
                 CommuneEntity(
-                    district = districtFuna,
+                    id = null,
+                    districtId = districtFuna,
                     name = "Makala"
                 ),
                 CommuneEntity(
-                    district = districtTshangu,
+                    id = null,
+                    districtId = districtTshangu,
                     name = "Maluku"
                 ),
                 CommuneEntity(
-                    district = districtTshangu,
+                    id = null,
+                    districtId = districtTshangu,
                     name = "Masina"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    districtId = districtMontAmba,
                     name = "Matete"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    districtId = districtMontAmba,
                     name = "Mont-Ngafula"
                 ),
                 CommuneEntity(
-                    district = districtTshangu,
+                    districtId = districtTshangu,
                     name = "Ndjili"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    districtId = districtMontAmba,
                     name = "Ngaba"
                 ),
                 CommuneEntity(
-                    district = districtMontAmba,
+                    districtId = districtMontAmba,
                     name = "Ngaliema"
                 ),
                 CommuneEntity(
-                    district = districtFuna,
+                    districtId = districtFuna,
                     name = "Ngiri-Ngiri"
                 ),
                 CommuneEntity(
-                    district = districtTshangu,
+                    districtId = districtTshangu,
                     name = "Nsele"
                 ),
                 CommuneEntity(
-                    district = districtFuna,
+                    districtId = districtFuna,
                     name = "Selembao"
                 )
             )
-        )
-        log.info("save commune")
+        ).toList()
+        log.info("save commune ${data.size}")
     }
-
-    fun createQuartier(){
+//
+    suspend fun createQuartier(){
+        log.info("in")
         val quartiers = listOf(
             QuartierRequest("TSHIBANGU", 1),
             QuartierRequest("MAKELELE", 1),
@@ -593,15 +616,16 @@ class CommandLineAddressComponent(
             QuartierRequest("PULULU MBAMBU", 24)
             //
         )
-        quartiers.map {
-            val commune = communeRepository.findById(it.communeId).orElse(null)
-            quartierRepository.save(QuartierEntity(
-                commune = commune,
-                name = it.name
-            ))
-//            log.info("**********save*********")
+        log.info("in-step")
+        val quartiersList = mutableListOf<QuartierEntity>()
+        quartiers.forEach {
+           // val commune = communeRepository.findById(it.communeId)
+            quartiersList.add(QuartierEntity(id = null, communeId = it.communeId, name = it.name))
         }
-        log.info("**********save quartier*********")
+        log.info("mutable")
+        val add = quartierRepository.saveAll(quartiersList).toList()
+        log.info("**********save quartier ${add.size}***********")
+        log.info("out")
 
     }
 }

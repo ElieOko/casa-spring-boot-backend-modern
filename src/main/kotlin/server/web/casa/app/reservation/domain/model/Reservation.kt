@@ -1,21 +1,26 @@
 package server.web.casa.app.reservation.domain.model
 
-import server.web.casa.app.property.domain.model.Property
-import server.web.casa.app.user.domain.model.User
-import server.web.casa.app.user.domain.model.UserDto
+import server.web.casa.app.property.domain.model.dto.PropertyDTO
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
+import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import java.time.LocalDate
 
 data class Reservation(
-    val reservationId: Long = 0,
-    val user: UserDto ?,
-    val property: Property,
+    val reservationId: Long? = null,
+    val user: Long ?,
+    val property: Long?,
     val message: String? = "",
-    val status: ReservationStatus = ReservationStatus.PENDING,
-    val type: ReservationType = ReservationType.STANDARD,
+    val status: String = ReservationStatus.PENDING.name,
+    val type: String = ReservationType.STANDARD.name,
     val isActive: Boolean = true,
     val reservationHeure: String? = "",
     val cancellationReason: String? = "",
     val startDate: LocalDate,
     val endDate: LocalDate,
     val createdAt: LocalDate = LocalDate.now(),
+)
+
+data class ReservationDTO(
+    val reservation: ReservationEntity?,
+    val property: PropertyMasterDTO?
 )

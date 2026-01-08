@@ -1,6 +1,7 @@
 package server.web.casa.config
 
 import jakarta.annotation.PostConstruct
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.disable
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.*
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -31,6 +32,7 @@ class ServerConfig(
     fun filterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
       return httpSecurity
             .csrf { csrf -> csrf.disable() }
+          .cors { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .exceptionHandling { configurer ->
                 configurer

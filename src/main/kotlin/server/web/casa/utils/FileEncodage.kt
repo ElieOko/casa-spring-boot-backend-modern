@@ -1,6 +1,8 @@
 package server.web.casa.utils
 
+import org.springframework.http.HttpStatus
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
 import java.io.File
 import java.util.Base64
 import java.io.*
@@ -45,6 +47,7 @@ fun base64ToMultipartFile(
     fieldName: String = "file",
     mimeType: String = "image/png"
 ): MultipartFile {
+    if(!isBase64(base64)) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"La chaine fournit n'est pas en Base 64")
     val timestamp = System.currentTimeMillis()
     val fileName = "image_${prefix}_${timestamp}.png"
     val imageBytes = Base64.getDecoder().decode(base64)

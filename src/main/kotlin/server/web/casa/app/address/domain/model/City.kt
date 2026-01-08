@@ -1,7 +1,10 @@
 package server.web.casa.app.address.domain.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 data class City(
-    val cityId : Long,
-    val country : Country,
+    var cityId : Long?,
+    @JsonIgnore
+    val country : Long,
     val name : String,
 )

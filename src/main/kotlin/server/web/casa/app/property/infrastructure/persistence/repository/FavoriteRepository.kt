@@ -1,31 +1,33 @@
 package server.web.casa.app.property.infrastructure.persistence.repository
 
-import jakarta.transaction.Transactional
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
+
+import kotlinx.coroutines.flow.Flow
+import org.springframework.data.r2dbc.repository.Modifying
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
+import org.springframework.transaction.annotation.Transactional
 import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 
-interface FavoriteRepository : JpaRepository<FavoriteEntity, Long> {
-    @Query("SELECT r FROM FavoriteEntity r WHERE r.user = :user")
-    fun findFavoriteByPropertyUser(@Param("user") user: UserEntity): List<FavoriteEntity> ?
+interface FavoriteRepository : CoroutineCrudRepository<FavoriteEntity, Long> {
+    @Query("SELECT * FROM favorites WHERE user_id = :user")
+    fun findFavoriteByPropertyUser(@Param("user") user: Long): Flow<FavoriteEntity>?
 
-    @Query("SELECT r FROM FavoriteEntity r WHERE r.property = :property")
-    fun findOneFavoritePropertyCount(@Param("property") property: PropertyEntity): List<FavoriteEntity> ?
+    @Query("SELECT * FROM favorites WHERE property_id = :property")
+    fun findOneFavoritePropertyCount(@Param("property") property: Long): Flow<FavoriteEntity>?
 
-    @Query("SELECT r FROM FavoriteEntity r WHERE r.property = :property AND r.user = :user")
-    fun findFavoriteExist(@Param("property") property: PropertyEntity, @Param("user") user: UserEntity): List<FavoriteEntity> ?
+    @Query("SELECT * FROM favorites WHERE property_id = :property AND user_id = :user")
+    fun findFavoriteExist(@Param("property") property: Long, @Param("user") user: Long): Flow<FavoriteEntity>?
 
     @Modifying
-    @Query("DELETE FROM FavoriteEntity r WHERE r.id = :id")
+    @Query("DELETE FROM favorites WHERE id = :id")
     fun deleteByIdFavorite(@Param("id") id: Long): Int
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM FavoriteEntity r WHERE r.user = :user")
-    fun deleteAllFavoriteUser(@Param("user") user: UserEntity): Int
+    @Query("DELETE FROM favorites WHERE user_id = :user")
+    fun deleteAllFavoriteUser(@Param("user") user: Long): Int
 }

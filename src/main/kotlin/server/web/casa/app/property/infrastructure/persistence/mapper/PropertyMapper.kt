@@ -1,12 +1,10 @@
 package server.web.casa.app.property.infrastructure.persistence.mapper
 
-import server.web.casa.app.address.infrastructure.persistence.mapper.*
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.user.infrastructure.persistence.mapper.*
 
 fun PropertyEntity.toDomain()  = Property(
-    propertyId = this.propertyId,
+    propertyId = this.id,
     title = this.title,
     description = this.description,
     price = this.price,
@@ -20,33 +18,29 @@ fun PropertyEntity.toDomain()  = Property(
     water = this.water,
     floor = this.floor,
     address = this.address,
-    city = this.city?.toDomain() ,
+    city = this.cityId,
     postalCode = this.postalCode,
     communeValue = this.communeValue,
     quartierValue = this.quartierValue,
     cityValue = this.cityValue,
     countryValue = this.countryValue,
-    commune = this.commune?.toDomain(),
-    quartier = this.quartier?.toDomain(),
+    commune = this.communeId,
+    quartier = this.quartierId,
     sold = this.sold,
     electric = this.electric,
     transactionType = this.transactionType,
-    propertyType = this.propertyType.toDomain(),
-    user = this.user?.toDomain(),
+    user = this.user,
     latitude = this.latitude,
     longitude = this.longitude,
     isAvailable = this.isAvailable,
-    features =  this.features.stream().map { it.toDomain() }.toList(),
-    propertyImage = this.propertyImage.map { it.toDomain()  }.toList()  ,
-    propertyImageRoom = this.propertyImageRoom.stream().map { it.toDomain() }.toList(),
-    propertyImageLivingRoom = this.propertyImageLivingRoom.stream().map { it.toDomain() }.toList(),
-    propertyImageKitchen = this.propertyImageKitchen.stream().map { it.toDomain() }.toList(),
+    propertyTypeId = this.propertyTypeId,
     createdAt = this.createdAt,
-    updatedAt = this.updatedAt
+    updatedAt = this.updatedAt,
+    deviseId = this.deviseId
 )
 
 fun Property.toEntity() = PropertyEntity(
-    propertyId = this.propertyId,
+    id = this.propertyId,
     title = this.title,
     electric = this.electric,
     water = this.water,
@@ -65,18 +59,18 @@ fun Property.toEntity() = PropertyEntity(
     quartierValue = this.quartierValue,
     cityValue = this.cityValue,
     countryValue = this.countryValue,
-    city = this.city?.toEntity() ,
+    cityId = this.city ,
     postalCode = this.postalCode,
-    commune = this.commune?.toEntity(),
-    quartier = this.quartier?.toEntity(),
+    communeId = this.commune,
+    quartierId = this.quartier,
     sold = this.sold,
     transactionType = this.transactionType,
-    propertyType = this.propertyType.toEntity(),
-    user = this.user?.toEntityToDto(),
+    propertyTypeId = this.propertyTypeId,
+    user = this.user,
     latitude = this.latitude,
     longitude = this.longitude,
     isAvailable = this.isAvailable,
-    features = this.features.stream().map { it.toEntity() }.toList(),
+    deviseId = this.deviseId,
     createdAt = this.createdAt,
     updatedAt = this.updatedAt
 )

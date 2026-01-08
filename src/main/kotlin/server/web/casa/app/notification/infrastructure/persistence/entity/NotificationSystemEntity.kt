@@ -1,18 +1,19 @@
 package server.web.casa.app.notification.infrastructure.persistence.entity
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 
-@Entity
-@Table(name = "notification_systems")
-class NotificationSystemEntity(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Table("notification_systems")
+data class NotificationSystemEntity(
+    @Id
     @Column("id")
-    val notificationSystemId : Long = 0,
+    val id: Long? = null,
     @Column("title")
-    val title : String,
+    val title: String,
     @Column("description")
-    val description : String,
-    @Column("dateCreated")
-    val dateCreated : LocalDate = LocalDate.now()
+    val description: String,
+    @Column("date_created")
+    val dateCreated: LocalDate = LocalDate.now()
 )

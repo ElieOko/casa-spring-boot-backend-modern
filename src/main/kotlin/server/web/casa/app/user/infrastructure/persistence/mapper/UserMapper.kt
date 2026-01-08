@@ -4,12 +4,10 @@ import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import kotlin.time.ExperimentalTime
 
-
 fun UserEntity.toDomain(): UserDto {
     val entity = this
     return UserDto(
         userId = entity.userId,
-        typeAccount = entity.typeAccount.toDomain(),
         email = entity.email,
         phone = entity.phone.toString(),
         username = entity.username.toString(),
@@ -21,16 +19,17 @@ fun UserEntity.toDomain(): UserDto {
 }
 
 @OptIn(ExperimentalTime::class)
-fun UserDto.toEntityToDto(): UserEntity {
+fun UserDto.toEntityToDto(password: String): UserEntity {
     val user = this
     return UserEntity(
         userId = user.userId,
         username = user.username,
-        typeAccount = user.typeAccount!!.toEntity(),
         email = user.email,
         phone = user.phone,
         city = user.city,
+        password = password,
         country = user.country,
+        isPremium = user.isPremium,
     )
 }
 
@@ -40,7 +39,6 @@ fun User.toEntity(): UserEntity {
     return UserEntity(
         userId = user.userId,
         username = user.username,
-        typeAccount = user.typeAccount!!.toEntity(),
         email = user.email,
         phone = user.phone,
         city = user.city,
