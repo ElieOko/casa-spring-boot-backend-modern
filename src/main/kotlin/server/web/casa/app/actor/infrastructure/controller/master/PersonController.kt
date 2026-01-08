@@ -15,7 +15,6 @@ import server.web.casa.app.actor.domain.model.*
 import server.web.casa.app.actor.domain.model.join.master.PersonUserRequest
 import server.web.casa.app.actor.domain.model.join.master.toPerson
 import server.web.casa.app.actor.domain.model.join.master.toUser
-import server.web.casa.app.actor.domain.model.request.PersonRequest
 import server.web.casa.app.actor.domain.model.request.PersonRequest2
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.ImageUserRequest
@@ -44,10 +43,10 @@ class PersonController(
         val account = accountItems.map { accountService.findByIdAccount(it.typeAccount)}.first()
         val parrain : User? = null
         var paraintId : Long = 0
-        val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+        //val phone =  normalizeAndValidatePhoneNumberUniversal(request.user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
         if (request.actor.parrainId != null) paraintId = request.actor.parrainId
 
-        val userSystem = request.toUser(phone)
+        val userSystem = request.toUser(request.user.phone)
         val userCreated = authService.register(userSystem, accountItems)
         val data = request.toPerson(userCreated.first?.userId!!)
         val state = service.create(data)
