@@ -30,6 +30,8 @@ class SalleFestiveEntity(
     val water: Int? = 0,
     @Column("price")
     val price : Double? = null,
+    @Column("sold")
+    var sold: Boolean = false,
     @Column("address")
     val address: String,
     @Column("commune_value")
@@ -70,6 +72,7 @@ class SalleFestiveEntity(
 
 fun SalleFestiveEntity.toDomain()= SalleFestive(
     id = this.id,
+    sold = this.sold,
     userId = this.userId,
     deviseId = this.deviseId,
     title = this.title,
