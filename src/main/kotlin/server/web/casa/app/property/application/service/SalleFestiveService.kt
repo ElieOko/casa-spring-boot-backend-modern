@@ -11,6 +11,7 @@ import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.FeatureRequest
+import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFestiveDTOMaster
 import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
@@ -20,6 +21,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.FestiveFea
 import server.web.casa.app.property.infrastructure.persistence.entity.toAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.FestiveFeatureRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveImageRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveRepository
@@ -88,6 +90,9 @@ class SalleFestiveService(
 
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle festive.")
+    }
+    suspend fun createOrUpdate(model : SalleFestive) =  coroutineScope{
+        repository.save(model.toEntity())
     }
 
     suspend fun update(p: SalleFestive) = coroutineScope {

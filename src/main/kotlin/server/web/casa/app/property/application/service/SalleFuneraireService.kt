@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.FeatureRequest
+import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFuneraire
 import server.web.casa.app.property.domain.model.SalleFuneraireDTOMaster
@@ -17,6 +18,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.FuneraireF
 import server.web.casa.app.property.infrastructure.persistence.entity.toAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.map
@@ -79,6 +81,10 @@ class SalleFuneraireService(
 
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle funeraire.")
+    }
+
+    suspend fun createOrUpdate(model : SalleFuneraire) =  coroutineScope{
+        repository.save(model.toEntity())
     }
 
     suspend fun update(p: SalleFuneraire) = coroutineScope {

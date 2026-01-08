@@ -14,6 +14,7 @@ import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.map
@@ -85,6 +86,9 @@ class BureauService(
         val data = p.toEntity()
         val result = repository.save(data)
         result.toDomain()
+    }
+    suspend fun createOrUpdate(model : Bureau) =  coroutineScope{
+        repository.save(model.toEntity())
     }
 
     suspend fun filter(
