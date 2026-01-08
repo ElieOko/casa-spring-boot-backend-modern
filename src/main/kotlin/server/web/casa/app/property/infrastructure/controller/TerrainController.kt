@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -72,5 +74,32 @@ class TerrainController(
         val data = service.getAll()
         val response = mapOf("terrain" to data)
         ResponseEntity.ok().body(response)
+    }
+    @Operation(summary = "Sold")
+    @GetMapping("/sold/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun soldOutOrInTerrain(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody status : Boolean
+    ){
+        val message = mutableMapOf("message" to if(status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        val data = service.findById(propertyId)
+        data.sold = status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
+    }
+
+    @Operation(summary = "Enable or disable")
+    @PutMapping("/enable/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun toEnableOrDisableTerrain(
+        @PathVariable("propertyId") propertyId : Long,
+        @RequestBody status : Boolean
+    ){
+        val message = mutableMapOf("message" to if(status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        val data= service.findById(propertyId)
+        data.isAvailable = status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
     }
 }
