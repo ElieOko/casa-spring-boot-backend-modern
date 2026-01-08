@@ -199,8 +199,11 @@ class BureauController(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody status : Boolean
     ){
-        val data = service.findById(propertyId).toEntity()
+        val message = mutableMapOf("message" to if(status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
+        val data = service.findById(propertyId)
         data.sold = status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
     }
 
     @Operation(summary = "Enable or disable")
@@ -210,8 +213,11 @@ class BureauController(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody status : Boolean
     ){
-        val data = service.findById(propertyId).toEntity()
+        val message = mutableMapOf("message" to if(status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
+        val data= service.findById(propertyId)
         data.isAvailable = status
+        service.createOrUpdate(data)
+        ResponseEntity.badRequest().body(message)
     }
 
 }
