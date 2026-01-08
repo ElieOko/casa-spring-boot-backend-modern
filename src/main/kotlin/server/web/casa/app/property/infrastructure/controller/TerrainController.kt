@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -23,6 +24,7 @@ import server.web.casa.app.property.application.service.PropertyTypeService
 import server.web.casa.app.property.application.service.TerrainImageService
 import server.web.casa.app.property.application.service.TerrainService
 import server.web.casa.app.property.domain.model.BureauDtoRequest
+import server.web.casa.app.property.domain.model.BureauRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
 import server.web.casa.app.property.domain.model.StatusState
 import server.web.casa.app.property.domain.model.request.TerrainRequest
@@ -112,5 +114,29 @@ class TerrainController(
     ) = coroutineScope {
         val data = service.getAllPropertyByUser(userId)
         ApiResponse(data)
+    }
+
+    @Operation(summary = "Modification Terrain")
+    @PutMapping("/owner/{terrainId}")
+    suspend fun updateTerrain(
+        @PathVariable("terrainId") terrainId : Long,
+        @Valid @RequestBody request: TerrainRequest
+    ) = coroutineScope {
+        userService.findIdUser(request.userId)
+        val terrain = service.findById(terrainId)
+        if (terrain.userId != request.userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté terrain.")
+        val city = cityService.findByIdCity(request.cityId)
+        val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId!!)
+        val commune = communeService.findByIdCommune(request.communeId)
+        val quartier =  quartierService.findByIdQuartier(request.quartierId)
+        val data = request.toDomain()
+        data.cityId = city?.cityId
+        data.propertyTypeId = propertyType.propertyTypeId
+        data.id = terrainId
+        data.communeId = commune?.communeId
+        data.quartierId = quartier?.quartierId
+        service.update(data)
+        val message = mutableMapOf("message" to "Modification effectuée avec succès")
+        ResponseEntity.ok(message)
     }
 }
