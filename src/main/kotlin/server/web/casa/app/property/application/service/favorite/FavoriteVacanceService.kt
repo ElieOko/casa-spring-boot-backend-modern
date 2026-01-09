@@ -3,12 +3,14 @@ package server.web.casa.app.property.application.service.favorite
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.VacanceService
 import server.web.casa.app.property.domain.model.favorite.FavoriteVacanceDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteVacanceEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteVacanceRepository
 import server.web.casa.app.user.application.service.UserService
 
+@Service
 class FavoriteVacanceService(
     private val repository: FavoriteVacanceRepository,
     private val userS: UserService,

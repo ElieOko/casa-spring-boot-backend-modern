@@ -17,3 +17,7 @@ import java.time.LocalDateTime
     val user        : UserDto,
    // val vacance     : VacanceDTO
 )
+class FavoriteVacanceRequest(
+    val userId: Long,
+    val vacanceId: Long
+)
