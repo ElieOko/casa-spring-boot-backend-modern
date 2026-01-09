@@ -1,3 +1,19 @@
 package server.web.casa.app.property.infrastructure.persistence.entity.favorite
 
-class FavoriteTerrainEntity()
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
+
+@Table("favorite_terrains")
+class FavoriteTerrainEntity(
+    @Id
+    @Column("id")
+    val id          : Long?=null,
+    @Column("user_id")
+    val userId      : Long,
+    @Column("terrain_id")
+    val terrainId   : Long,
+    @Column("created_at")
+    val createdAt   : LocalDate = LocalDate.now()
+)

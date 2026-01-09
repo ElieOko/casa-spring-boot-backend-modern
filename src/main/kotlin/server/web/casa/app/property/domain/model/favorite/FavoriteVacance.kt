@@ -5,15 +5,19 @@ import server.web.casa.app.property.infrastructure.persistence.entity.favorite.F
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
 
-data class FavoriteVacance(
+ class FavoriteVacance(
     val id          : Long,
     val userId      : Long,
     val vacanceId   : Long,
     val createdAt   : LocalDateTime = LocalDateTime.now()
 )
 
-data class FavoriteVacanceDTO(
+ class FavoriteVacanceDTO(
     val favorite    : FavoriteVacanceEntity,
     val user        : UserDto,
    // val vacance     : VacanceDTO
+)
+class FavoriteVacanceRequest(
+    val userId: Long,
+    val vacanceId: Long
 )
