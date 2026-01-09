@@ -1,6 +1,8 @@
 package server.web.casa.app.property.domain.model.favorite
 
+import jakarta.validation.constraints.NotNull
 import server.web.casa.app.property.domain.model.SalleFestive
+import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteFestiveEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
 
@@ -13,8 +15,15 @@ class FavoriteFestive(
 
     val createdAt       : LocalDateTime = LocalDateTime.now()
 )
-data class FavoriteFestiveDTO(
-//    val favorite    : FavoriteFestiveEntity,
+class FavoriteFestiveDTO(
+    val favorite    : FavoriteFestiveEntity,
     val user        : UserDto,
     val salle       : SalleFestive
+)
+
+class FavoriteFestiveRequest(
+    @NotNull
+    val userId : Long,
+    @NotNull
+    val festId : Long
 )
