@@ -13,17 +13,17 @@ class NotificationController(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    @Transactional
-    @MessageMapping("/sendMessage")
-    @SendTo("/topic/properties")
-    suspend fun notificationProperties(principal: Principal): Map<String, String> {
-        val user = auth.userStom(principal)
-        log.info("**********user->${user?.phone}")
-        Thread.sleep(1000)
-        val response = mapOf(
-            "properties" to "${user?.phone}"
-        )
-        log.info("*** ${response["properties"]}")
-        return response
-    }
+////    @Transactional
+//    @MessageMapping("/sendMessage")
+//    @SendTo("/topic/properties")
+//    suspend fun notificationProperties(principal: Principal): Map<String, String> {
+//        val user = auth.userStom(principal)
+//        log.info("**********user->${user?.phone}")
+//        Thread.sleep(1000)
+//        val response = mapOf(
+//            "properties" to "${user?.phone}"
+//        )
+//        log.info("*** ${response["properties"]}")
+//        return response
+//    }
 }

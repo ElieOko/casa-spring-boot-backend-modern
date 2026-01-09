@@ -32,14 +32,14 @@ class NotificationConfig(
                     StompHeaderAccessor::class.java)
                 if (StompCommand.CONNECT == accessor!!.command) {
                     val authHeader = accessor.getFirstNativeHeader("Authorization")
-                    log.info("$authHeader")
+                    log.info("*******************$authHeader******************************")
                     if (!authHeader.isNullOrEmpty() && authHeader.startsWith("Bearer ")) {
                         if(jwtService.validateAccessToken(authHeader)) {
                             val userId = jwtService.getUserIdFromToken(authHeader)
-                            val auth = UsernamePasswordAuthenticationToken(userId, null, emptyList())
+                            val auth = UsernamePasswordAuthenticationToken("${userId.toInt(16)}", null, emptyList())
 //                            SecurityContextHolder.getContext().authentication = auth
                             accessor.user = auth
-                            log.info("${userId.toInt().toLong()}")
+                            log.info("${userId.toInt(16)}")
                         } else{
                             log.info("Authorization pas permis ce tokem n'est plus valide")
                         }

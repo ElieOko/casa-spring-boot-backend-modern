@@ -5,20 +5,37 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.notification.domain.model.request.NotificationReservation
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationReservationRepository
 import server.web.casa.app.reservation.application.service.ReservationService
+import server.web.casa.app.user.application.service.UserService
 
 @Service
 class  NotificationReservationService(
     private val repository: NotificationReservationRepository,
-    private val reservationService: ReservationService
+    private val reservationService: ReservationService,
+    private val notificationService: NotificationService,
+    private val notification : NotificationCasaRepository,
 ) {
     suspend fun create(notice: NotificationReservation): Boolean {
+        val note = notification.save(
+            NotificationCasaEntity(
+                id = null,
+                userId = notice.hostUser.userId!!,
+                title = "Demande de visite reçue",
+                message = "Un client est intéressé par un bien et souhaite le visiter. Ne tardez pas à répondre \uD83D\uDE09",
+                tag = TagType.DEMANDES.toString(),
+            )
+        )
+       notificationService.sendNotificationToUser(notice.hostUser.userId.toString(),note.toDomain())
        repository.save(NotificationReservationEntity(
            reservationId = notice.reservation.id!!,
            guestUserId = notice.guestUser.userId!!,
-           hostUserId = notice.hostUser.userId!!,
+           hostUserId = notice.hostUser.userId,
            guestUserState = true
        )).let {
            return true
@@ -31,6 +48,16 @@ class  NotificationReservationService(
         }.first()
         data.hostUserDealConcluded = state
         repository.save(data)
+        val note = notification.save(
+            NotificationCasaEntity(
+                id = null,
+                userId = data.hostUserId,
+                title = "Rendez-vous validé",
+                message = "La visite est confirmée. Tout est prêt pour accueillir le client.",
+                tag = TagType.DEMANDES.toString(),
+            )
+        )
+        notificationService.sendNotificationToUser(data.hostUserId.toString(),note.toDomain())
         return state
     }
 
@@ -40,6 +67,16 @@ class  NotificationReservationService(
         }.first()
         data.guestUserDealConcluded = state
         repository.save(data)
+        val note = notification.save(
+            NotificationCasaEntity(
+                id = null,
+                userId = data.guestUserId,
+                title = "Visite confirmée",
+                message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.",
+                tag = TagType.DEMANDES.toString(),
+            )
+        )
+        notificationService.sendNotificationToUser(data.guestUserId.toString(),note.toDomain())
         return state
     }
 
@@ -58,6 +95,16 @@ class  NotificationReservationService(
         }.first()
         data.guestUserState = false
         repository.save(data)
+        val note = notification.save(
+            NotificationCasaEntity(
+                id = null,
+                userId = data.hostUserId,
+                title = "Annulation de visite",
+                message = "Le client a annulé sa demande de visite. Aucune action n’est requise.",
+                tag = TagType.DEMANDES.toString(),
+            )
+        )
+        notificationService.sendNotificationToUser(data.hostUserId.toString(),note.toDomain())
         return false
     }
     suspend fun deleteByReservation(reservation: Long): Boolean {
