@@ -9,42 +9,42 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.property.application.service.SalleFestiveService
-import server.web.casa.app.property.application.service.favorite.FavoriteFestiveService
-import server.web.casa.app.property.domain.model.favorite.FavoriteFestiveDTO
-import server.web.casa.app.property.domain.model.favorite.FavoriteFestiveRequest
-import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteFestiveEntity
+import server.web.casa.app.property.application.service.SalleFuneraireService
+import server.web.casa.app.property.application.service.favorite.FavoriteFuneraireService
+import server.web.casa.app.property.domain.model.favorite.FavoriteFuneraireDTO
+import server.web.casa.app.property.domain.model.favorite.FavoriteFuneraireRequest
+import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteFuneraireEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.favorite.FavoriteFestiveRoute
 import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.Mode
 import java.time.LocalDate
 
-const val ROUTE_FAVORITE = FavoriteFestiveRoute.FAVORITE_PATH
+const val ROUTE_FAVORITE_FUNE = FavoriteFestiveRoute.FAVORITE_FUNERAIRE_PATH
 
-@Tag(name = "Favorite Salle Festive", description = "Gestion des favorites")
+@Tag(name = "Favorite Salle Funeraire", description = "Gestion des favorites")
 @RestController
 @Profile(Mode.DEV)
-@RequestMapping(ROUTE_FAVORITE)
-class FavoriteFestiveController(
-    private val service: FavoriteFestiveService,
+@RequestMapping(ROUTE_FAVORITE_FUNE)
+class FavoriteFuneraireController(
+    private val service: FavoriteFuneraireService,
     private val userS: UserService,
-    private val salleS: SalleFestiveService
+    private val salleS: SalleFuneraireService
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFavorite(
-        @Valid @RequestBody request: FavoriteFestiveRequest
+        @Valid @RequestBody request: FavoriteFuneraireRequest
     ): ResponseEntity<Map<String, Any?>> {
         val user = userS.findIdUser(request.userId)
-        val salle = salleS.findById(request.festId)
+        val salle = salleS.findById(request.funeraireId)
 
-        val favorite = FavoriteFestiveEntity(
+        val favorite = FavoriteFuneraireEntity(
             userId = user.userId!!,
             createdAt = LocalDate.now(),
-            festiveId = salle.id!!
+            funeraireId = salle.id!!
         )
         val existingFavorite = service.getFavoriteIfExist(salle.id!!, user.userId!!)
-        val savedFavorite = if (!existingFavorite.isNullOrEmpty()) existingFavorite else service.create(favorite)
+        val savedFavorite = existingFavorite.ifEmpty { service.create(favorite) }
 
         val response = mapOf(
             "data" to savedFavorite
@@ -53,22 +53,22 @@ class FavoriteFestiveController(
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFavorite(): ApiResponse<List<FavoriteFestiveDTO>> {
+    suspend fun getAllFavorite(): ApiResponse<List<FavoriteFuneraireDTO>> {
         val data = service.getAll()
         return ApiResponse(data)
     }
 
     @GetMapping("/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteFestiveDTO>?>> {
+    suspend fun getUserFavoriteFuneraire(@PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteFuneraireDTO>?>> {
         val user = userS.findIdUser(user)
         val favorite = service.getUserFavorite(user.userId!!)
         val response = mapOf("data" to favorite)
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping("/{festId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getOneFavoriteById(@PathVariable festId: Long):ResponseEntity<Map<String, FavoriteFestiveDTO>> {
-        val favorite = service.getById(festId) ?: throw ResponseStatusException(
+    @GetMapping("/{funeraireId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getOneFavoriteById(@PathVariable funeraireId: Long):ResponseEntity<Map<String, FavoriteFuneraireDTO>> {
+        val favorite = service.getById(funeraireId) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "favorite Not Found."
         )
@@ -76,10 +76,10 @@ class FavoriteFestiveController(
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping("/salle/{festId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getFavoriteOneFestive(@PathVariable festId: Long):ResponseEntity<Map<String, List<FavoriteFestiveDTO>?>> {
-        val salle = salleS.findById (festId)
-        val favorite = service.getFavoriteByFestId(salle.id!!)
+    @GetMapping("/salle/{funeraireId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getOneFavoriteProperty(@PathVariable funeraireId: Long):ResponseEntity<Map<String, List<FavoriteFuneraireDTO>?>> {
+        val salle = salleS.findById (funeraireId)
+        val favorite = service.getFavoriteByFuneId(salle.id!!)
         val response = mapOf("data" to favorite)
         return ResponseEntity.ok().body(response)
     }
@@ -96,9 +96,9 @@ class FavoriteFestiveController(
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
     }
-    @DeleteMapping("/delete/{userId}/{festId}")
-    suspend fun deleteFavorite(@PathVariable userId: Long, @PathVariable festId:Long): ResponseEntity<Map<String, String>> {
-        val existingFavorite = service.getFavoriteIfExist(festId, userId).firstOrNull()
+    @DeleteMapping("/delete/{userId}/{funeraireId}")
+    suspend fun deleteFavorite(@PathVariable userId: Long, @PathVariable funeraireId:Long): ResponseEntity<Map<String, String>> {
+        val existingFavorite = service.getFavoriteIfExist(funeraireId, userId).firstOrNull()
 
         val deleteFavorite = existingFavorite?.favorite?.id?.let {
             service.deleteById(it)
