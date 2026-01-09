@@ -36,7 +36,12 @@ class ReservationService(
          return toEntityDTO(reservation)
          //return repoR.findById(id).let { mapperR.toDomain(it.orElse(null)) }
     }
+    suspend fun findByHostUser(userId: Long):List<ReservationDTO>?{
+        return repoR.findByHostUserId(userId).map {
+            toEntityDTO(it)
+        }.toList()
 
+    }
     suspend fun findByProperty(property: Long): List<ReservationDTO>? {
         return repoR.findByProperty(property)?.map {
                 toEntityDTO(it)
