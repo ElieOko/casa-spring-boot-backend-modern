@@ -22,6 +22,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.*
+import org.springframework.http.HttpStatusCode
+import org.springframework.web.server.ResponseStatusException
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -203,6 +205,18 @@ class ReservationController(
 //        val response = mapOf("message" to "Property not found with id: $propertyId")
 
 //        return ResponseEntity.badRequest().body(response)
+    }
+
+    @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationDTO>? >> {
+        val user = userR.findById(userId) ?: throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "user Not Found."
+        )
+        val reservation = service.findByHostUser(user.userId!!)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+
     }
     @PutMapping("/update/status/{id}")
     suspend fun updateReservation(
