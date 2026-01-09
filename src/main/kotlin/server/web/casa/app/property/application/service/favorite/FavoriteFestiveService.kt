@@ -3,12 +3,14 @@ package server.web.casa.app.property.application.service.favorite
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.SalleFestiveService
 import server.web.casa.app.property.domain.model.favorite.FavoriteFestiveDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteFestiveEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteFestiveRepository
 import server.web.casa.app.user.application.service.UserService
 
+@Service
 class FavoriteFestiveService (
     private val repository: FavoriteFestiveRepository,
     private val userS: UserService,
@@ -32,7 +34,7 @@ class FavoriteFestiveService (
         }?.toList() ?: emptyList()
     }
 
-    suspend fun getFavoriteByFuneId( festId: Long ) : List<FavoriteFestiveDTO>{
+    suspend fun getFavoriteByFestId( festId: Long ) : List<FavoriteFestiveDTO>{
         return repository.findFavoriteByFestId(festId).let {list-> list?.map{
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }

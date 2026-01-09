@@ -2,16 +2,17 @@ package server.web.casa.app.property.infrastructure.persistence.entity.favorite
 
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Table("favorite_festives")
 class FavoriteFestiveEntity(
     @Column("id")
-    val id          : Long,
+    val id          : Long? = null,
     @Column("user_id")
     val userId      : Long,
     @Column("festive_id")
     val festiveId   : Long,
     @Column("created_at")
-    val createdAt   : LocalDateTime = LocalDateTime.now()
+    val createdAt   : LocalDate = LocalDate.now()
 )
