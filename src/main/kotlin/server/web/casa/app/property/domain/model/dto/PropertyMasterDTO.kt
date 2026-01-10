@@ -13,13 +13,14 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEn
 class PropertyMasterDTO(
     val property: PropertyDTO,
     val images: Images? = null,
-    val postBy : String,
-    val address :AddressDTO,
+    val postBy: String,
+    val address: AddressDTO,
     val devise: Devise?,
-    val localAddress : LocalAddressDTO,
-    val geoZone : GeoDTO,
+    val localAddress: LocalAddressDTO,
+    val geoZone: GeoDTO,
     val typeProperty: PropertyType,
-    val features :List<Feature> = emptyList(),
+    val features: List<Feature> = emptyList(),
+    image: String,
 )
 
 
@@ -56,14 +57,14 @@ fun Property.toDto() = PropertyMasterDTO(
         countryValue = this.countryValue,
         postalCode = this.postalCode,
     ),
+    devise = Devise(id = this.deviseId,"","",0.0),
     localAddress = LocalAddressDTO(
         city = City(this.city, 0, ""),
         commune = Commune(this.commune, 0, emptyList(), ""),
         quartier = Quartier(this.quartier, "")
     ),
     geoZone = GeoDTO(this.latitude, this.longitude),
-    typeProperty = PropertyType(this.propertyTypeId, ""),
-    devise = Devise(id = this.deviseId,"","",0.0),
+    typeProperty = PropertyType(this.propertyTypeId, ""),,
 )
 
 fun PropertyMasterDTO.toEntity() = PropertyEntity(
