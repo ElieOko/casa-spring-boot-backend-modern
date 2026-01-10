@@ -22,20 +22,11 @@ class  NotificationReservationService(
     private val notification : NotificationCasaRepository,
 ) {
     suspend fun create(notice: NotificationReservation): Boolean {
-        val note = notification.save(
-            NotificationCasaEntity(
-                id = null,
-                userId = notice.hostUser.userId!!,
-                title = "Demande de visite reçue",
-                message = "Un client est intéressé par un bien et souhaite le visiter. Ne tardez pas à répondre \uD83D\uDE09",
-                tag = TagType.DEMANDES.toString(),
-            )
-        )
-       notificationService.sendNotificationToUser(notice.hostUser.userId.toString(),note.toDomain())
+
        repository.save(NotificationReservationEntity(
            reservationId = notice.reservation.id!!,
            guestUserId = notice.guestUser.userId!!,
-           hostUserId = notice.hostUser.userId,
+           hostUserId = notice.hostUser.userId!!,
            guestUserState = true
        )).let {
            return true
