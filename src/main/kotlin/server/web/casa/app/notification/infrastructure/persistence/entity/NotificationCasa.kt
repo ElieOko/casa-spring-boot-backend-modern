@@ -18,6 +18,8 @@ class NotificationCasaEntity(
     val title: String,
     @Column("message")
     val message: String,
+    @Column("is_active")
+    var isActive: Boolean = true,
     @Column("tag")
     val tag : String = TagType.RESERVATION.toString(),
     @Column("created")
@@ -30,5 +32,6 @@ fun NotificationCasaEntity.toDomain() = NotificationDTO(
     title = this.title,
     message = this.message,
     tag = this.tag,
+    isActive = this.isActive,
     timestamp = this.created
 )
