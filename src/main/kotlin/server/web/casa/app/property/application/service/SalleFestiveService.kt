@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
@@ -35,6 +36,7 @@ class SalleFestiveService(
     private val userService: UserService,
     private val repositoryFeature: FestiveFeatureRepository,
     private val featureService: FeatureService,
+    private val person : PersonService,
     private val cityService: CityService,
     private val communeService: CommuneService,
     private val quartierService: QuartierService,
@@ -54,6 +56,7 @@ class SalleFestiveService(
                     images = imageByModel[m.id]?.map { it.toDomain() }?:emptyList(),
                     devise = devise.getById(m.deviseId!!),
                     address = m.toAddressDTO(),
+                    image = person.findByIdPersonUser(m.userId!!)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
                         commune = communeService.findByIdCommune(m.communeId),
