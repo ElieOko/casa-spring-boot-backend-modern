@@ -7,6 +7,7 @@ import org.springframework.http.*
 import org.springframework.stereotype.*
 import org.springframework.web.server.*
 import server.web.casa.app.actor.application.service.PersonService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
@@ -27,7 +28,7 @@ class PropertyService(
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
     private val userService: UserService,
-    private val person : PersonService,
+    private val person : PersonRepository,
     private val propertyTypeService: PropertyTypeService,
     private val featureService: FeatureService,
     private val repositoryFeature : PropertyFeatureRepository,
@@ -96,7 +97,7 @@ class PropertyService(
                     commune = communeService.findByIdCommune(property.communeId),
                     quartier = quartierService.findByIdQuartier(property.quartierId)
                 ),
-                image = person.findByIdPersonUser(property.user)?.images?:"",
+                image = person.findByUser(property.user)?.images?:"",
                 geoZone = property.toGeo(),
                 typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
                 features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
@@ -138,7 +139,7 @@ class PropertyService(
             ),
             geoZone = property.toGeo(),
             postBy = userService.findIdUser(property.user!!).username,
-            image = person.findByIdPersonUser(property.user)?.images?:"",
+            image = person.findByUser(property.user)?.images?:"",
             typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
             features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
         )

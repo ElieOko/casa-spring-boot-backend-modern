@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.PersonService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.FeatureRequest
@@ -30,7 +31,7 @@ class SalleFuneraireService(
     private val userService: UserService,
     private val repositoryFeature: FuneraireFeatureRepository,
     private val featureService: FeatureService,
-    private val person : PersonService,
+    private val person : PersonRepository,
     private val cityService: CityService,
     private val communeService: CommuneService,
     private val quartierService: QuartierService,
@@ -51,14 +52,15 @@ class SalleFuneraireService(
                     devise = devise.getById(m.deviseId?:0),
                     feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
                     address = m.toAddressDTO(),
-                    image = person.findByIdPersonUser(m.userId!!)?.images?:"",
+//                    image = person.findByIdPersonUser(m.userId!!)?.images?:"",
+                    image = person.findByUser(m.userId!!)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
                         commune = communeService.findByIdCommune(m.communeId),
                         quartier = quartierService.findByIdQuartier(m.quartierId)
                     ),
                     geoZone = m.toGeo(),
-                    postBy = userService.findIdUser(m.userId!!).username,
+                    postBy = userService.findIdUser(m.userId).username,
                     typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
                 ))
         }

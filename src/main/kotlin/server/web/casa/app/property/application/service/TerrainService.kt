@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.application.service.PersonService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.Terrain
@@ -28,7 +29,7 @@ class TerrainService(
     private val cityService: CityService,
     private val communeService: CommuneService,
     private val quartierService: QuartierService,
-    private val person : PersonService,
+    private val person : PersonRepository,
     private val userService: UserService,
     private val propertyTypeService: PropertyTypeService,
 ) {
@@ -44,7 +45,7 @@ class TerrainService(
                     images = imageByTerrain[m.id]?.map { it.toDomain() } ?: emptyList(),
                     devise = devise.getById(m.deviseId!!),
                     address = m.toAddressDTO(),
-                    image = person.findByIdPersonUser(m.userId)?.images?:"",
+                    image = person.findByUser(m.userId)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
                         commune = communeService.findByIdCommune(m.communeId),
@@ -109,7 +110,7 @@ class TerrainService(
                     devise = devise.getById(m.deviseId!!),
                     postBy = userService.findIdUser(m.userId).username,
                     address = m.toAddressDTO(),
-                    image = person.findByIdPersonUser(m.userId)?.images?:"",
+                    image = person.findByUser(m.userId)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
                         commune = communeService.findByIdCommune(m.communeId),
