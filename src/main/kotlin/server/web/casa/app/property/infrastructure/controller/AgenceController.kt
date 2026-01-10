@@ -9,6 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.AgenceService
 import server.web.casa.app.property.domain.model.Agence
+import server.web.casa.app.property.domain.model.AgenceDTO
+import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.route.utils.AgenceRoute.AGENCE
 import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.ApiResponseWithMessage
@@ -22,9 +24,9 @@ class AgenceController(
     @Operation(summary = "Création agence")
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createAgence(
-        @Valid @RequestBody request: Agence,
+        @Valid @RequestBody request: AgenceDTO,
     ): ApiResponseWithMessage<Agence> = coroutineScope {
-        val result = service.create(request)
+        val result = service.create(request.toDomain())
         ApiResponseWithMessage(message = "Enregistrement réussie pour votre agence ${result.name}", data = result)
     }
 
