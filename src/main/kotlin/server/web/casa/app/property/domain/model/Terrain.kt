@@ -85,5 +85,6 @@ fun Terrain.toDto() = TerrainMasterDTO(
         quartier = Quartier(this.quartierId, "")
     ),
     geoZone = GeoDTO(this.latitude, this.longitude),
-    typeProperty = PropertyType(this.propertyTypeId!!, ""),,
+    typeProperty = PropertyType(this.propertyTypeId!!, ""),
+    image = ""
 )
