@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.Terrain
@@ -27,6 +28,7 @@ class TerrainService(
     private val cityService: CityService,
     private val communeService: CommuneService,
     private val quartierService: QuartierService,
+    private val person : PersonService,
     private val userService: UserService,
     private val propertyTypeService: PropertyTypeService,
 ) {
@@ -42,6 +44,7 @@ class TerrainService(
                     images = imageByTerrain[m.id]?.map { it.toDomain() } ?: emptyList(),
                     devise = devise.getById(m.deviseId!!),
                     address = m.toAddressDTO(),
+                    image = person.findByIdPersonUser(m.userId)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
                         commune = communeService.findByIdCommune(m.communeId),
@@ -103,8 +106,8 @@ class TerrainService(
             terrain.add(
                 TerrainMasterDTO(
                     terrain = m.toDomain().toDTO(),
-                    images = imageByTerrain[m.id]?.map { it.toDomain() } ?: emptyList(),
                     devise = devise.getById(m.deviseId!!),
+                    postBy = userService.findIdUser(m.userId).username,
                     address = m.toAddressDTO(),
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
@@ -112,8 +115,8 @@ class TerrainService(
                         quartier = quartierService.findByIdQuartier(m.quartierId)
                     ),
                     geoZone = m.toGeo(),
-                    postBy = userService.findIdUser(m.userId).username,
-                    typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
+                    images = imageByTerrain[m.id]?.map { it.toDomain() } ?: emptyList(),
+                    typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),,
                 )
             )
         }
