@@ -20,7 +20,7 @@ class PropertyMasterDTO(
     val geoZone: GeoDTO,
     val typeProperty: PropertyType,
     val features: List<Feature> = emptyList(),
-    image: String,
+    val image: String,
 )
 
 
@@ -64,7 +64,8 @@ fun Property.toDto() = PropertyMasterDTO(
         quartier = Quartier(this.quartier, "")
     ),
     geoZone = GeoDTO(this.latitude, this.longitude),
-    typeProperty = PropertyType(this.propertyTypeId, ""),,
+    typeProperty = PropertyType(this.propertyTypeId, ""),
+    image = ""
 )
 
 fun PropertyMasterDTO.toEntity() = PropertyEntity(
