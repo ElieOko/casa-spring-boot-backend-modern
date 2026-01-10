@@ -6,9 +6,16 @@ import jakarta.validation.constraints.Null
 import server.web.casa.app.property.infrastructure.persistence.entity.AgenceEntity
 
 class Agence(
-    @Null
-    @JsonIgnore
     val id: Long? = null,
+    val userId: Long,
+    val name: String,
+    val description : String = "",
+    val phone1 : String = "",
+    val phone2 : String = "",
+    val address : String = "",
+    var logo : String? = "",
+)
+class AgenceDTO(
     @NotNull
     val userId: Long,
     @NotNull
@@ -23,6 +30,15 @@ class Agence(
     var logo : String? = "",
 )
 
+fun AgenceDTO.toDomain() = Agence(
+    userId = this.userId,
+    name = this.name,
+    description = this.description,
+    phone1 = this.phone1,
+    phone2 = this.phone2,
+    address = this.address,
+    logo = this.logo
+)
 fun Agence.toEntity() = AgenceEntity(
     this.id,
     this.userId,
