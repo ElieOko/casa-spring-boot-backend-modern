@@ -109,6 +109,7 @@ class TerrainService(
                     devise = devise.getById(m.deviseId!!),
                     postBy = userService.findIdUser(m.userId).username,
                     address = m.toAddressDTO(),
+                    image = person.findByIdPersonUser(m.userId)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(m.cityId),
                         commune = communeService.findByIdCommune(m.communeId),
@@ -116,7 +117,7 @@ class TerrainService(
                     ),
                     geoZone = m.toGeo(),
                     images = imageByTerrain[m.id]?.map { it.toDomain() } ?: emptyList(),
-                    typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),,
+                    typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
                 )
             )
         }
