@@ -63,6 +63,8 @@ class JwtAuthFilter(
             "/otp/**",
             "/reset/password",
             "/refresh",
+            "/notifications/**",
+            "/notifications",
             "/websocket/**", // ← IMPORTANT: WebSocket doit être public pour le handshake
         )
 
