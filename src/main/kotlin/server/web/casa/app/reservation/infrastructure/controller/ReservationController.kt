@@ -313,15 +313,18 @@ class ReservationController(
             ResponseEntity.ok(response)
         }
         val notification = notif.dealConcludedHost(reservation?.id!!, true)
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
+        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
         val notificationState = notif.stateReservationHost(reservation.id, true)
-
         val propertyEntity = propertyR.findById(reservation.propertyId!!)
              propertyEntity!!.isAvailable = false
         propertyR.save(propertyEntity)
         val response = mapOf(
-            "DealConcludeHost" to notification,
-            "DealConcludeGuest" to notificationGuest,
+            "DealConcludeHost" to notification["state"],
+            "DealConcludeGuest" to notificationGuest["state"],
             "DealConcludeState" to notificationState,
             "message" to "True if it's successfully and null or false when unfulfilled")
 
@@ -357,6 +360,8 @@ class ReservationController(
            // .filter { entity -> entity!!.propertyId==reservation.property.propertyId }[0] //.filter { }//findById(reservation.property.propertyId)
         propertyEntity!!.isAvailable = true
         propertyR.save(propertyEntity)
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = propertyEntity.user, title = "Annulation de visite", message = "Le client a annulé sa demande de visite. Aucune action n’est requise.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(propertyEntity.user.toString(),note.toDomain())
         val response = mapOf("DealCancel" to notification, "message" to "Deal cancel successfully")
         ResponseEntity.ok(response)
     }
