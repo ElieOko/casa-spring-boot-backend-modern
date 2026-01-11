@@ -13,6 +13,7 @@ import server.web.casa.app.notification.infrastructure.persistence.repository.No
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationReservationRepository
 import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.user.application.service.UserService
+import kotlin.collections.mapOf
 
 @Service
 class  NotificationReservationService(
@@ -33,42 +34,32 @@ class  NotificationReservationService(
        }
     }
 
-    suspend fun dealConcludedHost(reservation : Long, state : Boolean): Boolean {
+    suspend fun dealConcludedHost(reservation : Long, state : Boolean): Map<String, Any> {
       val data = repository.findAll().filter { entity ->
             entity.reservationId == reservation
         }.first()
         data.hostUserDealConcluded = state
         repository.save(data)
-        val note = notification.save(
-            NotificationCasaEntity(
-                id = null,
-                userId = data.hostUserId,
-                title = "Rendez-vous validé",
-                message = "La visite est confirmée. Tout est prêt pour accueillir le client.",
-                tag = TagType.DEMANDES.toString(),
-            )
-        )
-        notificationService.sendNotificationToUser(data.hostUserId.toString(),note.toDomain())
-        return state
+//        val note = notification.save(
+//            NotificationCasaEntity(
+//                id = null,
+//                userId = data.hostUserId,
+//                title = "Rendez-vous validé",
+//                message = "La visite est confirmée. Tout est prêt pour accueillir le client.",
+//                tag = TagType.DEMANDES.toString(),
+//            )
+//        )
+//        notificationService.sendNotificationToUser(data.hostUserId.toString(),note.toDomain())
+        return mapOf("state" to state, "host" to data.hostUserId)
     }
 
-    suspend fun dealConcludedGuest(reservation : Long, state : Boolean): Boolean {
+    suspend fun dealConcludedGuest(reservation : Long, state : Boolean): Map<String, Any> {
         val data = repository.findAll().filter { entity ->
             entity.reservationId == reservation
         }.first()
         data.guestUserDealConcluded = state
         repository.save(data)
-        val note = notification.save(
-            NotificationCasaEntity(
-                id = null,
-                userId = data.guestUserId,
-                title = "Visite confirmée",
-                message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.",
-                tag = TagType.DEMANDES.toString(),
-            )
-        )
-        notificationService.sendNotificationToUser(data.guestUserId.toString(),note.toDomain())
-        return state
+        return mapOf("state" to state, "guest" to data.guestUserId)
     }
 
     suspend fun stateReservationHost(reservation : Long, state : Boolean): Boolean {
@@ -86,16 +77,16 @@ class  NotificationReservationService(
         }.first()
         data.guestUserState = false
         repository.save(data)
-        val note = notification.save(
-            NotificationCasaEntity(
-                id = null,
-                userId = data.hostUserId,
-                title = "Annulation de visite",
-                message = "Le client a annulé sa demande de visite. Aucune action n’est requise.",
-                tag = TagType.DEMANDES.toString(),
-            )
-        )
-        notificationService.sendNotificationToUser(data.hostUserId.toString(),note.toDomain())
+//        val note = notification.save(
+//            NotificationCasaEntity(
+//                id = null,
+//                userId = data.hostUserId,
+//                title = "Annulation de visite",
+//                message = "Le client a annulé sa demande de visite. Aucune action n’est requise.",
+//                tag = TagType.DEMANDES.toString(),
+//            )
+//        )
+//        notificationService.sendNotificationToUser(data.hostUserId.toString(),note.toDomain())
         return false
     }
     suspend fun deleteByReservation(reservation: Long): Boolean {
