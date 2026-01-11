@@ -306,13 +306,13 @@ class ReservationController(
     }
 
     @PutMapping("/notification/partners/{reservationId}")
-    suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+    suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope{
         val reservation = service.findById(reservationId)?.reservation
         if (reservation ==null){
             val response = mapOf("error" to "reservation not found")
-            return ResponseEntity.ok(response)
+            ResponseEntity.ok(response)
         }
-        val notification = notif.dealConcludedHost(reservation.id!!, true)
+        val notification = notif.dealConcludedHost(reservation?.id!!, true)
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
         val notificationState = notif.stateReservationHost(reservation.id, true)
 
@@ -325,7 +325,7 @@ class ReservationController(
             "DealConcludeState" to notificationState,
             "message" to "True if it's successfully and null or false when unfulfilled")
 
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
    /* @PutMapping("/notification/guest/{reservationId}")
     fun dealconcluguest( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
