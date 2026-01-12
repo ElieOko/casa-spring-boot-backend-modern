@@ -24,12 +24,15 @@ class JwtAuthFilter(
 ): OncePerRequestFilter() {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val matcher = AntPathMatcher()
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
         val path = request.requestURI
+
+        // Liste des chemins publics INCLUANT WebSocket
         val publicPaths = listOf(
             "/",
             "/swagger-ui/**",
@@ -59,40 +62,45 @@ class JwtAuthFilter(
             "/auth/register",
             "/otp/**",
             "/reset/password",
-            "/refresh"
+            "/refresh",
+            "/api/notifications/**",
+            "/api/notifications",
+            "/websocket/**", // ← IMPORTANT: WebSocket doit être public pour le handshake
         )
+
         try {
             //Vérifie si la route est publique (pattern matching)
             val isPublic = publicPaths.any { pattern ->
                 matcher.match(pattern, path)
             }
+
             if (isPublic) {
                 logger.info("🟢 Public route: $path")
                 filterChain.doFilter(request, response)
                 return
             }
+
             val authHeader = request.getHeader("Authorization")
-            log.info("ICI")
+
             if (authHeader == null || !authHeader.startsWith("Bearer ") || !jwtService.validateAccessToken(authHeader)) {
-                log.info("nGGOUSF")
                 sendJsonError(response, request, HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
                 return
             }
+
             val userId = jwtService.getUserIdFromToken(authHeader)
-            log.info("nGGOUS")
             val auth = UsernamePasswordAuthenticationToken(userId, null, emptyList()).apply {
                 details = WebAuthenticationDetailsSource().buildDetails(request)
             }
-            log.info("nOUS")
+
             SecurityContextHolder.getContext().authentication = auth
             filterChain.doFilter(request, response)
 
         } catch (e : AuthorizationDeniedException){
-            sendJsonError(response, request,HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
+            sendJsonError(response, request, HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
         }
     }
 
-     fun sendJsonError(
+    fun sendJsonError(
         response: HttpServletResponse,
         request: HttpServletRequest,
         status: Int,

@@ -27,11 +27,11 @@ class UserController(
     private val logger = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Liste des utilisateurs")
     @GetMapping
-    @Transactional
+//    @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getListUser(): ApiResponse<List<UserDto>> {
-        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-        logger.info("My ID -> $ownerId")
+//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+//        logger.info("My ID -> $ownerId")
         val data = userService.findAllUser().toList()
         return ApiResponse(data)
     }
@@ -49,11 +49,11 @@ class UserController(
 
     @Operation(summary = "Modification utilisateur")
     @PutMapping("/{id}")
-    @Transactional
+//    @Transactional
     suspend fun updateUser(
         @RequestBody @Valid user : UserRequestChange
     ) : ResponseEntity<UserDto> {
-        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
+//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
         val id = auth.user()?.userId
         val updated = userService.updateUser(id!!,user)
         return ResponseEntity.ok(updated)
@@ -61,7 +61,7 @@ class UserController(
 
     @Operation(summary = "Suppression utilisateur")
     @DeleteMapping("/{id}")
-    @Transactional
+//    @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun delete(
         @PathVariable("id") id : Long

@@ -6,6 +6,8 @@ import org.slf4j.*
 import org.springframework.http.*
 import org.springframework.stereotype.*
 import org.springframework.web.server.*
+import server.web.casa.app.actor.application.service.PersonService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.CityService
 import server.web.casa.app.address.application.service.CommuneService
 import server.web.casa.app.address.application.service.QuartierService
@@ -14,7 +16,6 @@ import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.filter.*
 import server.web.casa.app.property.infrastructure.persistence.entity.*
-import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.mapper.*
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.*
@@ -27,6 +28,7 @@ class PropertyService(
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
     private val userService: UserService,
+    private val person : PersonRepository,
     private val propertyTypeService: PropertyTypeService,
     private val featureService: FeatureService,
     private val repositoryFeature : PropertyFeatureRepository,
@@ -81,23 +83,24 @@ class PropertyService(
         properties.forEach { property ->
             propertyList.add(PropertyMasterDTO(
                 property = property.toPropertyDTO(),
-                devise = devise.getById(property.deviseId),
                 images = ImageDTO(
                     main = imagesByProperty[property.id] ?: emptyList(),
                     room = roomImagesByProperty[property.id] ?: emptyList(),
                     living = livingRoomImagesByProperty[property.id] ?: emptyList(),
                     kitchen = kitchenImagesByProperty[property.id] ?: emptyList()
                 ).toImage(),
+                postBy = userService.findIdUser(property.user!!).username,
                 address = property.toAddressDTO(),
+                devise = devise.getById(property.deviseId),
                 localAddress = LocalAddressDTO(
                     city = cityService.findByIdCity(property.cityId),
                     commune = communeService.findByIdCommune(property.communeId),
                     quartier = quartierService.findByIdQuartier(property.quartierId)
                 ),
+                image = person.findByUser(property.user)?.images?:"",
                 geoZone = property.toGeo(),
-                postBy = userService.findIdUser(property.user!!).username,
                 typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
-                features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
+                features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
             ))
         }
         propertyList
@@ -136,6 +139,7 @@ class PropertyService(
             ),
             geoZone = property.toGeo(),
             postBy = userService.findIdUser(property.user!!).username,
+            image = person.findByUser(property.user)?.images?:"",
             typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
             features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
         )

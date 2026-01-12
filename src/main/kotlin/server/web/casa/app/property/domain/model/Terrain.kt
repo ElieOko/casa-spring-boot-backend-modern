@@ -1,6 +1,5 @@
 package server.web.casa.app.property.domain.model
 
-import org.springframework.data.relational.core.mapping.Column
 import server.web.casa.app.address.domain.model.*
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.domain.model.dto.*
@@ -70,6 +69,7 @@ fun Terrain.toDto() = TerrainMasterDTO(
         isAvailable = this.isAvailable,
         createdAt = this.createdAt,
     ),
+    devise = Devise(id = this.deviseId!!, "", "", 0.0),
     postBy = "",
     address = AddressDTO(
         address = this.address,
@@ -86,5 +86,5 @@ fun Terrain.toDto() = TerrainMasterDTO(
     ),
     geoZone = GeoDTO(this.latitude, this.longitude),
     typeProperty = PropertyType(this.propertyTypeId!!, ""),
-    devise = Devise(id = this.deviseId!!, "", "", 0.0),
+    image = ""
 )

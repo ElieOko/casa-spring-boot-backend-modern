@@ -21,14 +21,15 @@ data class TerrainDTO(
 
 
 data class TerrainMasterDTO(
-    val terrain : TerrainDTO,
+    val terrain: TerrainDTO,
     val devise: Devise?,
-    val postBy : String,
-    val address :AddressDTO,
-    val localAddress : LocalAddressDTO,
-    val geoZone : GeoDTO,
-    val images : List<TerrainImage>? = null ,
+    val postBy: String,
+    val address: AddressDTO,
+    val localAddress: LocalAddressDTO,
+    val geoZone: GeoDTO,
+    val images: List<TerrainImage>? = null,
     val typeProperty: PropertyType,
+    val image: String,
 )
 
 

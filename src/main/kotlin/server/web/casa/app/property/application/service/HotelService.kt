@@ -4,7 +4,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
-import server.web.casa.app.property.domain.model.Agence
+import server.web.casa.app.actor.application.service.PersonService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.property.domain.model.Hotel
 import server.web.casa.app.property.domain.model.dto.HotelGlobal
 import server.web.casa.app.property.domain.model.toEntity
@@ -17,6 +18,7 @@ import server.web.casa.utils.gcs.GcsService
 class HotelService(
     private val hotelRepository: HotelRepository,
     private val gcsService: GcsService,
+    private val person : PersonRepository,
     private val chambre : HotelChambreService
 ) {
     suspend fun save(domain : Hotel) = coroutineScope {
@@ -36,7 +38,8 @@ class HotelService(
             hotel.add(
                 HotelGlobal(
                     hotel = it.toDomain(),
-                    structure =  chambre.getAllChambreByHotel(it.id?:0)
+                    image = person.findByUser(it.userId!!)?.images?:"",
+                    structure =  chambre.getAllChambreByHotel(it.id?:0),
                 )
             )
         }
@@ -52,6 +55,7 @@ class HotelService(
         data.map {it?.toDomain()}.toList().forEach { hotel.add(
             HotelGlobal(
                 hotel = it!!,
+                image = person.findByUser(it.userId!!)?.images?:"",
                 structure =  chambre.getAllChambreByHotel(it.id?:0)
             )
         ) }

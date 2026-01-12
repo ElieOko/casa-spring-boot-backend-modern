@@ -1,14 +1,10 @@
 package server.web.casa.app.property.domain.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Null
 import server.web.casa.app.ecosystem.domain.request.ImageRequest
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.domain.model.dto.GeoDTO
-import server.web.casa.app.property.domain.model.dto.Images
 import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
-import server.web.casa.app.property.domain.model.dto.PropertyDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.BureauEntity
 import java.time.LocalDateTime
 
@@ -79,13 +75,14 @@ class BureauRequest(
 data class BureauDTOMaster(
     val bureau: BureauDTO,
     val devise: Devise?,
-    val postBy : String,
-    val address :AddressDTO,
-    val localAddress : LocalAddressDTO,
-    val geoZone : GeoDTO,
-    val images : List<BureauImage?>,
+    val postBy: String,
+    val address: AddressDTO,
+    val localAddress: LocalAddressDTO,
+    val geoZone: GeoDTO,
+    val images: List<BureauImage?>,
     val feature: List<Feature>,
     val typeProperty: PropertyType,
+    val image: String,
 )
 
 data class BureauDtoRequest(

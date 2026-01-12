@@ -2,11 +2,17 @@ package server.web.casa.app.prestation.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import kotlinx.coroutines.coroutineScope
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.ecosystem.application.service.PrestationService
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.application.SollicitationService
 import server.web.casa.app.prestation.domain.model.FavoritePrestationDTO
@@ -29,7 +35,9 @@ class SollicitatonController(
     private val service: SollicitationService,
     private  val userS: UserService,
     private  val prestS: PrestationService,
-    private  val deviseS: DeviseService
+    private  val deviseS: DeviseService,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
 ) {
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createSollicitation(
@@ -49,6 +57,8 @@ class SollicitatonController(
             endDate = req.endDate
         )
         val created = service.create(data)
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = checkPrestation.userId, title = "Demande d'intervention reçue", message = "Un client est intéressé par votre service et souhaite que vous intervennez. Ne tardez pas à répondre \uD83D\uDE09", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(checkPrestation.userId.toString(),note.toDomain())
         return ResponseEntity.ok(mapOf(
             "sollicitation" to created,
             "prestateur" to prestateur,
@@ -78,12 +88,12 @@ class SollicitatonController(
     suspend fun updateSollicitationStatus(
         @PathVariable id: Long,
         @RequestBody request:RequestUpdateStatus
-    ): ResponseEntity<Map<String, Any?>> {
+    ) = coroutineScope {
 
-        val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
-        val sollicitation = service.findById(id) ?: return ResponseEntity.ok(mapOf("error" to "sollicitation not found"))
+        val userRequest = userS.findIdUser(request.userId)
+        val sollicitation: SollicitationDTO? = (service.findById(id) ?: ResponseEntity.ok(mapOf("error" to "sollicitation not found"))) as SollicitationDTO?
 
-        val userId = sollicitation.user.userId
+        val userId = sollicitation?.user!!.userId
         val prestateurId = prestS.getById ( sollicitation.prestation.id!!)?.userId
 
         val prestateurCheck = userRequest.userId == prestateurId
@@ -92,24 +102,24 @@ class SollicitatonController(
         if(prestateurCheck || sollicitateur){
             if (prestateurCheck){
                 val updated = service.updateStatus(sollicitation.sollicitation,  request.status)
-                return ResponseEntity.ok(mapOf("sollicitation" to updated))
+                ResponseEntity.ok(mapOf("sollicitation" to updated))
             }
 
             if(request.status != ReservationStatus.APPROVED){
                 val updated = service.updateStatus(sollicitation.sollicitation,  request.status)
-                return ResponseEntity.ok(mapOf("sollicitation" to updated))
+                ResponseEntity.ok(mapOf("sollicitation" to updated))
             }
         }
-        return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
+        ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
 
     @DeleteMapping("/delete/{id}")
-    suspend fun deleteById(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        val sollicitation = service.findById(id) ?: return ResponseEntity.ok(mapOf("message" to "Sollicitation not found"))
-        return if(service.deleteById(id)) {
+    suspend fun deleteById(@PathVariable id: Long): ResponseEntity<Map<String, String>> = coroutineScope {
+        val sollicitation = service.findById(id) ?: ResponseEntity.ok(mapOf("message" to "Sollicitation not found"))
+        if(service.deleteById(id)) {
             ResponseEntity.ok(mapOf("message" to "sollicitation deleted successfully"))
         }else{
-            return ResponseEntity.ok(mapOf("error" to "Something was wrong"))
+            ResponseEntity.ok(mapOf("error" to "Something was wrong"))
         }
     }
 }
