@@ -302,10 +302,10 @@ class ReservationController(
             ResponseEntity.ok(response)
         }
         val notification = notif.dealConcludedHost(reservation?.id!!, true)
-        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString(),))
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
         notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
-        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString(),))
+        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Bonne nouvelle ", message = "Félicitations, votre demande a été validée et le bien vous a été accordé.", tag = TagType.DEMANDES.toString(),))
         notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
         val notificationState = notif.stateReservationHost(reservation.id, true)
         val propertyEntity = propertyR.findById(reservation.propertyId!!)
@@ -334,8 +334,16 @@ class ReservationController(
         val reservation = service.findById(reservationId)!!.reservation
         val notification = if(reservation != null) notif.stateReservationHost(reservation.id!!, state) else null
         val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
+        if (state){
+            val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation?.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
+            notificationService.sendNotificationToUser(reservation?.userId.toString(),note2.toDomain())
+            val hostId = propertyR.findById(reservation?.propertyId!!)?.user
+            val note = notification2.save(NotificationCasaEntity(id = null, userId = hostId.toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString()))
+            notificationService.sendNotificationToUser(hostId.toString(),note.toDomain())
+        }
         ResponseEntity.ok(response)
     }
+
     @PutMapping("/notification/cancel/{reservationId}")
     suspend fun dealCancel(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val reservation = service.findById(reservationId)!!.reservation
