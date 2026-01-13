@@ -7,13 +7,13 @@ import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.ReservationType
 import java.time.LocalDate
 
-@Table("reservation_terrains")
-data class ReservationTerrainEntity(
+@Table("reservation_vacances")
+data class ReservationVacanceEntity(
    @Id
    @Column("id")
    val id: Long? = null,
-   @Column("terrain_id")
-   val terrainId: Long,
+   @Column("vacance_id")
+   val vacanceId: Long,
    @Column("user_id")
    val userId: Long,
    @Column("message")
