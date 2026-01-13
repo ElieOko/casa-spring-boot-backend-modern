@@ -1,13 +1,14 @@
 package server.web.casa.app.reservation.domain.model
 
-import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationHotelEntity
+import server.web.casa.app.property.domain.model.Terrain
+import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationTerrainEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
 
-data class ReservationHotel(
+data class ReservationTerrain(
     val reservationId: Long? = null,
     val userId: Long,
-    val hotelId: Long,
+    val terrainId: Long,
     val message: String? = "",
     val status: String = ReservationStatus.PENDING.name,
     val type: String = ReservationType.STANDARD.name,
@@ -19,8 +20,8 @@ data class ReservationHotel(
     val createdAt: LocalDate = LocalDate.now(),
 )
 
-data class ReservationHotelDTO(
-    val reservation: ReservationHotelEntity,
-   // val hotel: Hotel,
+data class ReservationTerrainDTO(
+    val reservation: ReservationTerrainEntity,
+   val terrain: Terrain,
     val user: UserDto
 )
