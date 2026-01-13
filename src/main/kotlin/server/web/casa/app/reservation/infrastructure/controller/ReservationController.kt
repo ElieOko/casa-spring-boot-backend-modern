@@ -19,10 +19,8 @@ import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.*
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.flow.*
 import org.springframework.http.HttpStatusCode
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.notification.application.service.NotificationService
@@ -30,6 +28,8 @@ import server.web.casa.app.notification.domain.model.request.TagType
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
 import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
+import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -157,94 +157,83 @@ class ReservationController(
          ResponseEntity.status(201).body(response)
     }
     @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getAllReservation(): ResponseEntity<Map<String, List<ReservationDTO>>>
-    {
-        val data = service.findAllReservation()
-        val response = mapOf("reservation" to data)
-        return ResponseEntity.ok().body(response)
+    suspend fun getAllReservation(): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope{
+       val data = service.findAllReservation()
+       val response = mapOf("reservation" to data)
+       ResponseEntity.ok().body(response)
     }
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> {
+     suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
         val reservation = service.findById(id)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
     @GetMapping("/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByStaus(@PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationDTO>>> {
+    suspend fun getReservationByStaus(@PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val reservation = service.findByStatus(status)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
     @GetMapping("/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByDate(@PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>>> {
+    suspend fun getReservationByDate(@PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val reservation = service.findByDate(inputDate)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
 
     @GetMapping("/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByMonthYear(@PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> {
+    suspend fun getReservationByMonthYear(@PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val reservation = service.findByMonth(month, year)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
 
     @GetMapping("/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> {
+    suspend fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val reservation = service.findByPYear(year)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
 
     @GetMapping("/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationInInterval(@PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>?>> {
+    suspend fun getReservationInInterval(@PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>?>> = coroutineScope {
         val reservation = service.findByInterval(startDateInput, endDateInput)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
 
     @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> {
-
-        val user = userR.findById(userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
-        //.orElseThrow{ RuntimeException("User not found with id: $userId") }
+    suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> = coroutineScope {
+        val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
         val reservation = service.findByUser(user.userId!!)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+        ResponseEntity.ok(response)
     }
 
     @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> {
-        val property = propertyR.findById(propertyId) ?: return ResponseEntity.ok(mapOf("error" to "property not found"))//.orElse(null)
-        val reservation = service.findByProperty(property.id!!)
+    suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
+        val property : PropertyEntity? = (propertyR.findById(propertyId) ?: ResponseEntity.ok(mapOf("error" to "property not found"))) as PropertyEntity?
+        val reservation = service.findByProperty(property?.id!!)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-//        }?: RuntimeException("Property not found with id: $propertyId")
-//        val response = mapOf("message" to "Property not found with id: $propertyId")
-
-//        return ResponseEntity.badRequest().body(response)
+        ResponseEntity.ok(response)
     }
 
     @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationDTO>? >> {
-        val user = userR.findById(userId) ?: throw ResponseStatusException(
-            HttpStatusCode.valueOf(404),
-            "user Not Found."
-        )
+    suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationDTO>?>> = coroutineScope {
+        val user = userR.findById(userId) ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "user Not Found.")
         val reservation = service.findByHostUser(user.userId!!)
         val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-
+        ResponseEntity.ok(response)
     }
     @PutMapping("/update/status/{id}")
     suspend fun updateReservation(
         @PathVariable id: Long,
         @RequestBody request:RequestUpdate
-    ): ResponseEntity<Map<String, Any?>> {
+    ): ResponseEntity<Map<String, Any?>> = coroutineScope {
 
-        val userRequest = userR.findById(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
-        val reservation = service.findById(id) ?: return ResponseEntity.ok(mapOf("error" to "reservation not found"))
+        val userRequest: UserEntity = (userR.findById(request.userId) ?:  ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
+        val reservation: ReservationDTO = (service.findById(id) ?: ResponseEntity.ok(mapOf("error" to "reservation not found"))) as ReservationDTO
 
         val userId = reservation.reservation?.userId
         val proprioId = propertyR.findById( reservation.reservation?.propertyId!!)
@@ -255,15 +244,15 @@ class ReservationController(
         if(emetCheck || proprioCheck){
             if (proprioCheck){
                 val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
-                return ResponseEntity.ok(mapOf("reservation" to updated))
+                ResponseEntity.ok(mapOf("reservation" to updated))
             }
 
             if(request.status != ReservationStatus.APPROVED){
                 val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
-                return ResponseEntity.ok(mapOf("reservation" to updated))
+                ResponseEntity.ok(mapOf("reservation" to updated))
             }
         }
-        return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
+        ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
 
   /*  @PutMapping("/cancel/{id}")
@@ -289,20 +278,20 @@ class ReservationController(
     }*/
 
     @DeleteMapping("/delete/{id}")
-    suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
+    suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>>  = coroutineScope {
+        service.findById(id)?.reservation ?: ResponseEntity.ok(mapOf("message" to "Reservation not found"))
         val notificationDelete = notif.deleteByReservation(id)
-        return if (notificationDelete) {
+        if (notificationDelete) {
             service.deleteReservationById(id)
             ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
         }else{
-            return ResponseEntity.ok(mapOf("message" to "Something was wrong"))
+            ResponseEntity.ok(mapOf("message" to "Something was wrong"))
         }
     }
     @DeleteMapping("/delete/all")
-    suspend fun deleteReservationAll(): ResponseEntity<Map<String, String>> {
-        val reservation = service.deleteAll()
-       return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
+    suspend fun deleteReservationAll(): ResponseEntity<Map<String, String>> = coroutineScope {
+       service.deleteAll()
+       ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
     }
 
     @PutMapping("/notification/partners/{reservationId}")
@@ -313,10 +302,10 @@ class ReservationController(
             ResponseEntity.ok(response)
         }
         val notification = notif.dealConcludedHost(reservation?.id!!, true)
-        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString(),))
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
         notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
-        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString(),))
+        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Bonne nouvelle ", message = "Félicitations, votre demande a été validée et le bien vous a été accordé.", tag = TagType.DEMANDES.toString(),))
         notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
         val notificationState = notif.stateReservationHost(reservation.id, true)
         val propertyEntity = propertyR.findById(reservation.propertyId!!)
@@ -341,12 +330,20 @@ class ReservationController(
     suspend fun stateReservationHost(
        @PathVariable reservationId: Long,
        @PathVariable state: Boolean
-    ): ResponseEntity<Map<String, Any?>> {
+    ): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val reservation = service.findById(reservationId)!!.reservation
         val notification = if(reservation != null) notif.stateReservationHost(reservation.id!!, state) else null
         val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
-        return ResponseEntity.ok(response)
+        if (state){
+            val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation?.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
+            notificationService.sendNotificationToUser(reservation?.userId.toString(),note2.toDomain())
+            val hostId = propertyR.findById(reservation?.propertyId!!)?.user
+            val note = notification2.save(NotificationCasaEntity(id = null, userId = hostId.toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString()))
+            notificationService.sendNotificationToUser(hostId.toString(),note.toDomain())
+        }
+        ResponseEntity.ok(response)
     }
+
     @PutMapping("/notification/cancel/{reservationId}")
     suspend fun dealCancel(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val reservation = service.findById(reservationId)!!.reservation
