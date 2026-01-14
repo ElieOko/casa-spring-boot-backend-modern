@@ -3,13 +3,22 @@ plugins {
 	kotlin("plugin.spring") version "2.2.10"
 	id("org.springframework.boot") version "4.0.0"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("io.sentry.jvm.gradle") version "5.12.2"
 	kotlin("plugin.jpa") version "2.2.10"
 }
 
 group = "server.web"
 version = "0.0.1-SNAPSHOT"
 description = "Projet backend de Casa avec Spring Boot Kotlin"
-
+sentry {
+	// Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+	// This enables source context, allowing you to see your source
+	// code as part of your stack traces in Sentry.
+	includeSourceContext = true
+	org = "casanayo"
+	projectName = "casanayo"
+	authToken =  System.getenv("SENTRY_AUTH_TOKEN")
+}
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
@@ -28,6 +37,7 @@ repositories {
 }
 extra["springCloudGcpVersion"] = "7.3.1"
 extra["springCloudVersion"] = "2025.0.0"
+extra["sentryVersion"] = "8.27.0"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 //	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -72,7 +82,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	compileOnly("org.projectlombok:lombok")
-
+	// @sentry
+	implementation("io.sentry:sentry-opentelemetry-agent:8.22.0")
 	implementation("io.r2dbc:r2dbc-postgresql")
 	implementation("io.r2dbc:r2dbc-pool:1.0.2.RELEASE")
 	implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
@@ -96,8 +107,10 @@ dependencyManagement {
     imports {
         mavenBom("com.google.cloud:spring-cloud-gcp-dependencies:${property("springCloudGcpVersion")}")
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+//		mavenBom("io.sentry:sentry-bom:${property("sentryVersion")}")
     }
 }
+
 
 
 kotlin {
