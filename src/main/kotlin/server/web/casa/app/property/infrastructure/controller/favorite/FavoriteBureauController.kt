@@ -26,7 +26,7 @@ const val ROUTE_FAVORITE_BUREAU = FavoriteFestiveRoute.FAVORITE_BUREAU
 @RestController
 @Profile(Mode.DEV)
 @RequestMapping(ROUTE_FAVORITE_BUREAU)
-class FavoriteFestiveController(
+class FavoriteBureauController(
     private val service: FavoriteBureauService,
     private val userS: UserService,
     private val brxS: BureauService

@@ -10,6 +10,7 @@ import server.web.casa.app.notification.application.service.NotificationReservat
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.reservation.application.service.ReservationBureauService
 import server.web.casa.app.reservation.domain.model.ReservationBureauDTO
+import server.web.casa.app.reservation.domain.model.ReservationBureauRequest
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationBureauEntity
@@ -34,10 +35,10 @@ class ReservationBureauController(
 ){
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
-        @Valid @RequestBody request: ReservationRequest
+        @Valid @RequestBody request: ReservationBureauRequest
     ): ResponseEntity<Map<String, Any?>> {
         val user = userS.findIdUser(request.userId)
-        val bureau = brxS.findById(request.propertyId)
+        val bureau = brxS.findById(request.bureauId)
 
         if(bureau.userId == user.userId){
             val responseOwnProperty = mapOf("error" to "You can't reserve your own property")
@@ -59,7 +60,7 @@ class ReservationBureauController(
             endDate = request.endDate,
         )
         //!= verify
-        //val propertyEntity = brxS.findById(request.propertyId)
+        //val propertyEntity = brxS.findById(request.bureauId)
             //.orElseThrow { RuntimeException("Property not found") }
 
         //val userEntity = userS.findIdUser(request.userId)
@@ -122,7 +123,6 @@ class ReservationBureauController(
         val response = mapOf(
             "message" to "Votre reservation à la date du ${reservationCreate.reservation?.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
             "reservation" to reservationCreate,
-            "user" to user,
             "proprietaire" to  userS.findIdUser( bureau.userId!!),
             //"property" to property,
            // "notificationSendState" to notification
@@ -187,14 +187,14 @@ class ReservationBureauController(
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> {
-        val property = brxS.findById(propertyId) ?: return ResponseEntity.ok(mapOf("error" to "property not found"))//.orElse(null)
+    @GetMapping("/bureau/{bureauId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getReservationByProperty(@PathVariable bureauId: Long): ResponseEntity<Map<String, Any?>> {
+        val property = brxS.findById(bureauId) ?: return ResponseEntity.ok(mapOf("error" to "property not found"))//.orElse(null)
         val reservation = service.findByProperty(property.id!!)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
-//        }?: RuntimeException("Property not found with id: $propertyId")
-//        val response = mapOf("message" to "Property not found with id: $propertyId")
+//        }?: RuntimeException("Property not found with id: $bureauId")
+//        val response = mapOf("message" to "Property not found with id: $bureauId")
 
 //        return ResponseEntity.badRequest().body(response)
     }
@@ -274,7 +274,7 @@ class ReservationBureauController(
         val reservation = service.deleteAll()
        return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
     }
-
+/*
     @PutMapping("/notification/partners/{reservationId}")
     suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findById(reservationId)?.reservation
@@ -287,7 +287,7 @@ class ReservationBureauController(
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
         val notificationState = notif.stateReservationHost(reservation.id, true)
 
-        val propertyEntity = brxS.findById(reservation.propertyId!!)
+        val propertyEntity = brxS.findById(reservation.bureauId!!)
              propertyEntity!!.isAvailable = false
         brxS.save(propertyEntity)*/
         val response = mapOf(
@@ -323,12 +323,12 @@ class ReservationBureauController(
             return ResponseEntity.ok(response)
         }/*
         val notification = notif.stateReservationGuestCancel(reservation.id!!)
-        val propertyEntity = brxS.findById(reservation.propertyId!!)
+        val propertyEntity = brxS.findById(reservation.bureauId!!)
            // .takeIf{ it.isNotEmpty() }!!
-           // .filter { entity -> entity!!.propertyId==reservation.property.propertyId }[0] //.filter { }//findById(reservation.property.propertyId)
+           // .filter { entity -> entity!!.bureauId==reservation.property.bureauId }[0] //.filter { }//findById(reservation.property.bureauId)
         propertyEntity!!.isAvailable = true
         brxS.save(propertyEntity)*/
         val response = mapOf("DealCancel" to true, "message" to "Deal cancel successfully")
         return ResponseEntity.ok(response)
-    }
+    }*/
 }

@@ -131,7 +131,8 @@ class ReservationBureauService(
         ReservationBureauDTO(
             reservation = it,
             bureau = brxS.findById(it.bureauId!!),
-            user = userS.findIdUser(it.userId!!)
+            user = userS.findIdUser(it.userId!!),
+           // propietaire = userS.findIdUser(brxS.findById(it.bureauId).userId!!)
         )
 
 }
