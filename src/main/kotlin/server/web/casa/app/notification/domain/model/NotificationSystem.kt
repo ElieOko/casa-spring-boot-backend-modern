@@ -1,5 +1,6 @@
 package server.web.casa.app.notification.domain.model
 
+import jakarta.validation.constraints.NotNull
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,6 +21,14 @@ data class NotificationDTO(
     val timestamp: LocalDateTime = LocalDateTime.now()
 )
 
+data class NotificationRequest(
+    @NotNull
+    val title: String,
+    @NotNull
+    val message: String,
+    @NotNull
+    val tag : String = TagType.RESERVATION.toString(),
+)
 fun NotificationDTO.toEntity() = NotificationCasaEntity(
     id = this.id,
     userId = this.userId,

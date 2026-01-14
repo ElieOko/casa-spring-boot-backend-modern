@@ -34,4 +34,10 @@ class NotificationRestController(
         service.notificationDisable(id)
         ResponseEntity.status(HttpStatus.CREATED).body(mapOf("message" to "cette notification a été supprimer avec succès"))
     }
+
+    @Operation(summary = "Desactivate notification")
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun createNotification() = coroutineScope {
+
+    }
 }
