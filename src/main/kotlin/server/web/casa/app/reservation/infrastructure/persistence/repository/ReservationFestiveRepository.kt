@@ -56,7 +56,7 @@ interface ReservationFestiveRepository : CoroutineCrudRepository<ReservationFest
     @Query("""
         SELECT r.* 
         FROM reservation_fetives r
-        JOIN properties p ON r.festive_id = p.id
+        JOIN festives p ON r.festive_id = p.id
         WHERE p.user_id = :userId
     """)
     fun findByHostUserId(@Param("userId") userId: Long): Flow<ReservationFestiveEntity>

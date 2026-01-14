@@ -56,7 +56,7 @@ interface ReservationBureauRepository : CoroutineCrudRepository<ReservationBurea
     @Query("""
         SELECT r.* 
         FROM reservations r
-        JOIN properties p ON r.property_id = p.id
+        JOIN bureau p ON r.property_id = p.id
         WHERE p.user_id = :userId
     """)
     fun findByHostUserId(@Param("userId") userId: Long): Flow<ReservationBureauEntity>
