@@ -10,6 +10,7 @@ object FavoriteFestiveRoute {
     const val FAVORITE_TERRAIN_PATH = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
     const val ROUTE_FAVORITE_HOTEL ="${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
     const val FAVORITE_VACANCE_PATH = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
+    const val FAVORITE_BUREAU = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
 
     //web
 
@@ -18,6 +19,7 @@ object FavoriteFestiveRoute {
 }
 
 object FavoriteFestiveFeatures{
+    const val FAVORITE_BUREAU_PATH ="bureau/favorite"
     const val FAVORITE_FESTIVE_PATH = "festive/favorite"
     const val FAVORITE_FUNERAIRE_PATH ="funeraire/favorite"
     const val ROUTE_FAVORITE_HOTEL_PATH ="hotel/favorite"
