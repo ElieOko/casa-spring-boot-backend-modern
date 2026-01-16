@@ -79,10 +79,9 @@ class PersonService(
             }
         }
 
-        if (phone != ""){
-            val phone2 =  normalizeAndValidatePhoneNumberUniversal(phone) ?: throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
-            val identifier = repositoryUser.findByPhoneOrEmail(phone!!)
+        if (phone?.isNotEmpty() == true){
+            val phone2 =  normalizeAndValidatePhoneNumberUniversal(phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
+            val identifier = repositoryUser.findByPhoneOrEmail(phone)
             if (identifier == null){
                 user.phone = phone2
             }
