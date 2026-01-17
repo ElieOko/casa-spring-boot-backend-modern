@@ -40,7 +40,7 @@ class AgenceService(
     suspend fun getAllByUser(userId : Long) = coroutineScope{
         val agenceByVacance = mutableListOf<VacanceAgence>()
         val data = repository.getAllByUser(userId)
-        data.collect { agenceByVacance.add(VacanceAgence(agence = it?.toDomain(), site = vacance.getAllVacanceByAgence(it?.id ?: 0))) }
+        data.toList().forEach { agenceByVacance.add(VacanceAgence(agence = it?.toDomain(), site = vacance.getAllVacanceByAgence(it?.id ?: 0))) }
         agenceByVacance.toList()
     }
 
