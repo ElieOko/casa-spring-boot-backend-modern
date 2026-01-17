@@ -10,14 +10,12 @@ import server.web.casa.app.property.infrastructure.persistence.entity.VacanceIma
 import server.web.casa.app.property.infrastructure.persistence.repository.VacanceImageRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
-import server.web.casa.utils.storage.FileSystemStorageService
 import kotlin.collections.forEach
 
 @Service
 class VacanceImageService(
     private val repository: VacanceImageRepository,
-    private val gcsService: GcsService,
-    private val storageService: FileSystemStorageService
+    private val gcsService: GcsService
 ) {
     private val subdirectory = "vacance/"
    suspend fun create(images: ImageRequestStandard) = coroutineScope {

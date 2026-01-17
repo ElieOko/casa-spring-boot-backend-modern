@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService

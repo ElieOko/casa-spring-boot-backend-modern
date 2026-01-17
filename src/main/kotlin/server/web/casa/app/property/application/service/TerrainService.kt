@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
@@ -81,13 +80,7 @@ class TerrainService(
         val result = repository.save(data)
         result.toDomain()
     }
-    suspend fun filter(
-        filterModel : PropertyFilter,
-        page : Int,
-        size : Int,
-        sortBy : String,
-        sortOrder : String
-    ) = coroutineScope {
+    suspend fun filter(filterModel : PropertyFilter) = coroutineScope {
         val terrain = mutableListOf<TerrainMasterDTO>()
         val data = repository.filter(
             transactionType = filterModel.transactionType,
