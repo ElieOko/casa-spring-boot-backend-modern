@@ -1,10 +1,8 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import org.springframework.stereotype.Service
-import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.property.domain.model.Hotel
 import server.web.casa.app.property.domain.model.dto.HotelGlobal
@@ -46,9 +44,6 @@ class HotelService(
         hotel.toList()
     }
 
-    private suspend fun findAll() = coroutineScope {
-
-    }
     suspend fun getAllByUser(userId : Long) = coroutineScope{
         val data = hotelRepository.getAllByUser(userId)
         val hotel = mutableListOf<HotelGlobal>()

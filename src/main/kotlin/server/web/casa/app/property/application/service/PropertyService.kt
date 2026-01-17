@@ -2,16 +2,12 @@ package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.slf4j.*
 import org.springframework.http.*
 import org.springframework.stereotype.*
 import org.springframework.web.server.*
-import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
-import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.payment.application.service.*
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.filter.*
@@ -37,7 +33,7 @@ class PropertyService(
     private val quartierService: QuartierService,
     private val devise: DeviseService,
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
+
     suspend fun create(p: PropertyMasterDTO, features: List<FeatureRequest>): PropertyMasterDTO  = coroutineScope {
         val data = p.toEntity()
         val result = repository.save(data)
@@ -54,7 +50,7 @@ class PropertyService(
         val result = repository.save(data)
         toDomain(result.id!!)
     }
-    suspend fun getAll(page : Int, size : Int, sortBy : String, sortOrder : String): List<PropertyMasterDTO> {
+    suspend fun getAll(): List<PropertyMasterDTO> {
 //        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
 //        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
 //        val page = repository.findAll()
@@ -165,13 +161,7 @@ class PropertyService(
         val key = Pair(data,similary.map{it.toDomain()})
         return key
     }
-    suspend fun filterProduct(
-        filterModel : PropertyFilter,
-        page : Int,
-        size : Int,
-        sortBy : String,
-        sortOrder : String
-    ) = coroutineScope{
+    suspend fun filterProduct(filterModel : PropertyFilter) = coroutineScope {
         val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,

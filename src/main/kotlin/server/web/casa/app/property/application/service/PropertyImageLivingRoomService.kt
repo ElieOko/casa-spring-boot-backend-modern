@@ -5,20 +5,17 @@ import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.PropertyImageLivingRoom
-import server.web.casa.app.property.domain.model.request.ImageChangeRequest
-import server.web.casa.app.property.domain.model.request.ImageRequest
+import server.web.casa.app.property.domain.model.request.*
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageLivingRoomEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageLivingRoomRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
-import server.web.casa.utils.storage.FileSystemStorageService
 import kotlin.collections.forEach
 
 @Service
 class PropertyImageLivingRoomService(
     private val repository: PropertyImageLivingRoomRepository,
-    private val gcsService: GcsService,
-    private val storageService: FileSystemStorageService
+    private val gcsService: GcsService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val subdirectory = "property/living/"

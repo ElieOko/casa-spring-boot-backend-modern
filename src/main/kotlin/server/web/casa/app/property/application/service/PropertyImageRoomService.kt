@@ -11,14 +11,12 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyIm
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyImageRoomRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
-import server.web.casa.utils.storage.FileSystemStorageService
 import kotlin.collections.forEach
 
 @Service
 class PropertyImageRoomService(
     private val repository: PropertyImageRoomRepository,
-    private val gcsService: GcsService,
-    private val storageService: FileSystemStorageService
+    private val gcsService: GcsService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val subdirectory = "property/room/"
