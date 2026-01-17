@@ -1,6 +1,7 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
@@ -36,9 +37,11 @@ class AgenceService(
         agenceByVacance.toList()
     }
 
-    suspend fun getAllByUser(userId : Long): List<Agence?> = coroutineScope{
+    suspend fun getAllByUser(userId : Long) = coroutineScope{
+        val agenceByVacance = mutableListOf<VacanceAgence>()
         val data = repository.getAllByUser(userId)
-        data.map {it?.toDomain()}.toList()
+        data.collect { agenceByVacance.add(VacanceAgence(agence = it?.toDomain(), site = vacance.getAllVacanceByAgence(it?.id ?: 0))) }
+        agenceByVacance.toList()
     }
 
     suspend fun create(agence: Agence): Agence = coroutineScope {
