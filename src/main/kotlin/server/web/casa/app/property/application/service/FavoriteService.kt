@@ -4,15 +4,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
-import server.web.casa.app.property.domain.model.Favorite
 import server.web.casa.app.property.domain.model.FavoriteDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.property.infrastructure.persistence.mapper.*
 import server.web.casa.app.property.infrastructure.persistence.repository.FavoriteRepository
-import server.web.casa.app.reservation.domain.model.ReservationDTO
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
-import kotlin.collections.map
 
 @Service
 class FavoriteService(

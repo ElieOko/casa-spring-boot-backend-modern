@@ -1,7 +1,7 @@
 package server.web.casa.app.user.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.Operation
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
@@ -19,8 +19,7 @@ class TypeAccountController(
 ) {
     @Operation(summary = "Liste de Type Accounts")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllTypeAccountE(): ApiResponse<List<TypeAccount>> {
-        val data = service.getAll().toList()
-        return ApiResponse(data)
+    suspend fun getAllTypeAccountE(): ApiResponse<List<TypeAccount>> = coroutineScope {
+       ApiResponse(service.getAll().toList())
     }
 }
