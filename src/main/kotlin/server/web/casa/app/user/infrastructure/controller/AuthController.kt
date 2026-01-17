@@ -3,6 +3,7 @@ package server.web.casa.app.user.infrastructure.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
@@ -28,29 +29,23 @@ class AuthController(
     private val authService: AuthService,
     private val accountService: TypeAccountService,
     private val auth: Auth,
-    private val servicePerson: PersonService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Création utilisateur")
     @PostMapping(ROUTE_REGISTER)
     suspend fun register(
         @Valid @RequestBody request : UserAuthRequest
-    ): ResponseEntity<Map<String, Any?>> {
+    ): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val accountItems = request.account
         if (accountItems.isNotEmpty()){
           val account = accountItems.map { accountService.findByIdTypeAccount(it.typeAccount) }.first()
           val userSystem = request.toDomain()
           val data = authService.register(userSystem,accountItems)
-          val response = mapOf(
-                "user" to data.first,
-                "token" to data.second,
-                "message" to "Votre compte principal ${account.name} a été créer avec succès"
-            )
-          return ResponseEntity.status(201).body(response)
+          val response = mapOf("user" to data.first, "token" to data.second, "message" to "Votre compte principal ${account.name} a été créer avec succès")
+          ResponseEntity.status(201).body(response)
         }
-        else{
-            throw Exception()
-        }
+        val response = mapOf("message" to "Vous devez selectionner au moins un compte pour vous enregistrez")
+        ResponseEntity.status(404).body(response)
     }
 
     @Operation(summary = "Connexion utilisateur")
