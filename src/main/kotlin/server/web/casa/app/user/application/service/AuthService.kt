@@ -1,8 +1,7 @@
 package server.web.casa.app.user.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import server.web.casa.app.user.domain.model.User
@@ -15,17 +14,12 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import server.web.casa.adaptater.provide.twilio.TwilioService
 import server.web.casa.app.actor.application.service.PersonService
-import server.web.casa.app.user.domain.model.AccountUser
-import server.web.casa.app.user.domain.model.UserDto
-import server.web.casa.app.user.domain.model.UserFullDTO
-import server.web.casa.app.user.domain.model.request.AccountRequest
-import server.web.casa.app.user.domain.model.request.VerifyRequest
+import server.web.casa.app.user.domain.model.*
+import server.web.casa.app.user.domain.model.request.*
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
 import server.web.casa.utils.*
 import java.security.MessageDigest
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
 import kotlin.time.ExperimentalTime
 //sudo docker run --name casa-db -e POSTGRES_PASSWORD=root -e POSTGRES_DB=testdb e- POSTGRES_USERNAME=postgres -p 5434:5432 -d postgres
@@ -42,7 +36,6 @@ class AuthService(
     private val typeAccountService: TypeAccountService,
     private val accountService: AccountService,
     private val servicePerson: PersonService,
-    private val repositoryUserAccount : AccountUserRepository
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     data class TokenPair(
@@ -79,12 +72,7 @@ class AuthService(
         val savedEntity = userRepository.save(entity)
 //        throw Exception("stop ***")
         accountItems.forEach {
-            serviceMultiAccount.save(
-                AccountUser(
-                    userId = savedEntity.userId!!,
-                    accountId = it.typeAccount
-                )
-            )
+            serviceMultiAccount.save(AccountUser(userId = savedEntity.userId!!, accountId = it.typeAccount))
         }
 
         val newAccessToken = jwtService.generateAccessToken(savedEntity.userId!!.toHexString())
@@ -97,49 +85,34 @@ class AuthService(
     suspend fun login(identifier: String, password: String): Pair<TokenPair, UserFullDTO>  =
         coroutineScope {
             var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
-            if (isEmailValid(identifier)){
-                validIdentifier = identifier
-            }
-
-            val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
-                ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
-
-            if(!hashEncoder.matches(password, user.password.toString())) {
-                throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
-            }
-
+            if (isEmailValid(identifier)) validIdentifier = identifier
+            val user = userRepository.findByPhoneOrEmail(validIdentifier.toString()) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
+            if(!hashEncoder.matches(password, user.password.toString())) throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
             log.info("Logging into user ${user.userId}")
             val newAccessToken = jwtService.generateAccessToken(user.userId!!.toHexString())
             val newRefreshToken = jwtService.generateRefreshToken(user.userId.toHexString())
             val accounts = serviceMultiAccount.getAll().filter { it.userId == user.userId }.toList()
             val accountMultiple: List<AccountDTO> =  accounts.map {
                 val data = accountService.findByIdAccount(it.accountId)
-                AccountDTO(
-                    id = data.id,
-                    name = data.name,
-                    typeAccount = typeAccountService.findByIdTypeAccount(data.typeAccountId)
-                )
+                AccountDTO(id = data.id, name = data.name, typeAccount = typeAccountService.findByIdTypeAccount(data.typeAccountId))
             }.toList()
             val profile = servicePerson.findByIdPersonUser(user.userId)
             storeRefreshToken(user.userId, newRefreshToken)
             val result = Pair(
                 TokenPair(accessToken = newAccessToken, refreshToken = newRefreshToken),
-                UserFullDTO(user.toDomain(), accountMultiple,profile))
+                UserFullDTO(user.toDomain(), accountMultiple,profile)
+            )
             result
      }
     suspend fun generateOTP(identifier: String): Triple<String?, String, String> {
-        var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
-        if (isEmailValid(identifier)){
-            validIdentifier = identifier
-        }
-        val user = userRepository.findByPhoneOrEmail(validIdentifier.toString())
-            ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
+       var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
+       if (isEmailValid(identifier)) validIdentifier = identifier
+       userRepository.findByPhoneOrEmail(validIdentifier.toString()) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
        val status = twilio.generateVerifyOTP(identifier)
        return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur numero non prises en charge",identifier)
     }
     suspend fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
-        val userSecurity = userRepository.findByPhoneOrEmail(user.identifier)
-            ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
+       val userSecurity = userRepository.findByPhoneOrEmail(user.identifier) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
        return Pair(userSecurity.userId!!,twilio.checkVerify(code = user.code, contact = user.identifier))
     }
     suspend fun changePassword(id : Long,new : String): UserDto {
@@ -153,29 +126,16 @@ class AuthService(
     }
     @Transactional
     suspend fun refresh(refreshToken: String): TokenPair {
-        if(!jwtService.validateRefreshToken(refreshToken)) {
-            throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid refresh token.")
-        }
+        if(!jwtService.validateRefreshToken(refreshToken)) throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid refresh token.")
         val userId = jwtService.getUserIdFromToken(refreshToken)
-        val user = userRepository.findById(userId.toLong()) ?: throw ResponseStatusException(
-            HttpStatusCode.valueOf(403),
-            "Invalid refresh token."
-        )
-
+        val user = userRepository.findById(userId.toLong()) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid refresh token.")
         val hashed = hashToken(refreshToken)
-            refreshTokenRepository.findByUserIdAndHashedToken(user.userId!!, hashed)
-                ?: throw ResponseStatusException(
-                    HttpStatusCode.valueOf(403),
-                    "Refresh token not recognized (maybe used or expired?)"
-                )
-            refreshTokenRepository.deleteByUserIdAndHashedToken(user.userId, hashed)
-            val newAccessToken = jwtService.generateAccessToken(userId)
-            val newRefreshToken = jwtService.generateRefreshToken(userId)
-            storeRefreshToken(user.userId, newRefreshToken)
-            return TokenPair(
-                accessToken = newAccessToken,
-                refreshToken = newRefreshToken
-            )
+        refreshTokenRepository.findByUserIdAndHashedToken(user.userId!!, hashed) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Refresh token not recognized (maybe used or expired?)")
+        refreshTokenRepository.deleteByUserIdAndHashedToken(user.userId, hashed)
+        val newAccessToken = jwtService.generateAccessToken(userId)
+        val newRefreshToken = jwtService.generateRefreshToken(userId)
+        storeRefreshToken(user.userId, newRefreshToken)
+        return TokenPair(accessToken = newAccessToken, refreshToken = newRefreshToken)
     }
     @OptIn(ExperimentalTime::class)
     private suspend fun storeRefreshToken(userId: Long, rawRefreshToken: String) {
@@ -184,13 +144,7 @@ class AuthService(
         val instant = Instant.now().plusMillis(expiryMs)
         val zoneId = ZoneId.systemDefault()
         val expiresAt =  LocalDateTime.ofInstant(instant, zoneId)
-        refreshTokenRepository.save(
-            RefreshToken(
-                userId = userId,
-                expiresAt = expiresAt,
-                hashedToken = hashed
-            )
-        )
+        refreshTokenRepository.save(RefreshToken(userId = userId, expiresAt = expiresAt, hashedToken = hashed))
     }
     private fun hashToken(token: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
