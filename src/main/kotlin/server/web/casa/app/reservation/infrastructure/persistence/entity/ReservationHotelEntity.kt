@@ -7,13 +7,13 @@ import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.ReservationType
 import java.time.LocalDate
 
-@Table("reservation_hotels")
-data class ReservationHotelEntity(
+@Table("reservation_hotel_chambres")
+data class ReservationChambreHotelEntity(
    @Id
    @Column("id")
    val id: Long? = null,
-   @Column("hotel_id")
-   val hotelId: Long,
+   @Column("hotel_chambre_id")
+   val chambreId: Long,
    @Column("user_id")
    val userId: Long,
    @Column("message")
