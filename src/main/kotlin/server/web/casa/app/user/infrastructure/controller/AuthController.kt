@@ -60,21 +60,14 @@ class AuthController(
     ): ResponseEntity<Map<String, Any?>> {
       val data = authService.login(body.identifiant, body.password)
         try {
-            val response = mapOf(
-                "member" to data.second,
-                "token" to data.first.accessToken,
-                "refresh_token" to data.first.refreshToken,
-                "message" to "Connexion réussie avec succès"
-            )
+            val response = mapOf("member" to data.second, "token" to data.first.accessToken, "refresh_token" to data.first.refreshToken, "message" to "Connexion réussie avec succès")
             return ResponseEntity.ok().body(response)
         }
         catch (e: AuthenticationException){
             log.info(e.message)
+            val response = mapOf("error" to "")
+            return ResponseEntity.ok().body(response)
         }
-        val response = mapOf(
-            "error" to ""
-        )
-        return ResponseEntity.ok().body(response)
     }
 
     @PostMapping("/refresh")
