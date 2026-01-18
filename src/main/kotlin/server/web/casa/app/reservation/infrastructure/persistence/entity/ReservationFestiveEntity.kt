@@ -7,7 +7,7 @@ import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.ReservationType
 import java.time.LocalDate
 
-@Table("reservation_fetives")
+@Table("reservation_festives")
 data class ReservationFestiveEntity(
    @Id
    @Column("id")

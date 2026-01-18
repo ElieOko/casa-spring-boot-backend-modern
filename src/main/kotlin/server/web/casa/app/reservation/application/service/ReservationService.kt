@@ -12,6 +12,7 @@ import server.web.casa.app.reservation.domain.model.ReservationDTO
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.reservation.infrastructure.persistence.repository.ReservationRepository
+import server.web.casa.app.user.application.service.UserService
 import server.web.casa.utils.Mode
 import java.time.LocalDate
 
@@ -19,7 +20,8 @@ import java.time.LocalDate
 @Profile(Mode.DEV)
 class ReservationService(
     private val repoR: ReservationRepository,
-    private val propS: PropertyService
+    private val propS: PropertyService,
+    private val userS: UserService
 ) {
      suspend fun createReservation(reservation: ReservationEntity): ReservationDTO {
         val result = repoR.save(reservation)
@@ -130,7 +132,8 @@ class ReservationService(
     suspend fun toEntityDTO(it: ReservationEntity): ReservationDTO =
         ReservationDTO(
             reservation = it,
-            property = propS.findByIdProperty(it.propertyId!!).first
+            property = propS.findByIdProperty(it.propertyId!!).first,
+            user = userS.findIdUser(it.userId!!)
         )
 
 }
