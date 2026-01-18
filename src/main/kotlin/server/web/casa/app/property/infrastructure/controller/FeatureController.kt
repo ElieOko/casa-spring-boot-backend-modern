@@ -1,10 +1,8 @@
 package server.web.casa.app.property.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.FeatureService
 import server.web.casa.app.property.domain.model.Feature

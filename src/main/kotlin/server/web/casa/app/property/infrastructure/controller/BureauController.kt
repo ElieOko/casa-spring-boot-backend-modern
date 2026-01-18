@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
@@ -27,19 +26,15 @@ import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.application.service.BureauImageService
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.property.application.service.PropertyTypeService
-import server.web.casa.app.property.domain.model.Bureau
+import server.web.casa.app.property.domain.model.BureauDTOMaster
 import server.web.casa.app.property.domain.model.BureauDtoRequest
 import server.web.casa.app.property.domain.model.BureauRequest
 import server.web.casa.app.property.domain.model.ImageRequestStandard
-import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.StatusState
-import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.ImageChange
 import server.web.casa.app.property.domain.model.request.ImageChangeOther
-import server.web.casa.app.property.domain.model.request.PropertyRequest
 import server.web.casa.app.property.domain.model.toDomain
-import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
@@ -85,7 +80,7 @@ class BureauController(
 
     @Operation(summary = "List des bureaux")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllBureau() = coroutineScope {
+    suspend fun getAllBureau(): ResponseEntity<Map<String, MutableList<BureauDTOMaster>>?>? = coroutineScope {
         val data = service.getAllBureau()
         val response = mapOf("bureaux" to data)
         ResponseEntity.ok().body(response)
@@ -96,7 +91,7 @@ class BureauController(
     suspend fun updateFileBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: ImageChange
-    ) = coroutineScope {
+    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope {
         service.findById(bureauId)
         val result = if (request.images.isNotEmpty()) bureauImageService.updateFile(bureauId,request.images) else false
         val message = mutableMapOf("message" to "Modification effectuée avec succès")
@@ -111,7 +106,7 @@ class BureauController(
     suspend fun deleteFileBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: ImageChangeOther
-    ) = coroutineScope{
+    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope{
         service.findById(bureauId)
         val result = if (request.images.isNotEmpty()) bureauImageService.deleteFile(bureauId,request.images) else false
         val message = mutableMapOf("message" to "Suppression effectuée avec succès")
@@ -136,7 +131,7 @@ class BureauController(
     suspend fun updateBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: BureauRequest
-    ) = coroutineScope {
+    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope {
         userService.findIdUser(request.userId!!)
         val bureau = service.findById(bureauId)
         if (bureau.userId != request.userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté bureau.")
@@ -171,7 +166,7 @@ class BureauController(
         @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
         @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
-    ) = coroutineScope {
+    ): ResponseEntity<Map<String, MutableList<BureauDTOMaster>>?>? = coroutineScope {
         val data = service.filter(
             filterModel = PropertyFilter(
                 transactionType = transactionType,
@@ -199,7 +194,7 @@ class BureauController(
     suspend fun soldOutOrInBureau(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState
-    )= coroutineScope{
+    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope{
         val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
         val data = service.findById(propertyId)
         data.sold = request.status
@@ -213,7 +208,7 @@ class BureauController(
     suspend fun toEnableOrDisableBureau(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState
-    )= coroutineScope{
+    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope{
         val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
         val data= service.findById(propertyId)
         data.isAvailable = request.status

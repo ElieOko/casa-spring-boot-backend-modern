@@ -89,7 +89,7 @@ class BureauService(
         repository.save(model.toEntity())
     }
 
-    suspend fun filter(filterModel : PropertyFilter) = coroutineScope {
+    suspend fun filter(filterModel: PropertyFilter, page: Int, size: Int, sortBy: String, sortOrder: String) = coroutineScope {
         val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,

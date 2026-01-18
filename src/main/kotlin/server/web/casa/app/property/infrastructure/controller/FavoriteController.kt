@@ -2,7 +2,6 @@ package server.web.casa.app.property.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import kotlinx.coroutines.flow.Flow
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
@@ -10,9 +9,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.property.application.service.FavoriteService
-import server.web.casa.app.property.application.service.PropertyService
-import server.web.casa.app.property.domain.model.Favorite
+import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.FavoriteDTO
 import server.web.casa.app.property.domain.model.request.FavoriteRequest
 import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
