@@ -15,12 +15,13 @@ import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.domain.model.request.ReservationRequest
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationBureauEntity
 import server.web.casa.app.user.application.service.UserService
+import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-const val ROUTE_RESERVATION_BUREAU = "api/reservation/bureau"
+const val ROUTE_RESERVATION_BUREAU = ReservationRoute.RESERVATION_BUREAU
 
 @Tag(name = "Reservation", description = "Reservation's Management")
 @RestController

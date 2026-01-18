@@ -14,12 +14,13 @@ import server.web.casa.app.reservation.domain.model.ReservationFestiveRequest
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationFestiveEntity
 import server.web.casa.app.user.application.service.UserService
+import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-const val ROUTE_RESERVATION_FESTIVE = "api/reservation/festive"
+const val ROUTE_RESERVATION_FESTIVE = ReservationRoute.RESERVATION_FESTIVE
 
 @Tag(name = "Reservation", description = "Reservation's Management")
 @RestController
