@@ -49,13 +49,13 @@ class AuthService(
             if (user.phone != null) {
                 if (user.phone.isNotEmpty()){
                     phone =  normalizeAndValidatePhoneNumberUniversal(user.phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
-                    if(userRepository.findByPhoneOrEmail(phone) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Cet identifiant existe dans la plateforme.")
+                    if(userRepository.findByPhoneOrEmail(phone) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Ce numéro de téléphone est déjà associé à un compte existant.")
                     state = true
                 }
             }
         if (user.email != null){
             if(user.email.isNotEmpty()){
-                if(userRepository.findByPhoneOrEmail(user.email) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse existe dans la plateforme.")
+                if(userRepository.findByPhoneOrEmail(user.email) != null) throw ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse mail est déjà associé à un compte existant.")
                 state = true
             }
         }
