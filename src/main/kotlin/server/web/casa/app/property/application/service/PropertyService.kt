@@ -50,7 +50,7 @@ class PropertyService(
         val result = repository.save(data)
         toDomain(result.id!!)
     }
-    suspend fun getAll(): List<PropertyMasterDTO> {
+    suspend fun getAll(page: Int, size: Int, sortBy: String, sortOrder: String): List<PropertyMasterDTO> {
 //        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
 //        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
 //        val page = repository.findAll()
@@ -161,7 +161,7 @@ class PropertyService(
         val key = Pair(data,similary.map{it.toDomain()})
         return key
     }
-    suspend fun filterProduct(filterModel : PropertyFilter) = coroutineScope {
+    suspend fun filterProduct(filterModel: PropertyFilter, page: Int, sortOrder: String, sortBy: String, size: Int) = coroutineScope {
         val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,

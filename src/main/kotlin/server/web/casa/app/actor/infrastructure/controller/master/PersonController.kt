@@ -32,7 +32,7 @@ class PersonController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPersonActor(
         @Valid @RequestBody request: PersonUserRequest
-    ): ResponseEntity<Map<String, Any?>?>? = coroutineScope {
+    ) = coroutineScope {
         val accountItems = request.account
         if (accountItems.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisissez au moins un type de comptes.")
         val account = accountItems.map { accountService.findByIdAccount(it.typeAccount)}.first()
@@ -62,7 +62,7 @@ class PersonController(
     @PutMapping("/{id}")
     suspend fun updatePersonActor(
         @PathVariable("id") id : Long,
-        @RequestBody @Valid request: PersonRequest2): ResponseEntity<Map<String, Any>?>? = coroutineScope {
+        @RequestBody @Valid request: PersonRequest2) = coroutineScope {
         val updated = service.update(request,id)
         userService.updateUsername(updated.second.userId!!,"@"+toPascalCase(updated.second.firstName + updated.second.lastName))
         val response = mapOf("message" to "Person updated successfully", "person" to updated.second, "user" to updated.first)

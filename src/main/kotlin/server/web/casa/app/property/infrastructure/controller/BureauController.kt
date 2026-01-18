@@ -80,7 +80,7 @@ class BureauController(
 
     @Operation(summary = "List des bureaux")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllBureau(): ResponseEntity<Map<String, MutableList<BureauDTOMaster>>?>? = coroutineScope {
+    suspend fun getAllBureau() = coroutineScope {
         val data = service.getAllBureau()
         val response = mapOf("bureaux" to data)
         ResponseEntity.ok().body(response)
@@ -91,7 +91,7 @@ class BureauController(
     suspend fun updateFileBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: ImageChange
-    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope {
+    ) = coroutineScope {
         service.findById(bureauId)
         val result = if (request.images.isNotEmpty()) bureauImageService.updateFile(bureauId,request.images) else false
         val message = mutableMapOf("message" to "Modification effectuée avec succès")
@@ -106,7 +106,7 @@ class BureauController(
     suspend fun deleteFileBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: ImageChangeOther
-    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope{
+    ) = coroutineScope{
         service.findById(bureauId)
         val result = if (request.images.isNotEmpty()) bureauImageService.deleteFile(bureauId,request.images) else false
         val message = mutableMapOf("message" to "Suppression effectuée avec succès")
@@ -131,7 +131,7 @@ class BureauController(
     suspend fun updateBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: BureauRequest
-    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope {
+    ) = coroutineScope {
         userService.findIdUser(request.userId!!)
         val bureau = service.findById(bureauId)
         if (bureau.userId != request.userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté bureau.")
@@ -166,7 +166,7 @@ class BureauController(
         @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
         @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
-    ): ResponseEntity<Map<String, MutableList<BureauDTOMaster>>?>? = coroutineScope {
+    ) = coroutineScope {
         val data = service.filter(
             filterModel = PropertyFilter(
                 transactionType = transactionType,
@@ -194,7 +194,7 @@ class BureauController(
     suspend fun soldOutOrInBureau(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState
-    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope{
+    ) = coroutineScope{
         val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
         val data = service.findById(propertyId)
         data.sold = request.status
@@ -208,7 +208,7 @@ class BureauController(
     suspend fun toEnableOrDisableBureau(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState
-    ): ResponseEntity<MutableMap<String, String>?>? = coroutineScope{
+    )= coroutineScope{
         val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
         val data= service.findById(propertyId)
         data.isAvailable = request.status

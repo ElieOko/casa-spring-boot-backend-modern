@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
@@ -18,7 +17,6 @@ import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.dto.toDto
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.*
-import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyRoute
 import server.web.casa.utils.ApiResponse
