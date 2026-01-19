@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@Table("favorite_bureau")
+@Table("bureau_favorites")
 class FavoriteBureauEntity(
     @Id
     @Column("id")
