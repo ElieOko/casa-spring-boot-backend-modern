@@ -34,13 +34,10 @@ class VacanceController(
         if (request.images.size < 3) ResponseEntity.badRequest().body("Vous devez fournir au minimun 3 images pour votre site touristique")
         val agence = agenceService.getAllByUser(request.userId!!)
         if (agence.isEmpty()) ResponseEntity.badRequest().body("Vous devez avoir une agence au minimum un pour poster un site touristique")
-        request.agenceId = agence.first()?.id
+        request.agenceId = agence.first().agence?.id
         val data = service.create(request.toDomain())
         request.images.forEach { imageService.create(ImageRequestStandard(data.id!!,it?.name!!)) }
-        ApiResponseWithMessage(
-            data = data,
-            message = "Enregistrement réussie pour la votre cite de vacance",
-        )
+        ApiResponseWithMessage(data = data, message = "Enregistrement réussie pour la votre cite de vacance",)
     }
 
     @Operation(summary = "List des vacance")

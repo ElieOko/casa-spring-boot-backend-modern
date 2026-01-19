@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
@@ -16,9 +15,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.*
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
-import kotlin.collections.get
-import kotlin.collections.map
-import kotlin.collections.toList
+import kotlin.collections.*
 
 @Service
 class BureauService(
@@ -92,13 +89,7 @@ class BureauService(
         repository.save(model.toEntity())
     }
 
-    suspend fun filter(
-        filterModel : PropertyFilter,
-        page : Int,
-        size : Int,
-        sortBy : String,
-        sortOrder : String
-    ) =  coroutineScope {
+    suspend fun filter(filterModel: PropertyFilter, page: Int, size: Int, sortBy: String, sortOrder: String) = coroutineScope {
         val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,

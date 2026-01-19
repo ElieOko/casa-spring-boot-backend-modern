@@ -5,15 +5,11 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.MediaType
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.AgenceService
-import server.web.casa.app.property.domain.model.Agence
-import server.web.casa.app.property.domain.model.AgenceDTO
-import server.web.casa.app.property.domain.model.toDomain
+import server.web.casa.app.property.domain.model.*
 import server.web.casa.route.utils.AgenceRoute.AGENCE
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.utils.*
 
 @Tag(name = "Agence", description = "")
 @RestController

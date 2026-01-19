@@ -3,18 +3,14 @@ package server.web.casa.app.actor.application.service
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
+import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.domain.model.Person
-import server.web.casa.app.actor.domain.model.request.PersonRequest
 import server.web.casa.app.actor.domain.model.request.PersonRequest2
 import server.web.casa.app.actor.domain.model.toEntity
 import server.web.casa.app.actor.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
-import server.web.casa.app.actor.infrastructure.persistence.repository.TypeCardRepository
-import server.web.casa.app.user.application.service.UserService
+import server.web.casa.app.actor.infrastructure.persistence.repository.*
 import server.web.casa.app.user.domain.model.ImageUserRequest
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.utils.base64ToMultipartFile
@@ -26,8 +22,6 @@ class PersonService(
     private val repository: PersonRepository,
     private val gcsService: GcsService,
     private val cardRepository: TypeCardRepository,
-//    private val storageService: FileSystemStorageService,
-    private val userService: UserService,
     private val repositoryUser: UserRepository
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)

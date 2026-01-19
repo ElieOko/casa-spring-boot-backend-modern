@@ -1,9 +1,8 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-import org.springframework.http.HttpStatus
+import kotlinx.coroutines.flow.*
+import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.property.domain.model.Agence
@@ -13,15 +12,12 @@ import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.AgenceRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
-import server.web.casa.utils.storage.FileSystemStorageService
 
 @Service
 class AgenceService(
     private val repository: AgenceRepository,
     private val gcsService: GcsService,
-    private val storageService: FileSystemStorageService,
     private val vacance: VacanceService
-
     ) {
     suspend fun getAllAgence() = coroutineScope{
         val agenceByVacance = mutableListOf<VacanceAgence>()
@@ -36,9 +32,11 @@ class AgenceService(
         agenceByVacance.toList()
     }
 
-    suspend fun getAllByUser(userId : Long): List<Agence?> = coroutineScope{
+    suspend fun getAllByUser(userId : Long) = coroutineScope{
+        val agenceByVacance = mutableListOf<VacanceAgence>()
         val data = repository.getAllByUser(userId)
-        data.map {it?.toDomain()}.toList()
+        data.toList().forEach { agenceByVacance.add(VacanceAgence(agence = it?.toDomain(), site = vacance.getAllVacanceByAgence(it?.id ?: 0))) }
+        agenceByVacance.toList()
     }
 
     suspend fun create(agence: Agence): Agence = coroutineScope {
