@@ -9,6 +9,7 @@ import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.domain.model.SollicitationDTO
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.prestation.infrastructure.persistance.repository.SollicitationRepository
+import server.web.casa.app.reservation.domain.model.ReservationBureauDTO
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.user.application.service.UserService
 
@@ -34,6 +35,12 @@ class SollicitationService(
         val entity = p.findByUserId(id)
         return entity?.map{toDto(it)}?.toList()
     }
+    suspend fun findByHostUser(userId: Long):List<SollicitationDTO>?{
+        return p.findByHostUserId(userId).map{
+            toDto(it)
+        }.toList()
+    }
+
 
     suspend fun updateStatus(entity: SollicitationEntity, status: ReservationStatus): SollicitationDTO?{
             entity.status = status.toString()
