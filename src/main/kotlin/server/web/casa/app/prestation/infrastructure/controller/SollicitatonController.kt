@@ -20,6 +20,7 @@ import server.web.casa.app.prestation.domain.model.SollicitationDTO
 import server.web.casa.app.prestation.domain.request.SollicitationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.domain.model.ReservationVacanceDTO
 import server.web.casa.app.reservation.infrastructure.controller.RequestUpdate
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.sollicitation.SollicitationRoute
@@ -83,6 +84,14 @@ class SollicitatonController(
     suspend fun getByUserId(@PathVariable userId: Long): ResponseEntity<Map<String, List<SollicitationDTO>?>>{
         val find = service.findByUserId(userId)
         return ResponseEntity.ok(mapOf("data" to find))
+    }
+    @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<SollicitationDTO>? >> {
+        val user = userS.findIdUser(userId)
+        val reservation = service.findByHostUser(user.userId!!)
+        val response = mapOf("reservation" to reservation)
+        return ResponseEntity.ok(response)
+
     }
     @PutMapping("/update/status/{id}")
     suspend fun updateSollicitationStatus(

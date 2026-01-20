@@ -15,12 +15,13 @@ import server.web.casa.app.reservation.domain.model.ReservationChambreHotelReque
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationChambreHotelEntity
 import server.web.casa.app.user.application.service.UserService
+import server.web.casa.route.reservation.ReservationRoute
 import server.web.casa.utils.Mode
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-const val ROUTE_RESERVATION_HOTEL = "api/reservation/hotel"
+const val ROUTE_RESERVATION_HOTEL = ReservationRoute.RESERVATION_HOTEL
 
 @Tag(name = "Reservation", description = "Reservation's Management")
 @RestController
@@ -39,7 +40,6 @@ class ReservationHotelController(
         @Valid @RequestBody request: ReservationChambreHotelRequest
     ): ResponseEntity<Map<String, Any?>> {
         val user = userS.findIdUser(request.userId)
-        //val bureau = chambrHTL.findById(request.hotelId)
         val chambrehotel = chambrHTL.getAll().find{ it.id == request.chambreId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "chambre hotel not found"))
         val hotel = hotlS.getAllHotel().find{ it.hotel.id == chambrehotel.hotelId }?.hotel ?: return ResponseEntity.badRequest().body(mapOf("error" to "hotel not found"))
 
@@ -47,8 +47,7 @@ class ReservationHotelController(
             val responseOwnProperty = mapOf("error" to "You can't reserve your own hotel")
             return ResponseEntity.ok().body(responseOwnProperty )
         }
-        if (request.endDate > request.startDate ){
-            //&& request.startDate >= LocalDate.now()
+        if (request.endDate < request.startDate || request.startDate < LocalDate.now()){
             val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
             return ResponseEntity.ok().body(responseNotFound )
         }
@@ -62,12 +61,6 @@ class ReservationHotelController(
             startDate = request.startDate,
             endDate = request.endDate,
         )
-        //!= verify
-        //val propertyEntity = chambrHTL.findById(request.hotelId)
-            //.orElseThrow { RuntimeException("Property not found") }
-
-        //val userEntity = userS.findIdUser(request.userId)
-            //.orElseThrow { RuntimeException("User not found") }
 
        val lastStatusReservationUserProperty = service.findByUserProperty(chambrehotel.id, user.userId!!)
                                                 ?.lastOrNull()?.reservation
@@ -127,8 +120,7 @@ class ReservationHotelController(
             "message" to "Votre reservation à la date du ${reservationCreate.reservation.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
             "reservation" to reservationCreate,
             "proprietaire" to  userS.findIdUser( hotel.userId!!),
-            //"property" to property,
-           // "notificationSendState" to notification
+           "notificationSendState" to "notification bientot disponible"
         )
         return ResponseEntity.status(201).body(response)
     }
@@ -190,17 +182,13 @@ class ReservationHotelController(
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/bureau/{hotelId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/chambre/{hotelId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByProperty(@PathVariable hotelId: Long): ResponseEntity<Map<String, Any?>> {
         val property = chambrHTL.getAll().find{ it.id == hotelId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "hote not found"))
         // chambrHTL.findById(hotelId) ?: return ResponseEntity.ok(mapOf("error" to "property not found"))//.orElse(null)
         val reservation = service.findByProperty(property.id!!)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
-//        }?: RuntimeException("Property not found with id: $hotelId")
-//        val response = mapOf("message" to "Property not found with id: $hotelId")
-
-//        return ResponseEntity.badRequest().body(response)
     }
 
     @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -242,28 +230,6 @@ class ReservationHotelController(
         }
         return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
-
-  /*  @PutMapping("/cancel/{id}")
-    suspend fun cancelReservation(
-        @PathVariable id: Long,
-        @RequestBody reason: String?
-    ): ResponseEntity<Map<String, ReservationBureauEntity?>> {
-        val cancel = service.cancelOrKeepReservation(id, false,reason, ReservationStatus.CANCELLED)
-        val reservation = service.findId(id)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-    }
-
-    @PutMapping("/keep/{id}/")
-    suspend fun keepReservation(
-        @PathVariable id: Long,
-        @RequestBody reason: String ?
-    ): ResponseEntity<Map<String, ReservationBureauEntity?>> {
-        val keep = service.cancelOrKeepReservation(id, true, reason, ReservationStatus.PENDING)
-        val reservation = service.findId(id)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-    }*/
 
     @DeleteMapping("/delete/{id}")
     suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {

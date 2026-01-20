@@ -8,13 +8,13 @@ import server.web.casa.app.property.infrastructure.persistence.entity.favorite.F
 
 interface FavoriteBureauRepository: CoroutineCrudRepository<FavoriteBureauEntity, Long>
 {
-    @Query("SELECT * FROM favorite_bureau WHERE user_id = :user")
+    @Query("SELECT * FROM bureau_favorites WHERE user_id = :user")
     fun findFavoriteByUserId(@Param("user") user: Long): Flow<FavoriteBureauEntity>?
 
-    @Query("SELECT * FROM favorite_bureau WHERE bureau_id = :bureauId")
+    @Query("SELECT * FROM bureau_favorites WHERE bureau_id = :bureauId")
     fun findFavoriteByFestId(@Param("bureauId") bureauId: Long): Flow<FavoriteBureauEntity>?
 
-    @Query("SELECT * FROM favorite_bureau WHERE bureau_id = :bureauId AND user_id = :user")
+    @Query("SELECT * FROM bureau_favorites WHERE bureau_id = :bureauId AND user_id = :user")
     fun findFavoriteExist(@Param("bureauId") bureauId: Long, @Param("user") user: Long): Flow<FavoriteBureauEntity>?
 
 }
