@@ -45,6 +45,9 @@ class PrestationService(
    suspend fun getAllData()= coroutineScope {
       compactModel(repository.findAllFilter().toList())
    }
+    suspend fun getAllData2()= coroutineScope {
+        compactModelAdmin(repository.findAllFilter().toList())
+    }
 
    private suspend fun compactModel(model : List<PrestationEntity>) = coroutineScope {
         val prestationList = mutableListOf<PrestationDTOMaster>()
@@ -63,14 +66,14 @@ class PrestationService(
         prestationList
     }
    private suspend fun compactModelAdmin(model : List<PrestationEntity>) = coroutineScope {
-        val prestationList = mutableListOf<PrestationDTOMasterAdmin>()
+        val prestationList = mutableListOf<PrestationDTOMaster>()
         val ids =  model.map { it.id!! }
         val images = repositoryImage.findByPrestationIdIn(ids).toList()
         val imagesByPrestation = images.groupBy { it.prestationId }
         model.forEach { pres->
             val user = userService.findIdUser(pres.userId)
             prestationList.add(
-                PrestationDTOMasterAdmin(
+                PrestationDTOMaster(
                     prestation = pres.toDomain(),
                     image = imagesByPrestation[pres.id]?.map { it.toDomain() } ?: emptyList(),
                     postBy = user.username,
