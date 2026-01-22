@@ -51,7 +51,7 @@ class UserController(
         @RequestBody @Valid user : UserRequestChange
     ) : ResponseEntity<UserDto> {
 //        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-        val id = auth.user()?.userId
+        val id = auth.user()?.first?.userId
         val updated = userService.updateUser(id!!,user)
         return ResponseEntity.ok(updated)
     }

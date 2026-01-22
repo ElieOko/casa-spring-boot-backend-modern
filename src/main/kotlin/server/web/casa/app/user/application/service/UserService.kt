@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageEntity
 import server.web.casa.app.user.domain.model.*
@@ -27,7 +28,7 @@ import kotlin.time.ExperimentalTime
 @Profile(Mode.DEV)
 class UserService(
     private val repository: UserRepository,
-    private val personRepository: PersonRepository,
+    private val personService: PersonService,
     private val service: TypeAccountService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -114,5 +115,9 @@ class UserService(
         }
         repository.deleteById(id)
         return true
+    }
+
+    suspend fun findPersonByUser(userId : Long) = coroutineScope{
+        personService.findByIdPersonUser(userId)
     }
 }

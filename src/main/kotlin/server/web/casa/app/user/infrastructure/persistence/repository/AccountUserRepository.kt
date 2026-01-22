@@ -9,4 +9,6 @@ interface AccountUserRepository : CoroutineCrudRepository<AccountUserEntity, Lon
     @Query("SELECT * FROM account_users WHERE user_id = :userId AND account_id = :accountId")
     suspend fun findByUserAndAccount(userId: Long, accountId : Long) : AccountUserEntity?
     fun findByUserIdIn(userIds: List<Long>): Flow<AccountUserEntity>
+    @Query("SELECT * FROM account_users WHERE user_id = :userId")
+    fun findAllAccountByUserId(userId: Long): Flow<AccountUserEntity>
 }

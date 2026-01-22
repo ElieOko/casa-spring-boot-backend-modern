@@ -104,7 +104,7 @@ class AuthController(
         val userConnect = auth.user()
         val new = user.newPassword
 //        val old = user.oldPassword
-        authService.changePassword(userConnect?.userId!!,new)
+        authService.changePassword(userConnect?.first?.userId!!,new)
         val message = mapOf("message" to "Mot de passe changé avec succès")
         ResponseEntity.ok(message)
     }
