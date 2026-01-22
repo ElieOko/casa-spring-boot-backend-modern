@@ -34,8 +34,8 @@ class PersonService(
     suspend fun findByIdPerson(id : Long): Person? = coroutineScope  {
         repository.findById(id)?.toDomain() ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "ID $id not found.")
     }
-    suspend fun findByIdPersonUser(id : Long): Person? {
-        return repository.findAll().filter { it.userId == id }.firstOrNull()?.toDomain()
+    suspend fun findByIdPersonUser(id : Long): Person? = coroutineScope {
+        repository.findByUser(id)?.toDomain()
     }
     suspend fun update(id : Long,model: Person): Person {
        val data = repository.findById(id)
@@ -44,9 +44,8 @@ class PersonService(
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "Invalid credentials.")
     }
-    suspend fun findByIdUser(userId : Long): Person? {
-       val profile: Person? = repository.findAll().filter { it.userId == userId }.firstOrNull()?.toDomain()
-       return profile
+    suspend fun findByIdUser(userId : Long): Person?  = coroutineScope {
+       repository.findByUser(userId)?.toDomain()
     }
     suspend fun changeFile(imageUser: ImageUserRequest, userId: Long) = coroutineScope {
         val person = repository.findByUser(userId)?: throw Exception()
