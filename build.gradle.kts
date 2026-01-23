@@ -4,6 +4,7 @@ plugins {
 	id("org.springframework.boot") version "4.0.0"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("io.sentry.jvm.gradle") version "5.12.2"
+	id("org.owasp.dependencycheck") version "12.2.0"
 	kotlin("plugin.jpa") version "2.2.10"
 }
 
