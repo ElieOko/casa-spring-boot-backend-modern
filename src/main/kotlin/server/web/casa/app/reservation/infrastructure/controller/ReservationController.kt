@@ -40,7 +40,7 @@ const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
 class ReservationController(
     private val service: ReservationService,
-    private val userService: UserService,
+    private val userS: UserService,
     private val propertyService: PropertyService,
     private val propertyR: PropertyRepository,
     private val userR: UserRepository,
@@ -52,7 +52,7 @@ class ReservationController(
     suspend fun create(
         @Valid @RequestBody request: ReservationRequest
     ): ResponseEntity<Map<String, Any?>> = coroutineScope {
-        val user = userService.findIdUser(request.userId)
+        val user = userS.findIdUser(request.userId)
         val property = propertyService.findByIdProperty(request.propertyId)
 
         if(property.first.property.userId == user.userId){
@@ -158,25 +158,45 @@ class ReservationController(
     }
     @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllReservation(): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope{
-       val data = service.findAllReservation()
-       val response = mapOf("reservation" to data)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
+        val data = service.findAllReservation()
+        val response = mapOf("reservation" to data)
        ResponseEntity.ok().body(response)
     }
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
      suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
         val reservation = service.findById(id)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
     }
     @GetMapping("/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByStaus(@PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByStatus(status)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
     }
     @GetMapping("/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByDate(@PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByDate(inputDate)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -184,6 +204,11 @@ class ReservationController(
 
     @GetMapping("/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByMonthYear(@PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByMonth(month, year)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -191,6 +216,11 @@ class ReservationController(
 
     @GetMapping("/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByPYear(year)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -198,6 +228,11 @@ class ReservationController(
 
     @GetMapping("/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationInInterval(@PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>?>> = coroutineScope {
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByInterval(startDateInput, endDateInput)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -206,6 +241,11 @@ class ReservationController(
     @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> = coroutineScope {
         val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByUser(user.userId!!)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -214,6 +254,11 @@ class ReservationController(
     @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val property : PropertyEntity? = (propertyR.findById(propertyId) ?: ResponseEntity.ok(mapOf("error" to "property not found"))) as PropertyEntity?
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != property?.user) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByProperty(property?.id!!)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -222,6 +267,11 @@ class ReservationController(
     @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationDTO>?>> = coroutineScope {
         val user = userR.findById(userId) ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "user Not Found.")
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val reservation = service.findByHostUser(user.userId!!)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -241,8 +291,10 @@ class ReservationController(
         val proprioCheck = userRequest.userId == proprioId?.user
         val emetCheck = userRequest.userId == userId
 
-        if(emetCheck || proprioCheck){
-            if (proprioCheck){
+        val checkAdmin = userS.isAdmin()
+
+        if(emetCheck || proprioCheck || checkAdmin.first){
+            if (proprioCheck || checkAdmin.first){
                 val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
                 ResponseEntity.ok(mapOf("reservation" to updated))
             }
@@ -279,7 +331,16 @@ class ReservationController(
 
     @DeleteMapping("/delete/{id}")
     suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>>  = coroutineScope {
-        service.findById(id)?.reservation ?: ResponseEntity.ok(mapOf("message" to "Reservation not found"))
+        val owner = service.findById(id)?.reservation ?: throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Reservation not found"
+        )
+        val propertyOwner = propertyService.findById(owner.propertyId!!)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != owner.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
         val notificationDelete = notif.deleteByReservation(id)
         if (notificationDelete) {
             service.deleteReservationById(id)
@@ -290,18 +351,29 @@ class ReservationController(
     }
     @DeleteMapping("/delete/all")
     suspend fun deleteReservationAll(): ResponseEntity<Map<String, String>> = coroutineScope {
-       service.deleteAll()
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
+        service.deleteAll()
        ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
     }
 
     @PutMapping("/notification/partners/{reservationId}")
     suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope{
         val reservation = service.findById(reservationId)?.reservation
-        if (reservation ==null){
+        if (reservation == null){
             val response = mapOf("error" to "reservation not found")
             ResponseEntity.ok(response)
         }
-        val notification = notif.dealConcludedHost(reservation?.id!!, true)
+        val propertyOwner = propertyService.findById(reservation?.propertyId!!)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
+        val notification = notif.dealConcludedHost(reservation.id!!, true)
         val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
         notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
         val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
@@ -331,13 +403,24 @@ class ReservationController(
        @PathVariable reservationId: Long,
        @PathVariable state: Boolean
     ): ResponseEntity<Map<String, Any?>> = coroutineScope {
-        val reservation = service.findById(reservationId)!!.reservation
-        val notification = if(reservation != null) notif.stateReservationHost(reservation.id!!, state) else null
+        //val reservation = service.findById(reservationId)!!.reservation
+       val reservation = service.findById(reservationId)?.reservation
+       if (reservation == null){
+           val response = mapOf("error" to "reservation not found")
+           ResponseEntity.ok(response)
+       }
+       val propertyOwner = propertyService.findById(reservation?.propertyId!!)
+       val checkAdmin = userS.isAdmin()
+       if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+           HttpStatusCode.valueOf(404),
+           "Authorization denied."
+       )
+        val notification = notif.stateReservationHost(reservation.id!!, state)
         val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
         if (state){
-            val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation?.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
-            notificationService.sendNotificationToUser(reservation?.userId.toString(),note2.toDomain())
-            val hostId = propertyR.findById(reservation?.propertyId!!)?.user
+            val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
+            notificationService.sendNotificationToUser(reservation.userId.toString(),note2.toDomain())
+            val hostId = propertyR.findById(reservation.propertyId)?.user
             val note = notification2.save(NotificationCasaEntity(id = null, userId = hostId.toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString()))
             notificationService.sendNotificationToUser(hostId.toString(),note.toDomain())
         }
@@ -346,13 +429,19 @@ class ReservationController(
 
     @PutMapping("/notification/cancel/{reservationId}")
     suspend fun dealCancel(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
-        val reservation = service.findById(reservationId)!!.reservation
-        if (reservation ==null){
+        val reservation = service.findById(reservationId)?.reservation
+        if (reservation == null){
             val response = mapOf("error" to "reservation not found")
-           ResponseEntity.ok(response)
+            ResponseEntity.ok(response)
         }
-        val notification = notif.stateReservationGuestCancel(reservation!!.id!!)
-        val propertyEntity = propertyR.findById(reservation.propertyId!!)
+        val propertyOwner = propertyService.findById(reservation?.propertyId!!)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied."
+        )
+        val notification = notif.stateReservationGuestCancel(reservation.id!!)
+        val propertyEntity = propertyR.findById(reservation.propertyId)
            // .takeIf{ it.isNotEmpty() }!!
            // .filter { entity -> entity!!.propertyId==reservation.property.propertyId }[0] //.filter { }//findById(reservation.property.propertyId)
         propertyEntity!!.isAvailable = true
