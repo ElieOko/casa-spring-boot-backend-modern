@@ -13,12 +13,12 @@ interface UserRepository : CoroutineCrudRepository<UserEntity, Long> {
    suspend fun findByPhoneOrEmail(identifier: String) : UserEntity?
 //    suspend fun findByEmailOrPhone(email: String, phone: String): Mono<UserEntity>?
 
-    @Query("SELECT * FROM users WHERE is_lock = false")
-    override suspend fun findById(id: Long): UserEntity?
+//    @Query("SELECT * FROM users WHERE id=:id")
+//    override suspend fun findById(id: Long): UserEntity?
     @Modifying
     @Query("""UPDATE users
-    SET is_lock = :lock
-    WHERE user_id = :userId"""
+    SET is_lock = :lock 
+    WHERE id = :userId"""
     )
     suspend fun isLock(userId: Long, lock: Boolean = true): Int
 }
