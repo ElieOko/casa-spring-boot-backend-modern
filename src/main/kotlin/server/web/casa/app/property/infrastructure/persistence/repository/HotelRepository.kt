@@ -13,7 +13,7 @@ interface HotelRepository : CoroutineCrudRepository<HotelEntity, Long>{
 
     @Modifying
     @Query(
-        """ UPDATE salle_festives
+        """ UPDATE hotels
     SET is_available = :state
     WHERE user_id = :userId"""
     )
