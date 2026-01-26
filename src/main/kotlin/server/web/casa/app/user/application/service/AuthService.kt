@@ -140,7 +140,7 @@ class AuthService(
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
     }
-    suspend fun lockedOrUnlocked(userId : Long, isLock : Boolean = true) = coroutineScope{
+    suspend fun lockedOrUnlocked(userId: Long, isLock: Boolean = true) = coroutineScope{
         when {
             userRepository.findById(userId) != null -> {
                 if (prestation.findAllFindByUser(userId).toList().isNotEmpty())
