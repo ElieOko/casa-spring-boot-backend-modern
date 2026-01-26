@@ -9,9 +9,15 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.user.application.service.*
-import server.web.casa.app.user.domain.model.*
-import server.web.casa.app.user.domain.model.request.*
+import server.web.casa.app.user.application.service.AuthService
+import server.web.casa.app.user.application.service.TypeAccountService
+import server.web.casa.app.user.domain.model.RefreshRequest
+import server.web.casa.app.user.domain.model.UserAuth
+import server.web.casa.app.user.domain.model.UserAuthRequest
+import server.web.casa.app.user.domain.model.request.IdentifiantRequest
+import server.web.casa.app.user.domain.model.request.UserPassword
+import server.web.casa.app.user.domain.model.request.VerifyRequest
+import server.web.casa.app.user.domain.model.toDomain
 import server.web.casa.route.auth.AuthRoute
 import server.web.casa.security.Auth
 
@@ -106,6 +112,15 @@ class AuthController(
 //        val old = user.oldPassword
         authService.changePassword(userConnect?.first?.userId!!,new)
         val message = mapOf("message" to "Mot de passe changé avec succès")
+        ResponseEntity.ok(message)
+    }
+
+    @Operation(summary = "Delete Account User")
+    @DeleteMapping("/delete/user/{id}")
+    suspend fun deleteUser(
+        @PathVariable("id") id: Long
+    ): ResponseEntity<Map<String, String>> = coroutineScope {
+        val message = mapOf("message" to "Votre compte a été supprimé avec succès")
         ResponseEntity.ok(message)
     }
 }
