@@ -40,4 +40,12 @@ interface SalleFestiveRepository : CoroutineCrudRepository<SalleFestiveEntity, L
         WHERE user_id = :userId
     """)
     fun findAllByUser(userId: Long):Flow<SalleFestiveEntity>
+
+    @Modifying
+    @Query(
+        """ UPDATE salle_festives
+    SET is_available = :state
+    WHERE user_id = :userId"""
+    )
+    suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
 }
