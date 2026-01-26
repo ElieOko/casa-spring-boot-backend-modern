@@ -18,6 +18,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.PropertyIm
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
+import server.web.casa.security.Auth
 import server.web.casa.utils.Mode
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -30,6 +31,7 @@ class UserService(
     private val repository: UserRepository,
     private val personService: PersonService,
     private val service: TypeAccountService,
+    private val auth: Auth
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     val name = "utilisateur"
@@ -119,5 +121,15 @@ class UserService(
 
     suspend fun findPersonByUser(userId : Long) = coroutineScope{
         personService.findByIdPersonUser(userId)
+    }
+
+    suspend fun isAdmin():Pair<Boolean, Long?>{
+        val user = auth.user()
+        val state = user?.second?.find { true } == true
+        val id = user?.first?.userId ?: throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied, please login"
+        )
+        return state to id
     }
 }
