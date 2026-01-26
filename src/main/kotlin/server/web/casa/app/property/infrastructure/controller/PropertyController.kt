@@ -142,7 +142,9 @@ class PropertyController(
 
     @Operation(summary = "Voir les Property")
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllProperty(): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
+    suspend fun getAllProperty(
+        request: HttpServletRequest
+    ): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
        val page = 0
        val size = 15
        val sortBy = "title"
@@ -153,6 +155,12 @@ class PropertyController(
            sortBy = sortBy,
            sortOrder = sortOrder
        ).toList()
+        val userAgent = request.getHeader("User-Agent")
+       val deviceBrand = request.getHeader("X-Device-Brand")
+       val deviceModel = request.getHeader("X-Device-Model")
+       val os = request.getHeader("X-OS")
+       val osVersion = request.getHeader("X-OS-Version")
+       log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
        val response = mapOf("properties" to data)
        ResponseEntity.ok().body(response)
     }
