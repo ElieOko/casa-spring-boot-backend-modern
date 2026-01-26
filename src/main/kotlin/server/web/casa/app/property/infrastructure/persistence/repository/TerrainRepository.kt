@@ -39,4 +39,12 @@ interface TerrainRepository  : CoroutineCrudRepository<TerrainEntity, Long> {
         WHERE user_id = :userId
     """)
     fun findAllByUser(userId: Long):Flow<TerrainEntity>
+
+    @Modifying
+    @Query(
+        """ UPDATE terrains
+    SET is_available = :state
+    WHERE user_id = :userId"""
+    )
+    suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
 }
