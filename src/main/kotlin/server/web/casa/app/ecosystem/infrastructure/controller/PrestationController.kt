@@ -71,6 +71,18 @@ class PrestationController(
         ResponseEntity.ok().body(message)
     }
 
+    @Operation(summary = "Voir les Prestaions service")
+    @GetMapping("/api/dashb",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPrestationAdmin() = coroutineScope {
+        val user = auth.user()
+        val state: Boolean? = user?.second?.find{ true }
+        val message = when (state) {
+            true -> mapOf("prestations" to prestationService.getAllData2().toList())
+            false,null -> mapOf("prestations" to prestationService.getAllData().toList())
+        }
+        ResponseEntity.ok().body(message)
+    }
+
     @Operation(summary = "Get Prestaion by ID")
     @GetMapping("/{prestationId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
