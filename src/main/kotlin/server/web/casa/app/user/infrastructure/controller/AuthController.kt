@@ -116,11 +116,10 @@ class AuthController(
     }
 
     @Operation(summary = "Delete Account User")
-    @DeleteMapping("/delete/user/{id}")
-    suspend fun deleteUser(
-        @PathVariable("id") id: Long
-    ): ResponseEntity<Map<String, String>> = coroutineScope {
-        val message = mapOf("message" to "Votre compte a été supprimé avec succès")
+    @DeleteMapping("/delete/user")
+    suspend fun lockAccount(): ResponseEntity<Map<String, String>> = coroutineScope {
+        val state = authService.lockedOrUnlocked(auth.user()?.first?.userId?:0L)
+        val message = mapOf("message" to if (state) "Votre compte a été supprimé avec succès" else "Cet utilisateur n'existe pas")
         ResponseEntity.ok(message)
     }
 }
