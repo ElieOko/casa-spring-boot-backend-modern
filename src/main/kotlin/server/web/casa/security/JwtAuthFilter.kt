@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
+import server.web.casa.app.property.domain.model.ClientRequestInfo
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.utils.Mode
 
@@ -31,7 +32,15 @@ class JwtAuthFilter(
         filterChain: FilterChain
     ) {
         val path = request.requestURI
-
+        val info = ClientRequestInfo(
+            ip = getClientIp(request),
+            userAgent = request.getHeader("User-Agent"),
+            deviceBrand = request.getHeader("X-Device-Brand"),
+            deviceModel = request.getHeader("X-Device-Model"),
+            os = request.getHeader("X-OS"),
+            osVersion = request.getHeader("X-OS-Version"),
+        )
+        request.setAttribute(ATTR, info)
         // Liste des chemins publics INCLUANT WebSocket
         val publicPaths = listOf(
             "/",
@@ -99,7 +108,13 @@ class JwtAuthFilter(
             sendJsonError(response, request, HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
         }
     }
-
+    private fun getClientIp(req: HttpServletRequest): String? {
+        val xff = req.getHeader("X-Forwarded-For")
+        if (!xff.isNullOrBlank()) return xff.split(",").first().trim()
+        val xRealIp = req.getHeader("X-Real-IP")
+        if (!xRealIp.isNullOrBlank()) return xRealIp.trim()
+        return req.remoteAddr
+    }
     fun sendJsonError(
         response: HttpServletResponse,
         request: HttpServletRequest,
@@ -117,5 +132,8 @@ class JwtAuthFilter(
         )
         val json = ObjectMapper().writeValueAsString(errorResponse)
         response.writer.write(json)
+    }
+    companion object {
+        const val ATTR = "CLIENT_REQUEST_INFO"
     }
 }
