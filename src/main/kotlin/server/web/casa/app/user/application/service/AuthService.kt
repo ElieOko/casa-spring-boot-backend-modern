@@ -39,10 +39,10 @@ class AuthService(
     private val userRepository: UserRepository,
     private val prestation: PrestationRepository,
     private val property: PropertyRepository,
-    private val hotelRepository: HotelRepository,
+    private val hotel: HotelRepository,
     private val bureau: BureauRepository,
     private val terrain: TerrainRepository,
-    private val festiveRepository: SalleFestiveRepository,
+    private val festive: SalleFestiveRepository,
     private val funeraire: SalleFuneraireRepository,
     private val person: PersonRepository,
     private val hashEncoder: HashEncoder,
@@ -140,20 +140,29 @@ class AuthService(
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
     }
-    suspend fun deleteUser(userId : Long){
-        val user = userRepository.findById(userId)
-        if (user != null){
-            user.isLock = true
-            userRepository.save(user)
-            val pres = prestation.findAllFindByUser(userId).toList().isNotEmpty()
-            if (pres) prestation.setUpdateIsAvailable(userId)
-            val bur = bureau.findAllByUser(userId).toList().isNotEmpty()
-
-            val actor = person.findByUser(userId)
-            if (actor != null) {
-                actor.isLock = true
-                person.save(actor)
+    suspend fun lockedOrUnlocked(userId : Long, isLock : Boolean = true) = coroutineScope{
+        when {
+            userRepository.findById(userId) != null -> {
+                if (prestation.findAllFindByUser(userId).toList().isNotEmpty())
+                    prestation.setUpdateIsAvailable(userId, !isLock)
+                if (bureau.findAllByUser(userId).toList().isNotEmpty())
+                    bureau.setUpdateIsAvailable(userId, !isLock)
+                if (property.findAllByUser(userId).toList().isNotEmpty())
+                    property.setUpdateIsAvailable(userId, !isLock)
+                if (funeraire.findAllByUser(userId).toList().isNotEmpty())
+                    funeraire.setUpdateIsAvailable(userId, !isLock)
+                if (festive.findAllByUser(userId).toList().isNotEmpty())
+                    festive.setUpdateIsAvailable(userId, !isLock)
+                if (terrain.findAllByUser(userId).toList().isNotEmpty())
+                    terrain.setUpdateIsAvailable(userId, !isLock)
+                if (hotel.getAllByUser(userId).toList().isNotEmpty())
+                    hotel.setUpdateIsAvailable(userId, !isLock)
+                if (person.findByUser(userId) != null)
+                    person.isLock(userId, isLock)
+                userRepository.isLock(userId, isLock)
+                true
             }
+            else-> false
         }
     }
     @Transactional
