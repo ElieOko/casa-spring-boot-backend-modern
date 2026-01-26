@@ -48,4 +48,13 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
         WHERE user_id = :userId
     """)
     fun findAllByUser(userId: Long):Flow<PropertyEntity>
+
+    @Modifying
+    @Query(
+        """ UPDATE properties
+    SET is_available = :state
+    WHERE user_id = :userId"""
+    )
+    suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
+
 }
