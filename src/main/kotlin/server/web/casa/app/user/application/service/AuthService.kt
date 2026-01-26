@@ -14,6 +14,14 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import server.web.casa.adaptater.provide.twilio.TwilioService
 import server.web.casa.app.actor.application.service.PersonService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
+import server.web.casa.app.ecosystem.infrastructure.persistence.repository.PrestationRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.BureauRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.HotelRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.SalleFestiveRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.SalleFuneraireRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.TerrainRepository
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.*
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
@@ -29,6 +37,14 @@ import kotlin.time.ExperimentalTime
 class AuthService(
     private val jwtService: JwtService,
     private val userRepository: UserRepository,
+    private val prestation: PrestationRepository,
+    private val property: PropertyRepository,
+    private val hotelRepository: HotelRepository,
+    private val bureau: BureauRepository,
+    private val terrain: TerrainRepository,
+    private val festiveRepository: SalleFestiveRepository,
+    private val funeraire: SalleFuneraireRepository,
+    private val person: PersonRepository,
     private val hashEncoder: HashEncoder,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val twilio : TwilioService,
@@ -123,6 +139,22 @@ class AuthService(
             return updatedUser.toDomain()
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
+    }
+    suspend fun deleteUser(userId : Long){
+        val user = userRepository.findById(userId)
+        if (user != null){
+            user.isLock = true
+            userRepository.save(user)
+            val pres = prestation.findAllFindByUser(userId).toList().isNotEmpty()
+            if (pres) prestation.setUpdateIsAvailable(userId)
+            val bur = bureau.findAllByUser(userId).toList().isNotEmpty()
+
+            val actor = person.findByUser(userId)
+            if (actor != null) {
+                actor.isLock = true
+                person.save(actor)
+            }
+        }
     }
     @Transactional
     suspend fun refresh(refreshToken: String): TokenPair {
