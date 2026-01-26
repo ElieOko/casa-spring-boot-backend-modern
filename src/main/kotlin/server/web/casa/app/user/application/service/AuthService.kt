@@ -140,9 +140,11 @@ class AuthService(
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
     }
-    suspend fun lockedOrUnlocked(userId: Long, isLock: Boolean = true) = coroutineScope{
-        when {
+    suspend fun lockedOrUnlocked(userId: Long, isLock: Boolean = true) : Boolean{
+        log.info("user method -> $userId")
+    val state = when {
             userRepository.findById(userId) != null -> {
+                log.info("in")
                 if (prestation.findAllFindByUser(userId).toList().isNotEmpty())
                     prestation.setUpdateIsAvailable(userId, !isLock)
                 if (bureau.findAllByUser(userId).toList().isNotEmpty())
@@ -164,6 +166,7 @@ class AuthService(
             }
             else-> false
         }
+    return state
     }
     @Transactional
     suspend fun refresh(refreshToken: String): TokenPair {
