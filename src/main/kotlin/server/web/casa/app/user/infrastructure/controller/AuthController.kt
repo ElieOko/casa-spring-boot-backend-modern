@@ -116,10 +116,21 @@ class AuthController(
     }
 
     @Operation(summary = "Delete Account User")
-    @DeleteMapping("/delete/user")
+    @DeleteMapping("/api/delete/user")
     suspend fun lockAccount(): ResponseEntity<Map<String, String>> = coroutineScope {
-        val state = authService.lockedOrUnlocked(auth.user()?.first?.userId?:0L)
+        val userId = auth.user()?.first?.userId
+        if (userId == null) ResponseEntity.status(404).body(mapOf("message" to "User not found"))
+        val state = authService.lockedOrUnlocked(userId as Long)
         val message = mapOf("message" to if (state) "Votre compte a été supprimé avec succès" else "Cet utilisateur n'existe pas")
+        ResponseEntity.ok(message)
+
+
+    }
+    @Operation(summary = "Recovery Account User")
+    @PutMapping("/api/recovery/user/{id}")
+    suspend fun unlockAccount(@PathVariable("id") id : Long): ResponseEntity<Map<String, String>> = coroutineScope {
+        val state = authService.lockedOrUnlocked(id,false)
+        val message = mapOf("message" to if (state) "Votre compte a été restauré avec succès" else "Cet utilisateur n'existe pas")
         ResponseEntity.ok(message)
     }
 }
