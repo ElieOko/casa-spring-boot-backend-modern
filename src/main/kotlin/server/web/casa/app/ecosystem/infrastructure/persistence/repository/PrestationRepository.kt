@@ -22,4 +22,12 @@ interface PrestationRepository : CoroutineCrudRepository<PrestationEntity, Long>
 
     @Query("SELECT * FROM prestations WHERE is_active = true and user_id = :userId")
     suspend fun findAllFindByUser(userId: Long) : Flow<PrestationEntity>
+
+    @Modifying
+    @Query(
+        """ UPDATE prestations
+    SET is_active = :state
+    WHERE user_id = :userId"""
+    )
+    suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
 }
