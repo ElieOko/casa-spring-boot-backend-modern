@@ -136,3 +136,9 @@ allOpen {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+tasks.withType<JavaExec>().configureEach {
+	jvmArgs("--enable-native-access=ALL-UNNAMED")
+}
+tasks.withType<Test>().configureEach {
+	jvmArgs("--enable-native-access=ALL-UNNAMED")
+}
