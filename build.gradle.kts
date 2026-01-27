@@ -3,7 +3,7 @@ plugins {
 	kotlin("plugin.spring") version "2.2.10"
 	id("org.springframework.boot") version "4.0.2"
 	id("io.spring.dependency-management") version "1.1.7"
-	id("io.sentry.jvm.gradle") version "5.12.2"
+	id("io.sentry.jvm.gradle") version "6.0.0"
 	id("org.owasp.dependencycheck") version "12.2.0"
 	kotlin("plugin.jpa") version "2.2.10"
 }
@@ -89,7 +89,10 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	compileOnly("org.projectlombok:lombok")
 	// @sentry
-	implementation("io.sentry:sentry-opentelemetry-agent:8.22.0")
+	implementation("io.sentry:sentry:8.31.0")
+//	implementation("io.sentry:sentry-opentelemetry-agent:8.22.0")
+//	implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.31.0")
+//	implementation(platform("io.sentry:sentry-bom:8.31.0"))
 	//implementation("io.r2dbc:r2dbc-postgresql")
 	implementation("io.r2dbc:r2dbc-pool:1.0.2.RELEASE")
 	//implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
@@ -132,6 +135,10 @@ allOpen {
 	annotation("jakarta.persistence.MappedSuperclass")
 	annotation("jakarta.persistence.Embeddable")
 }
+configurations.configureEach {
+	exclude(group = "io.sentry", module = "sentry-logback")
+}
+
 
 tasks.withType<Test> {
 	useJUnitPlatform()
