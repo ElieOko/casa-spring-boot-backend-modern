@@ -39,7 +39,7 @@ class GcsService(
 
    suspend fun deleteFile(fileName: String?,directory : String = ""): Boolean? = coroutineScope {
        try {
-           val blobId = BlobId.of("casanayo-bucket", "casa" + "/" + directory + fileName)
+           val blobId = BlobId.of("casanayo-bucket", "casa/$directory$fileName")
            val result = storage?.delete(blobId)
            result
        }
