@@ -3,11 +3,11 @@ package server.web.casa.route.address
 import server.web.casa.route.GlobalRoute
 
 object AddressRoute {
-    const val CITIES = "${GlobalRoute.ROOT}/${AddressFeatures.CITIES_PATH}"
-    const val COUNTRIES = "${GlobalRoute.ROOT}/${AddressFeatures.COUNTRIES_PATH}"
-    const val COMMUNES = "${GlobalRoute.ROOT}/${AddressFeatures.COMMUNES_PATH}"
-    const val DISTRICTS = "${GlobalRoute.ROOT}/${AddressFeatures.DISTRICTS_PATH}"
-    const val QUARTIERS = "${GlobalRoute.ROOT}/${AddressFeatures.QUARTIERS_PATH}"
+    const val CITIES = "${GlobalRoute.PUBLIC}/${AddressFeatures.CITIES_PATH}"
+    const val COUNTRIES = "${GlobalRoute.PUBLIC}/${AddressFeatures.COUNTRIES_PATH}"
+    const val COMMUNES = "${GlobalRoute.PUBLIC}/${AddressFeatures.COMMUNES_PATH}"
+    const val DISTRICTS = "${GlobalRoute.PUBLIC}/${AddressFeatures.DISTRICTS_PATH}"
+    const val QUARTIERS = "${GlobalRoute.PUBLIC}/${AddressFeatures.QUARTIERS_PATH}"
 }
 
 object AddressFeatures {

@@ -3,8 +3,8 @@ package server.web.casa.route.account
 import server.web.casa.route.GlobalRoute
 
 object AccountRoute {
-    const val ACCOUNT = "${GlobalRoute.ROOT}/${AccountFeatures.ACCOUNT_PATH}"
-    const val ACCOUNT_TYPE = "${GlobalRoute.ROOT}/${AccountFeatures.ACCOUNT_TYPE_PATH}"
+    const val ACCOUNT = "${GlobalRoute.PUBLIC}/${AccountFeatures.ACCOUNT_PATH}"
+    const val ACCOUNT_TYPE = "${GlobalRoute.PUBLIC}/${AccountFeatures.ACCOUNT_TYPE_PATH}"
 }
 
 object AccountFeatures {

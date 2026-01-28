@@ -5,12 +5,12 @@ import server.web.casa.route.GlobalRoute
 object FavoriteFestiveRoute {
     //api
 
-    const val FAVORITE_PATH = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
-    const val FAVORITE_FUNERAIRE_PATH = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_FUNERAIRE_PATH}"
-    const val FAVORITE_TERRAIN_PATH = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
-    const val ROUTE_FAVORITE_HOTEL ="${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
-    const val FAVORITE_VACANCE_PATH = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
-    const val FAVORITE_BUREAU = "${GlobalRoute.ROOT}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
+    const val FAVORITE_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
+    const val FAVORITE_FUNERAIRE_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_FUNERAIRE_PATH}"
+    const val FAVORITE_TERRAIN_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
+    const val ROUTE_FAVORITE_HOTEL ="${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
+    const val FAVORITE_VACANCE_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
+    const val FAVORITE_BUREAU = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
 
     //web
 
