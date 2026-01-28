@@ -172,7 +172,8 @@ class ReservationController(
      suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
         val reservation = service.findById(id)
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) throw ResponseStatusException(
+        val checkOwner = reservation?.user?.userId == checkAdmin.second
+        if (!checkAdmin.first && !checkOwner) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
@@ -242,7 +243,8 @@ class ReservationController(
     suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> = coroutineScope {
         val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
+        val checkOwner = checkAdmin.second == user.userId
+        if (!checkAdmin.first && !checkOwner) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
@@ -255,7 +257,8 @@ class ReservationController(
     suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val property : PropertyEntity? = (propertyR.findById(propertyId) ?: ResponseEntity.ok(mapOf("error" to "property not found"))) as PropertyEntity?
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != property?.user) throw ResponseStatusException(
+        val checkOwner = property?.user == checkAdmin.second
+        if (!checkAdmin.first && !checkOwner) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
@@ -268,7 +271,8 @@ class ReservationController(
     suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationDTO>?>> = coroutineScope {
         val user = userR.findById(userId) ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "user Not Found.")
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
+        val checkOwner = user.userId == checkAdmin.second
+        if (!checkAdmin.first && !checkOwner) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
@@ -337,7 +341,10 @@ class ReservationController(
         )
         val propertyOwner = propertyService.findById(owner.propertyId!!)
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != owner.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+        val checkOwner = owner.userId == checkAdmin.second
+        val checkPropertyOwner = checkAdmin.second == propertyOwner.user
+
+        if (!checkAdmin.first && !checkOwner && !checkPropertyOwner ) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
@@ -369,7 +376,9 @@ class ReservationController(
         }
         val propertyOwner = propertyService.findById(reservation?.propertyId!!)
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+        val checkOwner = reservation.userId == checkAdmin.second
+        val checkPOwer = propertyOwner.user == checkAdmin.second
+        if (!checkAdmin.first && !checkOwner && !checkPOwer) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
@@ -411,7 +420,9 @@ class ReservationController(
        }
        val propertyOwner = propertyService.findById(reservation?.propertyId!!)
        val checkAdmin = userS.isAdmin()
-       if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+       val checkOwner = reservation.userId == checkAdmin.second
+       val checkPOwer = propertyOwner.user == checkAdmin.second
+       if (!checkAdmin.first && !checkOwner && !checkPOwer) throw ResponseStatusException(
            HttpStatusCode.valueOf(404),
            "Authorization denied."
        )
@@ -436,7 +447,9 @@ class ReservationController(
         }
         val propertyOwner = propertyService.findById(reservation?.propertyId!!)
         val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+        val checkOwner = reservation.userId == checkAdmin.second
+        val checkPOwer = propertyOwner.user == checkAdmin.second
+        if (!checkAdmin.first && !checkOwner && !checkPOwer) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
         )
