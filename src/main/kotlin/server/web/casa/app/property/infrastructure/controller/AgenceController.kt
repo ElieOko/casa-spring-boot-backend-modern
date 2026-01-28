@@ -8,17 +8,17 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.AgenceService
 import server.web.casa.app.property.domain.model.*
-import server.web.casa.route.utils.AgenceRoute.AGENCE
+import server.web.casa.route.utils.AgenceScope
 import server.web.casa.utils.*
 
 @Tag(name = "Agence", description = "")
 @RestController
-@RequestMapping(AGENCE)
+@RequestMapping("api")
 class AgenceController(
     private val service: AgenceService
 ) {
     @Operation(summary = "Création agence")
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${AgenceScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createAgence(
         @Valid @RequestBody request: AgenceDTO,
     ): ApiResponseWithMessage<Agence> = coroutineScope {
@@ -27,14 +27,14 @@ class AgenceController(
     }
 
     @Operation(summary = "List des agences")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${AgenceScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllAgence() = coroutineScope {
         val data = service.getAllAgence()
         ApiResponse(data)
     }
 
     @Operation(summary = "List des agences")
-    @GetMapping("/owner/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${AgenceScope.PROTECTED}/owner/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllAgenceByUser(
         @PathVariable("userId") userId : Long,
     )= coroutineScope {

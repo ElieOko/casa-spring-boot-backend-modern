@@ -15,12 +15,12 @@ import server.web.casa.app.actor.domain.model.join.master.*
 import server.web.casa.app.actor.domain.model.request.PersonRequest2
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
-import server.web.casa.route.actor.ActorRoute.MEMBER
+import server.web.casa.route.actor.MemberScope
 import server.web.casa.utils.*
 
 @Tag(name = "Personne", description = "Gestion des Membres")
 @RestController
-@RequestMapping(MEMBER)
+@RequestMapping("api")
 @Profile(Mode.DEV)
 class PersonController(
     private val service : PersonService,
@@ -29,7 +29,7 @@ class PersonController(
     private val accountService: AccountService
 ) {
 //    private val log = LoggerFactory.getLogger(this::class.java)
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${MemberScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPersonActor(
         @Valid @RequestBody request: PersonUserRequest
     ) = coroutineScope {
@@ -53,13 +53,13 @@ class PersonController(
         ResponseEntity.status(201).body(response)
     }
 
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${MemberScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPerson(): ApiResponse<List<Person>> = coroutineScope{
        ApiResponse(service.findAllPerson().toList())
     }
 
     @Operation(summary = "Modification Person")
-    @PutMapping("/{id}")
+    @PutMapping("/{version}/${MemberScope.PROTECTED}/{id}")
     suspend fun updatePersonActor(
         @PathVariable("id") id : Long,
         @RequestBody @Valid request: PersonRequest2) = coroutineScope {
@@ -69,7 +69,7 @@ class PersonController(
         ResponseEntity.ok(response)
     }
     @Operation(summary = "Modification Photo de profile")
-    @PutMapping("/{id}/profile")
+    @PutMapping("/{version}/${MemberScope.PROTECTED}/{id}/profile")
     suspend fun updatePersonImage(
         @PathVariable("id") id : Long,
         @RequestBody @Valid request: ImageUserRequest
