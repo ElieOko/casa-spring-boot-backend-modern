@@ -7,22 +7,20 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.*
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.ecosystem.application.service.*
-import server.web.casa.app.ecosystem.domain.model.PrestationImage
-import server.web.casa.app.ecosystem.domain.model.toDomain
+import server.web.casa.app.ecosystem.domain.model.*
 import server.web.casa.app.ecosystem.domain.request.PrestationRequest
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.ecosystem.Service
+import server.web.casa.route.ecosystem.PrestationScope
 import server.web.casa.security.Auth
 import server.web.casa.utils.ApiResponse
 
 @Tag(name = "Prestation Service", description = "Gestion des prestations services")
 @RestController
-@RequestMapping(Service.PRESTATION)
+@RequestMapping("api")
 class PrestationController(
     private val userService: UserService,
     private val deviseService: DeviseService,
@@ -34,7 +32,7 @@ class PrestationController(
     private val auth: Auth,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${PrestationScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPrestationService(
         @Valid @RequestBody request: PrestationRequest,
         requestHttp: HttpServletRequest
@@ -60,31 +58,26 @@ class PrestationController(
     }
 
     @Operation(summary = "Voir les Prestaions service")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${PrestationScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPrestation() = coroutineScope {
-        val user = auth.user()
-        val state: Boolean? = user?.second?.find{ true }
-        val message = when (state) {
-         true -> mapOf("prestations" to prestationService.getAllData2().toList())
-         false,null -> mapOf("prestations" to prestationService.getAllData().toList())
-        }
+        val message = mapOf("prestations" to prestationService.getAllData().toList())
         ResponseEntity.ok().body(message)
     }
 
     @Operation(summary = "Voir les Prestaions service")
-    @GetMapping("/api/dashb",produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${PrestationScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPrestationAdmin() = coroutineScope {
         val user = auth.user()
         val state: Boolean? = user?.second?.find{ true }
         val message = when (state) {
             true -> mapOf("prestations" to prestationService.getAllData2().toList())
-            false,null -> mapOf("prestations" to prestationService.getAllData().toList())
+            false,null -> mapOf("prestations" to "Vous n'avez pas accès")
         }
         ResponseEntity.ok().body(message)
     }
 
     @Operation(summary = "Get Prestaion by ID")
-    @GetMapping("/{prestationId}",
+    @GetMapping("/{version}/${PrestationScope.PUBLIC}/{prestationId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPrestaionById(
         @PathVariable("prestationId") prestationId : Long,
@@ -94,7 +87,7 @@ class PrestationController(
     }
 
     @Operation(summary = "Get Prestaion by User")
-    @GetMapping("/owner/{userId}",
+    @GetMapping("/{version}/${PrestationScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPrestaionByUser(
         @PathVariable("userId") userId : Long,

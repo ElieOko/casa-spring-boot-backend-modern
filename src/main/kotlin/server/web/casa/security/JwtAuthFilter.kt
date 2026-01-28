@@ -43,37 +43,17 @@ class JwtAuthFilter(
         request.setAttribute(ATTR, info)
         // Liste des chemins publics INCLUANT WebSocket
         val publicPaths = listOf(
+            "/api/v1/public/**",
             "/",
             "/swagger-ui/**",
             "/swagger-ui.html/*",
             "/v3/**",
             "/files/**",
-            "/property/**",
-            "/api/account",
-            "/api/cities",
-            "/api/countries",
-            "/api/communes",
-            "/api/accounts",
-            "/api/accounts/**",
-            "/api/members",
-            "/api/cards",
-            "/api/members/**",
-            "/api/districts",
-            "/api/quartiers",
             "/auth/login",
-            "/api/property",
-            "/api/devises",
-            "/api/agences",
-            "/api/sectors",
-//            "/api/prestations",
-//            "/api/prestations/**",
-            "/api/property/**",
             "/auth/register",
             "/otp/**",
             "/reset/password",
             "/refresh",
-            "/api/notifications/**",
-            "/api/notifications",
             "/websocket/**", // ← IMPORTANT: WebSocket doit être public pour le handshake
         )
 

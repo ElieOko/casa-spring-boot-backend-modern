@@ -1,31 +1,25 @@
 package server.web.casa.app.property.infrastructure.controller
 
+import server.web.casa.route.GlobalRoute
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.address.application.service.*
-import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.payment.application.service.*
 import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.*
-import server.web.casa.app.property.domain.model.request.ImageChange
-import server.web.casa.app.property.domain.model.request.PropertyImageChangeRequest
-import server.web.casa.app.property.domain.model.request.PropertyImagesRequest
-import server.web.casa.app.property.domain.model.toDomain
+import server.web.casa.app.property.domain.model.request.*
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.property.PropertyRoute
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.route.property.PropertyFestiveScope
+import server.web.casa.utils.*
 
 @Tag(name = "Festive", description = "")
 @RestController
-@RequestMapping(PropertyRoute.PROPERTY_FESTIVE)
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 class SalleFestiveController(
     private val service: SalleFestiveService,
     private val devise : DeviseService,
@@ -36,9 +30,8 @@ class SalleFestiveController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService
 ) {
-
     @Operation(summary = "Création salle festive")
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyFestiveScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFestive(
         @Valid @RequestBody request: SalleFestiveRequest,
     ) = coroutineScope{
@@ -59,7 +52,7 @@ class SalleFestiveController(
     }
 
     @Operation(summary = "Listes des salles festives")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyFestiveScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFestive() = coroutineScope {
         val data = service.getAll()
         val response = mapOf("festives" to data)
@@ -67,7 +60,7 @@ class SalleFestiveController(
     }
 
     @Operation(summary = "Get Salle Festive by User")
-    @GetMapping("/owner/{userId}",
+    @GetMapping("/${PropertyFestiveScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFestiveByUser(
         @PathVariable("userId") userId : Long,
@@ -76,7 +69,7 @@ class SalleFestiveController(
         ApiResponse(data)
     }
     @Operation(summary = "Modification Salle Festive image")
-    @PutMapping("/image/{festiveId}")
+    @PutMapping("/${PropertyFestiveScope.PROTECTED}/image/{festiveId}")
     suspend fun updateFileFestive(
         @PathVariable("festiveId") festiveId : Long,
         @Valid @RequestBody request: ImageChange
@@ -90,7 +83,7 @@ class SalleFestiveController(
         }
     }
     @Operation(summary = "Suppression Salle Festive image")
-    @DeleteMapping("/image/{festiveId}")
+    @DeleteMapping("/${PropertyFestiveScope.PROTECTED}/image/{festiveId}")
     suspend fun deleteFile(
         @PathVariable("festiveId") festiveId : Long,
         @Valid @RequestBody request: PropertyImagesRequest
@@ -105,7 +98,7 @@ class SalleFestiveController(
     }
 
     @Operation(summary = "Modification Salle Festive")
-    @PutMapping("/owner/{festiveId}")
+    @PutMapping("/${PropertyFestiveScope.PROTECTED}/owner/{festiveId}")
     suspend fun updateBureau(
         @PathVariable("festiveId") festiveId : Long,
         @Valid @RequestBody request: SalleFestiveDTO
@@ -129,7 +122,7 @@ class SalleFestiveController(
     }
 
     @Operation(summary = "Sold")
-    @PutMapping("/sold/{propertyId}",
+    @PutMapping("/${PropertyFestiveScope.PROTECTED}/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInFestive(
         @PathVariable("propertyId") propertyId : Long,
@@ -143,7 +136,7 @@ class SalleFestiveController(
     }
 
     @Operation(summary = "Enable or disable")
-    @PutMapping("/enable/{propertyId}",
+    @PutMapping("/${PropertyFestiveScope.PROTECTED}/enable/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableFestive(
         @PathVariable("propertyId") propertyId : Long,

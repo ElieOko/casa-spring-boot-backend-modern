@@ -1,48 +1,27 @@
 package server.web.casa.app.property.infrastructure.controller
 
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
+import server.web.casa.route.GlobalRoute
+import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.*
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
-import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.property.application.service.BureauImageService
-import server.web.casa.app.property.application.service.BureauService
-import server.web.casa.app.property.application.service.PropertyTypeService
-import server.web.casa.app.property.domain.model.BureauDTOMaster
-import server.web.casa.app.property.domain.model.BureauDtoRequest
-import server.web.casa.app.property.domain.model.BureauRequest
-import server.web.casa.app.property.domain.model.ImageRequestStandard
-import server.web.casa.app.property.domain.model.StatusState
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.payment.application.service.*
+import server.web.casa.app.property.application.service.*
+import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
-import server.web.casa.app.property.domain.model.request.ImageChange
-import server.web.casa.app.property.domain.model.request.ImageChangeOther
+import server.web.casa.app.property.domain.model.request.*
 import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.property.PropertyRoute
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.route.property.PropertyBureauScope
+import server.web.casa.utils.*
 
 @Tag(name = "Bureau", description = "")
 @RestController
-@RequestMapping(PropertyRoute.PROPERTY_BUREAU)
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 class BureauController(
     private val service: BureauService,
     private val devise : DeviseService,
@@ -53,9 +32,8 @@ class BureauController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
 ) {
-
     @Operation(summary = "Création bureau")
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyBureauScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createBureau(
         @Valid @RequestBody request: BureauDtoRequest,
     ) = coroutineScope{
@@ -79,7 +57,7 @@ class BureauController(
     }
 
     @Operation(summary = "List des bureaux")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyBureauScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllBureau() = coroutineScope {
         val data = service.getAllBureau()
         val response = mapOf("bureaux" to data)
@@ -87,7 +65,7 @@ class BureauController(
     }
 
     @Operation(summary = "Modification Bureau")
-    @PutMapping("/image/{bureauId}")
+    @PutMapping("/${PropertyBureauScope.PROTECTED}/image/{bureauId}")
     suspend fun updateFileBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: ImageChange
@@ -102,7 +80,7 @@ class BureauController(
     }
 
     @Operation(summary = "Suppression Bureau image")
-    @DeleteMapping("/image/{bureauId}")
+    @DeleteMapping("/${PropertyBureauScope.PROTECTED}/image/{bureauId}")
     suspend fun deleteFileBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: ImageChangeOther
@@ -117,7 +95,7 @@ class BureauController(
     }
 
     @Operation(summary = "Get Bureau by User")
-    @GetMapping("/owner/{userId}",
+    @GetMapping("/${PropertyBureauScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllBureauByUser(
         @PathVariable("userId") userId : Long,
@@ -127,7 +105,7 @@ class BureauController(
     }
 
     @Operation(summary = "Modification Bureau")
-    @PutMapping("/owner/{bureauId}")
+    @PutMapping("/${PropertyBureauScope.PROTECTED}/owner/{bureauId}")
     suspend fun updateBureau(
         @PathVariable("bureauId") bureauId : Long,
         @Valid @RequestBody request: BureauRequest
@@ -150,7 +128,7 @@ class BureauController(
         ResponseEntity.ok(message)
     }
 
-    @GetMapping(ROUTE_PROPERTY_FILTER,produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyBureauScope.PUBLIC}/filter",produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Get property by sold into price, room, city, commune with pagination and sorting")
     suspend fun getAllBureauFilter(
         @Parameter(description = "Transaction Type") @RequestParam transactionType : String,
@@ -189,7 +167,7 @@ class BureauController(
     }
 
     @Operation(summary = "Sold")
-    @PutMapping("/sold/{propertyId}",
+    @PutMapping("/${PropertyBureauScope.PROTECTED}/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInBureau(
         @PathVariable("propertyId") propertyId : Long,
@@ -203,8 +181,7 @@ class BureauController(
     }
 
     @Operation(summary = "Enable or disable")
-    @PutMapping("/enable/{propertyId}",
-        produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping("/${PropertyBureauScope.PROTECTED}/enable/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableBureau(
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState

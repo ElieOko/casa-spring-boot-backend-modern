@@ -8,16 +8,16 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.user.application.service.AccountService
 import server.web.casa.app.user.infrastructure.persistence.entity.AccountDTO
-import server.web.casa.route.account.AccountRoute
+import server.web.casa.route.account.AccountScope
 
 @RestController
-@RequestMapping(AccountRoute.ACCOUNT)
+@RequestMapping("api")
 @Profile("dev")
 class AccountController(
     private val service: AccountService,
 ) {
     @Operation(summary = "Liste de Accounts")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${AccountScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllAccountE(): Map<String, List<AccountDTO>> = coroutineScope {
        mapOf("accounts" to service.getAll().toList())
     }

@@ -10,27 +10,22 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.ecosystem.application.service.PrestationService
 import server.web.casa.app.notification.application.service.NotificationService
 import server.web.casa.app.notification.domain.model.request.TagType
-import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
-import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.entity.*
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.application.SollicitationService
-import server.web.casa.app.prestation.domain.model.FavoritePrestationDTO
 import server.web.casa.app.prestation.domain.model.SollicitationDTO
 import server.web.casa.app.prestation.domain.request.SollicitationRequest
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.reservation.domain.model.ReservationStatus
-import server.web.casa.app.reservation.domain.model.ReservationVacanceDTO
-import server.web.casa.app.reservation.infrastructure.controller.RequestUpdate
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.sollicitation.SollicitationRoute
+import server.web.casa.route.sollicitation.SollicitationScope
 import server.web.casa.utils.Mode
 
-const val ROUTE_SOLLICITATION = SollicitationRoute.SOLLICITATION
 
 @Tag(name = "Sollicitation", description = "Sollicitation de prestation")
 @RestController
-@RequestMapping(ROUTE_SOLLICITATION)
+@RequestMapping("api")
 @Profile(Mode.DEV)
 class SollicitatonController(
     private val service: SollicitationService,
@@ -40,7 +35,7 @@ class SollicitatonController(
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
 ) {
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${SollicitationScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createSollicitation(
         @Valid @RequestBody req: SollicitationRequest
     ):ResponseEntity <Map<String, Any?>>{
@@ -66,26 +61,23 @@ class SollicitatonController(
             "demandeur" to checkUser))
     }
 
-    @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${SollicitationScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllSollicitations(): ResponseEntity<Map<String, List<SollicitationDTO>>>{
-        return ResponseEntity.ok().body(
-            mapOf(
-                "sollicitation" to service.findAll().toList()
-            ))
+        return ResponseEntity.ok().body(mapOf("sollicitation" to service.findAll().toList()))
     }
 
-    @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{versiom}/${SollicitationScope.PRIVATE}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getSollicitationById(@PathVariable id: Long): ResponseEntity<Map<String, SollicitationDTO?>> {
         val data = service.findById(id)
         val response = mapOf("sollicitation" to data)
         return ResponseEntity.ok(response)
     }
-    @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${SollicitationScope.PROTECTED}/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByUserId(@PathVariable userId: Long): ResponseEntity<Map<String, List<SollicitationDTO>?>>{
         val find = service.findByUserId(userId)
         return ResponseEntity.ok(mapOf("data" to find))
     }
-    @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${SollicitationScope.PROTECTED}/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<SollicitationDTO>? >> {
         val user = userS.findIdUser(userId)
         val reservation = service.findByHostUser(user.userId!!)
@@ -93,7 +85,7 @@ class SollicitatonController(
         return ResponseEntity.ok(response)
 
     }
-    @PutMapping("/update/status/{id}")
+    @PutMapping("/{version}/${SollicitationScope.PROTECTED}/update/status/{id}")
     suspend fun updateSollicitationStatus(
         @PathVariable id: Long,
         @RequestBody request:RequestUpdateStatus
@@ -122,7 +114,7 @@ class SollicitatonController(
         ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{versiom}/${SollicitationScope.PROTECTED}/delete/{id}")
     suspend fun deleteById(@PathVariable id: Long): ResponseEntity<Map<String, String>> = coroutineScope {
         val sollicitation = service.findById(id) ?: ResponseEntity.ok(mapOf("message" to "Sollicitation not found"))
         if(service.deleteById(id)) {

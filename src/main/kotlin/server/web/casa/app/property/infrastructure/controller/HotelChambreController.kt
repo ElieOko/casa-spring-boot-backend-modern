@@ -1,5 +1,6 @@
 package server.web.casa.app.property.infrastructure.controller
 
+import server.web.casa.route.GlobalRoute
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -8,21 +9,19 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.*
 import server.web.casa.app.property.domain.model.*
-import server.web.casa.app.property.domain.model.toDomain
-import server.web.casa.route.property.PropertyRoute.PROPERTY_HOTEL_CHAMBRE
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.route.property.PropertyHotelChambreScope
+import server.web.casa.utils.*
 
 @Tag(name = "Hotel Chambre", description = "")
 @RestController
-@RequestMapping(PROPERTY_HOTEL_CHAMBRE )
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 class HotelChambreController(
     private val service: HotelChambreService,
     private val hotel: HotelService,
     private val imageService: HotelChambreImageService
 ) {
     @Operation(summary = "Création Hotel Chambre")
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyHotelChambreScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createHotelChambre(
         @Valid @RequestBody request: HotelChambreRequest,
     ) = coroutineScope {
@@ -40,7 +39,7 @@ class HotelChambreController(
     }
 
     @Operation(summary = "List des chambres")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyHotelChambreScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllHotelChambre() = coroutineScope {
         ApiResponse(service.getAll())
     }

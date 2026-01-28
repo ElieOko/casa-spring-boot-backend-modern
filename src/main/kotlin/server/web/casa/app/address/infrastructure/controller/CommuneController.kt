@@ -6,24 +6,21 @@ import kotlinx.coroutines.coroutineScope
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.DistrictService
-import server.web.casa.app.address.domain.model.Commune
-import server.web.casa.app.address.domain.model.request.CommuneRequest
-import server.web.casa.route.address.AddressRoute
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.address.domain.model.*
+import server.web.casa.app.address.domain.model.request.*
+import server.web.casa.route.address.CommuneScope
 import server.web.casa.utils.Mode
-
-const val ROUTE_COMMUNE = AddressRoute.COMMUNES
 
 @Tag(name = "Commune", description = "Gestion des communes")
 @RestController
-@RequestMapping(ROUTE_COMMUNE)
+@RequestMapping("api")
 @Profile(Mode.DEV)
 class CommuneController(
    private val service : CommuneService,
    private val districtService: DistrictService,
 ) {
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${CommuneScope.PROTECTED}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createCommune(
        @Valid @RequestBody request: CommuneRequest
     ): ResponseEntity<Map<String, Any>> {
@@ -46,7 +43,7 @@ class CommuneController(
         return ResponseEntity.badRequest().body(response)
     }
 
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${CommuneScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllCommune(): ResponseEntity<Map<String, List<Commune>>> = coroutineScope {
         val data = service.findAllCommune()
         val response = mapOf("communes" to data)

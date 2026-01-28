@@ -1,10 +1,10 @@
 package server.web.casa.app.property.infrastructure.controller
 
+import server.web.casa.route.GlobalRoute
 import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.sentry.Sentry
-import io.sentry.metrics.MetricsUnit
-import io.sentry.metrics.SentryMetricsParameters
+import io.sentry.metrics.*
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
@@ -21,16 +21,14 @@ import server.web.casa.app.property.domain.model.dto.toDto
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.*
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.property.PropertyRoute
+import server.web.casa.route.property.PropertyScope
 import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.ApiResponseWithMessage
 import kotlin.collections.mutableMapOf
 
-const val ROUTE_PROPERTY = PropertyRoute.PROPERTY
-const val ROUTE_PROPERTY_FILTER = PropertyRoute.PROPERTY_FILTER
 @Tag(name = "Property", description = "Gestion des propriètés")
 @RestController
-@RequestMapping(ROUTE_PROPERTY)
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 class PropertyController(
     private val service : PropertyService,
     private val propertyTypeService: PropertyTypeService,
@@ -45,8 +43,7 @@ class PropertyController(
     private val quartierService: QuartierService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
-
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyScope.PRIVATE}", consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest,
         requestHttp: HttpServletRequest
@@ -144,7 +141,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Voir les Property")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllProperty(
         request: HttpServletRequest
     ): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
@@ -184,7 +181,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Get Property by User")
-    @GetMapping("/owner/{userId}",
+    @GetMapping("/${PropertyScope.PRIVATE}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByUser(
         @PathVariable("userId") userId : Long,
@@ -194,7 +191,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Get Property by ID")
-    @GetMapping("/{propertyId}",
+    @GetMapping("/${PropertyScope.PUBLIC}/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByID(
         @PathVariable("propertyId") propertyId : Long,
@@ -207,7 +204,7 @@ class PropertyController(
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping(ROUTE_PROPERTY_FILTER,produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping( "/${PropertyScope.PUBLIC}/filter",produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Get property by sold into price, room, city, commune with pagination and sorting")
     suspend fun getAllPropertyFilter(
         @Parameter(description = "Transaction Type") @RequestParam transactionType : String,
@@ -246,7 +243,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Modification Property")
-    @PutMapping("/owner/{userId}/{propertyId}")
+    @PutMapping("/${PropertyScope.PROTECTED}/owner/{userId}/{propertyId}")
     suspend fun updateProperty(
         @PathVariable("userId") userId : Long,
         @PathVariable("propertyId") propertyId : Long,
@@ -289,7 +286,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Modification Property")
-    @PutMapping("/image/{propertyId}")
+    @PutMapping("/${PropertyScope.PROTECTED}/image/{propertyId}")
     suspend fun updateFile(
         @PathVariable("propertyId") propertyId : Long,
         @Valid @RequestBody request: PropertyImageChangeRequest
@@ -307,7 +304,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Suppression Property")
-    @DeleteMapping("/image/{propertyId}")
+    @DeleteMapping("/${PropertyScope.PROTECTED}/image/{propertyId}")
     suspend fun deleteFile(
         @PathVariable("propertyId") propertyId : Long,
         @Valid @RequestBody request: PropertyImagesRequest
@@ -325,7 +322,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Sold")
-    @PutMapping("/sold/{propertyId}",
+    @PutMapping("/${PropertyScope.PROTECTED}/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrIn(
         @PathVariable("propertyId") propertyId : Long,
@@ -339,7 +336,7 @@ class PropertyController(
     }
 
     @Operation(summary = "Enable or disable")
-    @PutMapping("/enable/{propertyId}",
+    @PutMapping("/${PropertyScope.PROTECTED}/enable/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisable(
         @PathVariable("propertyId") propertyId : Long,
