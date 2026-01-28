@@ -1,43 +1,26 @@
 package server.web.casa.app.property.infrastructure.controller
 
+import server.web.casa.route.GlobalRoute
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.*
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
-import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.property.application.service.PropertyTypeService
-import server.web.casa.app.property.application.service.TerrainImageService
-import server.web.casa.app.property.application.service.TerrainService
-import server.web.casa.app.property.domain.model.BureauDtoRequest
-import server.web.casa.app.property.domain.model.BureauRequest
-import server.web.casa.app.property.domain.model.ImageRequestStandard
-import server.web.casa.app.property.domain.model.StatusState
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.payment.application.service.*
+import server.web.casa.app.property.application.service.*
+import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.request.TerrainRequest
 import server.web.casa.app.property.domain.model.request.toDomain
-import server.web.casa.app.property.domain.model.toDomain
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.property.PropertyRoute
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.route.property.PropertyTerrainScope
+import server.web.casa.utils.*
 
 @Tag(name = "Terrain", description = "")
 @RestController
-@RequestMapping(PropertyRoute.PROPERTY_TERRAIN)
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 class TerrainController(
     private val service : TerrainService,
     private val devise : DeviseService,
@@ -49,7 +32,7 @@ class TerrainController(
     private val propertyTypeService: PropertyTypeService,
 ) {
     @Operation(summary = "Création Terrain")
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createTerrain(
         @Valid @RequestBody request: TerrainRequest,
     ) = coroutineScope{
@@ -73,14 +56,14 @@ class TerrainController(
     }
 
     @Operation(summary = "List des terrain")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyTerrainScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTerrain() = coroutineScope {
         val data = service.getAll()
         val response = mapOf("terrain" to data)
         ResponseEntity.ok().body(response)
     }
     @Operation(summary = "Sold")
-    @PutMapping("/sold/{propertyId}",
+    @PutMapping("/${PropertyTerrainScope.PROTECTED}/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInTerrain(
         @PathVariable("propertyId") propertyId : Long,
@@ -94,7 +77,7 @@ class TerrainController(
     }
 
     @Operation(summary = "Enable or disable")
-    @PutMapping("/enable/{propertyId}",
+    @PutMapping("/${PropertyTerrainScope.PROTECTED}/enable/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableTerrain(
         @PathVariable("propertyId") propertyId : Long,
@@ -107,7 +90,7 @@ class TerrainController(
         ResponseEntity.badRequest().body(message)
     }
     @Operation(summary = "Get Terrain by User")
-    @GetMapping("/owner/{userId}",
+    @GetMapping("/${PropertyTerrainScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTerrainByUser(
         @PathVariable("userId") userId : Long,
@@ -117,7 +100,7 @@ class TerrainController(
     }
 
     @Operation(summary = "Modification Terrain")
-    @PutMapping("/owner/{terrainId}")
+    @PutMapping("/${PropertyTerrainScope.PROTECTED}/owner/{terrainId}")
     suspend fun updateTerrain(
         @PathVariable("terrainId") terrainId : Long,
         @Valid @RequestBody request: TerrainRequest

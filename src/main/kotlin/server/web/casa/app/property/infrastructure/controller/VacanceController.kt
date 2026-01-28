@@ -1,32 +1,28 @@
 package server.web.casa.app.property.infrastructure.controller
 
+import server.web.casa.route.GlobalRoute
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.property.application.service.AgenceService
-import server.web.casa.app.property.application.service.VacanceImageService
-import server.web.casa.app.property.application.service.VacanceService
-import server.web.casa.app.property.domain.model.ImageRequestStandard
-import server.web.casa.app.property.domain.model.request.VacanceRequest
-import server.web.casa.app.property.domain.model.request.toDomain
-import server.web.casa.route.property.PropertyRoute.PROPERTY_VACANCE
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.app.property.application.service.*
+import server.web.casa.app.property.domain.model.*
+import server.web.casa.app.property.domain.model.request.*
+import server.web.casa.route.property.PropertyVacanceScope
+import server.web.casa.utils.*
 
 @Tag(name = "Vacance", description = "")
 @RestController
-@RequestMapping(PROPERTY_VACANCE )
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 class VacanceController(
     private val service: VacanceService,
     private val agenceService: AgenceService,
     private val imageService: VacanceImageService
 ) {
     @Operation(summary = "Création vacance")
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyVacanceScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createVacance(
         @Valid @RequestBody request: VacanceRequest,
     )= coroutineScope {
@@ -41,7 +37,7 @@ class VacanceController(
     }
 
     @Operation(summary = "List des vacance")
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyVacanceScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllVacance() = coroutineScope {
         ApiResponse(service.getAllVacance())
     }
