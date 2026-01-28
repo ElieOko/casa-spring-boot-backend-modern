@@ -5,24 +5,21 @@ import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.DistrictService
-import server.web.casa.app.address.domain.model.District
-import server.web.casa.app.address.domain.model.request.DistrictRequest
-import server.web.casa.route.address.AddressRoute
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.address.domain.model.*
+import server.web.casa.app.address.domain.model.request.*
+import server.web.casa.route.address.DistrictScope
 import server.web.casa.utils.Mode
-
-const val ROUTE_DISTRICT = AddressRoute.DISTRICTS
 
 @Tag(name = "District", description = "Gestion des districts")
 @RestController
-@RequestMapping(ROUTE_DISTRICT)
+@RequestMapping("api")
 @Profile(Mode.DEV)
 class DistrictController(
    private val service : DistrictService,
    private val cityService: CityService,
 ) {
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${DistrictScope.PROTECTED}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createDistrict(
        @Valid @RequestBody request: DistrictRequest
     ): ResponseEntity<out Map<String, Any?>> {
@@ -45,7 +42,7 @@ class DistrictController(
         return ResponseEntity.badRequest().body(response)
     }
 
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${DistrictScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllDistrict(): ResponseEntity<Map<String, List<District?>>> {
         val data = service.findAllDistrict()
         val response = mapOf("districts" to data)
