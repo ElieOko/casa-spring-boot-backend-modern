@@ -3,6 +3,7 @@ package server.web.casa.app.reservation.infrastructure.controller
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -30,6 +31,7 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import server.web.casa.security.Auth
 
 const val ROUTE_RESERVATION = ReservationRoute.RESERVATION
 
@@ -47,7 +49,9 @@ class ReservationController(
     private val notif: NotificationReservationService,
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
+    private val auth: Auth,
 ){
+    private val log = LoggerFactory.getLogger(this::class.java)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
         @Valid @RequestBody request: ReservationRequest
@@ -170,8 +174,8 @@ class ReservationController(
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
      suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
-        val reservation = service.findById(id)
         val checkAdmin = userS.isAdmin()
+         val reservation = service.findById(id)
         if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
@@ -240,8 +244,8 @@ class ReservationController(
 
     @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> = coroutineScope {
-        val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
         val checkAdmin = userS.isAdmin()
+        val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
         if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
@@ -253,8 +257,8 @@ class ReservationController(
 
     @GetMapping("/property/{propertyId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByProperty(@PathVariable propertyId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
-        val property : PropertyEntity? = (propertyR.findById(propertyId) ?: ResponseEntity.ok(mapOf("error" to "property not found"))) as PropertyEntity?
         val checkAdmin = userS.isAdmin()
+        val property : PropertyEntity? = (propertyR.findById(propertyId) ?: ResponseEntity.ok(mapOf("error" to "property not found"))) as PropertyEntity?
         if (!checkAdmin.first && checkAdmin.second != property?.user) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
@@ -265,13 +269,23 @@ class ReservationController(
     }
 
     @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationDTO>?>> = coroutineScope {
+    suspend fun findByHostUser(@PathVariable userId:Long) = coroutineScope {
+        val userAuth = auth.user()
+        val isAdmin: Boolean? = userAuth?.second?.find{ true }
         val user = userR.findById(userId) ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "user Not Found.")
-        val checkAdmin = userS.isAdmin()
-        if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
-            HttpStatusCode.valueOf(404),
-            "Authorization denied."
-        )
+        log.info("***session:${userAuth?.first?.userId}")
+        log.info("***id-params:${user.userId}")
+        if (userId != userAuth?.first?.userId && isAdmin == false){
+            throw ResponseStatusException(
+                HttpStatusCode.valueOf(404),
+                "Authorization denied."
+            )
+        }
+//        val checkAdmin = userS.isAdmin()
+//        if (!checkAdmin.first || checkAdmin.second != user.userId) throw ResponseStatusException(
+//            HttpStatusCode.valueOf(404),
+//            "Authorization denied."
+//        )
         val reservation = service.findByHostUser(user.userId!!)
         val response = mapOf("reservation" to reservation)
         ResponseEntity.ok(response)
@@ -281,17 +295,14 @@ class ReservationController(
         @PathVariable id: Long,
         @RequestBody request:RequestUpdate
     ): ResponseEntity<Map<String, Any?>> = coroutineScope {
-
+        val checkAdmin = userS.isAdmin()
         val userRequest: UserEntity = (userR.findById(request.userId) ?:  ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
         val reservation: ReservationDTO = (service.findById(id) ?: ResponseEntity.ok(mapOf("error" to "reservation not found"))) as ReservationDTO
-
         val userId = reservation.reservation?.userId
         val proprioId = propertyR.findById( reservation.reservation?.propertyId!!)
 
         val proprioCheck = userRequest.userId == proprioId?.user
         val emetCheck = userRequest.userId == userId
-
-        val checkAdmin = userS.isAdmin()
 
         if(emetCheck || proprioCheck || checkAdmin.first){
             if (proprioCheck || checkAdmin.first){
@@ -404,13 +415,13 @@ class ReservationController(
        @PathVariable state: Boolean
     ): ResponseEntity<Map<String, Any?>> = coroutineScope {
         //val reservation = service.findById(reservationId)!!.reservation
+       val checkAdmin = userS.isAdmin()
        val reservation = service.findById(reservationId)?.reservation
        if (reservation == null){
            val response = mapOf("error" to "reservation not found")
            ResponseEntity.ok(response)
        }
        val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-       val checkAdmin = userS.isAdmin()
        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
            HttpStatusCode.valueOf(404),
            "Authorization denied."
@@ -429,13 +440,13 @@ class ReservationController(
 
     @PutMapping("/notification/cancel/{reservationId}")
     suspend fun dealCancel(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope {
+        val checkAdmin = userS.isAdmin()
         val reservation = service.findById(reservationId)?.reservation
         if (reservation == null){
             val response = mapOf("error" to "reservation not found")
             ResponseEntity.ok(response)
         }
         val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-        val checkAdmin = userS.isAdmin()
         if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
             "Authorization denied."
