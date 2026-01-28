@@ -11,6 +11,9 @@ interface PrestationRepository : CoroutineCrudRepository<PrestationEntity, Long>
     @Query("SELECT * FROM prestations WHERE user_id = :userId AND service_id = :serviceId")
     suspend fun findByUserAndService(userId: Long, serviceId : Long) : PrestationEntity?
 
+    @Query("SELECT * FROM prestations WHERE user_id = :userId")
+    suspend fun findByUser(userId: Long) : Flow<PrestationEntity>
+
     @Query("SELECT COUNT(*) FROM prestations WHERE user_id = :userId")
     suspend fun countByUserId(userId: Long) : Long
 

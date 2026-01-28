@@ -2,6 +2,9 @@ package server.web.casa.app.property.infrastructure.controller
 
 import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.sentry.Sentry
+import io.sentry.metrics.MetricsUnit
+import io.sentry.metrics.SentryMetricsParameters
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
@@ -145,6 +148,7 @@ class PropertyController(
     suspend fun getAllProperty(
         request: HttpServletRequest
     ): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
+       val startNanos = System.nanoTime()
        val page = 0
        val size = 15
        val sortBy = "title"
@@ -162,6 +166,20 @@ class PropertyController(
        val osVersion = request.getHeader("X-OS-Version")
        log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
        val response = mapOf("properties" to data)
+       val durationMs = (System.nanoTime() - startNanos) / 1_000_000.0
+       val metricParams = SentryMetricsParameters.create(
+           mapOf(
+               "route" to "GET /property",
+               "status" to "200",
+           )
+       )
+       Sentry.metrics().count("api.property.get_all.count", 1.0, "request", metricParams)
+       Sentry.metrics().distribution(
+           "api.property.get_all.latency",
+           durationMs,
+           MetricsUnit.Duration.MILLISECOND,
+           metricParams
+       )
        ResponseEntity.ok().body(response)
     }
 

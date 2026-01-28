@@ -71,7 +71,6 @@ class PersonService(
                 user.email = email
             }
         }
-
         if (phone?.isNotEmpty() == true){
             val phone2 =  normalizeAndValidatePhoneNumberUniversal(phone) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numero n'est pas valide.")
             val identifier = repositoryUser.findByPhoneOrEmail(phone)
@@ -79,13 +78,12 @@ class PersonService(
                 user.phone = phone2
             }
         }
-
        user.country = person.user.country.ifEmpty { user.country }
        user.city = person.user.city.ifEmpty { user.city }
         if (person.typeCardId == null) throw ResponseStatusException(HttpStatusCode.valueOf(404), "La carte n'a pas été envoyée")
         cardRepository.findById(person.typeCardId)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "Carte invalide")
-        if (person.typeCardId != 2L && person.cardBack?.isNotEmpty() == true) {
-            if ((person.cardBack != null && person.cardFront != null) && (person.cardBack.isNotEmpty() && person.cardFront.isNotEmpty())) {
+        if (person.typeCardId != 2L ) {
+            if (person.cardBack?.isNotEmpty() == true && person.cardFront?.isNotEmpty() == true) {
                 val file = base64ToMultipartFile(person.cardBack, "profile")
                 val file2 = base64ToMultipartFile(person.cardFront, "profile")
                 val imageUri = gcsService.uploadFile(file,"card/")
@@ -94,15 +92,16 @@ class PersonService(
                 log.info("public url local ")
                 data.cardFront = imageUri2
                 data.cardBack = imageUri
+                data.typeCardId = person.typeCardId
                 repository.save(data).toDomain()
             }
         }
-        if (person.cardFront?.isNotEmpty() == true && person.cardBack?.isEmpty() == true) {
-            person.cardFront.ifEmpty { throw ResponseStatusException(HttpStatusCode.valueOf(404), "Précisez votre carte") }
+        if (person.cardFront?.isNotEmpty() == true && person.typeCardId == 2L) {
             val file2 = base64ToMultipartFile(person.cardFront, "profile")
             val imageUri2 = gcsService.uploadFile(file2,"card/")
             user.isCertified = true
             data.cardFront = imageUri2
+            data.typeCardId = person.typeCardId
             repository.save(data).toDomain()
         }
        data.address = person.address
