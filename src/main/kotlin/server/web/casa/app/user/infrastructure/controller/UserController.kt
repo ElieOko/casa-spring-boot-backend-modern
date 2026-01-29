@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.*
 import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.security.Auth
@@ -32,7 +31,7 @@ class UserController(
                 val data = userService.findAllUser().toList()
                 ApiResponse(data)
             }
-            false,null -> ResponseStatusException(HttpStatusCode.valueOf(403), "Authorization denied.")
+            false,null -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
         }
     }
 
@@ -48,7 +47,7 @@ class UserController(
                 val data = userService.findIdUser(id)
                 ResponseEntity.ok().body(data)
             }
-            false,null -> ResponseStatusException(HttpStatusCode.valueOf(403), "Authorization denied.")
+            false,null -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
         }
     }
 
@@ -64,7 +63,7 @@ class UserController(
             val updated = userService.updateUser(userId,user)
             ResponseEntity.ok(updated)
         }
-        ResponseStatusException(HttpStatusCode.valueOf(403), "Authorization denied.")
+        ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
     }
 //
 //    @Operation(summary = "Suppression utilisateur")
