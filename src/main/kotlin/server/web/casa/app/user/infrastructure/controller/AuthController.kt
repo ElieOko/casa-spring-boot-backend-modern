@@ -68,11 +68,10 @@ class AuthController(
         }
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/api/{version}/protected/token/refresh")
     suspend fun refresh(@RequestBody body: RefreshRequest): AuthService.TokenPair = coroutineScope { authService.refresh(body.refreshToken) }
-
     @Operation(summary = "OTP activation send code")
-    @PostMapping("/otp/generate")
+    @PostMapping("/api/{version}/public/otp/generate")
     suspend fun generateKeyOTP(
         @RequestBody @Valid user : IdentifiantRequest
     ): ResponseEntity<Map<String, String?>> = coroutineScope {
@@ -82,7 +81,7 @@ class AuthController(
     }
 
     @Operation(summary = "OTP activation send code")
-    @PostMapping("/otp/verify")
+    @PostMapping("/api/{version}/public/otp/verify")
     suspend fun verifyOTP(
         @RequestBody @Valid user : VerifyRequest
     ): ResponseEntity<out Map<String, Any?>> = coroutineScope {
@@ -92,7 +91,7 @@ class AuthController(
     }
 
     @Operation(summary = "Reset password ")
-    @PutMapping("/reset/password")
+    @PutMapping("/api/{version}/protected/reset/password")
     suspend fun resetPassword(
         @RequestBody @Valid user : UserPassword
     ) : ResponseEntity<Map<String, String>> = coroutineScope {
@@ -103,7 +102,7 @@ class AuthController(
     }
 
     @Operation(summary = "Change password utilisateur")
-    @PutMapping("/change/password")
+    @PutMapping("/api/{version}/protected/change/password")
     suspend fun updateUser(
         @RequestBody @Valid user : UserPassword
     ) : ResponseEntity<Map<String, String>> = coroutineScope {
@@ -116,18 +115,16 @@ class AuthController(
     }
 
     @Operation(summary = "Delete Account User")
-    @DeleteMapping("/api/delete/user")
+    @DeleteMapping("/api/{version}/protected/users/delete/user")
     suspend fun lockAccount(): ResponseEntity<Map<String, String>> = coroutineScope {
         val userId = auth.user()?.first?.userId
         if (userId == null) ResponseEntity.status(404).body(mapOf("message" to "User not found"))
         val state = authService.lockedOrUnlocked(userId as Long)
         val message = mapOf("message" to if (state) "Votre compte a été supprimé avec succès" else "Cet utilisateur n'existe pas")
         ResponseEntity.ok(message)
-
-
     }
     @Operation(summary = "Recovery Account User")
-    @PutMapping("/api/recovery/user/{id}")
+    @PutMapping("/api/{version}/protected/recovery/user/{id}")
     suspend fun unlockAccount(@PathVariable("id") id : Long): ResponseEntity<Map<String, String>> = coroutineScope {
         val state = authService.lockedOrUnlocked(id,false)
         val message = mapOf("message" to if (state) "Votre compte a été restauré avec succès" else "Cet utilisateur n'existe pas")

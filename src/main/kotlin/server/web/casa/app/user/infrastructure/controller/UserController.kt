@@ -16,14 +16,14 @@ import server.web.casa.utils.ApiResponse
 
 @Tag(name = "Utilisateur", description = "Gestion des utilisateurs")
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("api")
 class UserController(
     val userService : UserService,
     val auth: Auth
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Liste des utilisateurs")
-    @GetMapping
+    @GetMapping("/{version}/protected/users")
 //    @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getListUser(): ApiResponse<List<UserDto>> {
@@ -34,7 +34,7 @@ class UserController(
     }
 
     @Operation(summary = "Detail utilisateur")
-    @GetMapping("/{id}")
+    @GetMapping("/{version}/protected/users/{id}")
 //    @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getUser(
@@ -45,7 +45,7 @@ class UserController(
     }
 
     @Operation(summary = "Modification utilisateur")
-    @PutMapping("/{id}")
+    @PutMapping("/{version}/protected/users/{id}")
 //    @Transactional
     suspend fun updateUser(
         @RequestBody @Valid user : UserRequestChange
@@ -57,7 +57,7 @@ class UserController(
     }
 
     @Operation(summary = "Suppression utilisateur")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{version}/protected/users/{id}")
 //    @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
     suspend fun delete(

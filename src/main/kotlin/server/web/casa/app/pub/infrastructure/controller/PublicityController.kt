@@ -45,7 +45,7 @@ class PublicityController(
             return ResponseEntity.status(201).body(response)
         }
 
-    @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${PubScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPub(): ResponseEntity<Map<String, List<PublicityEntity>>> {
             val pub = service.findAllPub()
             val response = mapOf("pub" to pub)

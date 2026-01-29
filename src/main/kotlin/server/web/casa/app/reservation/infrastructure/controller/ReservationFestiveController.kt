@@ -3,28 +3,22 @@ package server.web.casa.app.reservation.infrastructure.controller
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.notification.application.service.NotificationReservationService
 import server.web.casa.app.property.application.service.SalleFestiveService
 import server.web.casa.app.reservation.application.service.ReservationFestiveService
-import server.web.casa.app.reservation.domain.model.ReservationFestiveDTO
-import server.web.casa.app.reservation.domain.model.ReservationFestiveRequest
-import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.domain.model.*
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationFestiveEntity
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.reservation.ReservationRoute
+import server.web.casa.route.reservation.ReservationFestiveScope
 import server.web.casa.utils.Mode
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.*
 import java.time.format.DateTimeFormatter
-
-const val ROUTE_RESERVATION_FESTIVE = ReservationRoute.RESERVATION_FESTIVE
 
 @Tag(name = "Reservation", description = "Reservation's Management")
 @RestController
-@RequestMapping(ROUTE_RESERVATION_FESTIVE)
+@RequestMapping("api")
 @Profile(Mode.DEV)
 
 class ReservationFestiveController(
@@ -33,7 +27,7 @@ class ReservationFestiveController(
     private val festS: SalleFestiveService,
     private val notif: NotificationReservationService
 ){
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/{version}/${ReservationFestiveScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
         @Valid @RequestBody request: ReservationFestiveRequest
     ): ResponseEntity<Map<String, Any?>> {
@@ -129,7 +123,7 @@ class ReservationFestiveController(
         )
         return ResponseEntity.status(201).body(response)
     }
-    @GetMapping("/",produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
      suspend fun getAllReservation(): ResponseEntity<Map<String, List<ReservationFestiveDTO>>>
     {
         val data = service.findAllReservation()
@@ -137,47 +131,47 @@ class ReservationFestiveController(
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
      suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationFestiveDTO?>> {
         val reservation = service.findById(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
     }
-    @GetMapping("/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByStaus(@PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationFestiveDTO>>> {
         val reservation = service.findByStatus(status)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
     }
-    @GetMapping("/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByDate(@PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationFestiveDTO>>> {
         val reservation = service.findByDate(inputDate)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByMonthYear(@PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationFestiveDTO>>> {
         val reservation = service.findByMonth(month, year)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<ReservationFestiveDTO>>> {
         val reservation = service.findByPYear(year)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationInInterval(@PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationFestiveDTO>?>> {
         val reservation = service.findByInterval(startDateInput, endDateInput)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> {
 
         val user = userS.findIdUser(userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
@@ -187,7 +181,7 @@ class ReservationFestiveController(
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/bureau/{festiveId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/bureau/{festiveId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByProperty(@PathVariable festiveId: Long): ResponseEntity<Map<String, Any?>> {
         val property = festS.findById(festiveId) ?: return ResponseEntity.ok(mapOf("error" to "property not found"))//.orElse(null)
         val reservation = service.findByProperty(property.id!!)
@@ -199,7 +193,7 @@ class ReservationFestiveController(
 //        return ResponseEntity.badRequest().body(response)
     }
 
-    @GetMapping("/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationFestiveScope.PROTECTED}/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationFestiveDTO>? >> {
         val user = userS.findIdUser(userId)
         val reservation = service.findByHostUser(user.userId!!)
@@ -207,7 +201,7 @@ class ReservationFestiveController(
         return ResponseEntity.ok(response)
 
     }
-    @PutMapping("/update/status/{id}")
+    @PutMapping("/{version}/${ReservationFestiveScope.PROTECTED}/update/status/{id}")
     suspend fun updateReservation(
         @PathVariable id: Long,
         @RequestBody request:RequestUpdate
@@ -258,7 +252,7 @@ class ReservationFestiveController(
         return ResponseEntity.ok(response)
     }*/
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{version}/${ReservationFestiveScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
         val notificationDelete = notif.deleteByReservation(id)
@@ -269,7 +263,7 @@ class ReservationFestiveController(
             return ResponseEntity.ok(mapOf("message" to "Something was wrong"))
         }
     }
-    @DeleteMapping("/delete/all")
+    @DeleteMapping("/{version}/${ReservationFestiveScope.PROTECTED}/delete/all")
     suspend fun deleteReservationAll(): ResponseEntity<Map<String, String>> {
         val reservation = service.deleteAll()
        return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))

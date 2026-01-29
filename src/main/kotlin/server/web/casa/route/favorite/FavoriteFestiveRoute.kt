@@ -2,20 +2,40 @@ package server.web.casa.route.favorite
 
 import server.web.casa.route.GlobalRoute
 
-object FavoriteFestiveRoute {
-    //api
+object FavoriteScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
+}
 
-    const val FAVORITE_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
-    const val FAVORITE_FUNERAIRE_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_FUNERAIRE_PATH}"
-    const val FAVORITE_TERRAIN_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
-    const val ROUTE_FAVORITE_HOTEL ="${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
-    const val FAVORITE_VACANCE_PATH = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
-    const val FAVORITE_BUREAU = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
+object FavoriteFuneraireScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFestiveFeatures.FAVORITE_FUNERAIRE_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_FUNERAIRE_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFestiveFeatures.FAVORITE_FUNERAIRE_PATH}"
+}
 
-    //web
+object FavoriteTerrainScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFestiveFeatures.FAVORITE_TERRAIN_PATH}"
+}
 
-    const val FAVORITE_PATH_WEB = "${GlobalRoute.AUTH}/${FavoriteFestiveFeatures.FAVORITE_FESTIVE_PATH}"
+object FavoriteHotelScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFestiveFeatures.ROUTE_FAVORITE_HOTEL_PATH}"
+}
 
+object FavoriteVacanceScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFestiveFeatures.FAVORITE_VACANCE_PATH}"
+}
+
+object FavoriteBureauScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFestiveFeatures.FAVORITE_BUREAU_PATH}"
 }
 
 object FavoriteFestiveFeatures{

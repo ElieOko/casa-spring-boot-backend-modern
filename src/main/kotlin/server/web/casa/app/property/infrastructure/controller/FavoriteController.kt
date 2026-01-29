@@ -3,10 +3,7 @@ package server.web.casa.app.property.infrastructure.controller
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.property.application.service.*
@@ -16,17 +13,15 @@ import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEn
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
-import server.web.casa.route.favorite.FavoriteRoute
-import server.web.casa.utils.ApiResponse
-import server.web.casa.utils.Mode
+import server.web.casa.route.GlobalRoute
+import server.web.casa.route.favorite.PropertyFavoriteScope
+import server.web.casa.utils.*
 import java.time.LocalDate
-
-const val ROUTE_FAVORITE = FavoriteRoute.FAVORITE_PATH
 
 @Tag(name = "Favorite", description = "Gestion des favorites")
 @RestController
 @Profile(Mode.DEV)
-@RequestMapping(ROUTE_FAVORITE)
+@RequestMapping("${GlobalRoute.ROOT}/{version}")
 
 class FavoriteController(
     private val service: FavoriteService,
@@ -36,7 +31,7 @@ class FavoriteController(
     private val propR: PropertyRepository
 ) {
 
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/${PropertyFavoriteScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFavorite(
         @Valid @RequestBody request: FavoriteRequest
     ): ResponseEntity<Map<String, Any?>> {
@@ -59,13 +54,13 @@ class FavoriteController(
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyFavoriteScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFavorite(): ApiResponse<List<FavoriteDTO>> {
         val data = service.getAll()
         return ApiResponse(data)
     }
 
-    @GetMapping("/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyFavoriteScope.PROTECTED}/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteDTO>?>> {
         val user = userR.findById(user) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
@@ -76,7 +71,7 @@ class FavoriteController(
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping("/{favoriteId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyFavoriteScope.PROTECTED}/{favoriteId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOneFavoriteById(@PathVariable favoriteId: Long):ResponseEntity<Map<String, FavoriteDTO>> {
         val favorite = service.getById(favoriteId) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
@@ -86,7 +81,7 @@ class FavoriteController(
         return ResponseEntity.ok().body(response)
     }
 
-    @GetMapping("/property/{property}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/${PropertyFavoriteScope.PROTECTED}/property/{property}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOneFavoriteProperty(@PathVariable property: Long):ResponseEntity<Map<String, List<FavoriteDTO>?>> {
         val property = propR.findById (property) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),
@@ -97,19 +92,19 @@ class FavoriteController(
         return ResponseEntity.ok().body(response)
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/${PropertyFavoriteScope.PROTECTED}/delete/{id}")
     suspend fun deleteFavorite(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
         service.deleteById(id)
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
     }
-    @DeleteMapping("/delete/all")
+    @DeleteMapping("/${PropertyFavoriteScope.PROTECTED}/delete/all")
     suspend fun deleteFavoriteAll(): ResponseEntity<Map<String, String>> {
         service.deleteAll()
         val response = mapOf("message" to "Favorite deleted successfully")
         return ResponseEntity.ok(response)
     }
-    @DeleteMapping("/delete/{userId}/{propertyId}")
+    @DeleteMapping("/${PropertyFavoriteScope.PROTECTED}/delete/{userId}/{propertyId}")
     suspend fun deleteFavorite(@PathVariable userId: Long, @PathVariable propertyId:Long): ResponseEntity<Map<String, String>> {
         val existingFavorite = service.getFavoriteIfExist(propertyId, userId)?.firstOrNull()
 
@@ -120,7 +115,7 @@ class FavoriteController(
         return ResponseEntity.ok(response)
     }
 
-    @DeleteMapping("/user/delete/{userId}")
+    @DeleteMapping("/${PropertyFavoriteScope.PROTECTED}/user/delete/{userId}")
     suspend fun deleteAllFavoriteByUser(@PathVariable userId: Long): ResponseEntity<Map<String, String>> {
         val user = userR.findById(userId) ?: throw ResponseStatusException(
             HttpStatusCode.valueOf(404),

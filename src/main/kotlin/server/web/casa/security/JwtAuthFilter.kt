@@ -2,8 +2,7 @@ package server.web.casa.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -13,7 +12,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
-import server.web.casa.app.property.domain.model.ClientRequestInfo
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.utils.Mode
 
@@ -32,30 +30,17 @@ class JwtAuthFilter(
         filterChain: FilterChain
     ) {
         val path = request.requestURI
-        val info = ClientRequestInfo(
-            ip = getClientIp(request),
-            userAgent = request.getHeader("User-Agent"),
-            deviceBrand = request.getHeader("X-Device-Brand"),
-            deviceModel = request.getHeader("X-Device-Model"),
-            os = request.getHeader("X-OS"),
-            osVersion = request.getHeader("X-OS-Version"),
-        )
-        request.setAttribute(ATTR, info)
+//        val info = ClientRequestInfo(
+//            ip = getClientIp(request),
+//            userAgent = request.getHeader("User-Agent"),
+//            deviceBrand = request.getHeader("X-Device-Brand"),
+//            deviceModel = request.getHeader("X-Device-Model"),
+//            os = request.getHeader("X-OS"),
+//            osVersion = request.getHeader("X-OS-Version"),
+//        )
+//        request.setAttribute(ATTR, info)
         // Liste des chemins publics INCLUANT WebSocket
-        val publicPaths = listOf(
-            "/api/v1/public/**",
-            "/",
-            "/swagger-ui/**",
-            "/swagger-ui.html/*",
-            "/v3/**",
-            "/files/**",
-            "/auth/login",
-            "/auth/register",
-            "/otp/**",
-            "/reset/password",
-            "/refresh",
-            "/websocket/**", // ← IMPORTANT: WebSocket doit être public pour le handshake
-        )
+        val publicPaths = listOf("/api/v1/public/**", "/", "/swagger-ui/**", "/swagger-ui.html/*", "/v3/**", "/files/**", "/auth/login", "/auth/register", "/websocket/**") // ← IMPORTANT: WebSocket doit être public pour le handshake)
 
         try {
             //Vérifie si la route est publique (pattern matching)
