@@ -38,7 +38,6 @@ class HotelController(
         @Valid @RequestBody request: HotelRequest,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             if (request.propertyTypeId != 5L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au hotel")
             val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
@@ -54,7 +53,7 @@ class HotelController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.hotel.createhotel.count",
                     distributionName = "api.hotel.createhotel.latency"
@@ -67,7 +66,6 @@ class HotelController(
     @GetMapping("/${PropertyHotelScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllHotel(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllHotel()
             ApiResponse(data)
@@ -75,7 +73,7 @@ class HotelController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.hotel.getallhotel.count",
                     distributionName = "api.hotel.getallhotel.latency"
@@ -91,7 +89,6 @@ class HotelController(
         @PathVariable("userId") userId : Long,
     )= coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllByUser(userId)
             ApiResponse(data)
@@ -99,7 +96,7 @@ class HotelController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.hotel.getallhotelbyuser.count",
                     distributionName = "api.hotel.getallhotelbyuser.latency"

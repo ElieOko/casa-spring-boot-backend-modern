@@ -28,9 +28,8 @@ class CommuneController(
     suspend fun createCommune(
        httpRequest: HttpServletRequest,
        @Valid @RequestBody request: CommuneRequest
-    ): ResponseEntity<Map<String, Any>> {
+    ): ResponseEntity<Map<String, Any>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val district = districtService.findByIdDistrict(request.districtId)
             if (district != null){
@@ -43,17 +42,17 @@ class CommuneController(
                   "commune" to result as Commune,
                   "message" to "Enregistrement réussie avec succès"
               )
-                return ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
+                ResponseEntity.status(201).body(response)
             }
             val response = mapOf(
                 "message" to "cet district est inexistant !!!"
             )
-            return ResponseEntity.badRequest().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.commune.createcommune.count",
                     distributionName = "api.commune.createcommune.latency"
@@ -65,16 +64,15 @@ class CommuneController(
     @GetMapping("/{version}/${CommuneScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllCommune(request: HttpServletRequest): ResponseEntity<Map<String, List<Commune>>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findAllCommune()
             val response = mapOf("communes" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.commune.getallcommune.count",
                     distributionName = "api.commune.getallcommune.latency"

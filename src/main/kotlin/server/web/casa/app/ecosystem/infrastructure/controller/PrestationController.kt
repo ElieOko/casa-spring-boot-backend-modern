@@ -41,7 +41,6 @@ class PrestationController(
         requestHttp: HttpServletRequest
     ): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val commune = communeService.findByIdCommune(request.prestation.communeId)
             val quartier =  quartierService.findByIdQuartier(request.prestation.quartierId)
@@ -57,15 +56,14 @@ class PrestationController(
                 val data = prestationService.create(entity)
                 images.forEach { prestationImage.create(PrestationImage(prestationId = data.id!!, name = it.image), server = baseUrl) }
                 val response = mapOf("message" to "Enregistrement réussie avec succès",)
-                return ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
-            }
+                return ResponseEntity.status(201).body(response)}
             val response = mapOf("message" to "Précisez au moins une réalisation")
-            return ResponseEntity.badRequest().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.badRequest().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${requestHttp.method} /${requestHttp.requestURI}",
                     countName = "api.prestation.createprestationservice.count",
                     distributionName = "api.prestation.createprestationservice.latency"
@@ -78,15 +76,14 @@ class PrestationController(
     @GetMapping("/{version}/${PrestationScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPrestation(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mapOf("prestations" to prestationService.getAllData().toList())
-            ResponseEntity.ok().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestation.getallprestation.count",
                     distributionName = "api.prestation.getallprestation.latency"
@@ -99,7 +96,6 @@ class PrestationController(
     @GetMapping("/{version}/${PrestationScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPrestationAdmin(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = auth.user()
             val state: Boolean? = user?.second?.find{ true }
@@ -107,12 +103,12 @@ class PrestationController(
                 true -> mapOf("prestations" to prestationService.getAllData2().toList())
                 false,null -> mapOf("prestations" to "Vous n'avez pas accès")
             }
-            ResponseEntity.ok().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestation.getallprestationadmin.count",
                     distributionName = "api.prestation.getallprestationadmin.latency"
@@ -129,7 +125,6 @@ class PrestationController(
         @PathVariable("prestationId") prestationId : Long,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = prestationService.getByIdPrestation(prestationId)
             ApiResponse(data)
@@ -137,7 +132,7 @@ class PrestationController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestation.getallprestaionbyid.count",
                     distributionName = "api.prestation.getallprestaionbyid.latency"
@@ -154,7 +149,6 @@ class PrestationController(
         @PathVariable("userId") userId : Long,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = prestationService.getAllPrestationByUser(userId)
             ApiResponse(data)
@@ -162,7 +156,7 @@ class PrestationController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestation.getallprestaionbyuser.count",
                     distributionName = "api.prestation.getallprestaionbyuser.latency"

@@ -34,7 +34,6 @@ class FavoriteVacanceController(
         @Valid @RequestBody request: FavoriteVacanceRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(request.userId)
             val vac = vacS.getAllVacance().find{ it.id == request.vacanceId } ?: throw ResponseStatusException(
@@ -52,12 +51,12 @@ class FavoriteVacanceController(
             val response = mapOf(
                 "data" to savedFavorite
             )
-            return ResponseEntity.status(HttpStatus.CREATED).body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.status(HttpStatus.CREATED).body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.favoritevacance.createfavorite.count",
                     distributionName = "api.favoritevacance.createfavorite.latency"
@@ -69,7 +68,6 @@ class FavoriteVacanceController(
     @GetMapping("/{version}/${FavoriteVacanceScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFavorite(request: HttpServletRequest): ApiResponse<List<FavoriteVacanceDTO>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll()
             return ApiResponse(data)
@@ -77,7 +75,7 @@ class FavoriteVacanceController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.getallfavorite.count",
                     distributionName = "api.favoritevacance.getallfavorite.latency"
@@ -89,17 +87,16 @@ class FavoriteVacanceController(
     @GetMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getUserFavoriteVacance(request: HttpServletRequest, @PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteVacanceDTO>?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(user)
             val favorite = service.getUserFavorite(user.userId!!)
             val response = mapOf("data" to favorite)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.getuserfavoritevacance.count",
                     distributionName = "api.favoritevacance.getuserfavoritevacance.latency"
@@ -111,19 +108,18 @@ class FavoriteVacanceController(
     @GetMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOneFavoriteById(request: HttpServletRequest, @PathVariable id: Long):ResponseEntity<Map<String, FavoriteVacanceDTO>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val favorite = service.getById (id) ?: throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
                 "favorite Not Found."
             )
             val response = mapOf("data" to favorite)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.getonefavoritebyid.count",
                     distributionName = "api.favoritevacance.getonefavoritebyid.latency"
@@ -135,7 +131,6 @@ class FavoriteVacanceController(
     @GetMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/salle/{vacanceId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOneFavoriteVacance(request: HttpServletRequest, @PathVariable vacanceId: Long):ResponseEntity<Map<String, List<FavoriteVacanceDTO>?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val vac = vacS.getAllVacance().find{ it.id == vacanceId } ?: throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
@@ -143,12 +138,12 @@ class FavoriteVacanceController(
             )
             val favorite = service.getFavoriteByVacanceId(vacanceId)
             val response = mapOf("data" to favorite)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.getonefavoritevacance.count",
                     distributionName = "api.favoritevacance.getonefavoritevacance.latency"
@@ -160,16 +155,15 @@ class FavoriteVacanceController(
     @DeleteMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/delete/{id}")
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.deleteById(id)
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.deletefavorite.count",
                     distributionName = "api.favoritevacance.deletefavorite.latency"
@@ -180,16 +174,15 @@ class FavoriteVacanceController(
     @DeleteMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/delete/all")
     suspend fun deleteFavoriteAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.deleteAll()
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.deletefavoriteall.count",
                     distributionName = "api.favoritevacance.deletefavoriteall.latency"
@@ -200,7 +193,6 @@ class FavoriteVacanceController(
     @DeleteMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/delete/{userId}/{id}")
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable id:Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val existingFavorite = service.getFavoriteIfExist(id, userId).firstOrNull()
 
@@ -208,12 +200,12 @@ class FavoriteVacanceController(
                 service.deleteById(it)
             }
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.deletefavorite.count",
                     distributionName = "api.favoritevacance.deletefavorite.latency"
@@ -225,17 +217,16 @@ class FavoriteVacanceController(
     @DeleteMapping("/{version}/${FavoriteVacanceScope.PROTECTED}/user/delete/{userId}")
     suspend fun deleteAllFavoriteByUser(request: HttpServletRequest, @PathVariable userId: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(userId)
             service.deleteAllFavoriteUser(user.userId!!)
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoritevacance.deleteallfavoritebyuser.count",
                     distributionName = "api.favoritevacance.deleteallfavoritebyuser.latency"

@@ -25,14 +25,13 @@ class TypeCardController(
     @GetMapping("/{version}/${CardTypeScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTypeCard(request: HttpServletRequest): ApiResponse<List<TypeCardEntity>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             ApiResponse(repository.findAll().toList())
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.typecard.getalltypecard.count",
                     distributionName = "api.typecard.getalltypecard.latency"

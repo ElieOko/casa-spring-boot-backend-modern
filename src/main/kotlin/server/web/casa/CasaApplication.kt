@@ -29,14 +29,13 @@ class HomeController(
     @GetMapping("/")
     fun home(request: HttpServletRequest):String {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             return  "index"
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.home.home.count",
                     distributionName = "api.home.home.latency"

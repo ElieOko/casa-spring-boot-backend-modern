@@ -39,7 +39,6 @@ class PersonController(
         @Valid @RequestBody request: PersonUserRequest
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val accountItems = request.account
             if (accountItems.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisissez au moins un type de comptes.")
@@ -58,12 +57,12 @@ class PersonController(
                 "actor" to state,
                 "token" to userCreated.second
             )
-            ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.status(201).body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.person.createpersonactor.count",
                     distributionName = "api.person.createpersonactor.latency"
@@ -75,14 +74,13 @@ class PersonController(
     @GetMapping("/{version}/${MemberScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPerson(request: HttpServletRequest): ApiResponse<List<Person>> = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             ApiResponse(service.findAllPerson().toList())
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.person.getallperson.count",
                     distributionName = "api.person.getallperson.latency"
@@ -98,17 +96,16 @@ class PersonController(
         @PathVariable("id") id : Long,
         @RequestBody @Valid request: PersonRequest2) = coroutineScope {
             val startNanos = System.nanoTime()
-        var statusCode = "200"
             try {
                 val updated = service.update(request,id)
                 userService.updateUsername(updated.second.userId!!,"@"+toPascalCase(updated.second.firstName + updated.second.lastName))
                 val response = mapOf("message" to "Person updated successfully", "person" to updated.second, "user" to updated.first)
-                ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
-            } finally {
+                ResponseEntity.ok(response)
+        } finally {
                 sentry.callToMetric(
                     MetricModel(
                         startNanos = startNanos,
-                        status = statusCode,
+                        status = "200",
                         route = "${httpRequest.method} /${httpRequest.requestURI}",
                         countName = "api.person.updatepersonactor.count",
                         distributionName = "api.person.updatepersonactor.latency"
@@ -124,17 +121,16 @@ class PersonController(
         @RequestBody @Valid request: ImageUserRequest
     ) : ResponseEntity<Map<String, Any>> = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val person = service.findByIdPerson(id)
             val updated = service.changeFile(request,person?.userId!!)
             val response = mapOf("person" to updated, "message" to "Image de profile modifier avec succès")
-            ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.person.updatepersonimage.count",
                     distributionName = "api.person.updatepersonimage.latency"

@@ -32,12 +32,11 @@ class VacanceController(
         @Valid @RequestBody request: VacanceRequest,
     )= coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            if (request.userId == null) ResponseEntity.badRequest().body("User ID must not be null!").also { statusCode = it.statusCode.value().toString() }
-            if (request.images.size < 3) ResponseEntity.badRequest().body("Vous devez fournir au minimun 3 images pour votre site touristique").also { statusCode = it.statusCode.value().toString() }
+            if (request.userId == null) ResponseEntity.badRequest().body("User ID must not be null!")
+            if (request.images.size < 3) ResponseEntity.badRequest().body("Vous devez fournir au minimun 3 images pour votre site touristique")
             val agence = agenceService.getAllByUser(request.userId!!)
-            if (agence.isEmpty()) ResponseEntity.badRequest().body("Vous devez avoir une agence au minimum un pour poster un site touristique").also { statusCode = it.statusCode.value().toString() }
+            if (agence.isEmpty()) ResponseEntity.badRequest().body("Vous devez avoir une agence au minimum un pour poster un site touristique")
             request.agenceId = agence.first().agence?.id
             val data = service.create(request.toDomain())
             request.images.forEach { imageService.create(ImageRequestStandard(data.id!!,it?.name!!)) }
@@ -46,7 +45,7 @@ class VacanceController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.vacance.createvacance.count",
                     distributionName = "api.vacance.createvacance.latency"
@@ -59,14 +58,13 @@ class VacanceController(
     @GetMapping("/${PropertyVacanceScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllVacance(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             ApiResponse(service.getAllVacance())
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.vacance.getallvacance.count",
                     distributionName = "api.vacance.getallvacance.latency"

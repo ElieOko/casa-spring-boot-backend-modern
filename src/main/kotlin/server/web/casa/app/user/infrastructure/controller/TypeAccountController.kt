@@ -25,14 +25,13 @@ class TypeAccountController(
     @GetMapping("/{version}/${AccountTypeScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTypeAccountE(request: HttpServletRequest): ApiResponse<List<TypeAccount>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             ApiResponse(service.getAll().toList())
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.typeaccount.getalltypeaccounte.count",
                     distributionName = "api.typeaccount.getalltypeaccounte.latency"

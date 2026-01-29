@@ -42,7 +42,6 @@ class TerrainController(
         @Valid @RequestBody request: TerrainRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             //        propertyTypeService.findByIdPropertyType(request.bureau.propertyTypeId?:0)
                     if (request.propertyTypeId != 9L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au Terrain")
@@ -65,7 +64,7 @@ class TerrainController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.terrain.createterrain.count",
                     distributionName = "api.terrain.createterrain.latency"
@@ -78,16 +77,15 @@ class TerrainController(
     @GetMapping("/${PropertyTerrainScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTerrain(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll()
             val response = mapOf("terrain" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.terrain.getallterrain.count",
                     distributionName = "api.terrain.getallterrain.latency"
@@ -104,18 +102,17 @@ class TerrainController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
             val data = service.findById(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.terrain.soldoutorinterrain.count",
                     distributionName = "api.terrain.soldoutorinterrain.latency"
@@ -133,18 +130,17 @@ class TerrainController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.terrain.toenableordisableterrain.count",
                     distributionName = "api.terrain.toenableordisableterrain.latency"
@@ -160,7 +156,6 @@ class TerrainController(
         @PathVariable("userId") userId : Long,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllPropertyByUser(userId)
             ApiResponse(data)
@@ -168,7 +163,7 @@ class TerrainController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.terrain.getallterrainbyuser.count",
                     distributionName = "api.terrain.getallterrainbyuser.latency"
@@ -185,7 +180,6 @@ class TerrainController(
         @Valid @RequestBody request: TerrainRequest
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             userService.findIdUser(request.userId)
             val terrain = service.findById(terrainId)
@@ -202,12 +196,12 @@ class TerrainController(
             data.quartierId = quartier?.quartierId
             service.update(data)
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.terrain.updateterrain.count",
                     distributionName = "api.terrain.updateterrain.latency"

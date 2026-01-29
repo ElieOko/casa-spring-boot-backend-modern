@@ -41,7 +41,6 @@ class SalleFuneraireController(
         @Valid @RequestBody request: SalleFuneraireRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             if (request.funeraire.propertyTypeId != 7L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au salle funeraire")
             propertyTypeService.findByIdPropertyType(request.funeraire.propertyTypeId)
@@ -61,7 +60,7 @@ class SalleFuneraireController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefuneraire.createfuneraire.count",
                     distributionName = "api.sallefuneraire.createfuneraire.latency"
@@ -74,16 +73,15 @@ class SalleFuneraireController(
     @GetMapping("/${PropertyFuneraireScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFuneraire(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll()
             val response = mapOf("funeraires" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.sallefuneraire.getallfuneraire.count",
                     distributionName = "api.sallefuneraire.getallfuneraire.latency"
@@ -100,7 +98,6 @@ class SalleFuneraireController(
         @PathVariable("userId") userId : Long,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllPropertyByUser(userId)
             ApiResponse(data)
@@ -108,7 +105,7 @@ class SalleFuneraireController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.sallefuneraire.getallfunerairebyuser.count",
                     distributionName = "api.sallefuneraire.getallfunerairebyuser.latency"
@@ -124,20 +121,18 @@ class SalleFuneraireController(
         @Valid @RequestBody request: ImageChange
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findById(funeraireId)
             val result = if (request.images.isNotEmpty()) imageService.updateFile(funeraireId,request.images) else false
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            if (result)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune modification n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefuneraire.updatefile.count",
                     distributionName = "api.sallefuneraire.updatefile.latency"
@@ -154,20 +149,18 @@ class SalleFuneraireController(
         @Valid @RequestBody request: PropertyImagesRequest
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findById(funeraireId)
             val result = if (request.propertyImage.isNotEmpty()) imageService.deleteFile(funeraireId,request.propertyImage) else false
             val message = mutableMapOf("message" to "Suppression effectuée avec succès")
-            if (result)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune suppression n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefuneraire.deletefile.count",
                     distributionName = "api.sallefuneraire.deletefile.latency"
@@ -184,7 +177,6 @@ class SalleFuneraireController(
         @Valid @RequestBody request: SalleFuneraireDTO
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             userService.findIdUser(request.userId!!)
             val bureau = service.findById(funeraireId)
@@ -201,12 +193,12 @@ class SalleFuneraireController(
             data.quartierId = quartier?.quartierId
             service.update(data)
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefuneraire.updatefuneraire.count",
                     distributionName = "api.sallefuneraire.updatefuneraire.latency"
@@ -224,18 +216,17 @@ class SalleFuneraireController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
             val data = service.findById(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefuneraire.soldoutorinfuneraire.count",
                     distributionName = "api.sallefuneraire.soldoutorinfuneraire.latency"
@@ -253,18 +244,17 @@ class SalleFuneraireController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefuneraire.toenableordisablefuneraire.count",
                     distributionName = "api.sallefuneraire.toenableordisablefuneraire.latency"

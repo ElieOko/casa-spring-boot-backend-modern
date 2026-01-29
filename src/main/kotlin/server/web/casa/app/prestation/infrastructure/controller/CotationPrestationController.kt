@@ -32,22 +32,21 @@ class CotationPrestationController(
     suspend fun createCotation(
         request: HttpServletRequest,
         @Valid @RequestBody req: CotationRequest
-    ): ResponseEntity <Map<String, Any?>> = coroutineScope {
+    ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val checkUser = userS.findIdUser(req.userId)
-            val checkSollicitation: SollicitationDTO? = (solS.findById(req.sollicitationId) ?: ResponseEntity.badRequest().body(mapOf("error" to "prestation not found")).also { statusCode = it.statusCode.value().toString() }) as SollicitationDTO?
+            val checkSollicitation: SollicitationDTO? = (solS.findById(req.sollicitationId) ?: ResponseEntity.badRequest().body(mapOf("error" to "prestation not found"))) as SollicitationDTO?
             val prestateur = userS.findIdUser(checkSollicitation!!.user.userId!!)
-            if (req.cote >= 6 ) ResponseEntity.badRequest().body(mapOf("error" to "Cote doit etre inferieure ou egale à 5")).also { statusCode = it.statusCode.value().toString() }
+            if (req.cote >= 6 ) ResponseEntity.badRequest().body(mapOf("error" to "Cote doit etre inferieure ou egale à 5"))
             val data = CotationPrestationEntity(userId = checkUser.userId!! , sollicitationId = checkSollicitation.sollicitation.id!!, cote = req.cote, commentaire = req.commentaire, isActive = true, createdAt = LocalDateTime.now())
             val created = service.create(data)
-            ResponseEntity.ok(mapOf("cotation" to created, "prestateur" to prestateur, "evaluateur" to checkUser)).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(mapOf("cotation" to created, "prestateur" to prestateur, "evaluateur" to checkUser))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.cotationprestation.createcotation.count",
                     distributionName = "api.cotationprestation.createcotation.latency"
@@ -59,14 +58,13 @@ class CotationPrestationController(
     @GetMapping("/{version}/${CotationScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllCotations(request: HttpServletRequest): ResponseEntity<Map<String, List<CotationPrestationEntity>>> =  coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            ResponseEntity.ok().body(mapOf("cotation" to service.findAll().toList())).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(mapOf("cotation" to service.findAll().toList()))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.cotationprestation.getallcotations.count",
                     distributionName = "api.cotationprestation.getallcotations.latency"
@@ -78,16 +76,15 @@ class CotationPrestationController(
     @GetMapping("/{version}/${CotationScope.PUBLIC}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getCotationById(request: HttpServletRequest, @PathVariable id: Long) : ResponseEntity<Map<String, CotationPrestationEntity?>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findById(id)
             val response = mapOf("cotation" to data)
-            ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.cotationprestation.getcotationbyid.count",
                     distributionName = "api.cotationprestation.getcotationbyid.latency"
@@ -99,19 +96,16 @@ class CotationPrestationController(
     @DeleteMapping("/{version}/${CotationScope.PROTECTED}/delete/{id}")
     suspend fun deleteById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            service.findById(id) ?: ResponseEntity.ok(mapOf("message" to "cotation not found")).also { statusCode = it.statusCode.value().toString() }
+            service.findById(id) ?: ResponseEntity.ok(mapOf("message" to "cotation not found"))
             if(service.deleteById(id)) {
-                ResponseEntity.ok(mapOf("message" to "cotation deleted successfully")).also { statusCode = it.statusCode.value().toString() }
-            }else{
-                ResponseEntity.ok(mapOf("error" to "Something was wrong")).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.ok(mapOf("message" to "cotation deleted successfully"))
+            }else{ ResponseEntity.ok(mapOf("error" to "Something was wrong"))}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.cotationprestation.deletebyid.count",
                     distributionName = "api.cotationprestation.deletebyid.latency"

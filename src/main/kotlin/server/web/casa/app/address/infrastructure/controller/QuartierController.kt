@@ -23,16 +23,15 @@ class QuartierController(
     @GetMapping("/{version}/${QuartierScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllQuartier(request: HttpServletRequest): ResponseEntity<Map<String, List<Quartier>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findAllQuartier()
             val response = mapOf("quartiers" to data)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.quartier.getallquartier.count",
                     distributionName = "api.quartier.getallquartier.latency"

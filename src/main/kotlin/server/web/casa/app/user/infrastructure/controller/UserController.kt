@@ -29,7 +29,6 @@ class UserController(
     @GetMapping("/{version}/protected/users")
     suspend fun getListUser(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val session = auth.user()
             val state: Boolean? = session?.second?.find{ true }
@@ -39,14 +38,13 @@ class UserController(
                     ApiResponse(data)
                 }
                 false,null -> {
-                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé")).also { statusCode = it.statusCode.value().toString() }
-                }
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
             }
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.user.getlistuser.count",
                     distributionName = "api.user.getlistuser.latency"
@@ -62,24 +60,21 @@ class UserController(
         @PathVariable("id") id : Long
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val session = auth.user()
             val state: Boolean? = session?.second?.find{ true }
             when (state) {
                 true -> {
                     val data = userService.findIdUser(id)
-                    ResponseEntity.ok().body(data).also { statusCode = it.statusCode.value().toString() }
-                }
+                    ResponseEntity.ok().body(data)}
                 false,null ->{
-                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé")).also { statusCode = it.statusCode.value().toString() }
-                }
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
             }
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.user.getuser.count",
                     distributionName = "api.user.getuser.latency"
@@ -96,20 +91,18 @@ class UserController(
         @RequestBody @Valid user : UserRequestChange
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val session = auth.user()
             val state: Boolean? = session?.second?.find{ true }
             if (session?.first?.userId == userId || state == true ) {
                 val updated = userService.updateUser(userId,user)
-                ResponseEntity.ok(updated).also { statusCode = it.statusCode.value().toString() }
-            }
-            ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé")).also { statusCode = it.statusCode.value().toString() }
+                ResponseEntity.ok(updated)}
+            ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.user.updateuser.count",
                     distributionName = "api.user.updateuser.latency"

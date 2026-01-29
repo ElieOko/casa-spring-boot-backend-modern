@@ -26,7 +26,6 @@ class NotificationRestController(
         @PathVariable("userId") userId : Long,
     )= coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.notificationByUser(userId)
             ApiResponse(data)
@@ -34,7 +33,7 @@ class NotificationRestController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.notificationrest.getallnotificationbyuser.count",
                     distributionName = "api.notificationrest.getallnotificationbyuser.latency"
@@ -50,15 +49,14 @@ class NotificationRestController(
         @PathVariable("id") id : Long,
     )= coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.notificationDisable(id)
-            ResponseEntity.status(HttpStatus.CREATED).body(mapOf("message" to "cette notification a été supprimer avec succès")).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.status(HttpStatus.CREATED).body(mapOf("message" to "cette notification a été supprimer avec succès"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.notificationrest.disablenotification.count",
                     distributionName = "api.notificationrest.disablenotification.latency"

@@ -27,7 +27,6 @@ class PropertyTypeController(
     @GetMapping("/${PropertyTypeScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllType(request: HttpServletRequest): ApiResponse<List<PropertyType>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll().toList()
             return ApiResponse(data)
@@ -35,7 +34,7 @@ class PropertyTypeController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.propertytype.getalltype.count",
                     distributionName = "api.propertytype.getalltype.latency"

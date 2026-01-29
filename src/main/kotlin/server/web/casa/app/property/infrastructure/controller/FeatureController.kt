@@ -29,7 +29,6 @@ class FeatureController(
     @GetMapping("/${PropertyFeatureScope.PRIVATE}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFeature(request: HttpServletRequest): ApiResponse<List<Feature>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll().toList()
             return ApiResponse(data)
@@ -37,7 +36,7 @@ class FeatureController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.feature.getallfeature.count",
                     distributionName = "api.feature.getallfeature.latency"

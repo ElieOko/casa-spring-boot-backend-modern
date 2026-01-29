@@ -24,14 +24,13 @@ class AccountController(
     @GetMapping("/{version}/${AccountScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllAccountE(request: HttpServletRequest): Map<String, List<AccountDTO>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             mapOf("accounts" to service.getAll().toList())
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.account.getallaccounte.count",
                     distributionName = "api.account.getallaccounte.latency"

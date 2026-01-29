@@ -50,7 +50,6 @@ class PropertyController(
         requestHttp: HttpServletRequest
     ): ApiResponseWithMessage<PropertyMasterDTO> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
                     //       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
                     devise.getById(request.deviseId)
@@ -146,7 +145,7 @@ class PropertyController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${requestHttp.method} /${requestHttp.requestURI}",
                     countName = "api.property.createproperty.count",
                     distributionName = "api.property.createproperty.latency"
@@ -161,7 +160,6 @@ class PropertyController(
         request: HttpServletRequest
     ): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val page = 0
             val size = 15
@@ -180,12 +178,12 @@ class PropertyController(
             val osVersion = request.getHeader("X-OS-Version")
             log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
             val response = mapOf("properties" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.property.getallproperty.count",
                     distributionName = "api.property.getallproperty.latency"
@@ -202,7 +200,6 @@ class PropertyController(
         @PathVariable("userId") userId : Long,
     ): ApiResponse<List<PropertyMasterDTO>> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllPropertyByUser(userId)
              ApiResponse(data)
@@ -210,7 +207,7 @@ class PropertyController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.property.getallpropertybyuser.count",
                     distributionName = "api.property.getallpropertybyuser.latency"
@@ -227,19 +224,18 @@ class PropertyController(
         @PathVariable("propertyId") propertyId : Long,
     ): ResponseEntity<Map<String, Any>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findByIdProperty(propertyId)
             val response = mapOf(
                 "properties" to data.first,
                 "similaires" to data.second
             )
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.property.getallpropertybyid.count",
                     distributionName = "api.property.getallpropertybyid.latency"
@@ -267,7 +263,6 @@ class PropertyController(
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.filterProduct(
                 filterModel = PropertyFilter(
@@ -287,12 +282,12 @@ class PropertyController(
                 sortOrder = sortOrder
             )
             val response = mapOf("properties" to data)
-             ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+             ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.property.getallpropertyfilter.count",
                     distributionName = "api.property.getallpropertyfilter.latency"
@@ -310,7 +305,6 @@ class PropertyController(
         @Valid @RequestBody request: PropertyRequest
     ): ResponseEntity<PropertyMasterDTO> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val city = cityService.findByIdCity(request.cityId)
             userService.findIdUser(request.userId)
@@ -345,12 +339,12 @@ class PropertyController(
             property.first.geoZone.lat = request.latitude
             property.first.geoZone.lng = request.longitude
             val updated = service.update(property.first)
-            return ResponseEntity.ok(updated).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(updated)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.property.updateproperty.count",
                     distributionName = "api.property.updateproperty.latency"
@@ -367,7 +361,6 @@ class PropertyController(
         @Valid @RequestBody request: PropertyImageChangeRequest
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findByIdProperty(propertyId)
             val result = if (request.propertyImage.isNotEmpty()) propertyImageService.updateFile(propertyId,request.propertyImage) else false
@@ -375,15 +368,14 @@ class PropertyController(
             val result3 = if (request.propertyImageKitchen.isNotEmpty()) propertyImageKitchenService.updateFile(propertyId,request.propertyImageKitchen) else false
             val result4 = if (request.propertyImageLivingRoom.isNotEmpty()) propertyImageLivingRoomService.updateFile(propertyId,request.propertyImageLivingRoom) else false
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            if (result || result4 || result3 || result2)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result || result4 || result3 || result2)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune modification n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.property.updatefile.count",
                     distributionName = "api.property.updatefile.latency"
@@ -400,7 +392,6 @@ class PropertyController(
         @Valid @RequestBody request: PropertyImagesRequest
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findByIdProperty(propertyId)
             val result = if (request.propertyImage.isNotEmpty()) propertyImageService.deleteFile(propertyId,request.propertyImage) else false
@@ -408,15 +399,14 @@ class PropertyController(
             val result3 = if (request.propertyImageKitchen.isNotEmpty()) propertyImageKitchenService.deleteFile(propertyId,request.propertyImageKitchen) else false
             val result4 = if (request.propertyImageLivingRoom.isNotEmpty()) propertyImageLivingRoomService.deleteFile(propertyId,request.propertyImageLivingRoom) else false
             val message = mutableMapOf("message" to "Suppression effectuée avec succès")
-            if (result || result4 || result3 || result2)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result || result4 || result3 || result2)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune suppression n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.property.deletefile.count",
                     distributionName = "api.property.deletefile.latency"
@@ -434,18 +424,17 @@ class PropertyController(
         @RequestBody request : StatusState
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
             val data = service.findById(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.property.soldoutorin.count",
                     distributionName = "api.property.soldoutorin.latency"
@@ -463,18 +452,17 @@ class PropertyController(
         @RequestBody request : StatusState
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.property.toenableordisable.count",
                     distributionName = "api.property.toenableordisable.latency"

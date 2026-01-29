@@ -43,7 +43,6 @@ class BureauController(
         @Valid @RequestBody request: BureauDtoRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             //        propertyTypeService.findByIdPropertyType(request.bureau.propertyTypeId?:0)
                     if (request.bureau.propertyTypeId != 4L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au bureaux")
@@ -66,7 +65,7 @@ class BureauController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.bureau.createbureau.count",
                     distributionName = "api.bureau.createbureau.latency"
@@ -79,16 +78,15 @@ class BureauController(
     @GetMapping("/${PropertyBureauScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllBureau(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllBureau()
             val response = mapOf("bureaux" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.bureau.getallbureau.count",
                     distributionName = "api.bureau.getallbureau.latency"
@@ -105,20 +103,18 @@ class BureauController(
         @Valid @RequestBody request: ImageChange
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findById(bureauId)
             val result = if (request.images.isNotEmpty()) bureauImageService.updateFile(bureauId,request.images) else false
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            if (result)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune modification n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.bureau.updatefilebureau.count",
                     distributionName = "api.bureau.updatefilebureau.latency"
@@ -135,20 +131,18 @@ class BureauController(
         @Valid @RequestBody request: ImageChangeOther
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findById(bureauId)
             val result = if (request.images.isNotEmpty()) bureauImageService.deleteFile(bureauId,request.images) else false
             val message = mutableMapOf("message" to "Suppression effectuée avec succès")
-            if (result )  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result )  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune suppression n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.bureau.deletefilebureau.count",
                     distributionName = "api.bureau.deletefilebureau.latency"
@@ -165,7 +159,6 @@ class BureauController(
         @PathVariable("userId") userId : Long,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllPropertyByUser(userId)
             ApiResponse(data)
@@ -173,7 +166,7 @@ class BureauController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.bureau.getallbureaubyuser.count",
                     distributionName = "api.bureau.getallbureaubyuser.latency"
@@ -190,7 +183,6 @@ class BureauController(
         @Valid @RequestBody request: BureauRequest
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             userService.findIdUser(request.userId!!)
             val bureau = service.findById(bureauId)
@@ -207,12 +199,12 @@ class BureauController(
             data.quartierId = quartier?.quartierId
             service.update(data)
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.bureau.updatebureau.count",
                     distributionName = "api.bureau.updatebureau.latency"
@@ -240,7 +232,6 @@ class BureauController(
         @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.filter(
                 filterModel = PropertyFilter(
@@ -260,12 +251,12 @@ class BureauController(
                 sortOrder = sortOrder
             )
             val response = mapOf("properties" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.bureau.getallbureaufilter.count",
                     distributionName = "api.bureau.getallbureaufilter.latency"
@@ -283,18 +274,17 @@ class BureauController(
         @RequestBody request : StatusState
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
             val data = service.findById(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.bureau.soldoutorinbureau.count",
                     distributionName = "api.bureau.soldoutorinbureau.latency"
@@ -311,18 +301,17 @@ class BureauController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.bureau.toenableordisablebureau.count",
                     distributionName = "api.bureau.toenableordisablebureau.latency"

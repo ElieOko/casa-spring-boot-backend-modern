@@ -41,7 +41,6 @@ class SalleFestiveController(
         @Valid @RequestBody request: SalleFestiveRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             if (request.festive.propertyTypeId != 8L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au salle de fête")
             propertyTypeService.findByIdPropertyType(request.festive.propertyTypeId)
@@ -61,7 +60,7 @@ class SalleFestiveController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.createfestive.count",
                     distributionName = "api.sallefestive.createfestive.latency"
@@ -74,16 +73,15 @@ class SalleFestiveController(
     @GetMapping("/${PropertyFestiveScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFestive(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll()
             val response = mapOf("festives" to data)
-            ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.sallefestive.getallfestive.count",
                     distributionName = "api.sallefestive.getallfestive.latency"
@@ -100,7 +98,6 @@ class SalleFestiveController(
         @PathVariable("userId") userId : Long,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllPropertyByUser(userId)
             ApiResponse(data)
@@ -108,7 +105,7 @@ class SalleFestiveController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.sallefestive.getallfestivebyuser.count",
                     distributionName = "api.sallefestive.getallfestivebyuser.latency"
@@ -124,20 +121,18 @@ class SalleFestiveController(
         @Valid @RequestBody request: ImageChange
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findById(festiveId)
             val result = if (request.images.isNotEmpty()) imageService.updateFile(festiveId,request.images) else false
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            if (result)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune modification n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.updatefilefestive.count",
                     distributionName = "api.sallefestive.updatefilefestive.latency"
@@ -153,20 +148,18 @@ class SalleFestiveController(
         @Valid @RequestBody request: PropertyImagesRequest
     ) = coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.findById(festiveId)
             val result = if (request.propertyImage.isNotEmpty()) imageService.deleteFile(festiveId,request.propertyImage) else false
             val message = mutableMapOf("message" to "Suppression effectuée avec succès")
-            if (result)  ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() } else {
+            if (result)  ResponseEntity.ok(message)else {
                 message["message"] = "Aucune suppression n'a été effectuée"
-                ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.badRequest().body(message)}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.deletefile.count",
                     distributionName = "api.sallefestive.deletefile.latency"
@@ -183,7 +176,6 @@ class SalleFestiveController(
         @Valid @RequestBody request: SalleFestiveDTO
     ) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             userService.findIdUser(request.userId!!)
             val bureau = service.findById(festiveId)
@@ -200,12 +192,12 @@ class SalleFestiveController(
             data.quartierId = quartier?.quartierId
             service.update(data)
             val message = mutableMapOf("message" to "Modification effectuée avec succès")
-            ResponseEntity.ok(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.updatebureau.count",
                     distributionName = "api.sallefestive.updatebureau.latency"
@@ -223,18 +215,17 @@ class SalleFestiveController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
             val data = service.findById(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.soldoutorinfestive.count",
                     distributionName = "api.sallefestive.soldoutorinfestive.latency"
@@ -252,18 +243,17 @@ class SalleFestiveController(
         @RequestBody request : StatusState
     )= coroutineScope{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.badRequest().body(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.toenableordisablefestive.count",
                     distributionName = "api.sallefestive.toenableordisablefestive.latency"

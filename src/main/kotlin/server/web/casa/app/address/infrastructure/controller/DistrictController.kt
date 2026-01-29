@@ -12,6 +12,7 @@ import server.web.casa.route.address.DistrictScope
 import server.web.casa.utils.Mode
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.coroutineScope
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "District", description = "Gestion des districts")
@@ -29,7 +30,6 @@ class DistrictController(
        @Valid @RequestBody request: DistrictRequest
     ): ResponseEntity<out Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val city = cityService.findByIdCity(request.cityId)
             if (city != null){
@@ -42,17 +42,16 @@ class DistrictController(
                   "district" to result,
                   "message" to "Enregistrement réussie avec succès"
               )
-                return ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
-            }
+                return ResponseEntity.status(201).body(response)}
             val response = mapOf(
                 "message" to "cette ville est inexistante !!!"
             )
-            return ResponseEntity.badRequest().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.badRequest().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.district.createdistrict.count",
                     distributionName = "api.district.createdistrict.latency"
@@ -62,18 +61,17 @@ class DistrictController(
     }
 
     @GetMapping("/{version}/${DistrictScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllDistrict(request: HttpServletRequest): ResponseEntity<Map<String, List<District?>>> {
+    suspend fun getAllDistrict(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findAllDistrict()
             val response = mapOf("districts" to data)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.district.getalldistrict.count",
                     distributionName = "api.district.getalldistrict.latency"

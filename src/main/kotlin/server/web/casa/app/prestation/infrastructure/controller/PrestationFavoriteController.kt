@@ -35,16 +35,13 @@ class PrestationFavoriteController(
         @Valid @RequestBody request: FavoritePrestationRequest
     ): ResponseEntity<Map<String, Any?>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(request.userId)
                 ?: return ResponseEntity.badRequest()
-                .body(mapOf("error" to "User not found")).also { statusCode = it.statusCode.value().toString() }
-
+                .body(mapOf("error" to "User not found"))
             val prestation = presTS.getById(request.prestationId)
                     ?: return ResponseEntity.badRequest()
-                    .body(mapOf("error" to "prestation not found")).also { statusCode = it.statusCode.value().toString() }
-
+                    .body(mapOf("error" to "prestation not found"))
             val data = FavoritePrestationEntity(
                 userId = user.userId,
                 prestationId = prestation.id
@@ -52,12 +49,12 @@ class PrestationFavoriteController(
             val verify = service.findByPrestationIdAndUserId(prestation.id!!, user.userId!!)
             //val created = verify ?: service.create(data)
             val created = verify?.takeIf { it.isNotEmpty() } ?: service.create(data)
-            return ResponseEntity.status(201).body(mapOf("data" to created)).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.status(201).body(mapOf("data" to created))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.prestationfavorite.createprestationfavorite.count",
                     distributionName = "api.prestationfavorite.createprestationfavorite.latency"
@@ -69,15 +66,14 @@ class PrestationFavoriteController(
     @GetMapping("/{version}/${PrestationFavoriteScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFavortitePrestation(request: HttpServletRequest):ResponseEntity<Map<String,List<FavoritePrestationDTO>>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val all = service.findAll()
-            return ResponseEntity.ok().body(mapOf("data" to all)).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(mapOf("data" to all))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.getallfavortiteprestation.count",
                     distributionName = "api.prestationfavorite.getallfavortiteprestation.latency"
@@ -89,15 +85,14 @@ class PrestationFavoriteController(
     @GetMapping("/{version}/${PrestationFavoriteScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationPrestationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, FavoritePrestationDTO?>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val find = service.findById(id)
-            return ResponseEntity.ok().body(mapOf("data" to find)).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(mapOf("data" to find))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.getreservationprestationbyid.count",
                     distributionName = "api.prestationfavorite.getreservationprestationbyid.latency"
@@ -109,15 +104,14 @@ class PrestationFavoriteController(
     @GetMapping("/{version}/${PrestationFavoriteScope.PROTECTED}/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByUserPrestation(request: HttpServletRequest, @PathVariable userId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val find = service.findByUserId( userId)
-            return ResponseEntity.ok(mapOf("data" to find)).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(mapOf("data" to find))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.getbyuserprestation.count",
                     distributionName = "api.prestationfavorite.getbyuserprestation.latency"
@@ -128,15 +122,14 @@ class PrestationFavoriteController(
     @GetMapping("/{version}/${PrestationFavoriteScope.PROTECTED}/prestation/{prestationId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByPrestationFavorite(request: HttpServletRequest, @PathVariable prestationId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val find = service.findByPrestationId(prestationId)
-            return ResponseEntity.ok(mapOf("data" to find)).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(mapOf("data" to find))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.getbyprestationfavorite.count",
                     distributionName = "api.prestationfavorite.getbyprestationfavorite.latency"
@@ -147,15 +140,14 @@ class PrestationFavoriteController(
     @GetMapping("/{version}/${PrestationFavoriteScope.PROTECTED}/{userId}/{prestationId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getByUserPrestation(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable prestationId: Long): ResponseEntity<Map<String, List<FavoritePrestationDTO>?>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
              val find = service.findByPrestationIdAndUserId(prestationId, userId)
-            return ResponseEntity.ok(mapOf("data" to find)).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(mapOf("data" to find))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.getbyuserprestation.count",
                     distributionName = "api.prestationfavorite.getbyuserprestation.latency"
@@ -167,16 +159,15 @@ class PrestationFavoriteController(
     @DeleteMapping("/{version}/${PrestationFavoriteScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun deleteByIdFavoritePrestation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val find = service.findById(id)
-            if (find != null) service.deleteById(find.favorite.id!!) else return ResponseEntity.badRequest().body(mapOf("error" to "favorite not found")).also { statusCode = it.statusCode.value().toString() }
-            return ResponseEntity.ok().body(mapOf("message" to "Favorite deleted")).also { statusCode = it.statusCode.value().toString() }
+            if (find != null) service.deleteById(find.favorite.id!!) else return ResponseEntity.badRequest().body(mapOf("error" to "favorite not found"))
+            return ResponseEntity.ok().body(mapOf("message" to "Favorite deleted"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.deletebyidfavoriteprestation.count",
                     distributionName = "api.prestationfavorite.deletebyidfavoriteprestation.latency"
@@ -188,15 +179,14 @@ class PrestationFavoriteController(
     @DeleteMapping("/{version}/${PrestationFavoriteScope.PROTECTED}/delete/all")
     suspend fun deleteAllFavoritePrestation(request: HttpServletRequest): ResponseEntity<Map<String, String>>{
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.deleteAll()
-            return ResponseEntity.ok(mapOf("message" to "All favorite prestation deleted")).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(mapOf("message" to "All favorite prestation deleted"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestationfavorite.deleteallfavoriteprestation.count",
                     distributionName = "api.prestationfavorite.deleteallfavoriteprestation.latency"

@@ -25,16 +25,15 @@ class CityController(
     @GetMapping("/{version}/${CityScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllCity(request: HttpServletRequest): ResponseEntity<Map<String, List<City?>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findAllCity()
             val response = mapOf("cities" to data)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.city.getallcity.count",
                     distributionName = "api.city.getallcity.latency"

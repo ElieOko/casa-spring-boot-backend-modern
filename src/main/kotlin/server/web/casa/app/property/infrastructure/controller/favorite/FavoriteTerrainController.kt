@@ -34,7 +34,6 @@ class FavoriteTerrainController(
         @Valid @RequestBody request: FavoriteTerrainRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(request.userId)
             val terrain = terS.findById( request.terrainId )
@@ -49,12 +48,12 @@ class FavoriteTerrainController(
             val response = mapOf(
                 "data" to savedFavorite
             )
-            return ResponseEntity.status(HttpStatus.CREATED).body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.status(HttpStatus.CREATED).body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.favoriteterrain.createfavorite.count",
                     distributionName = "api.favoriteterrain.createfavorite.latency"
@@ -66,7 +65,6 @@ class FavoriteTerrainController(
     @GetMapping("/{version}/${FavoriteTerrainScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFavorite(request: HttpServletRequest): ApiResponse<List<FavoriteTerrainDTO>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAll()
             return ApiResponse(data)
@@ -74,7 +72,7 @@ class FavoriteTerrainController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.getallfavorite.count",
                     distributionName = "api.favoriteterrain.getallfavorite.latency"
@@ -86,17 +84,16 @@ class FavoriteTerrainController(
     @GetMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getUserFavoriteTerrain(request: HttpServletRequest, @PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteTerrainDTO>?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(user)
             val favorite = service.getUserFavorite(user.userId!!)
             val response = mapOf("data" to favorite)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.getuserfavoriteterrain.count",
                     distributionName = "api.favoriteterrain.getuserfavoriteterrain.latency"
@@ -108,19 +105,18 @@ class FavoriteTerrainController(
     @GetMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOneFavoriteById(request: HttpServletRequest, @PathVariable id: Long):ResponseEntity<Map<String, FavoriteTerrainDTO>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val favorite = service.getById (id) ?: throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
                 "favorite Not Found."
             )
             val response = mapOf("data" to favorite)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.getonefavoritebyid.count",
                     distributionName = "api.favoriteterrain.getonefavoritebyid.latency"
@@ -132,17 +128,16 @@ class FavoriteTerrainController(
     @GetMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/salle/{terrainId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOneFavoriteProperty(request: HttpServletRequest, @PathVariable terrainId: Long):ResponseEntity<Map<String, List<FavoriteTerrainDTO>?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val hotel = terS.findById( terrainId )
             val favorite = service.getFavoriteByTerrainId(terrainId)
             val response = mapOf("data" to favorite)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.getonefavoriteproperty.count",
                     distributionName = "api.favoriteterrain.getonefavoriteproperty.latency"
@@ -154,16 +149,15 @@ class FavoriteTerrainController(
     @DeleteMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/delete/{id}")
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.deleteById(id)
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.deletefavorite.count",
                     distributionName = "api.favoriteterrain.deletefavorite.latency"
@@ -174,16 +168,15 @@ class FavoriteTerrainController(
     @DeleteMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/delete/all")
     suspend fun deleteFavoriteAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             service.deleteAll()
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.deletefavoriteall.count",
                     distributionName = "api.favoriteterrain.deletefavoriteall.latency"
@@ -194,7 +187,6 @@ class FavoriteTerrainController(
     @DeleteMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/delete/{userId}/{id}")
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable id:Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val existingFavorite = service.getFavoriteIfExist(id, userId).firstOrNull()
 
@@ -202,12 +194,12 @@ class FavoriteTerrainController(
                 service.deleteById(it)
             }
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.deletefavorite.count",
                     distributionName = "api.favoriteterrain.deletefavorite.latency"
@@ -219,17 +211,16 @@ class FavoriteTerrainController(
     @DeleteMapping("/{version}/${FavoriteTerrainScope.PROTECTED}/user/delete/{userId}")
     suspend fun deleteAllFavoriteByUser(request: HttpServletRequest, @PathVariable userId: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(userId)
             service.deleteAllFavoriteUser(user.userId!!)
             val response = mapOf("message" to "Favorite deleted successfully")
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.favoriteterrain.deleteallfavoritebyuser.count",
                     distributionName = "api.favoriteterrain.deleteallfavoritebyuser.latency"

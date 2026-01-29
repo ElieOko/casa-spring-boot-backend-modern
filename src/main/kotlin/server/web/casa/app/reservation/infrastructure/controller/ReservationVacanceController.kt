@@ -37,19 +37,15 @@ class ReservationVacanceController(
         @Valid @RequestBody request: ReservationVacanceRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
              val user = userS.findIdUser(request.userId)
-             val vacance = vacS.getAllVacance().find{ it.id == request.vacanceId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "hotel not found")).also { statusCode = it.statusCode.value().toString() }
-
-             if(vacance.userId == user.userId){
+             val vacance = vacS.getAllVacance().find{ it.id == request.vacanceId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "hotel not found"))
+            if(vacance.userId == user.userId){
                  val responseOwnProperty = mapOf("error" to "You can't reserve your own vacance")
-                 return ResponseEntity.ok().body(responseOwnProperty ).also { statusCode = it.statusCode.value().toString() }
-             }
+                 return ResponseEntity.ok().body(responseOwnProperty )}
              if (request.endDate < request.startDate || request.startDate < LocalDate.now()){
                  val responseErrorDate = mapOf("error" to "End date must be after or equal to start date")
-                 return ResponseEntity.ok().body(responseErrorDate ).also { statusCode = it.statusCode.value().toString() }
-             }
+                 return ResponseEntity.ok().body(responseErrorDate )}
              val owner = userS.findIdUser( vacance.userId!!)
              val dataReservation = ReservationVacanceEntity(
                  type = request.type.toString(),
@@ -100,14 +96,12 @@ class ReservationVacanceController(
                      "error" to "Unfortunately, this time slot is already booked.",
                      "data" to propertyBooked
                  )
-                 return ResponseEntity.ok().body(responseHour ).also { statusCode = it.statusCode.value().toString() }
-             }
+                 return ResponseEntity.ok().body(responseHour )}
 
              // check if property is available before adding
              if(!vacance.isAvailable){
                  val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-                 return ResponseEntity.ok().body(responseAvailable).also { statusCode = it.statusCode.value().toString() }
-             }
+                 return ResponseEntity.ok().body(responseAvailable)}
                  val reservationCreate = service.createReservation(dataReservation)
              /* val notification = notif.create(
                   NotificationReservation(
@@ -122,12 +116,12 @@ class ReservationVacanceController(
                  "proprietaire" to  owner,
                  "notificationSendState" to "bientot disponible"
              )
-             return ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
+             return ResponseEntity.status(201).body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.reservationvacance.create.count",
                     distributionName = "api.reservationvacance.create.latency"
@@ -139,16 +133,15 @@ class ReservationVacanceController(
      suspend fun getAllReservation(request: HttpServletRequest): ResponseEntity<Map<String, List<ReservationVacanceDTO>>>
     {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findAllReservation()
             val response = mapOf("reservation" to data)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getallreservation.count",
                     distributionName = "api.reservationvacance.getallreservation.latency"
@@ -160,16 +153,15 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
      suspend fun getReservationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, ReservationVacanceDTO?>> {
          val startNanos = System.nanoTime()
-        var statusCode = "200"
          try {
              val reservation = service.findById(id)
              val response = mapOf("reservation" to reservation)
-             return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
-         } finally {
+             return ResponseEntity.ok(response)
+        } finally {
              sentry.callToMetric(
                  MetricModel(
                      startNanos = startNanos,
-                     status = statusCode,
+                     status = "200",
                      route = "${request.method} /${request.requestURI}",
                      countName = "api.reservationvacance.getreservationbyid.count",
                      distributionName = "api.reservationvacance.getreservationbyid.latency"
@@ -180,16 +172,15 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByStaus(request: HttpServletRequest, @PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationVacanceDTO>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val reservation = service.findByStatus(status)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationbystaus.count",
                     distributionName = "api.reservationvacance.getreservationbystaus.latency"
@@ -200,16 +191,15 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByDate(request: HttpServletRequest, @PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationVacanceDTO>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val reservation = service.findByDate(inputDate)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationbydate.count",
                     distributionName = "api.reservationvacance.getreservationbydate.latency"
@@ -221,16 +211,15 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByMonthYear(request: HttpServletRequest, @PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationVacanceDTO>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val reservation = service.findByMonth(month, year)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationbymonthyear.count",
                     distributionName = "api.reservationvacance.getreservationbymonthyear.latency"
@@ -242,16 +231,15 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByYear(request: HttpServletRequest, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationVacanceDTO>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val reservation = service.findByPYear(year)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationbyyear.count",
                     distributionName = "api.reservationvacance.getreservationbyyear.latency"
@@ -263,16 +251,15 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationInInterval(request: HttpServletRequest, @PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationVacanceDTO>?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val reservation = service.findByInterval(startDateInput, endDateInput)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationininterval.count",
                     distributionName = "api.reservationvacance.getreservationininterval.latency"
@@ -284,18 +271,16 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByUser(request: HttpServletRequest, @PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            val user = userS.findIdUser(userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found")).also { statusCode = it.statusCode.value().toString() }
-            //.orElseThrow{ RuntimeException("User not found with id: $userId") }
+            val user = userS.findIdUser(userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))//.orElseThrow{ RuntimeException("User not found with id: $userId") }
             val reservation = service.findByUser(user.userId!!)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationbyuser.count",
                     distributionName = "api.reservationvacance.getreservationbyuser.latency"
@@ -307,18 +292,16 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/vacance/{vacanceId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByProperty(request: HttpServletRequest, @PathVariable vacanceId: Long): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            val property =  vacS.getAllVacance().find{ it.id == vacanceId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "vacance not found")).also { statusCode = it.statusCode.value().toString() }
-
+            val property =  vacS.getAllVacance().find{ it.id == vacanceId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "vacance not found"))
             val reservation = service.findByProperty(property.id!!)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.getreservationbyproperty.count",
                     distributionName = "api.reservationvacance.getreservationbyproperty.latency"
@@ -330,17 +313,16 @@ class ReservationVacanceController(
     @GetMapping("/{version}/${ReservationVacanceScope.PROTECTED}/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun findByHostUser(request: HttpServletRequest, @PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationVacanceDTO>? >> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val user = userS.findIdUser(userId)
             val reservation = service.findByHostUser(user.userId!!)
             val response = mapOf("reservation" to reservation)
-            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.findbyhostuser.count",
                     distributionName = "api.reservationvacance.findbyhostuser.latency"
@@ -355,34 +337,29 @@ class ReservationVacanceController(
         @RequestBody request:RequestUpdate
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found")).also { statusCode = it.statusCode.value().toString() }
-            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("error" to "reservation not found")).also { statusCode = it.statusCode.value().toString() }
-
+            val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
+            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("error" to "reservation not found"))
             val userId = reservation.userId
-            val proprioId = vacS.getAllVacance().find{it.id == reservation.vacanceId}?.userId ?: return ResponseEntity.badRequest().body(mapOf("error" to "vacance not found")).also { statusCode = it.statusCode.value().toString() }
-
+            val proprioId = vacS.getAllVacance().find{it.id == reservation.vacanceId}?.userId ?: return ResponseEntity.badRequest().body(mapOf("error" to "vacance not found"))
             val proprioCheck = userRequest.userId == proprioId
             val emetCheck = userRequest.userId == userId
 
             if(emetCheck || proprioCheck){
                 if (proprioCheck){
                     val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
-                    return ResponseEntity.ok(mapOf("reservation" to updated)).also { statusCode = it.statusCode.value().toString() }
-                }
+                    return ResponseEntity.ok(mapOf("reservation" to updated))}
 
                 if(request.status != ReservationStatus.APPROVED){
                     val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
-                    return ResponseEntity.ok(mapOf("reservation" to updated)).also { statusCode = it.statusCode.value().toString() }
-                }
+                    return ResponseEntity.ok(mapOf("reservation" to updated))}
             }
-            return ResponseEntity.ok(mapOf("error" to "Authorization denied")).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.reservationvacance.updatereservation.count",
                     distributionName = "api.reservationvacance.updatereservation.latency"
@@ -394,21 +371,18 @@ class ReservationVacanceController(
     @DeleteMapping("/{version}/${ReservationVacanceScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
-            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found")).also { statusCode = it.statusCode.value().toString() }
+            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
             val notificationDelete = notif.deleteByReservation(id)
             return if (notificationDelete) {
                 service.deleteReservationById(id)
-                ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully")).also { statusCode = it.statusCode.value().toString() }
-            }else{
-                return ResponseEntity.ok(mapOf("message" to "Something was wrong")).also { statusCode = it.statusCode.value().toString() }
-            }
+                ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))}else{
+                return ResponseEntity.ok(mapOf("message" to "Something was wrong"))}
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.deletereservation.count",
                     distributionName = "api.reservationvacance.deletereservation.latency"
@@ -419,15 +393,14 @@ class ReservationVacanceController(
     @DeleteMapping("/{version}/${ReservationVacanceScope.PROTECTED}/delete/all")
     suspend fun deleteReservationAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
              val reservation = service.deleteAll()
-            return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully")).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.reservationvacance.deletereservationall.count",
                     distributionName = "api.reservationvacance.deletereservationall.latency"

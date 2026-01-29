@@ -23,16 +23,15 @@ class CountryController(
     @GetMapping("/{version}/${CountryScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllCountry(request: HttpServletRequest): ResponseEntity<Map<String, List<Country>>> {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.findAllCountry()
             val response = mapOf("countries" to data)
-            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+            return ResponseEntity.ok().body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.country.getallcountry.count",
                     distributionName = "api.country.getallcountry.latency"

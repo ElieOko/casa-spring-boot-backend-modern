@@ -28,7 +28,6 @@ class AgenceController(
         @Valid @RequestBody request: AgenceDTO,
     ): ApiResponseWithMessage<Agence> = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val result = service.create(request.toDomain())
             ApiResponseWithMessage(message = "Enregistrement réussie pour votre agence ${result.name}", data = result)
@@ -36,7 +35,7 @@ class AgenceController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.agence.createagence.count",
                     distributionName = "api.agence.createagence.latency"
@@ -49,7 +48,6 @@ class AgenceController(
     @GetMapping("/{version}/${AgenceScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllAgence(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             val data = service.getAllAgence()
             ApiResponse(data)
@@ -57,7 +55,7 @@ class AgenceController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.agence.getallagence.count",
                     distributionName = "api.agence.getallagence.latency"
@@ -73,7 +71,6 @@ class AgenceController(
         @PathVariable("userId") userId : Long,
     )= coroutineScope {
         val startNanos = System.nanoTime()
-        var statusCode = "200"
         try {
             //        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
                     val data = service.getAllByUser(userId)
@@ -82,7 +79,7 @@ class AgenceController(
             sentry.callToMetric(
                 MetricModel(
                     startNanos = startNanos,
-                    status = statusCode,
+                    status = "200",
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.agence.getallagencebyuser.count",
                     distributionName = "api.agence.getallagencebyuser.latency"
