@@ -15,6 +15,9 @@ import server.web.casa.route.reservation.ReservationTerrainScope
 import server.web.casa.utils.Mode
 import java.time.*
 import java.time.format.DateTimeFormatter
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Reservation", description = "Reservation's Management")
 @RestController
@@ -25,216 +28,412 @@ class ReservationTerrainController(
     private val service: ReservationTerrainService,
     private val userS: UserService,
     private val terS: TerrainService,
-    private val notif: NotificationReservationService
+    private val notif: NotificationReservationService,
+    private val sentry: SentryService,
 ){
     @PostMapping("/{version}/${ReservationTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
+        httpRequest: HttpServletRequest,
         @Valid @RequestBody request: ReservationTerrainRequest
     ): ResponseEntity<Map<String, Any?>> {
-        val user = userS.findIdUser(request.userId)
-        val terrain = terS.findById(request.terrainId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found"))
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+             val user = userS.findIdUser(request.userId)
+             val terrain = terS.findById(request.terrainId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found")).also { statusCode = it.statusCode.value().toString() }
 
-        if(terrain.userId == user.userId){
-            val responseOwnProperty = mapOf("error" to "You can't reserve your own terrain")
-            return ResponseEntity.ok().body(responseOwnProperty )
-        }
-        if (request.endDate < request.startDate || request.startDate < LocalDate.now()){
-            val responseErrorDate = mapOf("error" to "End date must be after or equal to start date")
-            return ResponseEntity.ok().body(responseErrorDate )
-        }
-        val owner = userS.findIdUser( terrain.userId)
-        val dataReservation = ReservationTerrainEntity(
-            type = request.type.toString(),
-            isActive = true,
-            reservationHeure = request.reservationHeure,
-            userId = request.userId,
-            terrainId = terrain.id!!,
-            message = request.message,
-            startDate = request.startDate,
-            endDate = request.endDate,
-        )
-
-       val lastStatusReservationUserProperty = service.findByUserProperty(terrain.id!!, user.userId!!)
-                                                ?.lastOrNull()?.reservation
-        val format = DateTimeFormatter.ofPattern("HH:mm:ss")
-
-        if (lastStatusReservationUserProperty != null){
-            val status = lastStatusReservationUserProperty.status
-            val reservationHeure = lastStatusReservationUserProperty.reservationHeure
-            val reservationId = lastStatusReservationUserProperty.id
-            val timeNow = LocalTime.now()
-            val startInterval = LocalTime.parse(reservationHeure!!, format)
-            val endInterval = startInterval.plusHours(1)
-            val timeRequest = LocalTime.parse(request.reservationHeure, format)
-
-            if(status == ReservationStatus.PENDING.toString() && timeNow.isAfter(endInterval))
-            {
-                //!timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval
-                val updated = service.updateStatusById(reservationId!!, ReservationStatus.CANCELLED)
-            }
-        }
-
-        val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, terrain.id!!)
-
-        val propertyBooked = lastReservationProperty
-            ?.takeIf { it.isNotEmpty() }
-            ?.filter {
-                val start = LocalTime.parse(it.reservation.reservationHeure!!, format)
-                val end = start.plusHours(1)
-                val newTimeR = LocalTime.parse(request.reservationHeure, format)
-                // newTimeR, verify interval
-                !newTimeR.isBefore(start) && newTimeR.isBefore(end)
-            }
-            ?.sortedBy { it.reservation.reservationHeure }
-        //if propertyBooked = null || empty we can add
-        if(propertyBooked?.isNotEmpty() == true) {
-            val responseHour = mapOf(
-                "error" to "Unfortunately, this time slot is already booked.",
-                "data" to propertyBooked
-            )
-            return ResponseEntity.ok().body(responseHour )
-        }
-
-        // check if property is available before adding
-        if(!terrain.isAvailable){
-            val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-            return ResponseEntity.ok().body(responseAvailable)
-        }
-            val reservationCreate = service.createReservation(dataReservation)
-        /* val notification = notif.create(
-             NotificationReservation(
-                 reservation = reservationCreate.reservation!!,
-                 guestUser = userEntity,
-                 hostUser = userR.findById( propertyEntity.user!!)!!
+             if(terrain.userId == user.userId){
+                 val responseOwnProperty = mapOf("error" to "You can't reserve your own terrain")
+                 return ResponseEntity.ok().body(responseOwnProperty ).also { statusCode = it.statusCode.value().toString() }
+             }
+             if (request.endDate < request.startDate || request.startDate < LocalDate.now()){
+                 val responseErrorDate = mapOf("error" to "End date must be after or equal to start date")
+                 return ResponseEntity.ok().body(responseErrorDate ).also { statusCode = it.statusCode.value().toString() }
+             }
+             val owner = userS.findIdUser( terrain.userId)
+             val dataReservation = ReservationTerrainEntity(
+                 type = request.type.toString(),
+                 isActive = true,
+                 reservationHeure = request.reservationHeure,
+                 userId = request.userId,
+                 terrainId = terrain.id!!,
+                 message = request.message,
+                 startDate = request.startDate,
+                 endDate = request.endDate,
              )
-         )*/
-        val response = mapOf(
-            "message" to "Votre reservation à la date du ${reservationCreate.reservation.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
-            "reservation" to reservationCreate,
-            "proprietaire" to  owner,
-            "notificationSendState" to "bientot disponible"
-        )
-        return ResponseEntity.status(201).body(response)
+
+            val lastStatusReservationUserProperty = service.findByUserProperty(terrain.id!!, user.userId!!)
+                                                     ?.lastOrNull()?.reservation
+             val format = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+             if (lastStatusReservationUserProperty != null){
+                 val status = lastStatusReservationUserProperty.status
+                 val reservationHeure = lastStatusReservationUserProperty.reservationHeure
+                 val reservationId = lastStatusReservationUserProperty.id
+                 val timeNow = LocalTime.now()
+                 val startInterval = LocalTime.parse(reservationHeure!!, format)
+                 val endInterval = startInterval.plusHours(1)
+                 val timeRequest = LocalTime.parse(request.reservationHeure, format)
+
+                 if(status == ReservationStatus.PENDING.toString() && timeNow.isAfter(endInterval))
+                 {
+                     //!timeRequest.isBefore(startInterval) && timeRequest.isBefore(endInterval
+                     val updated = service.updateStatusById(reservationId!!, ReservationStatus.CANCELLED)
+                 }
+             }
+
+             val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, terrain.id!!)
+
+             val propertyBooked = lastReservationProperty
+                 ?.takeIf { it.isNotEmpty() }
+                 ?.filter {
+                     val start = LocalTime.parse(it.reservation.reservationHeure!!, format)
+                     val end = start.plusHours(1)
+                     val newTimeR = LocalTime.parse(request.reservationHeure, format)
+                     // newTimeR, verify interval
+                     !newTimeR.isBefore(start) && newTimeR.isBefore(end)
+                 }
+                 ?.sortedBy { it.reservation.reservationHeure }
+             //if propertyBooked = null || empty we can add
+             if(propertyBooked?.isNotEmpty() == true) {
+                 val responseHour = mapOf(
+                     "error" to "Unfortunately, this time slot is already booked.",
+                     "data" to propertyBooked
+                 )
+                 return ResponseEntity.ok().body(responseHour ).also { statusCode = it.statusCode.value().toString() }
+             }
+
+             // check if property is available before adding
+             if(!terrain.isAvailable){
+                 val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
+                 return ResponseEntity.ok().body(responseAvailable).also { statusCode = it.statusCode.value().toString() }
+             }
+                 val reservationCreate = service.createReservation(dataReservation)
+             /* val notification = notif.create(
+                  NotificationReservation(
+                      reservation = reservationCreate.reservation!!,
+                      guestUser = userEntity,
+                      hostUser = userR.findById( propertyEntity.user!!)!!
+                  )
+              )*/
+             val response = mapOf(
+                 "message" to "Votre reservation à la date du ${reservationCreate.reservation.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
+                 "reservation" to reservationCreate,
+                 "proprietaire" to  owner,
+                 "notificationSendState" to "bientot disponible"
+             )
+             return ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.reservationterrain.create.count",
+                    distributionName = "api.reservationterrain.create.latency"
+                )
+            )
+        }
     }
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getAllReservation(): ResponseEntity<Map<String, List<ReservationTerrainDTO>>>
+     suspend fun getAllReservation(request: HttpServletRequest): ResponseEntity<Map<String, List<ReservationTerrainDTO>>>
     {
-        val data = service.findAllReservation()
-        val response = mapOf("reservation" to data)
-        return ResponseEntity.ok().body(response)
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val data = service.findAllReservation()
+            val response = mapOf("reservation" to data)
+            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getallreservation.count",
+                    distributionName = "api.reservationterrain.getallreservation.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getReservationById(@PathVariable id: Long): ResponseEntity<Map<String, ReservationTerrainDTO?>> {
-        val reservation = service.findById(id)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-    }
+     suspend fun getReservationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, ReservationTerrainDTO?>> {
+         val startNanos = System.nanoTime()
+        var statusCode = "200"
+         try {
+             val reservation = service.findById(id)
+             val response = mapOf("reservation" to reservation)
+             return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+         } finally {
+             sentry.callToMetric(
+                 MetricModel(
+                     startNanos = startNanos,
+                     status = statusCode,
+                     route = "${request.method} /${request.requestURI}",
+                     countName = "api.reservationterrain.getreservationbyid.count",
+                     distributionName = "api.reservationterrain.getreservationbyid.latency"
+                 )
+             )
+         }
+     }
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByStaus(@PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
-        val reservation = service.findByStatus(status)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+    suspend fun getReservationByStaus(request: HttpServletRequest, @PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val reservation = service.findByStatus(status)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationbystaus.count",
+                    distributionName = "api.reservationterrain.getreservationbystaus.latency"
+                )
+            )
+        }
     }
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByDate(@PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
-        val reservation = service.findByDate(inputDate)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+    suspend fun getReservationByDate(request: HttpServletRequest, @PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val reservation = service.findByDate(inputDate)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationbydate.count",
+                    distributionName = "api.reservationterrain.getreservationbydate.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByMonthYear(@PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
-        val reservation = service.findByMonth(month, year)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+    suspend fun getReservationByMonthYear(request: HttpServletRequest, @PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val reservation = service.findByMonth(month, year)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationbymonthyear.count",
+                    distributionName = "api.reservationterrain.getreservationbymonthyear.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
-        val reservation = service.findByPYear(year)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+    suspend fun getReservationByYear(request: HttpServletRequest, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationTerrainDTO>>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val reservation = service.findByPYear(year)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationbyyear.count",
+                    distributionName = "api.reservationterrain.getreservationbyyear.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationInInterval(@PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationTerrainDTO>?>> {
-        val reservation = service.findByInterval(startDateInput, endDateInput)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+    suspend fun getReservationInInterval(request: HttpServletRequest, @PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationTerrainDTO>?>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val reservation = service.findByInterval(startDateInput, endDateInput)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationininterval.count",
+                    distributionName = "api.reservationterrain.getreservationininterval.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/user/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByUser(@PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> {
-
-        val user = userS.findIdUser(userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
-        //.orElseThrow{ RuntimeException("User not found with id: $userId") }
-        val reservation = service.findByUser(user.userId!!)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+    suspend fun getReservationByUser(request: HttpServletRequest, @PathVariable userId: Long): ResponseEntity<out Map<String, Any?>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val user = userS.findIdUser(userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found")).also { statusCode = it.statusCode.value().toString() }
+            //.orElseThrow{ RuntimeException("User not found with id: $userId") }
+            val reservation = service.findByUser(user.userId!!)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationbyuser.count",
+                    distributionName = "api.reservationterrain.getreservationbyuser.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/terrain/{terrainId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getReservationByProperty(@PathVariable terrainId: Long): ResponseEntity<Map<String, Any?>> {
-        val property =  terS.findById(terrainId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found"))
+    suspend fun getReservationByProperty(request: HttpServletRequest, @PathVariable terrainId: Long): ResponseEntity<Map<String, Any?>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val property =  terS.findById(terrainId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found")).also { statusCode = it.statusCode.value().toString() }
 
-        val reservation = service.findByProperty(property.id!!)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
+            val reservation = service.findByProperty(property.id!!)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.getreservationbyproperty.count",
+                    distributionName = "api.reservationterrain.getreservationbyproperty.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${ReservationTerrainScope.PROTECTED}/user/host/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findByHostUser(@PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationTerrainDTO>? >> {
-        val user = userS.findIdUser(userId)
-        val reservation = service.findByHostUser(user.userId!!)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-
+    suspend fun findByHostUser(request: HttpServletRequest, @PathVariable userId:Long): ResponseEntity<Map<String,  List<ReservationTerrainDTO>? >> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val user = userS.findIdUser(userId)
+            val reservation = service.findByHostUser(user.userId!!)
+            val response = mapOf("reservation" to reservation)
+            return ResponseEntity.ok(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.findbyhostuser.count",
+                    distributionName = "api.reservationterrain.findbyhostuser.latency"
+                )
+            )
+        }
     }
     @PutMapping("/{version}/${ReservationTerrainScope.PROTECTED}/update/status/{id}")
     suspend fun updateReservation(
+        httpRequest: HttpServletRequest,
         @PathVariable id: Long,
         @RequestBody request:RequestUpdate
     ): ResponseEntity<Map<String, Any?>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found")).also { statusCode = it.statusCode.value().toString() }
+            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("error" to "reservation not found")).also { statusCode = it.statusCode.value().toString() }
 
-        val userRequest = userS.findIdUser(request.userId) ?: return ResponseEntity.ok(mapOf("error" to "user not found"))
-        val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("error" to "reservation not found"))
+            val userId = reservation.userId
+            val proprioId =  terS.findById(reservation.terrainId).userId ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found")).also { statusCode = it.statusCode.value().toString() }
 
-        val userId = reservation.userId
-        val proprioId =  terS.findById(reservation.terrainId).userId ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found"))
+            val proprioCheck = userRequest.userId == proprioId
+            val emetCheck = userRequest.userId == userId
 
-        val proprioCheck = userRequest.userId == proprioId
-        val emetCheck = userRequest.userId == userId
+            if(emetCheck || proprioCheck){
+                if (proprioCheck){
+                    val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
+                    return ResponseEntity.ok(mapOf("reservation" to updated)).also { statusCode = it.statusCode.value().toString() }
+                }
 
-        if(emetCheck || proprioCheck){
-            if (proprioCheck){
-                val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
-                return ResponseEntity.ok(mapOf("reservation" to updated))
+                if(request.status != ReservationStatus.APPROVED){
+                    val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
+                    return ResponseEntity.ok(mapOf("reservation" to updated)).also { statusCode = it.statusCode.value().toString() }
+                }
             }
-
-            if(request.status != ReservationStatus.APPROVED){
-                val updated = service.cancelOrKeepReservation(id, true,request.reason, request.status)
-                return ResponseEntity.ok(mapOf("reservation" to updated))
-            }
+            return ResponseEntity.ok(mapOf("error" to "Authorization denied")).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.reservationterrain.updatereservation.count",
+                    distributionName = "api.reservationterrain.updatereservation.latency"
+                )
+            )
         }
-        return ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
 
     @DeleteMapping("/{version}/${ReservationTerrainScope.PROTECTED}/delete/{id}")
-    suspend fun deleteReservation(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
-        val notificationDelete = notif.deleteByReservation(id)
-        return if (notificationDelete) {
-            service.deleteReservationById(id)
-            ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
-        }else{
-            return ResponseEntity.ok(mapOf("message" to "Something was wrong"))
+    suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found")).also { statusCode = it.statusCode.value().toString() }
+            val notificationDelete = notif.deleteByReservation(id)
+            return if (notificationDelete) {
+                service.deleteReservationById(id)
+                ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully")).also { statusCode = it.statusCode.value().toString() }
+            }else{
+                return ResponseEntity.ok(mapOf("message" to "Something was wrong")).also { statusCode = it.statusCode.value().toString() }
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.deletereservation.count",
+                    distributionName = "api.reservationterrain.deletereservation.latency"
+                )
+            )
         }
     }
     @DeleteMapping("/{version}/${ReservationTerrainScope.PROTECTED}/delete/all")
-    suspend fun deleteReservationAll(): ResponseEntity<Map<String, String>> {
-        val reservation = service.deleteAll()
-       return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
+    suspend fun deleteReservationAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+             val reservation = service.deleteAll()
+            return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully")).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.reservationterrain.deletereservationall.count",
+                    distributionName = "api.reservationterrain.deletereservationall.latency"
+                )
+            )
+        }
     }
 /*
     @PutMapping("/notification/partners/{reservationId}")

@@ -10,6 +10,9 @@ import server.web.casa.app.address.domain.model.*
 import server.web.casa.app.address.domain.model.request.*
 import server.web.casa.route.address.DistrictScope
 import server.web.casa.utils.Mode
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "District", description = "Gestion des districts")
 @RestController
@@ -18,34 +21,64 @@ import server.web.casa.utils.Mode
 class DistrictController(
    private val service : DistrictService,
    private val cityService: CityService,
+   private val sentry: SentryService,
 ) {
     @PostMapping("/{version}/${DistrictScope.PROTECTED}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createDistrict(
+       httpRequest: HttpServletRequest,
        @Valid @RequestBody request: DistrictRequest
     ): ResponseEntity<out Map<String, Any?>> {
-        val city = cityService.findByIdCity(request.cityId)
-        if (city != null){
-            val data = District(
-                city = city.cityId ,
-                name = request.name
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val city = cityService.findByIdCity(request.cityId)
+            if (city != null){
+                val data = District(
+                    city = city.cityId ,
+                    name = request.name
+                )
+              val result = service.saveDistrict(data)
+              val response = mapOf(
+                  "district" to result,
+                  "message" to "Enregistrement réussie avec succès"
+              )
+                return ResponseEntity.status(201).body(response).also { statusCode = it.statusCode.value().toString() }
+            }
+            val response = mapOf(
+                "message" to "cette ville est inexistante !!!"
             )
-          val result = service.saveDistrict(data)
-          val response = mapOf(
-              "district" to result,
-              "message" to "Enregistrement réussie avec succès"
-          )
-            return ResponseEntity.status(201).body(response)
+            return ResponseEntity.badRequest().body(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.district.createdistrict.count",
+                    distributionName = "api.district.createdistrict.latency"
+                )
+            )
         }
-        val response = mapOf(
-            "message" to "cette ville est inexistante !!!"
-        )
-        return ResponseEntity.badRequest().body(response)
     }
 
     @GetMapping("/{version}/${DistrictScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllDistrict(): ResponseEntity<Map<String, List<District?>>> {
-        val data = service.findAllDistrict()
-        val response = mapOf("districts" to data)
-        return ResponseEntity.ok().body(response)
+    suspend fun getAllDistrict(request: HttpServletRequest): ResponseEntity<Map<String, List<District?>>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val data = service.findAllDistrict()
+            val response = mapOf("districts" to data)
+            return ResponseEntity.ok().body(response).also { statusCode = it.statusCode.value().toString() }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.district.getalldistrict.count",
+                    distributionName = "api.district.getalldistrict.latency"
+                )
+            )
+        }
     }
 }

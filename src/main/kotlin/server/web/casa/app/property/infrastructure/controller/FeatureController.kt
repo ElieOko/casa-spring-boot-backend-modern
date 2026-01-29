@@ -9,12 +9,16 @@ import server.web.casa.app.property.application.service.FeatureService
 import server.web.casa.app.property.domain.model.Feature
 import server.web.casa.route.property.PropertyFeatureScope
 import server.web.casa.utils.ApiResponse
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Features", description = "Gestion des équipements")
 @RestController
 @RequestMapping("${GlobalRoute.ROOT}/{version}")
 class FeatureController(
-    private val service: FeatureService
+    private val service: FeatureService,
+    private val sentry: SentryService,
 ) {
 
 //    @PostMapping("/${PropertyFeatureScope.PROTECTED}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -23,8 +27,22 @@ class FeatureController(
 //    }
 
     @GetMapping("/${PropertyFeatureScope.PRIVATE}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFeature(): ApiResponse<List<Feature>> {
-        val data = service.getAll().toList()
-        return ApiResponse(data)
+    suspend fun getAllFeature(request: HttpServletRequest): ApiResponse<List<Feature>> {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            val data = service.getAll().toList()
+            return ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.feature.getallfeature.count",
+                    distributionName = "api.feature.getallfeature.latency"
+                )
+            )
+        }
     }
 }

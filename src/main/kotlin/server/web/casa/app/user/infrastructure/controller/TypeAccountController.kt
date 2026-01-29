@@ -10,16 +10,34 @@ import server.web.casa.app.user.application.service.TypeAccountService
 import server.web.casa.app.user.domain.model.TypeAccount
 import server.web.casa.route.account.AccountTypeScope
 import server.web.casa.utils.ApiResponse
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @RestController
-@RequestMapping()
+@RequestMapping("api")
 @Profile("dev")
 class TypeAccountController(
     private val service: TypeAccountService,
+    private val sentry: SentryService,
 ) {
     @Operation(summary = "Liste de Type Accounts")
     @GetMapping("/{version}/${AccountTypeScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllTypeAccountE(): ApiResponse<List<TypeAccount>> = coroutineScope {
-       ApiResponse(service.getAll().toList())
+    suspend fun getAllTypeAccountE(request: HttpServletRequest): ApiResponse<List<TypeAccount>> = coroutineScope {
+        val startNanos = System.nanoTime()
+        var statusCode = "200"
+        try {
+            ApiResponse(service.getAll().toList())
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = statusCode,
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.typeaccount.getalltypeaccounte.count",
+                    distributionName = "api.typeaccount.getalltypeaccounte.latency"
+                )
+            )
+        }
     }
 }
