@@ -158,7 +158,7 @@ class ReservationBureauController(
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${ReservationBureauScope.PROTECTED}/year/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByYear(@PathVariable year: Int): ResponseEntity<Map<String, List<ReservationBureauDTO>>> {
         val reservation = service.findByPYear(year)
         val response = mapOf("reservation" to reservation)

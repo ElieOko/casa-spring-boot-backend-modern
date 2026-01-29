@@ -66,7 +66,7 @@ class SollicitatonController(
         return ResponseEntity.ok().body(mapOf("sollicitation" to service.findAll().toList()))
     }
 
-    @GetMapping("/{versiom}/${SollicitationScope.PRIVATE}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${SollicitationScope.PRIVATE}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getSollicitationById(@PathVariable id: Long): ResponseEntity<Map<String, SollicitationDTO?>> {
         val data = service.findById(id)
         val response = mapOf("sollicitation" to data)
@@ -114,7 +114,7 @@ class SollicitatonController(
         ResponseEntity.ok(mapOf("error" to "Authorization denied"))
     }
 
-    @DeleteMapping("/{versiom}/${SollicitationScope.PROTECTED}/delete/{id}")
+    @DeleteMapping("/{version}/${SollicitationScope.PROTECTED}/delete/{id}")
     suspend fun deleteById(@PathVariable id: Long): ResponseEntity<Map<String, String>> = coroutineScope {
         val sollicitation = service.findById(id) ?: ResponseEntity.ok(mapOf("message" to "Sollicitation not found"))
         if(service.deleteById(id)) {
