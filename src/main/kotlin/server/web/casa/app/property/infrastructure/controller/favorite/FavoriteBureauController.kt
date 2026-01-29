@@ -14,6 +14,9 @@ import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.favorite.FavoriteBureauScope
 import server.web.casa.utils.*
 import java.time.LocalDate
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Favorite BUREAU", description = "Gestion des favorites")
 @RestController
@@ -22,89 +25,208 @@ import java.time.LocalDate
 class FavoriteBureauController(
     private val service: FavoriteBureauService,
     private val userS: UserService,
-    private val brxS: BureauService
+    private val brxS: BureauService,
+    private val sentry: SentryService,
 ) {
     @PostMapping("/{version}/${FavoriteBureauScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFavorite(
+        httpRequest: HttpServletRequest,
         @Valid @RequestBody request: FavoriteBureauRequest
     ): ResponseEntity<Map<String, Any?>> {
-        val user = userS.findIdUser(request.userId)
-        val salle = brxS.findById(request.bureauId)
+        val startNanos = System.nanoTime()
+        try {
+            val user = userS.findIdUser(request.userId)
+            val salle = brxS.findById(request.bureauId)
 
-        val favorite = FavoriteBureauEntity(
-            userId = user.userId!!,
-            createdAt = LocalDate.now(),
-            bureauId = salle.id!!
-        )
-        val existingFavorite = service.getFavoriteIfExist(salle.id!!, user.userId!!)
-        val savedFavorite = if (!existingFavorite.isNullOrEmpty()) existingFavorite else service.create(favorite)
+            val favorite = FavoriteBureauEntity(
+                userId = user.userId!!,
+                createdAt = LocalDate.now(),
+                bureauId = salle.id!!
+            )
+            val existingFavorite = service.getFavoriteIfExist(salle.id!!, user.userId!!)
+            val savedFavorite = if (!existingFavorite.isNullOrEmpty()) existingFavorite else service.create(favorite)
 
-        val response = mapOf(
-            "data" to savedFavorite
-        )
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+            val response = mapOf(
+                "data" to savedFavorite
+            )
+            return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.favoritebureau.createfavorite.count",
+                    distributionName = "api.favoritebureau.createfavorite.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFavorite(): ApiResponse<List<FavoriteBureauDTO>> {
-        val data = service.getAll()
-        return ApiResponse(data)
+    suspend fun getAllFavorite(request: HttpServletRequest): ApiResponse<List<FavoriteBureauDTO>> {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.getAll()
+            return ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.getallfavorite.count",
+                    distributionName = "api.favoritebureau.getallfavorite.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/user/{user}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getUserFavoriteProperty(@PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteBureauDTO>?>> {
-        val user = userS.findIdUser(user)
-        val favorite = service.getUserFavorite(user.userId!!)
-        val response = mapOf("data" to favorite)
-        return ResponseEntity.ok().body(response)
+    suspend fun getUserFavoriteProperty(request: HttpServletRequest, @PathVariable user: Long):ResponseEntity<Map<String, List<FavoriteBureauDTO>?>> {
+        val startNanos = System.nanoTime()
+        try {
+            val user = userS.findIdUser(user)
+            val favorite = service.getUserFavorite(user.userId!!)
+            val response = mapOf("data" to favorite)
+            return ResponseEntity.ok().body(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.getuserfavoriteproperty.count",
+                    distributionName = "api.favoritebureau.getuserfavoriteproperty.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/{festId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getOneFavoriteById(@PathVariable festId: Long):ResponseEntity<Map<String, FavoriteBureauDTO>> {
-        val favorite = service.getById(festId) ?: throw ResponseStatusException(
-            HttpStatusCode.valueOf(404),
-            "favorite Not Found."
-        )
-        val response = mapOf("favorites" to favorite)
-        return ResponseEntity.ok().body(response)
+    suspend fun getOneFavoriteById(request: HttpServletRequest, @PathVariable festId: Long):ResponseEntity<Map<String, FavoriteBureauDTO>> {
+        val startNanos = System.nanoTime()
+        try {
+            val favorite = service.getById(festId) ?: throw ResponseStatusException(
+                HttpStatusCode.valueOf(404),
+                "favorite Not Found."
+            )
+            val response = mapOf("favorites" to favorite)
+            return ResponseEntity.ok().body(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.getonefavoritebyid.count",
+                    distributionName = "api.favoritebureau.getonefavoritebyid.latency"
+                )
+            )
+        }
     }
 
     @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/salle/{festId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getFavoriteOneFestive(@PathVariable festId: Long):ResponseEntity<Map<String, List<FavoriteBureauDTO>?>> {
-        val salle = brxS.findById (festId)
-        val favorite = service.getFavoriteByFestId(salle.id!!)
-        val response = mapOf("data" to favorite)
-        return ResponseEntity.ok().body(response)
+    suspend fun getFavoriteOneFestive(request: HttpServletRequest, @PathVariable festId: Long):ResponseEntity<Map<String, List<FavoriteBureauDTO>?>> {
+        val startNanos = System.nanoTime()
+        try {
+            val salle = brxS.findById (festId)
+            val favorite = service.getFavoriteByFestId(salle.id!!)
+            val response = mapOf("data" to favorite)
+            return ResponseEntity.ok().body(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.getfavoriteonefestive.count",
+                    distributionName = "api.favoritebureau.getfavoriteonefestive.latency"
+                )
+            )
+        }
     }
 
     @DeleteMapping("/{version}/${FavoriteBureauScope.PROTECTED}/delete/{id}")
-    suspend fun deleteFavorite(@PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        service.deleteById(id)
-        val response = mapOf("message" to "Favorite deleted successfully")
-        return ResponseEntity.ok(response)
+    suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
+        val startNanos = System.nanoTime()
+        try {
+            service.deleteById(id)
+            val response = mapOf("message" to "Favorite deleted successfully")
+            return ResponseEntity.ok(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.deletefavorite.count",
+                    distributionName = "api.favoritebureau.deletefavorite.latency"
+                )
+            )
+        }
     }
     @DeleteMapping("/{version}/${FavoriteBureauScope.PROTECTED}/delete/all")
-    suspend fun deleteFavoriteAll(): ResponseEntity<Map<String, String>> {
-        service.deleteAll()
-        val response = mapOf("message" to "Favorite deleted successfully")
-        return ResponseEntity.ok(response)
+    suspend fun deleteFavoriteAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
+        val startNanos = System.nanoTime()
+        try {
+            service.deleteAll()
+            val response = mapOf("message" to "Favorite deleted successfully")
+            return ResponseEntity.ok(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.deletefavoriteall.count",
+                    distributionName = "api.favoritebureau.deletefavoriteall.latency"
+                )
+            )
+        }
     }
     @DeleteMapping("/{version}/${FavoriteBureauScope.PROTECTED}/delete/{userId}/{festId}")
-    suspend fun deleteFavorite(@PathVariable userId: Long, @PathVariable festId:Long): ResponseEntity<Map<String, String>> {
-        val existingFavorite = service.getFavoriteIfExist(festId, userId).firstOrNull()
+    suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable festId:Long): ResponseEntity<Map<String, String>> {
+        val startNanos = System.nanoTime()
+        try {
+            val existingFavorite = service.getFavoriteIfExist(festId, userId).firstOrNull()
 
-        val deleteFavorite = existingFavorite?.favorite?.id?.let {
-            service.deleteById(it)
+            val deleteFavorite = existingFavorite?.favorite?.id?.let {
+                service.deleteById(it)
+            }
+            val response = mapOf("message" to "Favorite deleted successfully")
+            return ResponseEntity.ok(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.deletefavorite.count",
+                    distributionName = "api.favoritebureau.deletefavorite.latency"
+                )
+            )
         }
-        val response = mapOf("message" to "Favorite deleted successfully")
-        return ResponseEntity.ok(response)
     }
 
     @DeleteMapping("/{version}/${FavoriteBureauScope.PROTECTED}/user/delete/{userId}")
-    suspend fun deleteAllFavoriteByUser(@PathVariable userId: Long): ResponseEntity<Map<String, String>> {
-        val user = userS.findIdUser(userId)
-        service.deleteAllFavoriteUser(user.userId!!)
-        val response = mapOf("message" to "Favorite deleted successfully")
-        return ResponseEntity.ok(response)
+    suspend fun deleteAllFavoriteByUser(request: HttpServletRequest, @PathVariable userId: Long): ResponseEntity<Map<String, String>> {
+        val startNanos = System.nanoTime()
+        try {
+            val user = userS.findIdUser(userId)
+            service.deleteAllFavoriteUser(user.userId!!)
+            val response = mapOf("message" to "Favorite deleted successfully")
+            return ResponseEntity.ok(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.favoritebureau.deleteallfavoritebyuser.count",
+                    distributionName = "api.favoritebureau.deleteallfavoritebyuser.latency"
+                )
+            )
+        }
     }
 }

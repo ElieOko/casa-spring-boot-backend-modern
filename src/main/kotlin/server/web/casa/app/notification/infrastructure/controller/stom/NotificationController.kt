@@ -6,10 +6,12 @@ import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import server.web.casa.security.Auth
 import java.security.Principal
+import server.web.casa.security.monitoring.SentryService
 
 @Controller
 class NotificationController(
-    private val auth: Auth
+    private val auth: Auth,
+    private val sentry: SentryService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 

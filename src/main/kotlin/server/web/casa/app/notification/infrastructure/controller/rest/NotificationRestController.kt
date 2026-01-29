@@ -8,29 +8,61 @@ import org.springframework.web.bind.annotation.*
 import server.web.casa.app.notification.application.service.NotificationSystemService
 import server.web.casa.route.utils.NotificationScope
 import server.web.casa.utils.ApiResponse
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Notification", description = "")
 @RestController
 @RequestMapping("api")
 class NotificationRestController(
     private val service: NotificationSystemService,
+    private val sentry: SentryService,
 ) {
     @Operation(summary = "List notifications of user")
     @GetMapping("/{version}/${NotificationScope.PROTECTED}/owner/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllNotificationByUser(
+        request: HttpServletRequest,
         @PathVariable("userId") userId : Long,
     )= coroutineScope {
-        val data = service.notificationByUser(userId)
-        ApiResponse(data)
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.notificationByUser(userId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.notificationrest.getallnotificationbyuser.count",
+                    distributionName = "api.notificationrest.getallnotificationbyuser.latency"
+                )
+            )
+        }
     }
 
     @Operation(summary = "Desactivate notification")
     @GetMapping("/{version}/${NotificationScope.PRIVATE}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun disableNotification(
+        request: HttpServletRequest,
         @PathVariable("id") id : Long,
     )= coroutineScope {
-        service.notificationDisable(id)
-        ResponseEntity.status(HttpStatus.CREATED).body(mapOf("message" to "cette notification a été supprimer avec succès"))
+        val startNanos = System.nanoTime()
+        try {
+            service.notificationDisable(id)
+            ResponseEntity.status(HttpStatus.CREATED).body(mapOf("message" to "cette notification a été supprimer avec succès"))
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.notificationrest.disablenotification.count",
+                    distributionName = "api.notificationrest.disablenotification.latency"
+                )
+            )
+        }
     }
 
 //    @Operation(summary = "Desactivate notification")

@@ -8,18 +8,35 @@ import server.web.casa.app.address.application.service.QuartierService
 import server.web.casa.app.address.domain.model.Quartier
 import server.web.casa.route.address.QuartierScope
 import server.web.casa.utils.Mode
+import server.web.casa.security.monitoring.SentryService
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Quartier", description = "Gestion des quartiers")
 @RestController
 @RequestMapping("api")
 @Profile(Mode.DEV)
 class QuartierController(
-   private val service : QuartierService
+   private val service : QuartierService,
+   private val sentry: SentryService,
 ) {
     @GetMapping("/{version}/${QuartierScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllQuartier(): ResponseEntity<Map<String, List<Quartier>>> {
-        val data = service.findAllQuartier()
-        val response = mapOf("quartiers" to data)
-        return ResponseEntity.ok().body(response)
+    suspend fun getAllQuartier(request: HttpServletRequest): ResponseEntity<Map<String, List<Quartier>>> {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.findAllQuartier()
+            val response = mapOf("quartiers" to data)
+            return ResponseEntity.ok().body(response)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.quartier.getallquartier.count",
+                    distributionName = "api.quartier.getallquartier.latency"
+                )
+            )
+        }
     }
 }
