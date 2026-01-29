@@ -6,10 +6,10 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.app.user.domain.model.UserDto
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.security.Auth
 import server.web.casa.utils.ApiResponse
@@ -24,48 +24,57 @@ class UserController(
     private val logger = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Liste des utilisateurs")
     @GetMapping("/{version}/protected/users")
-//    @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
-    suspend fun getListUser(): ApiResponse<List<UserDto>> {
-//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-//        logger.info("My ID -> $ownerId")
-        val data = userService.findAllUser().toList()
-        return ApiResponse(data)
+    suspend fun getListUser() = coroutineScope {
+        val session = auth.user()
+        val state: Boolean? = session?.second?.find{ true }
+        when (state) {
+            true -> {
+                val data = userService.findAllUser().toList()
+                ApiResponse(data)
+            }
+            false,null -> ResponseStatusException(HttpStatusCode.valueOf(403), "Authorization denied.")
+        }
     }
 
     @Operation(summary = "Detail utilisateur")
     @GetMapping("/{version}/protected/users/{id}")
-//    @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
     suspend fun getUser(
         @PathVariable("id") id : Long
     ) = coroutineScope {
-        val data = userService.findIdUser(id)
-        ResponseEntity.ok().body(data)
+        val session = auth.user()
+        val state: Boolean? = session?.second?.find{ true }
+        when (state) {
+            true -> {
+                val data = userService.findIdUser(id)
+                ResponseEntity.ok().body(data)
+            }
+            false,null -> ResponseStatusException(HttpStatusCode.valueOf(403), "Authorization denied.")
+        }
     }
 
     @Operation(summary = "Modification utilisateur")
     @PutMapping("/{version}/protected/users/{id}")
-//    @Transactional
     suspend fun updateUser(
+        @PathVariable("id") userId : Long,
         @RequestBody @Valid user : UserRequestChange
-    ) : ResponseEntity<UserDto> {
-//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-        val id = auth.user()?.first?.userId
-        val updated = userService.updateUser(id!!,user)
-        return ResponseEntity.ok(updated)
+    ) = coroutineScope {
+        val session = auth.user()
+        val state: Boolean? = session?.second?.find{ true }
+        if (session?.first?.userId == userId || state == true ) {
+            val updated = userService.updateUser(userId,user)
+            ResponseEntity.ok(updated)
+        }
+        ResponseStatusException(HttpStatusCode.valueOf(403), "Authorization denied.")
     }
-
-    @Operation(summary = "Suppression utilisateur")
-    @DeleteMapping("/{version}/protected/users/{id}")
-//    @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
-    suspend fun delete(
-        @PathVariable("id") id : Long
-    ): ResponseEntity<Map<String, String>> {
-//        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-        userService.deleteUser(id)
-        val response = mapOf("message" to "Suppression réussi avec succès")
-        return ResponseEntity.ok().body(response)
-    }
+//
+//    @Operation(summary = "Suppression utilisateur")
+//    @DeleteMapping("/{version}/protected/users/{id}")
+//    suspend fun delete(
+//        @PathVariable("id") id : Long
+//    ): ResponseEntity<Map<String, String>> {
+//
+//        userService.deleteUser(id)
+//        val response = mapOf("message" to "Suppression réussi avec succès")
+//        return ResponseEntity.ok().body(response)
+//    }
 }
