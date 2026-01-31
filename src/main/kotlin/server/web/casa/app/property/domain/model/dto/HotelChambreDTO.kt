@@ -8,6 +8,7 @@ data class HotelChambreDTO(
 )
 
 data class HotelGlobal(
-    val hotel : Hotel,
-    val structure : List<HotelChambreDTO>
+    val hotel: Hotel,
+    val structure: List<HotelChambreDTO>,
+    val image: String
 )

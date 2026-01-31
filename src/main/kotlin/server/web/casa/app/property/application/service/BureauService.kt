@@ -1,11 +1,11 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.*
@@ -13,18 +13,16 @@ import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
-import kotlin.collections.get
-import kotlin.collections.map
-import kotlin.collections.toList
+import kotlin.collections.*
 
 @Service
 class BureauService(
     private val repository: BureauRepository,
     private val bureauImageRepository: BureauImageRepository,
     private val devise: DeviseService,
+    private val person : PersonRepository,
     private val repositoryFeature: BureauFeatureRepository,
     private val featureService: FeatureService,
     private val cityService: CityService,
@@ -48,13 +46,14 @@ class BureauService(
                     devise = devise.getById(bureau.deviseId!!),
                     feature = featureByModel[bureau.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList() ?: emptyList(),
                     address = bureau.toAddressDTO(),
+                    image = person.findByUser(bureau.userId!!)?.images?:"",
                     localAddress = LocalAddressDTO(
                         city = cityService.findByIdCity(bureau.cityId),
                         commune = communeService.findByIdCommune(bureau.communeId),
                         quartier = quartierService.findByIdQuartier(bureau.quartierId)
                     ),
                     geoZone = bureau.toGeo(),
-                    postBy = userService.findIdUser(bureau.userId!!).username,
+                    postBy = userService.findIdUser(bureau.userId).username,
                     typeProperty = propertyTypeService.findByIdPropertyType(bureau.propertyTypeId?:0),
                 )
             )
@@ -90,13 +89,7 @@ class BureauService(
         repository.save(model.toEntity())
     }
 
-    suspend fun filter(
-        filterModel : PropertyFilter,
-        page : Int,
-        size : Int,
-        sortBy : String,
-        sortOrder : String
-    ) =  coroutineScope {
+    suspend fun filter(filterModel: PropertyFilter, page: Int, size: Int, sortBy: String, sortOrder: String) = coroutineScope {
         val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,
@@ -119,11 +112,12 @@ class BureauService(
                     bureau = bureau.toDomain().toDT0(),
                     images = imageByBureau[bureau.id]?.map { it.toDomain() } ?: emptyList(),
                     devise = devise.getById(bureau.deviseId!!),
+                    image = person.findByUser(bureau.userId!!)?.images?:"",
                     feature = featureByModel[bureau.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList() ?: emptyList(),
                     address = bureau.toAddressDTO(),
                     localAddress = LocalAddressDTO(city = cityService.findByIdCity(bureau.cityId), commune = communeService.findByIdCommune(bureau.communeId), quartier = quartierService.findByIdQuartier(bureau.quartierId)),
                     geoZone = bureau.toGeo(),
-                    postBy = userService.findIdUser(bureau.userId!!).username,
+                    postBy = userService.findIdUser(bureau.userId).username,
                     typeProperty = propertyTypeService.findByIdPropertyType(bureau.propertyTypeId?:0),
                 )
             )

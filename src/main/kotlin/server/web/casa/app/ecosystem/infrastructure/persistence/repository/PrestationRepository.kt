@@ -1,15 +1,18 @@
 package server.web.casa.app.ecosystem.infrastructure.persistence.repository
 
 import kotlinx.coroutines.flow.Flow
+import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.PrestationEntity
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 
 interface PrestationRepository : CoroutineCrudRepository<PrestationEntity, Long>{
 
     @Query("SELECT * FROM prestations WHERE user_id = :userId AND service_id = :serviceId")
     suspend fun findByUserAndService(userId: Long, serviceId : Long) : PrestationEntity?
+
+    @Query("SELECT * FROM prestations WHERE user_id = :userId")
+    suspend fun findByUser(userId: Long) : Flow<PrestationEntity>
 
     @Query("SELECT COUNT(*) FROM prestations WHERE user_id = :userId")
     suspend fun countByUserId(userId: Long) : Long
@@ -22,4 +25,12 @@ interface PrestationRepository : CoroutineCrudRepository<PrestationEntity, Long>
 
     @Query("SELECT * FROM prestations WHERE is_active = true and user_id = :userId")
     suspend fun findAllFindByUser(userId: Long) : Flow<PrestationEntity>
+
+    @Modifying
+    @Query(
+        """ UPDATE prestations
+    SET is_active = :state
+    WHERE user_id = :userId"""
+    )
+    suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
 }

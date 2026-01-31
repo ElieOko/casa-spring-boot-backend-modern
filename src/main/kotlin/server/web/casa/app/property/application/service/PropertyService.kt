@@ -2,19 +2,16 @@ package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.slf4j.*
 import org.springframework.http.*
 import org.springframework.stereotype.*
 import org.springframework.web.server.*
-import server.web.casa.app.address.application.service.CityService
-import server.web.casa.app.address.application.service.CommuneService
-import server.web.casa.app.address.application.service.QuartierService
-import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
+import server.web.casa.app.address.application.service.*
+import server.web.casa.app.payment.application.service.*
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.*
 import server.web.casa.app.property.domain.model.filter.*
 import server.web.casa.app.property.infrastructure.persistence.entity.*
-import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.mapper.*
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.*
@@ -27,6 +24,7 @@ class PropertyService(
     private val propertyImageRoomService: PropertyImageRoomService,
     private val propertyImageKitchenService: PropertyImageKitchenService,
     private val userService: UserService,
+    private val person : PersonRepository,
     private val propertyTypeService: PropertyTypeService,
     private val featureService: FeatureService,
     private val repositoryFeature : PropertyFeatureRepository,
@@ -35,7 +33,7 @@ class PropertyService(
     private val quartierService: QuartierService,
     private val devise: DeviseService,
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
+
     suspend fun create(p: PropertyMasterDTO, features: List<FeatureRequest>): PropertyMasterDTO  = coroutineScope {
         val data = p.toEntity()
         val result = repository.save(data)
@@ -52,7 +50,7 @@ class PropertyService(
         val result = repository.save(data)
         toDomain(result.id!!)
     }
-    suspend fun getAll(page : Int, size : Int, sortBy : String, sortOrder : String): List<PropertyMasterDTO> {
+    suspend fun getAll(page: Int, size: Int, sortBy: String, sortOrder: String): List<PropertyMasterDTO> {
 //        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
 //        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
 //        val page = repository.findAll()
@@ -81,23 +79,24 @@ class PropertyService(
         properties.forEach { property ->
             propertyList.add(PropertyMasterDTO(
                 property = property.toPropertyDTO(),
-                devise = devise.getById(property.deviseId),
                 images = ImageDTO(
                     main = imagesByProperty[property.id] ?: emptyList(),
                     room = roomImagesByProperty[property.id] ?: emptyList(),
                     living = livingRoomImagesByProperty[property.id] ?: emptyList(),
                     kitchen = kitchenImagesByProperty[property.id] ?: emptyList()
                 ).toImage(),
+                postBy = userService.findIdUser(property.user!!).username,
                 address = property.toAddressDTO(),
+                devise = devise.getById(property.deviseId),
                 localAddress = LocalAddressDTO(
                     city = cityService.findByIdCity(property.cityId),
                     commune = communeService.findByIdCommune(property.communeId),
                     quartier = quartierService.findByIdQuartier(property.quartierId)
                 ),
+                image = person.findByUser(property.user)?.images?:"",
                 geoZone = property.toGeo(),
-                postBy = userService.findIdUser(property.user!!).username,
                 typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
-                features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
+                features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
             ))
         }
         propertyList
@@ -136,6 +135,7 @@ class PropertyService(
             ),
             geoZone = property.toGeo(),
             postBy = userService.findIdUser(property.user!!).username,
+            image = person.findByUser(property.user)?.images?:"",
             typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
             features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
         )
@@ -161,13 +161,7 @@ class PropertyService(
         val key = Pair(data,similary.map{it.toDomain()})
         return key
     }
-    suspend fun filterProduct(
-        filterModel : PropertyFilter,
-        page : Int,
-        size : Int,
-        sortBy : String,
-        sortOrder : String
-    ) = coroutineScope{
+    suspend fun filterProduct(filterModel: PropertyFilter, page: Int, sortOrder: String, sortBy: String, size: Int) = coroutineScope {
         val data = repository.filter(
             transactionType = filterModel.transactionType,
             minPrice = filterModel.minPrice,

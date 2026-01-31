@@ -12,11 +12,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyImageEntity
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.UserRequestChange
 import server.web.casa.app.user.infrastructure.persistence.mapper.*
+import server.web.casa.security.Auth
 import server.web.casa.utils.Mode
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -27,8 +29,9 @@ import kotlin.time.ExperimentalTime
 @Profile(Mode.DEV)
 class UserService(
     private val repository: UserRepository,
-    private val personRepository: PersonRepository,
+    private val personService: PersonService,
     private val service: TypeAccountService,
+    private val auth: Auth
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     val name = "utilisateur"
@@ -114,5 +117,19 @@ class UserService(
         }
         repository.deleteById(id)
         return true
+    }
+
+    suspend fun findPersonByUser(userId : Long) = coroutineScope{
+        personService.findByIdPersonUser(userId)
+    }
+
+    suspend fun isAdmin():Pair<Boolean, Long?>{
+        val user = auth.user()
+        val state = user?.second?.find { true } == true
+        val id = user?.first?.userId ?: throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "Authorization denied, please login"
+        )
+        return state to id
     }
 }

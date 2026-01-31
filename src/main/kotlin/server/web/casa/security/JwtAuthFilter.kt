@@ -2,8 +2,7 @@ package server.web.casa.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -24,75 +23,64 @@ class JwtAuthFilter(
 ): OncePerRequestFilter() {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val matcher = AntPathMatcher()
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
         val path = request.requestURI
-        val publicPaths = listOf(
-            "/",
-            "/swagger-ui/**",
-            "/swagger-ui.html/*",
-            "/v3/**",
-            "/files/**",
-            "/property/**",
-            "/api/account",
-            "/api/cities",
-            "/api/countries",
-            "/api/communes",
-            "/api/accounts",
-            "/api/accounts/**",
-            "/api/members",
-            "/api/cards",
-            "/api/members/**",
-            "/api/districts",
-            "/api/quartiers",
-            "/auth/login",
-            "/api/property",
-            "/api/devises",
-            "/api/agences",
-            "/api/sectors",
-            "/api/prestations",
-            "/api/prestations/**",
-            "/api/property/**",
-            "/auth/register",
-            "/otp/**",
-            "/reset/password",
-            "/refresh"
-        )
+//        val info = ClientRequestInfo(
+//            ip = getClientIp(request),
+//            userAgent = request.getHeader("User-Agent"),
+//            deviceBrand = request.getHeader("X-Device-Brand"),
+//            deviceModel = request.getHeader("X-Device-Model"),
+//            os = request.getHeader("X-OS"),
+//            osVersion = request.getHeader("X-OS-Version"),
+//        )
+//        request.setAttribute(ATTR, info)
+        // Liste des chemins publics INCLUANT WebSocket
+        val publicPaths = listOf("/api/v1/public/**", "/", "/swagger-ui/**", "/swagger-ui.html/*", "/v3/**", "/files/**", "/auth/login", "/auth/register", "/websocket/**") // ← IMPORTANT: WebSocket doit être public pour le handshake)
+
         try {
             //Vérifie si la route est publique (pattern matching)
             val isPublic = publicPaths.any { pattern ->
                 matcher.match(pattern, path)
             }
+
             if (isPublic) {
                 logger.info("🟢 Public route: $path")
                 filterChain.doFilter(request, response)
                 return
             }
+
             val authHeader = request.getHeader("Authorization")
-            log.info("ICI")
+
             if (authHeader == null || !authHeader.startsWith("Bearer ") || !jwtService.validateAccessToken(authHeader)) {
-                log.info("nGGOUSF")
                 sendJsonError(response, request, HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
                 return
             }
+
             val userId = jwtService.getUserIdFromToken(authHeader)
-            log.info("nGGOUS")
             val auth = UsernamePasswordAuthenticationToken(userId, null, emptyList()).apply {
                 details = WebAuthenticationDetailsSource().buildDetails(request)
             }
-            log.info("nOUS")
+
             SecurityContextHolder.getContext().authentication = auth
             filterChain.doFilter(request, response)
 
         } catch (e : AuthorizationDeniedException){
-            sendJsonError(response, request,HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
+            sendJsonError(response, request, HttpServletResponse.SC_UNAUTHORIZED,"Invalid or missing JWT token")
         }
     }
-
-     fun sendJsonError(
+    private fun getClientIp(req: HttpServletRequest): String? {
+        val xff = req.getHeader("X-Forwarded-For")
+        if (!xff.isNullOrBlank()) return xff.split(",").first().trim()
+        val xRealIp = req.getHeader("X-Real-IP")
+        if (!xRealIp.isNullOrBlank()) return xRealIp.trim()
+        return req.remoteAddr
+    }
+    fun sendJsonError(
         response: HttpServletResponse,
         request: HttpServletRequest,
         status: Int,
@@ -109,5 +97,8 @@ class JwtAuthFilter(
         )
         val json = ObjectMapper().writeValueAsString(errorResponse)
         response.writer.write(json)
+    }
+    companion object {
+        const val ATTR = "CLIENT_REQUEST_INFO"
     }
 }

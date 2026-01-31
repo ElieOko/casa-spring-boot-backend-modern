@@ -2,9 +2,10 @@ package server.web.casa.route.favorite
 
 import server.web.casa.route.GlobalRoute
 
-object FavoriteRoute {
-    const val FAVORITE_PATH = "${GlobalRoute.ROOT}/${FavoriteFeatures.FAVORITE_PATH}"
-    const val FAVORITE_PATH_WEB = "${GlobalRoute.AUTH}/${FavoriteFeatures.FAVORITE_PATH}"
+object PropertyFavoriteScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${FavoriteFeatures.FAVORITE_PATH}"
+    const val PROTECTED = "${GlobalRoute.PROTECT}/${FavoriteFeatures.FAVORITE_PATH}"
+    const val PRIVATE ="${GlobalRoute.PRIVATE}/${FavoriteFeatures.FAVORITE_PATH}"
 }
 
 object FavoriteFeatures{
