@@ -30,8 +30,10 @@ class PersonEntity(
     val userId: Long?,
     @Column("parrain_id")
     val parrainId: Long? = null,
+    @Column("is_lock")
+    var isLock: Boolean = false,
     @Column("type_card_id")
-    val typeCardId: Long? = null
+    var typeCardId: Long? = null
 )
 
 fun PersonEntity.toDomain() = Person(

@@ -56,6 +56,14 @@ interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Lon
     fun findByUserProperty(@Param("propertyId") propertyId: Long,
                            @Param("userId") userId: Long): Flow<ReservationEntity> ?
 
+    @Query("""
+        SELECT r.* 
+        FROM reservations r
+        JOIN properties p ON r.property_id = p.id
+        WHERE p.user_id = :userId
+    """)
+    fun findByHostUserId(@Param("userId") userId: Long): Flow<ReservationEntity>
+
     //use with @Transactional when you call it
     @Modifying
     @Query("UPDATE reservations SET status = :status WHERE id = :id")

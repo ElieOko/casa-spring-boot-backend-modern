@@ -2,7 +2,6 @@ package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.ImageRequestStandard
 import server.web.casa.app.property.domain.model.request.*
@@ -17,7 +16,7 @@ class TerrainImageService(
     private val repository: TerrainImageRepository,
     private val gcsService: GcsService,
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
+//    private val log = LoggerFactory.getLogger(this::class.java)
     private val subdirectory = "terrain/"
     suspend fun create(images: ImageRequestStandard) = coroutineScope {
         val file = base64ToMultipartFile(images.name, "terrain")

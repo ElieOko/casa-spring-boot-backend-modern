@@ -37,6 +37,7 @@ data class SollicitationEntity(
     val endDate: LocalDate,
 
     @Column("created_at")
-    val createdAt: LocalDate = LocalDate.now()
-
+    val createdAt: LocalDate = LocalDate.now(),
+    @Column("is_active")
+    val isActive: Boolean = true
 )

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDate
 import java.time.LocalDateTime
-import kotlin.time.*
 
 @Table(name = "users")
 class UserEntity(
@@ -26,6 +24,8 @@ class UserEntity(
     var isPremium: Boolean = false,
     @Column("is_certified")
     var isCertified: Boolean = false,
+    @Column("is_lock")
+    var isLock: Boolean = false,
     @Column("phone")
     var phone: String?=null,
     @Column("country")

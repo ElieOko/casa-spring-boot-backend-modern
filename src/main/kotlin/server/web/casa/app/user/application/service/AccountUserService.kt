@@ -1,5 +1,6 @@
 package server.web.casa.app.user.application.service
 
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
@@ -21,10 +22,12 @@ class AccountUserService(
         return result.toDomain()
     }
     suspend fun getAll() = repository.findAll().map { it.toDomain() }
-
     suspend fun findByIdAccount(id : Long): AccountUser {
       val data = repository.findById(id)?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "ID Is Not Found.")
         return data.toDomain()
+    }
+    suspend fun findMultipleAccountUser(userId : Long) = coroutineScope{
+        repository.findAllAccountByUserId(userId).toList()
     }
 //    suspend fun findAccountWithType(account : Long, type : Long): TypeAccountUser {
 //      val data = repository.findAll().filter { it.typeAccountId == account && it.typeAccountId == type }.toList()

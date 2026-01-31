@@ -1,15 +1,16 @@
 package server.web.casa
 
-import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
+import server.web.casa.security.monitoring.SentryService
 import server.web.casa.utils.Mode
 import server.web.casa.utils.storage.StorageProperties
-
+import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.security.monitoring.MetricModel
 
 @SpringBootApplication
 @EnableConfigurationProperties(StorageProperties::class)
@@ -17,22 +18,29 @@ import server.web.casa.utils.storage.StorageProperties
 class CasaApplication
 
 fun main(args: Array<String>) {
-
 	runApplication<CasaApplication>(*args)
-//    val redis = RedisStorage()
-//    redis.storeRedisData("user1","ElieOko")
-//    redis.storeRedisData("user2","Hd&Fils")
-//    redis.getRedisData("user1")
-//    redis.delete("user1")
-//    redis.getRedisData("user2")
-//    redis.getRedisData("user1")
 }
 
 @Controller
 @Profile(Mode.DEV)
-class HomeController {
+class HomeController(
+    private val sentry: SentryService,
+) {
     @GetMapping("/")
-    fun home():String {
-        return  "index"
+    fun home(request: HttpServletRequest):String {
+        val startNanos = System.nanoTime()
+        try {
+            return  "index"
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.home.home.count",
+                    distributionName = "api.home.home.latency"
+                )
+            )
+        }
     }
 }

@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import server.web.casa.utils.Mode
 
-
 @Data
 @Configuration
 @Profile(Mode.DEV)

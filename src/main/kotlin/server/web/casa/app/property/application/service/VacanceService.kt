@@ -1,20 +1,13 @@
 package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import org.springframework.stereotype.Service
-import server.web.casa.app.property.domain.model.Agence
-import server.web.casa.app.property.domain.model.Terrain
 import server.web.casa.app.property.domain.model.Vacance
-import server.web.casa.app.property.domain.model.dto.VacanceAgence
 import server.web.casa.app.property.domain.model.dto.VacanceDTO
 import server.web.casa.app.property.domain.model.toEntity
-import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.property.infrastructure.persistence.repository.AgenceRepository
-import server.web.casa.app.property.infrastructure.persistence.repository.VacanceImageRepository
-import server.web.casa.app.property.infrastructure.persistence.repository.VacanceRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.*
 
 @Service
 class VacanceService(

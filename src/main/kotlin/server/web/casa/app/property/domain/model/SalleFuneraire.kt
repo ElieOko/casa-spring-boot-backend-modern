@@ -1,7 +1,6 @@
 package server.web.casa.app.property.domain.model
 
 import jakarta.validation.constraints.NotNull
-import org.springframework.data.relational.core.mapping.Column
 import server.web.casa.app.ecosystem.domain.request.ImageRequest
 import server.web.casa.app.payment.domain.model.Devise
 import server.web.casa.app.property.domain.model.dto.GeoDTO
@@ -121,13 +120,14 @@ fun SalleFuneraireDTO.toDomain() = SalleFuneraire(
 data class SalleFuneraireDTOMaster(
     val funeraire: SalleFuneraire,
     val devise: Devise?,
-    val postBy : String,
-    val images : List<SalleFuneraireImage?>,
+    val postBy: String,
+    val images: List<SalleFuneraireImage?>,
     val feature: List<Feature>,
-    val address :AddressDTO,
-    val geoZone : GeoDTO,
-    val localAddress : LocalAddressDTO,
+    val address: AddressDTO,
+    val geoZone: GeoDTO,
+    val localAddress: LocalAddressDTO,
     val typeProperty: PropertyType,
+    val image: String,
 )
 
 data class FuneraireDTO(
