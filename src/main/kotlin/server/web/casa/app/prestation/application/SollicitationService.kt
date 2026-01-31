@@ -3,6 +3,7 @@ package server.web.casa.app.prestation.application
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.ecosystem.application.service.PrestationService
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.application.service.DeviseService
@@ -18,7 +19,8 @@ class SollicitationService(
     private val p: SollicitationRepository,
     private val userS: UserService,
     private  val devs: DeviseService,
-    private val prestS: PrestationService
+    private val prestS: PrestationService,
+    private val person: PersonService
 ) {
 
     suspend fun create(s: SollicitationEntity): SollicitationDTO{
@@ -56,6 +58,7 @@ class SollicitationService(
         sollicitation = it,
         user = userS.findIdUser(it.userId!!),
         devise = devs.getById(it.deviseId)!!,
-        prestation = prestS.getById(it.prestationId!!)!!.toDomain()
+        prestation = prestS.getById(it.prestationId!!)!!.toDomain(),
+        userImage = person.findByIdUser(it.userId)?.images,
     )
 }

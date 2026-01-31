@@ -24,5 +24,6 @@ class SollicitationDTO(
     val sollicitation: SollicitationEntity,
     val user: UserDto,
     val devise: Devise,
-    val prestation: Prestation
+    val prestation: Prestation,
+    val userImage: String?
 )
