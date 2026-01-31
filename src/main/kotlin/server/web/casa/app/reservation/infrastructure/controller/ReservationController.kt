@@ -176,10 +176,7 @@ class ReservationController(
         val startNanos = System.nanoTime()
         try {
              val checkAdmin = userS.isAdmin()
-             if (!checkAdmin.first) throw ResponseStatusException(
-                 HttpStatusCode.valueOf(404),
-                 "Authorization denied."
-             )
+             if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
              val data = service.findAllReservation()
              val response = mapOf("reservation" to data)
             ResponseEntity.ok().body(response)
@@ -202,10 +199,7 @@ class ReservationController(
          try {
              val checkAdmin = userS.isAdmin()
               val reservation = service.findById(id)
-             if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) throw ResponseStatusException(
-                 HttpStatusCode.valueOf(404),
-                 "Authorization denied."
-             )
+             if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
              val response = mapOf("reservation" to reservation)
              ResponseEntity.ok(response)
         } finally {
@@ -225,10 +219,7 @@ class ReservationController(
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByStatus(status)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -249,10 +240,7 @@ class ReservationController(
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByDate(inputDate)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -324,10 +312,7 @@ class ReservationController(
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByInterval(startDateInput, endDateInput)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -350,10 +335,7 @@ class ReservationController(
         try {
             val checkAdmin = userS.isAdmin()
             val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
-            if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first && checkAdmin.second != user.userId) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByUser(user.userId!!)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -399,14 +381,12 @@ class ReservationController(
         try {
                     val userAuth = auth.user()
                     val isAdmin: Boolean? = userAuth?.second?.find{ true }
-                    val user = userR.findById(userId) ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "user Not Found.")
+                    val user = userR.findById(userId) ?: ResponseEntity.status(404).body(mapOf("error" to "User not found"))
+                    user as UserEntity
                     log.info("***session:${userAuth?.first?.userId}")
                     log.info("***id-params:${user.userId}")
                     if (userId != userAuth?.first?.userId && isAdmin == false){
-                        throw ResponseStatusException(
-                            HttpStatusCode.valueOf(404),
-                            "Authorization denied."
-                        )
+                        ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
                     }
             //        val checkAdmin = userS.isAdmin()
             //        if (!checkAdmin.first || checkAdmin.second != user.userId) throw ResponseStatusException(
@@ -555,10 +535,10 @@ class ReservationController(
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) {
+                ResponseEntity.status(403)
+                    .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+            }
             val notification = notif.dealConcludedHost(reservation.id!!, true)
             val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
             notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
@@ -610,10 +590,11 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user )
+            {
+                ResponseEntity.status(403)
+                    .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+            }
              val notification = notif.stateReservationHost(reservation.id!!, state)
              val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
              if (state){
