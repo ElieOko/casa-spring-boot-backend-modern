@@ -367,7 +367,7 @@ class ReservationVacanceController(
             )
         }
     }
-
+/*
     @DeleteMapping("/{version}/${ReservationVacanceScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
@@ -408,7 +408,6 @@ class ReservationVacanceController(
             )
         }
     }
-/*
     @PutMapping("/notification/partners/{reservationId}")
     suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findById(reservationId)?.reservation
