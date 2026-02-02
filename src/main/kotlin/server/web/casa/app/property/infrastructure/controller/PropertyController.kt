@@ -171,7 +171,7 @@ class PropertyController(
                 sortBy = sortBy,
                 sortOrder = sortOrder
             ).toList()
-             val userAgent = request.getHeader("User-Agent")
+            val userAgent = request.getHeader("User-Agent")
             val deviceBrand = request.getHeader("X-Device-Brand")
             val deviceModel = request.getHeader("X-Device-Model")
             val os = request.getHeader("X-OS")
