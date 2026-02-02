@@ -4,9 +4,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import kotlinx.coroutines.flow.Flow
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.property.application.service.PropertyService
 import server.web.casa.app.reservation.domain.model.ReservationDTO
 import server.web.casa.app.reservation.domain.model.ReservationStatus
@@ -21,7 +20,8 @@ import java.time.LocalDate
 class ReservationService(
     private val repoR: ReservationRepository,
     private val propS: PropertyService,
-    private val userS: UserService
+    private val userS: UserService,
+    private val person: PersonService
 ) {
      suspend fun createReservation(reservation: ReservationEntity): ReservationDTO {
         val result = repoR.save(reservation)
@@ -133,7 +133,8 @@ class ReservationService(
         ReservationDTO(
             reservation = it,
             property = propS.findByIdProperty(it.propertyId!!).first,
-            user = userS.findIdUser(it.userId!!)
+            user = userS.findIdUser(it.userId!!),
+            userImage = person.findByIdUser(it.userId)?.images
         )
 
 }

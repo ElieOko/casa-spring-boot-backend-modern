@@ -19,7 +19,7 @@ import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.security.monitoring.MetricModel
 
-@Tag(name = "Reservation", description = "Reservation's Management")
+@Tag(name = "Reservation Hotel", description = "Reservation's Management")
 @RestController
 @RequestMapping("api")
 @Profile(Mode.DEV)
@@ -372,7 +372,7 @@ class ReservationHotelController(
             )
         }
     }
-
+/*
     @DeleteMapping("/{version}/${ReservationHotelScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
@@ -413,7 +413,7 @@ class ReservationHotelController(
             )
         }
     }
-/*
+
     @PutMapping("/notification/partners/{reservationId}")
     suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findById(reservationId)?.reservation
