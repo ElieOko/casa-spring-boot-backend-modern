@@ -72,6 +72,8 @@ class TerrainService(
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas le terrain.")
     }
+    suspend fun getImageByTerrainID( terrainId: Long) = coroutineScope { terrainImage.findByTerrainId(terrainId).toList() }
+
     suspend fun createOrUpdate(model : Terrain) =  coroutineScope{
         repository.save(model.toEntity())
     }

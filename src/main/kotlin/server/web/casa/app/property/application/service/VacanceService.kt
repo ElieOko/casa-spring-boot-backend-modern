@@ -38,6 +38,11 @@ class VacanceService(
        val result = repository.save(data.toEntity()).toDomain()
         result
     }
+    suspend fun findById(id : Long) = coroutineScope {
+        val result = repository.findById(id)?.toDomain()
+        result
+    }
+    suspend fun getImageByVacanceID( vacanceId: Long) = coroutineScope {imageVacance.findByVacanceID (vacanceId).toList() }
 
     suspend fun update(p: Vacance) = coroutineScope {
         val data = p.toEntity()

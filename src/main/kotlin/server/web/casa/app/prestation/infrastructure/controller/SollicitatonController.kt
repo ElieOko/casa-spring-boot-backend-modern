@@ -59,6 +59,8 @@ class SollicitatonController(
                 startDate = req.startDate,
                 endDate = req.endDate
             )
+            //val lastSolPrestUser = service.findByUserIdPrestationId(checkUser.userId!!, checkPrestation.id!!)
+            //val lastSolPrest = service.findByPrestationId(checkUser.userId)
             val created = service.create(data)
             val note = notification2.save(NotificationCasaEntity(id = null, userId = checkPrestation.userId, title = "Demande d'intervention reçue", message = "Un client est intéressé par votre service et souhaite que vous intervennez. Ne tardez pas à répondre \uD83D\uDE09", tag = TagType.DEMANDES.toString(),))
             notificationService.sendNotificationToUser(checkPrestation.userId.toString(),note.toDomain())
@@ -193,7 +195,7 @@ class SollicitatonController(
             )
         }
     }
-
+/*
     @DeleteMapping("/{version}/${SollicitationScope.PROTECTED}/delete/{id}")
     suspend fun deleteById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> = coroutineScope {
         val startNanos = System.nanoTime()
@@ -213,7 +215,7 @@ class SollicitatonController(
                 )
             )
         }
-    }
+    }*/
 }
 data class RequestUpdateStatus(
     val userId: Long,

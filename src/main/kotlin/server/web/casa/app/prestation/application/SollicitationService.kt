@@ -35,7 +35,15 @@ class SollicitationService(
     }
     suspend fun findByUserId(id: Long): List<SollicitationDTO>?{
         val entity = p.findByUserId(id)
-        return entity?.map{toDto(it)}?.toList()
+        return entity.map{toDto(it)}.toList()
+    }
+    suspend fun findByPrestationId(prestationId: Long): List<SollicitationDTO>?{
+        val entity = p.findByPrestationId(prestationId)
+        return entity.map{toDto(it)}.toList()
+    }
+    suspend fun findByUserIdPrestationId(userId: Long, prestationId: Long): List<SollicitationDTO>?{
+        val entity = p.findByUserIdPrestationId(userId, prestationId)
+        return entity.map{toDto(it)}.toList()
     }
     suspend fun findByHostUser(userId: Long):List<SollicitationDTO>?{
         return p.findByHostUserId(userId).map{
