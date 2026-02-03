@@ -140,6 +140,14 @@ class AuthService(
         }
         throw ResponseStatusException(HttpStatusCode.valueOf(403), "ID invalide.")
     }
+    suspend fun goCertification(id : Long,state : Boolean) = coroutineScope {
+        val user = userRepository.findById(id)?:throw ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "ID Is Not Found for User with ID $id."
+        )
+        user.isPremium = state
+        userRepository.save(user)
+    }
     suspend fun lockedOrUnlocked(userId: Long, isLock: Boolean = true) : Boolean = coroutineScope{
         log.info("user method -> $userId")
     val state = when {
