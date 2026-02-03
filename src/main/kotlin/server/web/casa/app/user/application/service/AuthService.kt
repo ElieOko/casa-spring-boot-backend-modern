@@ -145,7 +145,7 @@ class AuthService(
             HttpStatusCode.valueOf(404),
             "ID Is Not Found for User with ID $id."
         )
-        user.isPremium = state
+        user.isCertified = state
         userRepository.save(user)
     }
     suspend fun lockedOrUnlocked(userId: Long, isLock: Boolean = true) : Boolean = coroutineScope{
