@@ -155,7 +155,35 @@ class AuthController(
             )
         }
     }
+    @Operation(summary = "certification user")
+    @PutMapping("/api/{version}/protected/certification/{userId}")
+    suspend fun goCertification(
+        request: HttpServletRequest,
+        @PathVariable("userId") userId : Long,
+        @RequestBody @Valid certification : CertificationState
+    )  = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = authService.goCertification(userId,certification.state)
+            ResponseEntity.ok(
+                mapOf(
+                    "message" to if (certification.state) "Certification successful" else "Certification failed",
+                    "user" to data
+                )
+            )
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.certifcation.user.count",
+                    distributionName = "api.certifcation.user.latency"
+                )
+            )
+        }
 
+    }
     @Operation(summary = "Reset password ")
     @PutMapping("/api/{version}/protected/reset/password")
     suspend fun resetPassword(request: HttpServletRequest,
