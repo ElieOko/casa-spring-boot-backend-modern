@@ -8,7 +8,10 @@ import server.web.casa.app.prestation.infrastructure.persistance.entity.Sollicit
 
 interface SollicitationRepository : CoroutineCrudRepository<SollicitationEntity, Long> {
     @Query("SELECT * FROM sollicitations WHERE user_id = :userId")
-    fun findByUserId(@Param("userId") userId: Long): Flow<SollicitationEntity>?
+    fun findByUserId(@Param("userId") userId: Long): Flow<SollicitationEntity>
+
+    @Query("SELECT * FROM sollicitations WHERE prestation_id = :prestationId")
+    fun findByPrestationId(@Param("prestationId") prestationId: Long): Flow<SollicitationEntity>
 
     @Query("""
         SELECT r.* 
@@ -17,5 +20,8 @@ interface SollicitationRepository : CoroutineCrudRepository<SollicitationEntity,
         WHERE p.user_id = :userId
     """)
     fun findByHostUserId(@Param("userId") userId: Long): Flow<SollicitationEntity>
+
+    @Query("SELECT * FROM sollicitations WHERE user_id = :userId AND prestation_id = :prestationId")
+    fun findByUserIdPrestationId(@Param("userId") userId: Long, @Param("prestationId") prestationId: Long): Flow<SollicitationEntity>
 
 }

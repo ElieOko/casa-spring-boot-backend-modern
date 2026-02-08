@@ -76,6 +76,8 @@ class SalleFestiveService(
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle festive.")
     }
+    suspend fun getImageBySalleID( salleId: Long)= coroutineScope { imageRepository.findAllBySalleId(salleId).toList() }
+
     suspend fun createOrUpdate(model : SalleFestive) =  coroutineScope{
         repository.save(model.toEntity())
     }

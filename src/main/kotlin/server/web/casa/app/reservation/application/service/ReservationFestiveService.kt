@@ -131,7 +131,8 @@ class ReservationFestiveService(
         ReservationFestiveDTO(
             reservation = it,
             salle = festS.findById(it.festiveId!!),
-            user = userS.findIdUser(it.userId!!)
+            user = userS.findIdUser(it.userId!!),
+            imagSalle = festS.getImageBySalleID(it.festiveId)
         )
 
 }
