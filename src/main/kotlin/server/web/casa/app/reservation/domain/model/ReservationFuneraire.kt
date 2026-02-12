@@ -2,9 +2,8 @@ package server.web.casa.app.reservation.domain.model
 
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
-import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFuneraire
-import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationFestiveEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.SalleFuneraireImageEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationFuneraireEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
@@ -28,7 +27,8 @@ data class ReservationFuneraire(
 data class ReservationFuneraireDTO(
     val reservation: ReservationFuneraireEntity,
     val salle: SalleFuneraire,
-    val user: UserDto
+    val user: UserDto,
+    val imagSalle: List<SalleFuneraireImageEntity>
 )
 
 data class ReservationFuneraireRequest(

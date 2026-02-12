@@ -36,6 +36,8 @@ class HotelChambreService(
         }
         hotelList
     }
+    suspend fun getImageByChambreID( chambreId: Long) = coroutineScope { images.findAllByChambreID(chambreId).toList() }
+    suspend fun findById( id: Long) = coroutineScope { repository.findById(id)?.toDomain() }
 
     suspend fun getAll() = coroutineScope { repository.findAll().toList() }
 }

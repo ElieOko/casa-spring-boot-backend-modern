@@ -61,7 +61,7 @@ class BureauService(
         bureauList
     }
     suspend fun getAllBureau() = coroutineScope{ findAll(repository.findAll().toList()) }
-
+    suspend fun getImageByBureauID( bureauId: Long)= coroutineScope { bureauImageRepository.findAllByBureauId(bureauId).toList() }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{ findAll(repository.findAllByUser(userId).toList()) }
 
     suspend fun create(data : Bureau,features: List<FeatureRequest>) = coroutineScope {

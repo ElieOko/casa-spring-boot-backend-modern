@@ -49,7 +49,7 @@ class ReservationBureauController(
                  val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
                  return ResponseEntity.ok().body(responseNotFound )}
              val dataReservation = ReservationBureauEntity(
-                 status = request.status.toString(),
+                  status = request.status.toString(),
                  type = request.type.toString(),
                  isActive = true,
                  reservationHeure = request.reservationHeure,
