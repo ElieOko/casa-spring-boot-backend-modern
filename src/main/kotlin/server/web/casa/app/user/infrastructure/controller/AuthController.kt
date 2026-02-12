@@ -164,13 +164,22 @@ class AuthController(
     )  = coroutineScope {
         val startNanos = System.nanoTime()
         try {
-            val data = authService.goCertification(userId,certification.state)
-            ResponseEntity.ok(
-                mapOf(
-                    "message" to if (certification.state) "Certification successful" else "Certification failed",
-                    "user" to data
-                )
-            )
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = authService.goCertification(userId,certification.state)
+                    ResponseEntity.ok(
+                        mapOf(
+                            "message" to if (certification.state) "Certification successful" else "Certification failed",
+                            "user" to data
+                        )
+                    )
+                }
+                false,null -> {
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -236,7 +245,7 @@ class AuthController(
 
     @Operation(summary = "Delete Account User")
     @DeleteMapping("/api/{version}/protected/users/delete/user")
-    suspend fun lockAccount(request: HttpServletRequest,): ResponseEntity<Map<String, String>> = coroutineScope {
+    suspend fun lockAccount(request: HttpServletRequest): ResponseEntity<Map<String, String>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val userId = auth.user()?.first?.userId
