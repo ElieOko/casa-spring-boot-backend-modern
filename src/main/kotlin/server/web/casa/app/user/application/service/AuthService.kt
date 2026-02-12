@@ -124,8 +124,8 @@ class AuthService(
        var validIdentifier = normalizeAndValidatePhoneNumberUniversal(identifier)
        if (isEmailValid(identifier)) validIdentifier = identifier
        userRepository.findByPhoneOrEmail(validIdentifier.toString()) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")
-       val status = twilio.generateVerifyOTP(identifier)
-       return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur numero non prises en charge",identifier)
+       val status = if (isEmailValid(identifier)) twilio.generateVerifyOTP(identifier, channel = "email") else twilio.generateVerifyOTP(identifier)
+       return Triple(status, if (status == "pending") "Votre code de vérification a été envoyé avec suucès" else "Erreur identifiant non prises en charge",identifier)
     }
     suspend fun verifyOTP(user : VerifyRequest): Pair<Long, String?> {
        val userSecurity = userRepository.findByPhoneOrEmail(user.identifier) ?: throw ResponseStatusException(HttpStatusCode.valueOf(403), "Idenfiant invalide.")

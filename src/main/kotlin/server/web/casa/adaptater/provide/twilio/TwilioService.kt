@@ -13,12 +13,11 @@ class TwilioService(
     private val log = LoggerFactory.getLogger(this::class.java)
     fun generateVerifyOTP(
         contact: String = "+243827824163",
+        channel : String = "sms"
     ): String? {
-      val verification = Verification.creator(
-           "VA7016e2d1a784a728342ea285a4eb1d63",
-            contact,
-            "sms"
-        ).create()
+      val verification = Verification
+          .creator("VA7016e2d1a784a728342ea285a4eb1d63",contact, channel)
+          .create()
         log.info("Status :${verification.status}")
         log.info("Status :${verification.serviceSid}")
        return verification.status
