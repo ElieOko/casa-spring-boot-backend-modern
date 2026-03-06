@@ -17,6 +17,7 @@ class TwilioService(
     ): String? {
       val verification = Verification
           .creator("VA7016e2d1a784a728342ea285a4eb1d63",contact, channel)
+          .setLocale("fr")
           .create()
         log.info("Status :${verification.status}")
         log.info("Status :${verification.serviceSid}")
