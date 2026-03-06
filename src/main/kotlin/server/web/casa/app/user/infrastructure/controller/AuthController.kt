@@ -92,6 +92,7 @@ class AuthController(
         }
     }
 
+
     @PostMapping("/api/{version}/protected/token/refresh")
     suspend fun refresh(request: HttpServletRequest, @RequestBody body: RefreshRequest): AuthService.TokenPair = coroutineScope {
         val startNanos = System.nanoTime()
