@@ -5,8 +5,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.BureauService
+import server.web.casa.app.property.domain.model.Bureau
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.favorite.FavoriteBureauDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteBureauEntity
+import server.web.casa.app.property.infrastructure.persistence.repository.BureauRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteBureauRepository
 import server.web.casa.app.user.application.service.UserService
 
@@ -14,7 +17,8 @@ import server.web.casa.app.user.application.service.UserService
 class FavoriteBureauService (
     private val repository: FavoriteBureauRepository,
     private val userS: UserService,
-    private val brxS: BureauService
+    private val brxS: BureauService,
+    private val brxR: BureauRepository
 ) {
     suspend fun create(f : FavoriteBureauEntity): FavoriteBureauDTO {
         val result = repository.save(f)
@@ -56,11 +60,16 @@ class FavoriteBureauService (
         return true
     }
 
-    suspend fun toFavoriteDTO(it: FavoriteBureauEntity): FavoriteBureauDTO =
-        FavoriteBureauDTO(
+    suspend fun toFavoriteDTO(it: FavoriteBureauEntity): FavoriteBureauDTO {
+        val checkProperty = brxR.findById(it.bureauId)
+        var dto: Bureau? = null
+        if(checkProperty != null){
+            dto = brxS.findById(it.bureauId)
+        }
+       return FavoriteBureauDTO(
             favorite = it,
             user = userS.findIdUser(it.userId),
-            bureau = brxS.findById(it.bureauId)
+            bureau = dto
         )
-
+    }
 }

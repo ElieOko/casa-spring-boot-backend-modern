@@ -1,6 +1,7 @@
 package server.web.casa.app.property.domain.model.favorite
 
 import server.web.casa.app.property.domain.model.dto.VacanceDTO
+import server.web.casa.app.property.infrastructure.persistence.entity.VacanceEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteVacanceEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
@@ -15,7 +16,7 @@ import java.time.LocalDateTime
  class FavoriteVacanceDTO(
     val favorite    : FavoriteVacanceEntity,
     val user        : UserDto,
-   // val vacance     : VacanceDTO
+    val vacance     : VacanceEntity?
 )
 class FavoriteVacanceRequest(
     val userId: Long,
