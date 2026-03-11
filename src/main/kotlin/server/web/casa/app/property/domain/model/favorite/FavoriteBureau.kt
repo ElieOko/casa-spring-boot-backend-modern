@@ -18,7 +18,7 @@ class FavoriteBureau(
 class FavoriteBureauDTO(
     val favorite    : FavoriteBureauEntity,
     val user        : UserDto,
-    val bureau      : Bureau
+    val bureau      : Bureau?
 )
 
 class FavoriteBureauRequest(

@@ -14,6 +14,6 @@ data class Favorite(
 
 data class FavoriteDTO(
     val favorite: FavoriteEntity?,
-    val property: PropertyMasterDTO,
+    val property: PropertyMasterDTO?,
 
 )

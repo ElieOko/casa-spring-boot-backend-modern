@@ -18,7 +18,7 @@ class FavoriteFestive(
 class FavoriteFestiveDTO(
     val favorite    : FavoriteFestiveEntity,
     val user        : UserDto,
-    val salle       : SalleFestive
+    val salle       : SalleFestive?
 )
 
 class FavoriteFestiveRequest(

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.VacanceService
 import server.web.casa.app.property.domain.model.favorite.FavoriteVacanceDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteVacanceEntity
+import server.web.casa.app.property.infrastructure.persistence.repository.VacanceRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteVacanceRepository
 import server.web.casa.app.user.application.service.UserService
 
@@ -14,7 +15,8 @@ import server.web.casa.app.user.application.service.UserService
 class FavoriteVacanceService(
     private val repository: FavoriteVacanceRepository,
     private val userS: UserService,
-    private val vacanceS: VacanceService
+    private val vacanceS: VacanceService,
+    private val vacR: VacanceRepository
 ) {
     suspend fun create(f : FavoriteVacanceEntity): FavoriteVacanceDTO {
         val result = repository.save(f)
@@ -60,7 +62,7 @@ class FavoriteVacanceService(
         FavoriteVacanceDTO(
             favorite = it,
             user = userS.findIdUser(it.userId),
-            //vacance = vacanceS.findById(it.vacanceId)
+            vacance = vacR.findById(it.vacanceId)
         )
 
 }

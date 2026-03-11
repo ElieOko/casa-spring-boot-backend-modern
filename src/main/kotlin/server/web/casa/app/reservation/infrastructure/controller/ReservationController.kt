@@ -35,6 +35,7 @@ import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 import server.web.casa.security.monitoring.MetricModel
+import java.time.LocalDate
 
 @Tag(name = "Reservation Property", description = "Reservation's Management")
 @RestController
@@ -63,13 +64,12 @@ class ReservationController(
         try {
              val user = userS.findIdUser(request.userId)
              val property = propertyService.findByIdProperty(request.propertyId).first.property
-
              if(property.userId == user.userId){
                  val responseOwnProperty = mapOf("error" to "You can't reserve your own property")
-                 ResponseEntity.ok().body(responseOwnProperty )}
-             if (request.endDate < request.startDate){
-                 val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
-                 ResponseEntity.ok().body(responseNotFound )}
+                return@coroutineScope ResponseEntity.ok().body(responseOwnProperty )}
+             if (request.endDate < request.startDate || request.startDate < LocalDate.now()){
+                 val responseNotFound = mapOf("error" to "End date must be after or equal to start date and today")
+                 return@coroutineScope ResponseEntity.ok().body(responseNotFound )}
              val dataReservation = ReservationEntity(
                  status = request.status.toString(),
                  type = request.type.toString(),
@@ -121,19 +121,24 @@ class ReservationController(
                  }
                  ?.sortedBy { it.reservation?.reservationHeure }
              //if propertyBooked = null || empty we can add
-             if(propertyBooked?.isNotEmpty() == true) {
+             //if(propertyBooked?.isNotEmpty() == true) {
+                 if(!propertyBooked.isNullOrEmpty()){
                  val responseHour = mapOf(
                      "error" to "Unfortunately, this time slot is already booked.",
                      "data" to propertyBooked
                  )
-                 ResponseEntity.ok().body(responseHour )}
+                     return@coroutineScope ResponseEntity.ok().body(responseHour )
+                 }
             val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
             val hostUser = userR.findById( property.userId!!) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
             // check if property is available before adding
              if(!property.isAvailable){
                  val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-                 ResponseEntity.ok().body(responseAvailable)}
+                 return@coroutineScope ResponseEntity.ok().body(responseAvailable)
+             }
+
              val reservationCreate = service.createReservation(dataReservation)
+
              val notification = notif.create(
                  NotificationReservation(
                      reservation = reservationCreate.reservation!!,
@@ -158,7 +163,7 @@ class ReservationController(
                  "proprietaire" to  hostUser,
                  "notificationSendState" to notification
              )
-              ResponseEntity.status(201).body(response)
+            return@coroutineScope ResponseEntity.status(201).body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -358,8 +363,8 @@ class ReservationController(
         try {
             val checkAdmin = userS.isAdmin()
             val property = propertyService.findById(propertyId)
-            if (!checkAdmin.first && checkAdmin.second != property.user) ResponseEntity.status(403).body(mapOf("error" to "Authorization denied, no access to resources"))
-            val reservation = service.findByProperty(property.propertyId!!)
+            if (!checkAdmin.first && checkAdmin.second != property?.user) ResponseEntity.status(403).body(mapOf("error" to "Authorization denied, no access to resources"))
+            val reservation = service.findByProperty(property?.propertyId!!)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
         } finally {
@@ -422,7 +427,7 @@ class ReservationController(
             val userId = reservation.reservation?.userId
             val proprioId = propertyService.findById( reservation.reservation?.propertyId!!)
 
-            val proprioCheck = userRequest.userId == proprioId.user
+            val proprioCheck = userRequest.userId == proprioId?.user
             val emetCheck = userRequest.userId == userId
 
             if(emetCheck || proprioCheck || checkAdmin.first){
@@ -535,7 +540,7 @@ class ReservationController(
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) {
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) {
                 ResponseEntity.status(403)
                     .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             }
@@ -590,7 +595,7 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user )
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user )
             {
                 ResponseEntity.status(403)
                     .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
@@ -600,7 +605,7 @@ class ReservationController(
              if (state){
                  val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
                  notificationService.sendNotificationToUser(reservation.userId.toString(),note2.toDomain())
-                 val hostId = propertyService.findById(reservation.propertyId).user
+                 val hostId = propertyService.findById(reservation.propertyId)?.user
                  val note = notification2.save(NotificationCasaEntity(id = null, userId = hostId.toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString()))
                  notificationService.sendNotificationToUser(hostId.toString(),note.toDomain())
              }
@@ -628,7 +633,7 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
                 "Authorization denied."
             )

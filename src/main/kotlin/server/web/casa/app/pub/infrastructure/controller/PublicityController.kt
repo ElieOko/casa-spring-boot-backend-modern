@@ -32,8 +32,6 @@ class PublicityController(
         val startNanos = System.nanoTime()
         try {
             val user = userS.findIdUser(request.userId)
-                    ?: return ResponseEntity.badRequest()
-                    .body(mapOf("error" to "User not found"))
             val pub = PublicityEntity(
                 user = user.userId,
                 imagePath = request.imagePath,
@@ -105,7 +103,7 @@ class PublicityController(
     suspend fun getPubByUser(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, List<PublicityEntity?>>> {
         val startNanos = System.nanoTime()
         try {
-            val user = userS.findIdUser(id) ?: throw RuntimeException("User not found")
+            val user = userS.findIdUser(id)
             val pub = service.findByUser(user.userId!!)
             val response = mapOf("pub" to pub)
             return ResponseEntity.ok(response)
@@ -166,7 +164,7 @@ class PublicityController(
             )
         }
     }
-
+/*
     @DeleteMapping("/{version}/${PubScope.PROTECTED}/delete/{id}")
     suspend fun deletePub(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
@@ -186,5 +184,5 @@ class PublicityController(
                 )
             )
         }
-    }
+    }*/
 }

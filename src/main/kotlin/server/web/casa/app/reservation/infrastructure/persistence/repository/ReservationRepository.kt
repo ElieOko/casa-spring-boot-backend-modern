@@ -1,19 +1,34 @@
 package server.web.casa.app.reservation.infrastructure.persistence.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
-import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
-import org.springframework.data.repository.query.Param
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
-import org.springframework.transaction.annotation.Transactional
-import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
-import server.web.casa.app.reservation.domain.model.ReservationStatus
-import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
-import java.time.LocalDate
-import kotlinx.coroutines.flow.Flow
+import org.springframework.data.repository.query.Param
 import reactor.core.publisher.Mono
+import server.web.casa.app.reservation.domain.model.ReservationStatus
+import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
+import java.time.LocalDate
 
 interface ReservationRepository : CoroutineCrudRepository<ReservationEntity, Long>{
+
+    @Query("""
+        SELECT * FROM reservations r
+        WHERE (r.end_date, CAST(r.reservation_heure AS TIME)) < (CURRENT_DATE, CURRENT_TIME)
+        AND r.status = 'PENDING'
+    """)
+    fun findExpiredPendingReservations(): Flow<ReservationEntity>
+
+    @Query("""
+        UPDATE reservations
+        SET status = 'CLOSED'
+        WHERE (
+            end_date < CURRENT_DATE
+            OR (end_date = CURRENT_DATE AND CAST(reservation_heure AS TIME) < CURRENT_TIME)
+        )
+        AND status = 'PENDING'
+    """)
+    fun closeExpiredReservations(): Int
 
     @Query("SELECT * FROM reservations WHERE created_at = :date")
     fun findAllByDate(@Param("date") date: LocalDate): Flow<ReservationEntity>
