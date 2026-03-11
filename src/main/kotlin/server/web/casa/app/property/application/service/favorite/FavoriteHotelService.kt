@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.HotelService
 import server.web.casa.app.property.domain.model.favorite.FavoriteHotelDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteHotelEntity
+import server.web.casa.app.property.infrastructure.persistence.repository.HotelRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteHotelRepository
 import server.web.casa.app.user.application.service.UserService
 
@@ -14,7 +15,8 @@ import server.web.casa.app.user.application.service.UserService
 class FavoriteHotelService(
     private val repository: FavoriteHotelRepository,
     private val userS: UserService,
-    private val hotS: HotelService
+    private val hotS: HotelService,
+    private val hotR: HotelRepository
 ) {
     suspend fun create(f : FavoriteHotelEntity): FavoriteHotelDTO {
         val result = repository.save(f)
@@ -60,7 +62,7 @@ class FavoriteHotelService(
         FavoriteHotelDTO(
             favorite = it,
             user = userS.findIdUser(it.userId),
-            //hotel = hotS.findById(it.hotelId)
+            hotel = hotR.findById(it.hotelId)
         )
 
 }

@@ -14,6 +14,8 @@ class FavoriteHotelEntity(
     val userId      : Long,
     @Column("hotel_id")
     val hotelId     : Long,
+    @Column("status")
+    val status: Boolean? = null,
     @Column("created_at")
     val createdAt   : LocalDate = LocalDate.now()
 )

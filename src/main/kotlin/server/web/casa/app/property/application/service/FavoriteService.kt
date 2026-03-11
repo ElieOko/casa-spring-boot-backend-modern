@@ -5,13 +5,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.domain.model.FavoriteDTO
+import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.FavoriteEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.FavoriteRepository
+import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 
 @Service
 class FavoriteService(
     private val repository: FavoriteRepository,
-    private val propS: PropertyService
+    private val propS: PropertyService,
+    private val propR: PropertyRepository
 ) {
     suspend fun create(f : FavoriteEntity): FavoriteDTO {
         //val data = f.toEntity()
@@ -54,10 +57,16 @@ class FavoriteService(
         return true
     }
 
-    suspend fun toFavoriteDTO(it: FavoriteEntity): FavoriteDTO =
-        FavoriteDTO(
-            favorite = it,
-            property = propS.findByIdProperty(it.propertyId!!).first
-        )
+    suspend fun toFavoriteDTO(it: FavoriteEntity): FavoriteDTO  {
+        val checkProperty = propR.findById(it.propertyId!!)
+        var dto: PropertyMasterDTO? = null
+        if(checkProperty != null){
+            dto = propS.findByIdProperty(it.propertyId).first
+        }
 
+       return FavoriteDTO(
+            favorite = it,
+            property = dto
+        )
+    }
 }
