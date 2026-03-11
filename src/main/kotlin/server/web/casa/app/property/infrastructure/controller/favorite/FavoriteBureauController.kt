@@ -43,8 +43,11 @@ class FavoriteBureauController(
                 createdAt = LocalDate.now(),
                 bureauId = salle.id!!
             )
-            val existingFavorite = service.getFavoriteIfExist(salle.id!!, user.userId!!)
-            val savedFavorite = if (!existingFavorite.isNullOrEmpty()) existingFavorite else service.create(favorite)
+            val existingFavorite = service.getFavoriteIfExist(salle.id!!, user.userId)?.favorite
+            val savedFavorite = if (existingFavorite != null) {
+                existingFavorite.status = !existingFavorite.status
+                service.create(existingFavorite)
+            }else service.create(favorite)
 
             val response = mapOf(
                 "data" to savedFavorite
@@ -189,9 +192,8 @@ class FavoriteBureauController(
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable festId:Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
         try {
-            val existingFavorite = service.getFavoriteIfExist(festId, userId).firstOrNull()
-
-            val deleteFavorite = existingFavorite?.favorite?.id?.let {
+            val existingFavorite = service.getFavoriteIfExist(festId, userId)?.favorite
+            val deleteFavorite = existingFavorite?.id?.let {
                 service.deleteById(it)
             }
             val response = mapOf("message" to "Favorite deleted successfully")

@@ -1,13 +1,16 @@
 package server.web.casa.app.property.application.service.favorite
 
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.SalleFuneraireService
 import server.web.casa.app.property.domain.model.SalleFestive
 import server.web.casa.app.property.domain.model.SalleFuneraire
+import server.web.casa.app.property.domain.model.favorite.FavoriteFestiveDTO
 import server.web.casa.app.property.domain.model.favorite.FavoriteFuneraireDTO
+import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteFestiveEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteFuneraireEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.SalleFuneraireRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteFuneraireRepository
@@ -43,8 +46,9 @@ class FavoriteFuneraireService(
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }
     }
-    suspend fun getFavoriteIfExist( funeraireId: Long , user: Long) : List<FavoriteFuneraireDTO>{
-        return repository.findFavoriteExist(funeraireId, user).let{list-> list?.map{toFavoriteDTO(it)}?.toList() ?: emptyList() }
+    suspend fun getFavoriteIfExist(funeraireId: Long, user: Long): FavoriteFuneraireDTO? {
+        val fav:  FavoriteFuneraireEntity? = repository.findFavoriteExist(funeraireId, user)?.firstOrNull()
+        return fav?.let { toFavoriteDTO(it) }
     }
     suspend fun deleteById(favoriteId: Long) {
         return repository.deleteById(favoriteId)

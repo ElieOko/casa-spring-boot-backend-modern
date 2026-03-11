@@ -16,7 +16,7 @@ class FavoriteBureauEntity(
     @Column("bureau_id")
     val bureauId   : Long,
     @Column("status")
-    val status: Boolean? = null,
+    var status: Boolean = true,
     @Column("created_at")
     val createdAt   : LocalDate = LocalDate.now()
 )

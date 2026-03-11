@@ -16,7 +16,7 @@ class FavoriteFestiveEntity(
     @Column("festive_id")
     val festiveId   : Long,
     @Column("status")
-    val status: Boolean? = null,
+    var status: Boolean = true,
     @Column("created_at")
     val createdAt   : LocalDate = LocalDate.now()
 )
