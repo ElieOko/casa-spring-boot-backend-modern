@@ -16,7 +16,7 @@ class FavoriteFuneraireEntity(
     @Column("funeraire_id")
     val funeraireId : Long,
     @Column("status")
-    val status: Boolean? = null,
+    var status: Boolean = true,
     @Column("created_at")
     val createdAt   : LocalDate = LocalDate.now()
 )

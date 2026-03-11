@@ -42,9 +42,11 @@ class FavoriteHotelController(
                 createdAt = LocalDate.now(),
                 hotelId = salle.hotel.id!!
             )
-            val existingFavorite = service.getFavoriteIfExist(salle.hotel.id, user.userId)
-            val savedFavorite = existingFavorite.ifEmpty { service.create(favorite) }
-
+            val existingFavorite = service.getFavoriteIfExist(salle.hotel.id, user.userId)?.favorite
+            val savedFavorite = if (existingFavorite != null) {
+                existingFavorite.status = !existingFavorite.status
+                service.create(existingFavorite)
+            }else service.create(favorite)
             val response = mapOf(
                 "data" to savedFavorite
             )
@@ -191,7 +193,7 @@ class FavoriteHotelController(
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable hotelId:Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
         try {
-            val existingFavorite = service.getFavoriteIfExist(hotelId, userId).firstOrNull()
+            val existingFavorite = service.getFavoriteIfExist(hotelId, userId)
 
             val deleteFavorite = existingFavorite?.favorite?.id?.let {
                 service.deleteById(it)

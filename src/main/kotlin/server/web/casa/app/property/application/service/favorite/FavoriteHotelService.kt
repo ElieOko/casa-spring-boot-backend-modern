@@ -1,6 +1,7 @@
 package server.web.casa.app.property.application.service.favorite
 
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
@@ -41,8 +42,9 @@ class FavoriteHotelService(
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }
     }
-    suspend fun getFavoriteIfExist( hotelId: Long , user: Long) : List<FavoriteHotelDTO>{
-        return repository.findFavoriteExist(hotelId, user).let{list-> list?.map{toFavoriteDTO(it)}?.toList() ?: emptyList() }
+    suspend fun getFavoriteIfExist(hotelId: Long, user: Long): FavoriteHotelDTO? {
+        val fav:  FavoriteHotelEntity? = repository.findFavoriteExist(hotelId, user)?.firstOrNull()
+        return fav?.let { toFavoriteDTO(it) }
     }
     suspend fun deleteById(favoriteId: Long) {
         return repository.deleteById(favoriteId)

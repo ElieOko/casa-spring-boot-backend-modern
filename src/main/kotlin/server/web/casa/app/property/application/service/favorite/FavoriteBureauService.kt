@@ -1,12 +1,12 @@
 package server.web.casa.app.property.application.service.favorite
 
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.property.domain.model.Bureau
-import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
 import server.web.casa.app.property.domain.model.favorite.FavoriteBureauDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteBureauEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.BureauRepository
@@ -43,8 +43,9 @@ class FavoriteBureauService (
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }
     }
-    suspend fun getFavoriteIfExist( festId: Long , user: Long) : List<FavoriteBureauDTO>{
-        return repository.findFavoriteExist(festId, user).let{list-> list?.map{toFavoriteDTO(it)}?.toList() ?: emptyList() }
+    suspend fun getFavoriteIfExist(bureauId: Long, user: Long): FavoriteBureauDTO? {
+        val fav: FavoriteBureauEntity? = repository.findFavoriteExist(bureauId, user)?.firstOrNull()
+        return fav?.let { toFavoriteDTO(it) }
     }
     suspend fun deleteById(favoriteId: Long) {
         return repository.deleteById(favoriteId)

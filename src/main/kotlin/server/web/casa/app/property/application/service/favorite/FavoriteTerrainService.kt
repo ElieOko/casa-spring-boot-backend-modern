@@ -1,13 +1,16 @@
 package server.web.casa.app.property.application.service.favorite
 
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.TerrainService
 import server.web.casa.app.property.domain.model.SalleFuneraire
 import server.web.casa.app.property.domain.model.Terrain
+import server.web.casa.app.property.domain.model.favorite.FavoriteHotelDTO
 import server.web.casa.app.property.domain.model.favorite.FavoriteTerrainDTO
+import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteHotelEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteTerrainEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.TerrainRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteTerrainRepository
@@ -43,8 +46,12 @@ class FavoriteTerrainService(
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }
     }
-    suspend fun getFavoriteIfExist( terId: Long , user: Long) : List<FavoriteTerrainDTO>{
+    suspend fun getFavoriteIfExistb( terId: Long , user: Long) : List<FavoriteTerrainDTO>{
         return repository.findFavoriteExist(terId, user).let{list-> list?.map{toFavoriteDTO(it)}?.toList() ?: emptyList() }
+    }
+    suspend fun getFavoriteIfExist(terId: Long, user: Long): FavoriteTerrainDTO? {
+        val fav:  FavoriteTerrainEntity? = repository.findFavoriteExist(terId, user)?.firstOrNull()
+        return fav?.let { toFavoriteDTO(it) }
     }
     suspend fun deleteById(favoriteId: Long) {
         return repository.deleteById(favoriteId)
