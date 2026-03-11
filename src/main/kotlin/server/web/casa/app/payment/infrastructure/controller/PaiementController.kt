@@ -12,30 +12,30 @@ import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.security.monitoring.MetricModel
 
-@RestController
-@RequestMapping("api")
-@Profile("dev")
-class PaiementController(
-    private val service: DeviseService,
-    private val sentry: SentryService,
-) {
-    @Operation(summary = "Liste des devises")
-    @GetMapping("/{version}/public/devises",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllAccountE(request: HttpServletRequest): Map<String, List<Devise>>  = coroutineScope {
-        val startNanos = System.nanoTime()
-        try {
-            val data = service.getAllData().toList()
-            mapOf("devises" to data)
-        } finally {
-            sentry.callToMetric(
-                MetricModel(
-                    startNanos = startNanos,
-                    status = "200",
-                    route = "${request.method} /${request.requestURI}",
-                    countName = "api.devise.getallaccounte.count",
-                    distributionName = "api.devise.getallaccounte.latency"
-                )
-            )
-        }
-    }
-}
+//@RestController
+//@RequestMapping("api")
+//@Profile("dev")
+//class PaiementController(
+//    private val service: DeviseService,
+//    private val sentry: SentryService,
+//) {
+//    @Operation(summary = "Liste des devises")
+//    @GetMapping("/{version}/public/devises",produces = [MediaType.APPLICATION_JSON_VALUE])
+//    suspend fun getAllAccountE(request: HttpServletRequest): Map<String, List<Devise>>  = coroutineScope {
+//        val startNanos = System.nanoTime()
+//        try {
+//            val data = service.getAllData().toList()
+//            mapOf("devises" to data)
+//        } finally {
+//            sentry.callToMetric(
+//                MetricModel(
+//                    startNanos = startNanos,
+//                    status = "200",
+//                    route = "${request.method} /${request.requestURI}",
+//                    countName = "api.devise.getallaccounte.count",
+//                    distributionName = "api.devise.getallaccounte.latency"
+//                )
+//            )
+//        }
+//    }
+//}
