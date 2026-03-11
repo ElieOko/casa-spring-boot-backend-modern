@@ -363,8 +363,8 @@ class ReservationController(
         try {
             val checkAdmin = userS.isAdmin()
             val property = propertyService.findById(propertyId)
-            if (!checkAdmin.first && checkAdmin.second != property.user) ResponseEntity.status(403).body(mapOf("error" to "Authorization denied, no access to resources"))
-            val reservation = service.findByProperty(property.propertyId!!)
+            if (!checkAdmin.first && checkAdmin.second != property?.user) ResponseEntity.status(403).body(mapOf("error" to "Authorization denied, no access to resources"))
+            val reservation = service.findByProperty(property?.propertyId!!)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
         } finally {
@@ -427,7 +427,7 @@ class ReservationController(
             val userId = reservation.reservation?.userId
             val proprioId = propertyService.findById( reservation.reservation?.propertyId!!)
 
-            val proprioCheck = userRequest.userId == proprioId.user
+            val proprioCheck = userRequest.userId == proprioId?.user
             val emetCheck = userRequest.userId == userId
 
             if(emetCheck || proprioCheck || checkAdmin.first){
@@ -540,7 +540,7 @@ class ReservationController(
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) {
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) {
                 ResponseEntity.status(403)
                     .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             }
@@ -595,7 +595,7 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user )
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user )
             {
                 ResponseEntity.status(403)
                     .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
@@ -605,7 +605,7 @@ class ReservationController(
              if (state){
                  val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
                  notificationService.sendNotificationToUser(reservation.userId.toString(),note2.toDomain())
-                 val hostId = propertyService.findById(reservation.propertyId).user
+                 val hostId = propertyService.findById(reservation.propertyId)?.user
                  val note = notification2.save(NotificationCasaEntity(id = null, userId = hostId.toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString()))
                  notificationService.sendNotificationToUser(hostId.toString(),note.toDomain())
              }
@@ -633,7 +633,7 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
                 "Authorization denied."
             )
