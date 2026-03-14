@@ -2,7 +2,9 @@ package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.actor.infrastructure.persistence.repository.PersonRepository
 import server.web.casa.app.property.domain.model.Hotel
 import server.web.casa.app.property.domain.model.dto.HotelGlobal
@@ -54,6 +56,19 @@ class HotelService(
                 structure =  chambre.getAllChambreByHotel(it.id?:0)
             )
         ) }
+        hotel.toList()
+    }
+
+    suspend fun showDetail(id : Long) = coroutineScope{
+        val data = hotelRepository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette hotel n'existe.")
+        val hotel = mutableListOf<HotelGlobal>()
+        hotel.add(
+            HotelGlobal(
+                hotel = data.toDomain(),
+                image = person.findByUser(data.userId!!)?.images?:"",
+                structure =  chambre.getAllChambreByHotel(data.id?:0)
+            )
+        )
         hotel.toList()
     }
 }

@@ -119,4 +119,30 @@ class TerrainService(
         }
         terrain
     }
+
+    suspend fun showDetail(id : Long) = coroutineScope {
+        val terrain = mutableListOf<TerrainMasterDTO>()
+        val m = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas le terrain.")
+        val bureauIds: List<Long> = listOf(m.id!!)
+        val images = terrainImage.findByTerrainIdIn(bureauIds).toList()
+        val imageByTerrain: Map<Long, List<TerrainImageEntity>> = images.groupBy { it.terrainId }
+        terrain.add(
+            TerrainMasterDTO(
+                terrain = m.toDomain().toDTO(),
+                devise = devise.getById(m.deviseId!!),
+                postBy = userService.findIdUser(m.userId).username,
+                address = m.toAddressDTO(),
+                image = person.findByUser(m.userId)?.images?:"",
+                localAddress = LocalAddressDTO(
+                    city = cityService.findByIdCity(m.cityId),
+                    commune = communeService.findByIdCommune(m.communeId),
+                    quartier = quartierService.findByIdQuartier(m.quartierId)
+                ),
+                geoZone = m.toGeo(),
+                images = imageByTerrain[m.id]?.map { it.toDomain() } ?: emptyList(),
+                typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
+            )
+        )
+        terrain
+    }
 }

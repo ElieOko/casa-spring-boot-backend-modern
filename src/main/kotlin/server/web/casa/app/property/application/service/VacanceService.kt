@@ -2,7 +2,9 @@ package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.property.domain.model.Vacance
 import server.web.casa.app.property.domain.model.dto.VacanceDTO
 import server.web.casa.app.property.domain.model.toEntity
@@ -50,4 +52,18 @@ class VacanceService(
         result.toDomain()
     }
 
+    suspend fun showDetail(id : Long) = coroutineScope {
+        val ag = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce le lieu de vacance n'existe.")
+        val vacance = mutableListOf<VacanceDTO>()
+        val agenceIds: List<Long> = listOf(ag.agenceId!!)
+        val images = imageVacance.findByVacanceIdIn(agenceIds).toList()
+        val imageByBureau = images.groupBy { it.vacanceId }
+         vacance.add(
+                VacanceDTO(
+                    vacance = ag.toDomain(),
+                    image = imageByBureau[ag.id]?.map { it.toDomain() } ?: emptyList()
+                )
+            )
+        vacance
+    }
 }

@@ -54,7 +54,8 @@ class SalleFestiveService(
                     postBy = userService.findIdUser(m.userId).username,
                     feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
                     typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
-                ))
+                )
+            )
         }
         dataList
     }
@@ -86,5 +87,33 @@ class SalleFestiveService(
         val data = p.toEntity()
         val result = repository.save(data)
         result.toDomain()
+    }
+    suspend fun showDetail(id : Long) = coroutineScope{
+        val dataList = mutableListOf<SalleFestiveDTOMaster>()
+        val m = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+        val ids : List<Long> = listOf(m.id!!)
+        val images = imageRepository.findBySalleFestiveIdIn(ids).toList()
+        val features = repositoryFeature.findByFestiveIdIn(ids).toList()
+        val imageByModel = images.groupBy { it.salleFestiveId }
+        val featureByModel = features.groupBy { it.festiveId }
+        dataList.add(
+            SalleFestiveDTOMaster(
+                festive = m.toDomain().toDTO() ,
+                images = imageByModel[m.id]?.map { it.toDomain() }?:emptyList(),
+                devise = devise.getById(m.deviseId!!),
+                address = m.toAddressDTO(),
+                image = person.findByUser(m.userId!!)?.images?:"",
+                localAddress = LocalAddressDTO(
+                    city = cityService.findByIdCity(m.cityId),
+                    commune = communeService.findByIdCommune(m.communeId),
+                    quartier = quartierService.findByIdQuartier(m.quartierId)
+                ),
+                geoZone = m.toGeo(),
+                postBy = userService.findIdUser(m.userId).username,
+                feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
+                typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0),
+            )
+        )
+        dataList
     }
 }

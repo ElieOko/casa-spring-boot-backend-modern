@@ -2,7 +2,9 @@ package server.web.casa.app.property.application.service
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.property.domain.model.HotelChambre
 import server.web.casa.app.property.domain.model.dto.HotelChambreDTO
 import server.web.casa.app.property.domain.model.toEntity
@@ -40,4 +42,19 @@ class HotelChambreService(
     suspend fun findById( id: Long) = coroutineScope { repository.findById(id)?.toDomain() }
 
     suspend fun getAll() = coroutineScope { repository.findAll().toList() }
+
+    suspend fun showDetail(id : Long) = coroutineScope{
+        val ag = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette chambre n'existe.")
+        val hotelList = mutableListOf<HotelChambreDTO>()
+        val hotelIds: List<Long> = listOf(ag.hotelId!!)
+        val images = images.findByHotelChambreIdIn(hotelIds).toList()
+        val imageByBureau = images.groupBy { it.hotelChambreId }
+        hotelList.add(
+            HotelChambreDTO(
+                chambre = ag.toDomain(),
+                image = imageByBureau[ag.id]?.map { it.toDomain() } ?: emptyList()
+            )
+        )
+        hotelList
+    }
 }

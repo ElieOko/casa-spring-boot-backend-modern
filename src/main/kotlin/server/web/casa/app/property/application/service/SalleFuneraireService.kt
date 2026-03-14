@@ -20,6 +20,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
+import kotlin.collections.get
 import kotlin.collections.map
 
 @Service
@@ -93,5 +94,34 @@ class SalleFuneraireService(
         val data = p.toEntity()
         val result = repository.save(data)
         result.toDomain()
+    }
+
+    suspend fun showDetail(id : Long) = coroutineScope{
+        val dataList = mutableListOf<SalleFuneraireDTOMaster>()
+        val m = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+        val ids: List<Long> = listOf(m.id!!)
+        val images = imageRepository.findBySalleFuneraireIdIn(ids).toList()
+        val features = repositoryFeature.findByFuneraireIdIn(ids).toList()
+        val imageByModel = images.groupBy { it.salleFuneraireId }
+        val featureByModel = features.groupBy { it.funeraireId }
+        dataList.add(
+            SalleFuneraireDTOMaster(
+                funeraire = m.toDomain(),
+                images = imageByModel[m.id]?.map { it.toDomain() }?:emptyList(),
+                devise = devise.getById(m.deviseId?:0),
+                feature = featureByModel[m.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList(),
+                address = m.toAddressDTO(),
+                image = person.findByUser(m.userId!!)?.images?:"",
+                localAddress = LocalAddressDTO(
+                    city = cityService.findByIdCity(m.cityId),
+                    commune = communeService.findByIdCommune(m.communeId),
+                    quartier = quartierService.findByIdQuartier(m.quartierId)
+                ),
+                geoZone = m.toGeo(),
+                postBy = userService.findIdUser(m.userId).username,
+                typeProperty = propertyTypeService.findByIdPropertyType(m.propertyTypeId?:0)
+            )
+        )
+        dataList
     }
 }

@@ -46,4 +46,16 @@ class AgenceService(
         agence.logo = imageUri
         repository.save(agence.toEntity()).toDomain()
     }
+
+    suspend fun showDetail(id : Long) = coroutineScope{
+        val data = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette agence n'existe.")
+        val agenceByVacance = mutableListOf<VacanceAgence>()
+        agenceByVacance.add(
+            VacanceAgence(
+                agence = data.toDomain(),
+                site = vacance.getAllVacanceByAgence(data.id ?: 0)
+            )
+        )
+        agenceByVacance.toList()
+    }
 }
