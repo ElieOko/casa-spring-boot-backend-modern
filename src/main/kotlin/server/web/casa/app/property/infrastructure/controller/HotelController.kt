@@ -16,6 +16,7 @@ import server.web.casa.route.property.PropertyHotelScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyFestiveScope
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Hotel", description = "")
@@ -100,6 +101,30 @@ class HotelController(
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.hotel.getallhotelbyuser.count",
                     distributionName = "api.hotel.getallhotelbyuser.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "Get Hotel by ID")
+    @GetMapping("/${PropertyHotelScope.PUBLIC}/{hotelId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getHotelByID(
+        request: HttpServletRequest,
+        @PathVariable("hotelId") hotelId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(hotelId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getHotelById.count",
+                    distributionName = "api.property.getHotelById.latency"
                 )
             )
         }

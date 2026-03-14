@@ -19,6 +19,7 @@ import server.web.casa.route.property.PropertyTerrainScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyScope
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Terrain", description = "")
@@ -148,6 +149,31 @@ class TerrainController(
             )
         }
     }
+
+    @Operation(summary = "Get Terrain by ID")
+    @GetMapping("/${PropertyTerrainScope.PUBLIC}/{terrainId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getTerrainByID(
+        request: HttpServletRequest,
+        @PathVariable("terrainId") terrainId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(terrainId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getTerrainById.count",
+                    distributionName = "api.property.getTerrainById.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Get Terrain by User")
     @GetMapping("/${PropertyTerrainScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])

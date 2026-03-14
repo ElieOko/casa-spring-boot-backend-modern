@@ -20,6 +20,7 @@ import server.web.casa.route.property.PropertyBureauScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyFestiveScope
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Bureau", description = "")
@@ -320,4 +321,27 @@ class BureauController(
         }
     }
 
+    @Operation(summary = "Get Bureau by ID")
+    @GetMapping("/${PropertyBureauScope.PUBLIC}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getBureauByID(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(propertyId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getBureauById.count",
+                    distributionName = "api.property.getBureauById.latency"
+                )
+            )
+        }
+    }
 }

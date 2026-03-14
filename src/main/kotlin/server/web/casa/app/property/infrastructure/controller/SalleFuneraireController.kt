@@ -18,6 +18,7 @@ import server.web.casa.route.property.PropertyFuneraireScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyTerrainScope
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Funeraire", description = "")
@@ -140,7 +141,29 @@ class SalleFuneraireController(
             )
         }
     }
-
+    @Operation(summary = "Get Salle Funeraire by ID")
+    @GetMapping("/${PropertyFuneraireScope.PUBLIC}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getFuneraireByID(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(propertyId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getFuneraireById.count",
+                    distributionName = "api.property.getFuneraireById.latency"
+                )
+            )
+        }
+    }
     @Operation(summary = "Suppression Salle festive")
     @DeleteMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
     suspend fun deleteFile(

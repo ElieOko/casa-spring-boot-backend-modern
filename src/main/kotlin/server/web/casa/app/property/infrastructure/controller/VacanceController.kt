@@ -14,6 +14,7 @@ import server.web.casa.route.property.PropertyVacanceScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyTerrainScope
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Vacance", description = "")
@@ -73,5 +74,27 @@ class VacanceController(
         }
     }
 
-
+    @Operation(summary = "Get Vacance by ID")
+    @GetMapping("/${PropertyVacanceScope.PUBLIC}/{vacanceId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getVacanceByID(
+        request: HttpServletRequest,
+        @PathVariable("vacanceId") vacanceId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(vacanceId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getTerrainById.count",
+                    distributionName = "api.property.getTerrainById.latency"
+                )
+            )
+        }
+    }
 }
