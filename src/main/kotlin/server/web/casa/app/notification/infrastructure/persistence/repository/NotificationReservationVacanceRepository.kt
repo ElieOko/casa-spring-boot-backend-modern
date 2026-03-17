@@ -1,0 +1,10 @@
+package server.web.casa.app.notification.infrastructure.persistence.repository
+
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationBureauEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationFestiveEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationHotelEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationReservationVacanceEntity
+
+interface NotificationReservationVacanceRepository : CoroutineCrudRepository<NotificationReservationVacanceEntity, Long>
