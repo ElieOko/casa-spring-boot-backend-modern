@@ -71,4 +71,7 @@ class HotelService(
         )
         hotel.toList()
     }
+    suspend fun findById(id : Long) = coroutineScope {
+        hotelRepository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de salle funeraire.")
+    }
 }
