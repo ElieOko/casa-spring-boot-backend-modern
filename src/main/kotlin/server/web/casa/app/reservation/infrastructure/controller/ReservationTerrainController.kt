@@ -17,7 +17,17 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.NotificationReservationFuneraire
+import server.web.casa.app.notification.domain.model.request.NotificationReservationTerrain
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.scheduler.ReservationScheduler
 
 @Tag(name = "Reservation Terrain", description = "Reservation's Management")
 @RestController
@@ -27,9 +37,13 @@ import server.web.casa.security.monitoring.MetricModel
 class ReservationTerrainController(
     private val service: ReservationTerrainService,
     private val userS: UserService,
+    private val userR: UserRepository,
     private val terS: TerrainService,
     private val notif: NotificationReservationService,
     private val sentry: SentryService,
+    private val task : ReservationScheduler,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
 ){
     @PostMapping("/{version}/${ReservationTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -101,8 +115,11 @@ class ReservationTerrainController(
              // check if property is available before adding
              if(!terrain.isAvailable){
                  val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-                 return ResponseEntity.ok().body(responseAvailable)}
-                 val reservationCreate = service.createReservation(dataReservation)
+                 return ResponseEntity.ok().body(responseAvailable)
+             }
+            val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            val hostUser = userR.findById( terrain.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            val reservationCreate = service.createReservation(dataReservation)
              /* val notification = notif.create(
                   NotificationReservation(
                       reservation = reservationCreate.reservation!!,
@@ -110,6 +127,29 @@ class ReservationTerrainController(
                       hostUser = userR.findById( propertyEntity.user!!)!!
                   )
               )*/
+            task.scheduleOneShot(
+                reservationId = reservationCreate.reservation.id?:0L,
+                taskType ="ONESHOT reservation terrain",
+                type = "terrain",
+                minute = 1L
+            )
+            val notification = notif.createTerrain(
+                NotificationReservationTerrain(
+                    reservation = reservationCreate.reservation,
+                    guestUser = guestUser as UserEntity,
+                    hostUser = hostUser as UserEntity
+                )
+            )
+            val note = notification2.save(
+                NotificationCasaEntity(
+                    id = null,
+                    userId = userR.findById(terrain.userId)!!.userId,
+                    title = "Demande de visite reçue",
+                    message = "Un client est intéressé par un bien et souhaite le visiter. Ne tardez pas à répondre \uD83D\uDE09",
+                    tag = TagType.DEMANDES.toString(),
+                )
+            )
+            notificationService.sendNotificationToUser(hostUser.userId.toString(),note.toDomain())
              val response = mapOf(
                  "message" to "Votre reservation à la date du ${reservationCreate.reservation.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
                  "reservation" to reservationCreate,
@@ -367,6 +407,38 @@ class ReservationTerrainController(
             )
         }
     }
+
+
+    @PutMapping("/{version}/${ReservationTerrainScope.PROTECTED}/notification/partners/{reservationId}")
+    suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+        val reservation = service.findById(reservationId)?.reservation
+        if (reservation == null){
+            val response = mapOf("error" to "reservation not found")
+            return ResponseEntity.ok(response)
+        }
+        val propertyOwner = terS.findById(reservation.terrainId)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.userId ) {
+            ResponseEntity.status(403)
+                .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+        }
+
+        val notification = notif.dealConcludedHostTerrain(reservation.id!!, true)
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
+        val notificationGuest = notif.dealConcludedGuestTerrain(reservation.id , true)
+        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Bonne nouvelle ", message = "Félicitations, votre demande a été validée et le bien vous a été accordé.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
+        val notificationState = notif.stateReservationHostTerrain(reservation.id, true)
+
+        val response = mapOf(
+            "DealConcludeHost" to true,
+            "DealConcludeGuest" to true,
+            "DealConcludeState" to true,
+            "message" to "True if it's successfully and null or false when unfulfilled")
+
+        return ResponseEntity.ok(response)
+    }
 /*
     @DeleteMapping("/{version}/${ReservationTerrainScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
@@ -409,29 +481,7 @@ class ReservationTerrainController(
         }
     }
 
-    @PutMapping("/notification/partners/{reservationId}")
-    suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
-        val reservation = service.findById(reservationId)?.reservation
-        if (reservation == null){
-            val response = mapOf("error" to "reservation not found")
-            return ResponseEntity.ok(response)
-        }
-        /*
-        val notification = notif.dealConcludedHost(reservation.id!!, true)
-        val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
-        val notificationState = notif.stateReservationHost(reservation.id, true)
 
-        val propertyEntity = terS.findById(reservation.terrainId!!)
-             propertyEntity!!.isAvailable = false
-        terS.save(propertyEntity)*/
-        val response = mapOf(
-            "DealConcludeHost" to true,
-            "DealConcludeGuest" to true,
-            "DealConcludeState" to true,
-            "message" to "True if it's successfully and null or false when unfulfilled")
-
-        return ResponseEntity.ok(response)
-    }
    /* @PutMapping("/notification/guest/{reservationId}")
     fun dealconcluguest( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findId(reservationId)

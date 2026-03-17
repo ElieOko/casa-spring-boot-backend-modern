@@ -35,6 +35,7 @@ import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.scheduler.ReservationScheduler
 import java.time.LocalDate
 
 @Tag(name = "Reservation Property", description = "Reservation's Management")
@@ -53,6 +54,7 @@ class ReservationController(
     private val notification2 : NotificationCasaRepository,
     private val auth: Auth,
     private val sentry: SentryService,
+    private val task : ReservationScheduler,
 ){
     private val log = LoggerFactory.getLogger(this::class.java)
     @PostMapping("/{version}/${ReservationScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -137,8 +139,13 @@ class ReservationController(
                  return@coroutineScope ResponseEntity.ok().body(responseAvailable)
              }
 
-             val reservationCreate = service.createReservation(dataReservation)
-
+            val reservationCreate = service.createReservation(dataReservation)
+            task.scheduleOneShot(
+                reservationId = reservationCreate.reservation?.id?:0L,
+                taskType ="ONESHOT reservation property",
+                type = "property",
+                minute = 1L
+            )
              val notification = notif.create(
                  NotificationReservation(
                      reservation = reservationCreate.reservation!!,
@@ -176,6 +183,7 @@ class ReservationController(
             )
         }
     }
+
     @GetMapping("/{version}/${ReservationScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllReservation(request: HttpServletRequest): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope{
         val startNanos = System.nanoTime()
@@ -199,7 +207,7 @@ class ReservationController(
     }
 
     @GetMapping("/{version}/${ReservationScope.PRIVATE}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getReservationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
+    suspend fun getReservationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
          val startNanos = System.nanoTime()
          try {
              val checkAdmin = userS.isAdmin()
@@ -219,6 +227,7 @@ class ReservationController(
              )
          }
      }
+
     @GetMapping("/{version}/${ReservationScope.PROTECTED}/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByStaus(request: HttpServletRequest, @PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
@@ -240,6 +249,7 @@ class ReservationController(
             )
         }
     }
+
     @GetMapping("/{version}/${ReservationScope.PROTECTED}/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByDate(request: HttpServletRequest, @PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
@@ -537,7 +547,8 @@ class ReservationController(
             val reservation = service.findById(reservationId)?.reservation
             if (reservation == null){
                 val response = mapOf("error" to "reservation not found")
-                ResponseEntity.ok(response)}
+                ResponseEntity.ok(response)
+            }
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
             val checkAdmin = userS.isAdmin()
             if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) {
