@@ -120,18 +120,15 @@ class ReservationVacanceController(
             val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
             val hostUser = userR.findById( vacance.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
             val reservationCreate = service.createReservation(dataReservation)
-             /* val notification = notif.create(
-                  NotificationReservation(
-                      reservation = reservationCreate.reservation!!,
-                      guestUser = userEntity,
-                      hostUser = userR.findById( propertyEntity.user!!)!!
-                  )
-              )*/
+            val startTaskAt = expiredAt(
+                date = reservationCreate.reservation?.startDate.toString(),
+                heure = reservationCreate.reservation?.reservationHeure.toString()
+            )
             task.scheduleOneShot(
                 reservationId = reservationCreate.reservation.id?:0L,
                 taskType ="ONESHOT reservation vacance",
                 type = "vacance",
-                minute = 1L
+                minute = startTaskAt
             )
             val notification = notif.createVacance(
                 NotificationReservationVacance(
@@ -443,6 +440,12 @@ class ReservationVacanceController(
             "message" to "True if it's successfully and null or false when unfulfilled"
         )
         return ResponseEntity.ok(response)
+    }
+    fun expiredAt (date:String, heure: String): Long {
+        val date = LocalDate.parse(date)
+        val time = LocalTime.parse(heure)
+        val end = LocalDateTime.of(date, time).plusHours(1)
+        return  Duration.between(LocalDateTime.now(), end).toMinutes()
     }
 /*
     @DeleteMapping("/{version}/${ReservationVacanceScope.PROTECTED}/delete/{id}")

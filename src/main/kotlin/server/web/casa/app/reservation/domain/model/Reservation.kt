@@ -23,6 +23,6 @@ data class Reservation(
 data class ReservationDTO(
     val reservation: ReservationEntity?,
     val property: PropertyMasterDTO?,
-    val user: UserDto,
+    val user: UserDto?,
     val userImage: String?
 )
