@@ -1,5 +1,9 @@
 package server.web.casa.app.payment.domain.model
 
+
+import jakarta.validation.constraints.Null
+import org.jetbrains.annotations.*
+
 data class TransactionState(
     val orderNumber : String,
     val reference : String,
@@ -10,11 +14,17 @@ data class TransactionState(
     val status : String
 )
 data class Transaction(
-    val merchant : String,
-    val type : String,
-    val phone : String,
+    val merchant : String = "casanayo",
+    val type : String = "1",
     val reference : String,
-    val amount : String,
-    val currency : String,
-    val callbackUrl : String
+    val phone : String,
+    val amount : String = "5" ,
+    val currency : String = "USD",
+    val callbackUrl : String = "migration.casanayo.com/api/v1/public/payment/mobile/callback"
+)
+data class TransactionRequest(
+    @NotNull
+    val phone : String,
+    @NotNull
+    val deviseId : Long,
 )
