@@ -3,7 +3,6 @@ package server.web.casa.app.payment.infrastructure.persistence.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.*
 import server.web.casa.app.payment.domain.model.*
-import server.web.casa.app.reservation.domain.model.*
 import java.time.LocalDate
 
 @Table(name = "paiements")
@@ -24,7 +23,7 @@ class PaiementEntity(
     @Column("type_payment")
     val typePayment : String = TypePayment.MOBILE_MONEY.name,
     @Column("status")
-    val status : String = ReservationStatus.PENDING.name,
+    var status : String = StatusPayment.PENDING.name,
     @Column("date_created")
     val dateCreated : LocalDate = LocalDate.now(),
     @Column("date_updated")
