@@ -29,6 +29,8 @@ import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
 import server.web.casa.security.monitoring.MetricModel
 import server.web.casa.utils.scheduler.ReservationScheduler
+import java.time.Duration
+import java.time.LocalDateTime
 
 @Tag(name = "Reservation Bureau", description = "Reservation's Management")
 @RestController
@@ -128,12 +130,16 @@ class ReservationBureauController(
             val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
             val hostUser = userR.findById( bureau.userId!!) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
             val reservationCreate = service.createReservation(dataReservation)
+            val startTaskAt = expiredAt(
+                date = reservationCreate.reservation.startDate.toString(),
+                heure = reservationCreate.reservation.reservationHeure.toString()
+            )
 
             task.scheduleOneShot(
                 reservationId = reservationCreate.reservation.id?:0L,
                 taskType ="ONESHOT reservation bureau",
                 type = "bureau",
-                minute = 1L
+                minute = startTaskAt
             )
             val notification = notif.createBureau(
                 NotificationReservationBureau(
@@ -443,6 +449,12 @@ class ReservationBureauController(
             "message" to "True if it's successfully and null or false when unfulfilled")
 
         return ResponseEntity.ok(response)
+    }
+    fun expiredAt (date:String, heure: String): Long {
+        val date = LocalDate.parse(date)
+        val time = LocalTime.parse(heure)
+        val end = LocalDateTime.of(date, time).plusHours(1)
+        return  Duration.between(LocalDateTime.now(), end).toMinutes()
     }
   /*  @PutMapping("/cancel/{id}")
     suspend fun cancelReservation(

@@ -140,11 +140,15 @@ class ReservationController(
              }
 
             val reservationCreate = service.createReservation(dataReservation)
+            val startTaskAt = expiredAt(
+                date = reservationCreate.reservation?.startDate.toString(),
+                heure = reservationCreate.reservation?.reservationHeure.toString()
+            )
             task.scheduleOneShot(
                 reservationId = reservationCreate.reservation?.id?:0L,
                 taskType ="ONESHOT reservation property",
                 type = "property",
-                minute = 1L
+                minute = startTaskAt
             )
              val notification = notif.create(
                  NotificationReservation(
@@ -168,7 +172,8 @@ class ReservationController(
                  "message" to "Votre reservation à la date du ${reservationCreate.reservation.startDate} au ${reservationCreate.reservation.endDate} a été créée avec succès",
                  "reservation" to reservationCreate,
                  "proprietaire" to  hostUser,
-                 "notificationSendState" to notification
+                 "notificationSendState" to notification,
+                 "onshotAt" to startTaskAt
              )
             return@coroutineScope ResponseEntity.status(201).body(response)
         } finally {
@@ -669,6 +674,13 @@ class ReservationController(
                 )
             )
         }
+    }
+
+    fun expiredAt (date:String, heure: String): Long {
+        val date = LocalDate.parse(date)
+        val time = LocalTime.parse(heure)
+        val end = LocalDateTime.of(date, time).plusHours(1)
+       return  Duration.between(LocalDateTime.now(), end).toMinutes()
     }
 }
 class RequestUpdate(
