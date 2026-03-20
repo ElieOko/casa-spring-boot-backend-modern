@@ -44,7 +44,7 @@ class ReservationTaskService(
         when(type){
             "property" -> {
                 val data = reservationProperty.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationProperty.save(data)
                     val reservation = service.findById(reservationId)?.reservation
@@ -56,42 +56,42 @@ class ReservationTaskService(
             }
             "bureau" -> {
                 val data = reservationBureau.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationBureau.save(data)
                 }
             }
             "festive" ->{
                 val data = reservationFestive.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationFestive.save(data)
                 }
             }
             "funeraire" ->{
                 val data = reservationFuneraire.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationFuneraire.save(data)
                 }
             }
             "hotel" ->{
                 val data = reservationHotel.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationHotel.save(data)
                 }
             }
             "terrain" ->{
                 val data = reservationTerrain.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationTerrain.save(data)
                 }
             }
             "vacance" ->{
                 val data = reservationVacance.findById(reservationId)
-                if (data != null) {
+                if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationVacance.save(data)
                 }
