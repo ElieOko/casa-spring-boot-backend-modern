@@ -2,7 +2,6 @@ package server.web.casa.utils.scheduler
 
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.*
 import org.springframework.stereotype.Service
 import server.web.casa.app.notification.application.service.NotificationReservationService
 import server.web.casa.app.notification.application.service.NotificationService
@@ -10,6 +9,8 @@ import server.web.casa.app.notification.domain.model.request.TagType
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
 import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
+import server.web.casa.app.payment.domain.model.StatusPayment
+import server.web.casa.app.payment.infrastructure.persistence.repository.PaiementRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
 import server.web.casa.app.reservation.application.service.ReservationService
 import server.web.casa.app.reservation.domain.model.ReservationStatus
@@ -31,6 +32,7 @@ class ReservationTaskService(
    private val notification2 : NotificationCasaRepository,
    private val propertyR: PropertyRepository,
    private val service: ReservationService,
+   private val paymentRepository: PaiementRepository
 
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -96,10 +98,17 @@ class ReservationTaskService(
                     reservationVacance.save(data)
                 }
             }
+            "payment"->{
+                paymentRepository.findByReference(taskType).collect {
+                    if (it != null && it.status == StatusPayment.PENDING.name){
+                        it.status = StatusPayment.CANCELLED.name
+                        paymentRepository.save(it)
+                    }
+                }
+            }
             else ->  log.info("Pas d'execution type fournit invalide !!!")
         }
         println("Exécution tâche $taskType pour la réservation $reservationId")
         log.info("Exécution tâche $taskType pour la réservation $reservationId")
     }
-
 }

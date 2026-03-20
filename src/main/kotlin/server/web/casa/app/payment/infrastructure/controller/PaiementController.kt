@@ -16,6 +16,7 @@ import server.web.casa.app.user.infrastructure.persistence.repository.*
 import server.web.casa.route.payment.*
 import server.web.casa.security.*
 import server.web.casa.utils.*
+import server.web.casa.utils.scheduler.ReservationScheduler
 
 const val AMOUNT_SUBSCRIPTION = 5
 @RestController
@@ -27,6 +28,7 @@ class PaiementController(
     private val devise : DeviseService,
     private val payment : PaymentService,
     private val auth : Auth,
+    private val task : ReservationScheduler,
     private val userRepository: UserRepository
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -64,6 +66,7 @@ class PaiementController(
                                      typePayment = TypePayment.MOBILE_MONEY.name,
                                      status = StatusPayment.PENDING.name)
                                  )
+                                   task.scheduleOneShot(0, taskType = reference, type = "payment", minute = 2L)
                                }
                            }
                        }
@@ -87,6 +90,7 @@ class PaiementController(
                                         typePayment = TypePayment.MOBILE_MONEY.name,
                                         status = StatusPayment.PENDING.name)
                                     )
+                                    task.scheduleOneShot(0, taskType = reference, type = "payment", minute = 2L)
                                 }
                             }
                         }
