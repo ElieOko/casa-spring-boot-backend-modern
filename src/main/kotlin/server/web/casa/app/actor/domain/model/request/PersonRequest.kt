@@ -14,7 +14,7 @@ data class PersonRequest(
     val cardFront : String? = "",
     val cardBack : String? ="",
     val typeCardId : Long? = 0,
-    val parrainId : Long? = 0,
+    var parrainId : Long? = 0,
     val numberCard : String? = "",
 )
 
