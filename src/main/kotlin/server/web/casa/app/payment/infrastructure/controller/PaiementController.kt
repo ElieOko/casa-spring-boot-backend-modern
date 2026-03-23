@@ -17,6 +17,7 @@ import server.web.casa.route.payment.*
 import server.web.casa.security.*
 import server.web.casa.utils.*
 import server.web.casa.utils.scheduler.ReservationScheduler
+import kotlin.random.Random
 
 const val AMOUNT_SUBSCRIPTION = 5
 @RestController
@@ -41,6 +42,7 @@ class PaiementController(
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
+        val index = (Random.nextInt(1,1_000_000_000)).toLong()
         try {
             when(request.deviseId){
                 1L-> {
@@ -66,7 +68,7 @@ class PaiementController(
                                      typePayment = TypePayment.MOBILE_MONEY.name,
                                      status = StatusPayment.PENDING.name)
                                  )
-                                   task.scheduleOneShot(0, taskType = reference, type = "payment", minute = 2L)
+                                   task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 2L)
                                }
                            }
                        }
@@ -90,7 +92,7 @@ class PaiementController(
                                         typePayment = TypePayment.MOBILE_MONEY.name,
                                         status = StatusPayment.PENDING.name)
                                     )
-                                    task.scheduleOneShot(0, taskType = reference, type = "payment", minute = 2L)
+                                    task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 2L)
                                 }
                             }
                         }
