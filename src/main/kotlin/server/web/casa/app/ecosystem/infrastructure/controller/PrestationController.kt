@@ -1,24 +1,24 @@
 package server.web.casa.app.ecosystem.infrastructure.controller
 
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.validation.Valid
-import kotlinx.coroutines.coroutineScope
-import org.slf4j.LoggerFactory
+import io.swagger.v3.oas.annotations.*
+import io.swagger.v3.oas.annotations.tags.*
+import jakarta.servlet.http.*
+import jakarta.validation.*
+import kotlinx.coroutines.*
+import org.slf4j.*
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.*
 import server.web.casa.app.address.application.service.*
 import server.web.casa.app.ecosystem.application.service.*
 import server.web.casa.app.ecosystem.domain.model.*
-import server.web.casa.app.ecosystem.domain.request.PrestationRequest
-import server.web.casa.app.payment.application.service.DeviseService
-import server.web.casa.app.user.application.service.UserService
-import server.web.casa.route.ecosystem.PrestationScope
-import server.web.casa.security.Auth
-import server.web.casa.utils.ApiResponse
-import server.web.casa.security.monitoring.SentryService
-import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.app.ecosystem.domain.request.*
+import server.web.casa.app.payment.application.service.*
+import server.web.casa.app.user.application.service.*
+import server.web.casa.route.ecosystem.*
+import server.web.casa.security.*
+import server.web.casa.utils.*
+import server.web.casa.security.monitoring.*
 
 @Tag(name = "Prestation Service", description = "Gestion des prestations services")
 @RestController
@@ -41,10 +41,12 @@ class PrestationController(
         requestHttp: HttpServletRequest
     ): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
-            val commune = communeService.findByIdCommune(request.prestation.communeId)
-            val quartier =  quartierService.findByIdQuartier(request.prestation.quartierId)
-            val city = cityService.findByIdCity(request.prestation.cityId)
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
+            communeService.findByIdCommune(request.prestation.communeId)
+            quartierService.findByIdQuartier(request.prestation.quartierId)
+            cityService.findByIdCity(request.prestation.cityId)
             val isProd = true
             val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
             val images = request.images
