@@ -6,3 +6,7 @@ object KinshasaDistrict {
     const val FUNA = "Funa"
     const val TSHANGU = "Tshangu"
 }
+
+object MessageResponse{
+    const val ACCOUNT_NOT_CERTIFIED = "Opération non autorisée,votre compte n'est pas certifié."
+}
