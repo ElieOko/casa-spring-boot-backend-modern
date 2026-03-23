@@ -21,6 +21,7 @@ import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.route.property.PropertyFestiveScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Bureau", description = "")
@@ -36,32 +37,36 @@ class BureauController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création bureau")
     @PostMapping("/${PropertyBureauScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createBureau(
         httpRequest: HttpServletRequest,
         @Valid @RequestBody request: BureauDtoRequest,
-    ) = coroutineScope{
+    ) = coroutineScope {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
-            //        propertyTypeService.findByIdPropertyType(request.bureau.propertyTypeId?:0)
-                    if (request.bureau.propertyTypeId != 4L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au bureaux")
-                    val city = if (request.bureau.cityId != null) cityService.findByIdCity(request.bureau.cityId) else null
-                    val commune = communeService.findByIdCommune(request.bureau.communeId)
-                    val quartier =  if (request.bureau.quartierId != null) quartierService.findByIdQuartier(request.bureau.quartierId) else null
-                    devise.getById(request.bureau.deviseId)
-                    userService.findIdUser(request.bureau.userId!!)
-                    request.bureau.cityId =  city?.cityId
-                    request.bureau.communeId = commune?.communeId
-                    request.bureau.quartierId = quartier?.quartierId
-                    if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
-                    val data = service.create(request.bureau.toDomain(),request.features)
-                    request.images.forEach { bureauImageService.create(ImageRequestStandard(data.id!!,it.image)) }
-                    ApiResponseWithMessage(
-                       data = data,
-                        message = "Enregistrement réussie pour la proprièté bureau",
-                    )
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
+            if (request.bureau.propertyTypeId != 4L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au bureaux")
+            val city = if (request.bureau.cityId != null) cityService.findByIdCity(request.bureau.cityId) else null
+            val commune = communeService.findByIdCommune(request.bureau.communeId)
+            val quartier =  if (request.bureau.quartierId != null) quartierService.findByIdQuartier(request.bureau.quartierId) else null
+            devise.getById(request.bureau.deviseId)
+            userService.findIdUser(request.bureau.userId!!)
+            request.bureau.cityId =  city?.cityId
+            request.bureau.communeId = commune?.communeId
+            request.bureau.quartierId = quartier?.quartierId
+            if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
+            val data = service.create(request.bureau.toDomain(),request.features)
+            request.images.forEach { bureauImageService.create(ImageRequestStandard(data.id!!,it.image)) }
+            ApiResponseWithMessage(
+                data = data,
+                message = "Enregistrement réussie pour la proprièté bureau",
+                )
         } finally {
             sentry.callToMetric(
                 MetricModel(

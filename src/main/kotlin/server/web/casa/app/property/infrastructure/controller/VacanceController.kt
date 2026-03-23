@@ -14,7 +14,9 @@ import server.web.casa.route.property.PropertyVacanceScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.route.property.PropertyTerrainScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Vacance", description = "")
@@ -25,6 +27,7 @@ class VacanceController(
     private val agenceService: AgenceService,
     private val imageService: VacanceImageService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création vacance")
     @PostMapping("/${PropertyVacanceScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -33,7 +36,11 @@ class VacanceController(
         @Valid @RequestBody request: VacanceRequest,
     )= coroutineScope {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
             if (request.userId == null) ResponseEntity.badRequest().body("User ID must not be null!")
             if (request.images.size < 3) ResponseEntity.badRequest().body("Vous devez fournir au minimun 3 images pour votre site touristique")
             val agence = agenceService.getAllByUser(request.userId!!)

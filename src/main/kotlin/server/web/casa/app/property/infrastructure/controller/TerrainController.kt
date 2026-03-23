@@ -20,6 +20,7 @@ import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.route.property.PropertyScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Terrain", description = "")
@@ -35,6 +36,7 @@ class TerrainController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création Terrain")
     @PostMapping("/${PropertyTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -43,24 +45,27 @@ class TerrainController(
         @Valid @RequestBody request: TerrainRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
-            //        propertyTypeService.findByIdPropertyType(request.bureau.propertyTypeId?:0)
-                    if (request.propertyTypeId != 9L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au Terrain")
-                    val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
-                    val commune = communeService.findByIdCommune(request.communeId)
-                    val quartier =  if (request.quartierId != null) quartierService.findByIdQuartier(request.quartierId) else null
-                    devise.getById(request.deviseId)
-                    userService.findIdUser(request.userId)
-                    request.cityId =  city?.cityId
-                    request.communeId = commune?.communeId
-                    request.quartierId = quartier?.quartierId
-                    if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
-                    val data = service.create(request.toDomain())
-                    request.images.forEach { imageTerrain.create(ImageRequestStandard(data.id!!,it.image)) }
-                    ApiResponseWithMessage(
-                        data = data,
-                        message = "Enregistrement réussie pour la proprièté terrain",
-                    )
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
+            if (request.propertyTypeId != 9L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au Terrain")
+            val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
+            val commune = communeService.findByIdCommune(request.communeId)
+            val quartier =  if (request.quartierId != null) quartierService.findByIdQuartier(request.quartierId) else null
+            devise.getById(request.deviseId)
+            userService.findIdUser(request.userId)
+            request.cityId =  city?.cityId
+            request.communeId = commune?.communeId
+            request.quartierId = quartier?.quartierId
+            if (request.images.isEmpty()) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Precisez des images.")
+            val data = service.create(request.toDomain())
+            request.images.forEach { imageTerrain.create(ImageRequestStandard(data.id!!,it.image)) }
+            ApiResponseWithMessage(
+                data = data,
+                message = "Enregistrement réussie pour la proprièté terrain",
+                )
         } finally {
             sentry.callToMetric(
                 MetricModel(

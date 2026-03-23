@@ -20,10 +20,12 @@ import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.request.*
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.route.property.PropertyScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 import server.web.casa.security.monitoring.SentryService
 import server.web.casa.utils.ApiResponse
 import server.web.casa.utils.ApiResponseWithMessage
+import server.web.casa.utils.MessageResponse
 import kotlin.collections.mutableMapOf
 
 @Tag(name = "Property", description = "Gestion des propriètés")
@@ -42,104 +44,107 @@ class PropertyController(
     private val devise : DeviseService,
     private val quartierService: QuartierService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @PostMapping("/${PropertyScope.PRIVATE}", consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest,
         requestHttp: HttpServletRequest
-    ): ApiResponseWithMessage<PropertyMasterDTO> = coroutineScope {
+    ) = coroutineScope {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
-                    //       val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-                    devise.getById(request.deviseId)
-                    val imageList = request.propertyImage
-                    val imageKitchen = request.propertyImageKitchen
-                    val imageRoom = request.propertyImageRoom
-                    val imageLivingRoom = request.propertyImageLivingRoom
-                    val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
-                    val user = userService.findIdUser(request.userId)
-                    val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
-                    val commune = communeService.findByIdCommune(request.communeId)
-                    val quartier =  if (request.quartierId != null) quartierService.findByIdQuartier(request.quartierId) else null
-                    val isProd = true
-                    val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
-                    if (imageList.isEmpty()) throw ResponseStatusException(
-                        HttpStatusCode.valueOf(404),
-                        "Precisez des images."
-                    )
-                    val property = Property(
-                        title = request.title,
-                        description = request.description,
-                        price = request.price,
-                        surface = request.surface,
-                        rooms = request.rooms,
-                        bedrooms = request.bedrooms,
-                        kitchen = request.kitchen,
-                        livingRoom = request.livingRoom,
-                        bathroom = request.bathroom,
-                        floor = request.floor,
-                        guarantee = request.guarantee,
-                        water = request.water,
-                        electric = request.electric,
-                        countryValue = request.countryValue,
-                        communeValue = request.communeValue,
-                        quartierValue = request.quartierValue,
-                        cityValue = request.cityValue,
-                        address = request.address,
-                        city = city?.cityId,
-                        postalCode = request.postalCode,
-                        commune = commune?.communeId,
-                        quartier = quartier?.quartierId,
-                        sold = request.sold,
-                        transactionType = request.transactionType,
-                        user = user.userId,
-                        latitude = request.latitude,
-                        longitude = request.longitude,
-                        propertyTypeId = propertyType.propertyTypeId,
-                        deviseId = request.deviseId
-                    )
-                    val result = service.create(property.toDto(), request.features)
-                    val propertyInstance = service.findByIdProperty(result.property.propertyId!!)
-                    log.info("propertyInstance => ***${propertyInstance}***")
-                    if (imageList.isNotEmpty()){
-                        imageList.forEach {
-                            propertyImageService.create(PropertyImage(
-                                propertyId = propertyInstance.first.property.propertyId,
-                                name = it?.image!!
-                            ),baseUrl)
-                        }
-                    }
-                    if (imageRoom.isNotEmpty()){
-                        imageRoom.forEach {
-                            propertyImageRoomService.create(PropertyImageRoom(
-                                propertyId = propertyInstance.first.property.propertyId,
-                                name = it?.image!!
-                            ),baseUrl)
-                        }
-                    }
-                    if (imageLivingRoom.isNotEmpty()){
-                        imageLivingRoom.forEach {
-                            val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
-                                propertyId = propertyInstance.first.property.propertyId,
-                                name = it?.image!!
-                            ),baseUrl)
-                            log.info("test => ***${result}***")
-                        }
-                    }
-                    if (imageKitchen.isNotEmpty()){
-                        imageKitchen.forEach {
-                            propertyImageKitchenService.create(PropertyImageKitchen(
-                                propertyId = propertyInstance.first.property.propertyId,
-                                name = it?.image!!
-                            ),baseUrl)
-                        }
-                    }
-                    ApiResponseWithMessage(
-                        data = result,
-                        message = "Enregistrement réussie pour la proprièté",
-                    )
-
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
+            devise.getById(request.deviseId)
+            val imageList = request.propertyImage
+            val imageKitchen = request.propertyImageKitchen
+            val imageRoom = request.propertyImageRoom
+            val imageLivingRoom = request.propertyImageLivingRoom
+            val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
+            val user = userService.findIdUser(request.userId)
+            val propertyType = propertyTypeService.findByIdPropertyType(request.propertyTypeId)
+            val commune = communeService.findByIdCommune(request.communeId)
+            val quartier =  if (request.quartierId != null) quartierService.findByIdQuartier(request.quartierId) else null
+            val isProd = true
+            val baseUrl = if (isProd) "${requestHttp.scheme}://${requestHttp.serverName}"  else  "${requestHttp.scheme}://${requestHttp.serverName}:${requestHttp.serverPort}"
+            if (imageList.isEmpty()) throw ResponseStatusException(
+                HttpStatusCode.valueOf(404),
+                "Precisez des images."
+            )
+            val property = Property(
+                title = request.title,
+                description = request.description,
+                price = request.price,
+                surface = request.surface,
+                rooms = request.rooms,
+                bedrooms = request.bedrooms,
+                kitchen = request.kitchen,
+                livingRoom = request.livingRoom,
+                bathroom = request.bathroom,
+                floor = request.floor,
+                guarantee = request.guarantee,
+                water = request.water,
+                electric = request.electric,
+                countryValue = request.countryValue,
+                communeValue = request.communeValue,
+                quartierValue = request.quartierValue,
+                cityValue = request.cityValue,
+                address = request.address,
+                city = city?.cityId,
+                postalCode = request.postalCode,
+                commune = commune?.communeId,
+                quartier = quartier?.quartierId,
+                sold = request.sold,
+                transactionType = request.transactionType,
+                user = user.userId,
+                latitude = request.latitude,
+                longitude = request.longitude,
+                propertyTypeId = propertyType.propertyTypeId,
+                deviseId = request.deviseId
+            )
+            val result = service.create(property.toDto(), request.features)
+            val propertyInstance = service.findByIdProperty(result.property.propertyId!!)
+            log.info("propertyInstance => ***${propertyInstance}***")
+            if (imageList.isNotEmpty()){
+                imageList.forEach {
+                    propertyImageService.create(PropertyImage(
+                        propertyId = propertyInstance.first.property.propertyId,
+                        name = it?.image!!
+                    ),baseUrl)
+                }
+            }
+            if (imageRoom.isNotEmpty()){
+                imageRoom.forEach {
+                    propertyImageRoomService.create(PropertyImageRoom(
+                        propertyId = propertyInstance.first.property.propertyId,
+                        name = it?.image!!
+                    ),baseUrl)
+                }
+            }
+            if (imageLivingRoom.isNotEmpty()){
+                imageLivingRoom.forEach {
+                    val result = propertyImageLivingRoomService.create(PropertyImageLivingRoom(
+                        propertyId = propertyInstance.first.property.propertyId,
+                        name = it?.image!!
+                    ),baseUrl)
+                    log.info("test => ***${result}***")
+                }
+            }
+            if (imageKitchen.isNotEmpty()){
+                imageKitchen.forEach {
+                    propertyImageKitchenService.create(PropertyImageKitchen(
+                        propertyId = propertyInstance.first.property.propertyId,
+                        name = it?.image!!
+                    ),baseUrl)
+                }
+            }
+            ApiResponseWithMessage(
+                data = result,
+                message = "Enregistrement réussie pour la proprièté",
+            )
             //        throw Exception("")
         } finally {
             sentry.callToMetric(

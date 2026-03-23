@@ -19,6 +19,7 @@ import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.route.property.PropertyFuneraireScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Festive", description = "")
@@ -34,6 +35,7 @@ class SalleFestiveController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création salle festive")
     @PostMapping("/${PropertyFestiveScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -42,7 +44,11 @@ class SalleFestiveController(
         @Valid @RequestBody request: SalleFestiveRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
             if (request.festive.propertyTypeId != 8L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au salle de fête")
             propertyTypeService.findByIdPropertyType(request.festive.propertyTypeId)
             val city = if (request.festive.cityId != null) cityService.findByIdCity(request.festive.cityId) else null
