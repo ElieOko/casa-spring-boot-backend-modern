@@ -13,6 +13,7 @@ class Prestation(
     val description : String?="",
     val experience : String = "",
     var profile : String? = "",
+    var cvFile : String? = "",
     val plageJourPrestation : String = "",
     val plageHeurePrestation : String = "",
     val minPrice: Double = 0.0,
@@ -40,6 +41,7 @@ class PrestationDTO(
     val title : String = "",
     @NotNull
     val profile : String = "",
+    val cvFile : String? = "",
     val description : String?="",
     @NotNull
     val experience : String = "",
@@ -60,6 +62,7 @@ fun PrestationDTO.toDomain()= Prestation(
     id = null,
     userId = this.userId,
     profile = this.profile,
+    cvFile = this.cvFile,
     serviceId = this.serviceId,
     deviseId = this.deviseId,
     title = this.title,
@@ -95,6 +98,7 @@ fun Prestation.toEntity() = PrestationEntity(
     minPrice = this.minPrice,
     maxPrice = this.maxPrice,
     address = this.address,
+    cvFile = this.cvFile,
     communeValue = this.communeValue,
     quartierValue = this.quartierValue,
     cityValue = this.cityValue,
