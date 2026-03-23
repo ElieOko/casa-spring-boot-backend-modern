@@ -17,6 +17,7 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.notification.application.service.NotificationService
 import server.web.casa.app.notification.domain.model.request.NotificationReservationFuneraire
 import server.web.casa.app.notification.domain.model.request.NotificationReservationHotel
@@ -26,7 +27,9 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
 import server.web.casa.utils.scheduler.ReservationScheduler
 
 @Tag(name = "Reservation Hotel", description = "Reservation's Management")
@@ -45,6 +48,7 @@ class ReservationHotelController(
     private val task : ReservationScheduler,
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
+    private val auth : Auth
 ){
     @PostMapping("/{version}/${ReservationHotelScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -52,7 +56,9 @@ class ReservationHotelController(
         @Valid @RequestBody request: ReservationChambreHotelRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val chambrehotel = chambrHTL.getAll().find{ it.id == request.chambreId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "chambre hotel not found"))
             val hotel = hotlS.getAllHotel().find{ it.hotel.id == chambrehotel.hotelId }?.hotel ?: return ResponseEntity.badRequest().body(mapOf("error" to "hotel not found"))

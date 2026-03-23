@@ -17,6 +17,7 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.notification.application.service.NotificationService
 import server.web.casa.app.notification.domain.model.TagType
 import server.web.casa.app.notification.domain.model.request.NotificationReservationFuneraire
@@ -26,14 +27,15 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
 import server.web.casa.utils.scheduler.ReservationScheduler
 
 @Tag(name = "Reservation", description = "Reservation's Management")
 @RestController
 @RequestMapping("api")
 @Profile(Mode.DEV)
-
 class ReservationVacanceController(
     private val service: ReservationVacanceService,
     private val userS: UserService,
@@ -44,6 +46,7 @@ class ReservationVacanceController(
     private val task : ReservationScheduler,
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
+    private val auth : Auth
 ){
     @PostMapping("/{version}/${ReservationVacanceScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -51,7 +54,9 @@ class ReservationVacanceController(
         @Valid @RequestBody request: ReservationVacanceRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val vacance = vacS.getAllVacance().find{ it.id == request.vacanceId } ?: return ResponseEntity.badRequest().body(mapOf("error" to "hotel not found"))
             if(vacance.userId == user.userId){

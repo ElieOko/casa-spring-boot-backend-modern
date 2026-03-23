@@ -17,6 +17,7 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.notification.application.service.NotificationService
 import server.web.casa.app.notification.domain.model.request.NotificationReservationFuneraire
 import server.web.casa.app.notification.domain.model.request.NotificationReservationTerrain
@@ -26,7 +27,9 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
 import server.web.casa.utils.scheduler.ReservationScheduler
 
 @Tag(name = "Reservation Terrain", description = "Reservation's Management")
@@ -44,6 +47,7 @@ class ReservationTerrainController(
     private val task : ReservationScheduler,
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
+    private val auth : Auth
 ){
     @PostMapping("/{version}/${ReservationTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -51,7 +55,9 @@ class ReservationTerrainController(
         @Valid @RequestBody request: ReservationTerrainRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val terrain = terS.findById(request.terrainId) ?: return ResponseEntity.badRequest().body(mapOf("error" to "terrain not found"))
             if(terrain.userId == user.userId){

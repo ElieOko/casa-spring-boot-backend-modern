@@ -18,6 +18,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
 import server.web.casa.app.notification.application.service.NotificationService
 import server.web.casa.app.notification.domain.model.request.NotificationReservation
 import server.web.casa.app.notification.domain.model.request.NotificationReservationBureau
@@ -27,7 +28,9 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
 import server.web.casa.utils.scheduler.ReservationScheduler
 import java.time.Duration
 import java.time.LocalDateTime
@@ -47,6 +50,7 @@ class ReservationBureauController(
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
     private val userR: UserRepository,
+    private val auth : Auth
 ){
     @PostMapping("/{version}/${ReservationBureauScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -54,10 +58,12 @@ class ReservationBureauController(
         @Valid @RequestBody request: ReservationBureauRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val bureau = brxS.findById(request.bureauId)
-
+            if (userConnect.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              if(bureau.userId == user.userId){
                  val responseOwnProperty = mapOf("error" to "You can't reserve your own property")
                  return ResponseEntity.ok().body(responseOwnProperty )}

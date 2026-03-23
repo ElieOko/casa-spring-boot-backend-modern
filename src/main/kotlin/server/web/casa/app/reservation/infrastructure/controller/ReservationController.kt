@@ -35,6 +35,7 @@ import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
 import server.web.casa.utils.scheduler.ReservationScheduler
 import java.time.LocalDate
 
@@ -63,7 +64,9 @@ class ReservationController(
         @Valid @RequestBody request: ReservationRequest
     ): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val property = propertyService.findByIdProperty(request.propertyId).first.property
              if(property.userId == user.userId){
