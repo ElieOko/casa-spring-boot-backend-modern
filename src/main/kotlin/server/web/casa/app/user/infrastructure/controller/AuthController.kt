@@ -10,12 +10,20 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
+import server.web.casa.app.notification.application.service.NotificationReservationService
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.*
 import server.web.casa.route.auth.AuthRoute
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.*
+import server.web.casa.utils.MessageResponse.ACCOUNT_CERTIFIED
+import server.web.casa.utils.MessageResponse.ACCOUNT_CERTIFIED_CANCEL
 
 const val ROUTE_REGISTER = AuthRoute.REGISTER
 const val ROUTE_LOGIN = AuthRoute.LOGIN
@@ -28,7 +36,10 @@ class AuthController(
     private val authService: AuthService,
     private val accountService: TypeAccountService,
     private val auth: Auth,
-    private val sentry : SentryService
+    private val sentry : SentryService,
+    private val notif: NotificationReservationService,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Création utilisateur")
@@ -110,6 +121,7 @@ class AuthController(
             )
         }
     }
+
     @Operation(summary = "OTP activation send code")
     @PostMapping("/api/{version}/public/otp/generate")
     suspend fun generateKeyOTP(request: HttpServletRequest,
@@ -156,6 +168,7 @@ class AuthController(
             )
         }
     }
+
     @Operation(summary = "certification user")
     @PutMapping("/api/{version}/protected/certification/{userId}")
     suspend fun goCertification(
@@ -170,17 +183,42 @@ class AuthController(
             when (state) {
                 true -> {
                     val data = authService.goCertification(userId,certification.state)
+                    if (!certification.state){
+                        authService.lockedOrUnlocked(userId)
+                        val note = notification2.save(
+                            NotificationCasaEntity(
+                                id = null,
+                                userId = userId,
+                                title = "CasaNayo Certification",
+                                message = ACCOUNT_CERTIFIED_CANCEL,
+                                tag = TagType.CERTIFICATION.toString(),
+                            )
+                        )
+                        notificationService.sendNotificationToUser(userId.toString(),note.toDomain())
+                    } else {
+                        val note = notification2.save(
+                            NotificationCasaEntity(
+                                id = null,
+                                userId = userId,
+                                title = "CasaNayo Certification",
+                                message = ACCOUNT_CERTIFIED,
+                                tag = TagType.CERTIFICATION.toString(),
+                            )
+                        )
+                        notificationService.sendNotificationToUser(userId.toString(),note.toDomain())
+                       authService.lockedOrUnlocked(userId,false)
+                    }
                     ResponseEntity.ok(
                         mapOf(
                             "message" to if (certification.state) "Certification successful" else "Certification failed",
-                            "user" to data
+                            "user" to data,
+                            "reason" to "${certification.message}"
                         )
                     )
                 }
                 false,null -> {
                     ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
             }
-
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -194,6 +232,7 @@ class AuthController(
         }
 
     }
+
     @Operation(summary = "Reset password ")
     @PutMapping("/api/{version}/protected/reset/password")
     suspend fun resetPassword(request: HttpServletRequest,
@@ -265,6 +304,7 @@ class AuthController(
             )
         }
     }
+
     @Operation(summary = "Recovery Account User")
     @PutMapping("/api/{version}/protected/recovery/user/{id}")
     suspend fun unlockAccount(request: HttpServletRequest,@PathVariable("id") id : Long): ResponseEntity<Map<String, String>> = coroutineScope {
