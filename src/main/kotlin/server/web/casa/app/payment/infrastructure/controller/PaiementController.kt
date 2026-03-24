@@ -11,11 +11,20 @@ import jakarta.servlet.http.*
 import jakarta.validation.*
 import kotlinx.coroutines.reactive.collect
 import org.slf4j.*
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.payment.domain.model.*
+import server.web.casa.app.user.application.service.UserService
+import server.web.casa.app.user.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.user.infrastructure.persistence.repository.*
 import server.web.casa.route.payment.*
 import server.web.casa.security.*
 import server.web.casa.utils.*
+import server.web.casa.utils.MessageResponse.ACCOUNT_CERTIFIED
+import server.web.casa.utils.MessageResponse.PAYMENT_SUCCESS
 import server.web.casa.utils.scheduler.ReservationScheduler
 import kotlin.random.Random
 
@@ -30,7 +39,10 @@ class PaiementController(
     private val payment : PaymentService,
     private val auth : Auth,
     private val task : ReservationScheduler,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
+    private val userService: UserService
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -129,8 +141,18 @@ class PaiementController(
                         val state = payment.update(request.reference,request.code)
                         val user = userRepository.findById(state.userId)
                         if (user != null){
+                            val note = notification2.save(NotificationCasaEntity(
+                                    id = null,
+                                    userId = user.userId,
+                                    title = "CasaNayo Abonnement",
+                                    message = PAYMENT_SUCCESS,
+                                    tag = TagType.SUBSCRIPTION.toString(),
+                                ))
+                            val notify = note.toDomain()
                             user.isPremium = true
                             userRepository.save(user)
+                            notify.user = userService.findIdUser(user.userId!!)
+                            notificationService.sendNotificationToUser(user.userId.toString(),notify)
                         }
                     }
                     else-> {
