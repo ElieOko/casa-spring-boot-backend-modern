@@ -18,12 +18,10 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.payment.domain.model.*
 import server.web.casa.app.user.application.service.UserService
-import server.web.casa.app.user.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.user.infrastructure.persistence.repository.*
 import server.web.casa.route.payment.*
 import server.web.casa.security.*
 import server.web.casa.utils.*
-import server.web.casa.utils.MessageResponse.ACCOUNT_CERTIFIED
 import server.web.casa.utils.MessageResponse.PAYMENT_SUCCESS
 import server.web.casa.utils.scheduler.ReservationScheduler
 import kotlin.random.Random
