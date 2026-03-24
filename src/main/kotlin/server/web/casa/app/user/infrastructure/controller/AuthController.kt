@@ -35,9 +35,9 @@ const val ROUTE_LOGIN = AuthRoute.LOGIN
 class AuthController(
     private val authService: AuthService,
     private val accountService: TypeAccountService,
+    private val userService: UserService,
     private val auth: Auth,
     private val sentry : SentryService,
-    private val notif: NotificationReservationService,
     private val notificationService: NotificationService,
     private val notification2 : NotificationCasaRepository,
 ) {
@@ -194,7 +194,9 @@ class AuthController(
                                 tag = TagType.CERTIFICATION.toString(),
                             )
                         )
-                        notificationService.sendNotificationToUser(userId.toString(),note.toDomain())
+                        val notify = note.toDomain()
+                        notify.user = userService.findIdUser(userId)
+                        notificationService.sendNotificationToUser(userId.toString(),notify)
                     } else {
                         val note = notification2.save(
                             NotificationCasaEntity(
@@ -205,7 +207,9 @@ class AuthController(
                                 tag = TagType.CERTIFICATION.toString(),
                             )
                         )
-                        notificationService.sendNotificationToUser(userId.toString(),note.toDomain())
+                        val notify = note.toDomain()
+                        notify.user = userService.findIdUser(userId)
+                        notificationService.sendNotificationToUser(userId.toString(),notify)
                        authService.lockedOrUnlocked(userId,false)
                     }
                     ResponseEntity.ok(
