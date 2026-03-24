@@ -2,6 +2,7 @@ package server.web.casa.app.notification.domain.model
 
 import jakarta.validation.constraints.NotNull
 import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -18,7 +19,8 @@ data class NotificationDTO(
     val isActive: Boolean = true,
     val message: String,
     val tag : String = TagType.RESERVATION.toString(),
-    val timestamp: LocalDateTime = LocalDateTime.now()
+    val timestamp: LocalDateTime = LocalDateTime.now(),
+    var user : UserDto? = null
 )
 
 data class NotificationRequest(
