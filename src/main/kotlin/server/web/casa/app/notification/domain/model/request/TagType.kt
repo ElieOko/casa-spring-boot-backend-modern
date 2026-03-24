@@ -8,5 +8,6 @@ enum class TagType{
     SYSTEMS,
     RESERVATION,
     AGENDA,
-    CERTIFICATION
+    CERTIFICATION,
+    SUBSCRIPTION
 }
