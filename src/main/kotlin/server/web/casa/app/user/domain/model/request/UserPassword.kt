@@ -13,5 +13,6 @@ data class UserPassword(
 )
 data class CertificationState(
     @NotNull
-    val state : Boolean = true
+    val state : Boolean = true,
+    val message : String?= null,
 )
