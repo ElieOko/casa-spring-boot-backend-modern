@@ -7,5 +7,6 @@ enum class TagType{
     DEMANDES,
     SYSTEMS,
     RESERVATION,
-    AGENDA
+    AGENDA,
+    CERTIFICATION
 }
