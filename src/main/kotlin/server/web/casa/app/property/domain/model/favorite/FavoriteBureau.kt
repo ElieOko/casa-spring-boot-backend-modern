@@ -2,6 +2,8 @@ package server.web.casa.app.property.domain.model.favorite
 
 import jakarta.validation.constraints.NotNull
 import server.web.casa.app.property.domain.model.Bureau
+import server.web.casa.app.property.domain.model.BureauImage
+import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteBureauEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
@@ -18,7 +20,8 @@ class FavoriteBureau(
 class FavoriteBureauDTO(
     val favorite    : FavoriteBureauEntity,
     val user        : UserDto,
-    val bureau      : Bureau?
+    val bureau      : Bureau?,
+    val bureauImage : List<BureauImageEntity>?
 )
 
 class FavoriteBureauRequest(

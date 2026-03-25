@@ -110,3 +110,29 @@ fun Prestation.toEntity() = PrestationEntity(
     isActive = this.isActive,
     dateCreated = this.dateCreated
 )
+
+class PrestationRequestUpdate(
+    var id: Long,
+    val userId : Long,
+    val serviceId : Long,
+    val deviseId : Long,
+    val title : String,
+    val description : String?,
+    val experience : String?,
+    var profile : String?,
+    var cvFile : String?,
+    val plageJourPrestation : String?,
+    val plageHeurePrestation : String?,
+    val minPrice: Double = 0.0,
+    val maxPrice: Double = 0.0,
+    val address: String?,
+    val communeValue: String?,
+    val quartierValue: String?,
+    val cityValue: String?,
+    val countryValue: String?,
+    val cityId: Long?,
+    val communeId: Long?,
+    val quartierId: Long?,
+    var isCertified: Boolean,
+    val isActive: Boolean
+)

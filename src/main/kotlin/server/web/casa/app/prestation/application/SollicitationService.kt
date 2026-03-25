@@ -8,6 +8,7 @@ import server.web.casa.app.ecosystem.application.service.PrestationService
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.domain.model.SollicitationDTO
+import server.web.casa.app.prestation.domain.model.SollicitationRequestUpdate
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.prestation.infrastructure.persistance.repository.SollicitationRepository
 import server.web.casa.app.reservation.domain.model.ReservationBureauDTO
@@ -55,6 +56,17 @@ class SollicitationService(
     suspend fun updateStatus(entity: SollicitationEntity, status: ReservationStatus): SollicitationDTO?{
             entity.status = status.toString()
             p.save(entity)
+        return toDto( p.findById(entity.id!!)!!)
+    }
+
+    suspend fun updateAllColumn(entity: SollicitationEntity, req: SollicitationRequestUpdate): SollicitationDTO?{
+        entity.deviseId = req.deviseId
+        entity.budget = req.budget
+        entity.description = req.description
+        entity.startDate = req.startDate
+        entity.endDate = req.endDate
+        entity.isActive = req.isActive
+        p.save(entity)
         return toDto( p.findById(entity.id!!)!!)
     }
 

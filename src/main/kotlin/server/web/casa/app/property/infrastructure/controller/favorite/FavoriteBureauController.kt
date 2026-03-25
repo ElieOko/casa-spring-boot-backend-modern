@@ -106,11 +106,11 @@ class FavoriteBureauController(
         }
     }
 
-    @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/{festId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getOneFavoriteById(request: HttpServletRequest, @PathVariable festId: Long):ResponseEntity<Map<String, FavoriteBureauDTO>> {
+    @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/{bureauId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getOneFavoriteById(request: HttpServletRequest, @PathVariable bureauId: Long):ResponseEntity<Map<String, FavoriteBureauDTO>> {
         val startNanos = System.nanoTime()
         try {
-            val favorite = service.getById(festId) ?: throw ResponseStatusException(
+            val favorite = service.getById(bureauId) ?: throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
                 "favorite Not Found."
             )
@@ -129,12 +129,12 @@ class FavoriteBureauController(
         }
     }
 
-    @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/salle/{festId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getFavoriteOneFestive(request: HttpServletRequest, @PathVariable festId: Long):ResponseEntity<Map<String, List<FavoriteBureauDTO>?>> {
+    @GetMapping("/{version}/${FavoriteBureauScope.PROTECTED}/salle/{bureauId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getFavoriteOneFestive(request: HttpServletRequest, @PathVariable bureauId: Long):ResponseEntity<Map<String, List<FavoriteBureauDTO>?>> {
         val startNanos = System.nanoTime()
         try {
-            val salle = brxS.findById (festId)
-            val favorite = service.getFavoriteByFestId(salle.id!!)
+            val bureau = brxS.findById (bureauId)
+            val favorite = service.getFavoriteByBureauId( bureau.id!!)
             val response = mapOf("data" to favorite)
             return ResponseEntity.ok().body(response)
         } finally {
@@ -188,11 +188,11 @@ class FavoriteBureauController(
             )
         }
     }
-    @DeleteMapping("/{version}/${FavoriteBureauScope.PROTECTED}/delete/{userId}/{festId}")
-    suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable festId:Long): ResponseEntity<Map<String, String>> {
+    @DeleteMapping("/{version}/${FavoriteBureauScope.PROTECTED}/delete/{userId}/{bureauId}")
+    suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable bureauId:Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
         try {
-            val existingFavorite = service.getFavoriteIfExist(festId, userId)?.favorite
+            val existingFavorite = service.getFavoriteIfExist(bureauId, userId)?.favorite
             val deleteFavorite = existingFavorite?.id?.let {
                 service.deleteById(it)
             }

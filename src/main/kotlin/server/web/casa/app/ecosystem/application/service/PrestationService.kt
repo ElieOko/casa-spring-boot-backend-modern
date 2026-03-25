@@ -98,4 +98,32 @@ class PrestationService(
     }
 
     suspend fun getById(id: Long)  = repository.findById(id)
+
+    suspend fun updatePrestation( it: PrestationRequestUpdate, id: Long ): PrestationEntity? {
+        repository.updatePrestation(
+            isActive = it.isActive,
+            serviceId = it.serviceId,
+            deviseId = it.deviseId,
+            title = it.title,
+            description = it.description,
+            profile = it.profile,
+            cvFile = it.cvFile,
+            experience = it.experience,
+            plageJourPrestation = it.plageJourPrestation,
+            plageHeurePrestation = it.plageHeurePrestation,
+            minPrice = it.minPrice,
+            maxPrice = it.maxPrice,
+            address = it.address,
+            communeValue = it.communeValue,
+            quartierValue = it.quartierValue,
+            cityValue = it.cityValue,
+            countryValue = it.countryValue,
+            cityId = it.cityId,
+            quartierId = it.quartierId,
+            isCertified = it.isCertified,
+            communeId = it.communeId,
+            id = id
+        )
+        return repository.findById(id)
+    }
 }
