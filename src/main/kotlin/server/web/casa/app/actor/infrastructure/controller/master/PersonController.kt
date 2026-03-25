@@ -33,8 +33,8 @@ class PersonController(
     private val sentry: SentryService,
 ) {
 //    private val log = LoggerFactory.getLogger(this::class.java)
-    @Operation(summary = "Parrainage")
-    @PostMapping("/{version}/${MemberScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Creation membre")
+    @PostMapping("/{version}/${MemberScope.PUBLIC}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPersonActor(
         httpRequest: HttpServletRequest,
         @Valid @RequestBody request: PersonUserRequest
@@ -44,7 +44,7 @@ class PersonController(
             val accountItems = request.account
             if (accountItems.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisissez au moins un type de comptes.")
             val account = accountItems.map { accountService.findByIdAccount(it.typeAccount)}.first()
-            if (request.actor.parrainId != null) {
+            if (request.actor.parrainId != null && request.actor.parrainId?.toLong() != 0L) {
               userService.findIdUser(request.actor.parrainId!!)
             }
             val userSystem = request.toUser(request.user.phone)

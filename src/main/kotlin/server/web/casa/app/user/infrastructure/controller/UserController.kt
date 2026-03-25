@@ -110,6 +110,28 @@ class UserController(
             )
         }
     }
+
+
+    @GetMapping("/{version}/private/users")
+    suspend fun getAllUserPrivate(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = userService.findAllUser().toList()
+            ApiResponse(data)
+
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.user.getAllUserPrivate.count",
+                    distributionName = "api.user.getAllUserPrivate.latency"
+                )
+            )
+        }
+
+    }
 //
 //    @Operation(summary = "Suppression utilisateur")
 //    @DeleteMapping("/{version}/protected/users/{id}")
