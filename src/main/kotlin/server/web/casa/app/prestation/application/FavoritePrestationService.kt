@@ -30,8 +30,8 @@ class FavoritePrestationService(
     suspend fun findAll() = repo.findAll().map { toDTO(it) }.toList()
 
     suspend fun findById(id: Long): FavoritePrestationDTO? {
-       val it = repo.findById(id) ?: return null
-        return toDTO(it)
+       val it = repo.findById(id)
+        return if(it != null) toDTO(it) else null
     }
 
     suspend fun findByUserId(userId: Long): List<FavoritePrestationDTO>? {

@@ -1,24 +1,35 @@
 package server.web.casa.app.ecosystem.infrastructure.controller
 
-import io.swagger.v3.oas.annotations.*
-import io.swagger.v3.oas.annotations.tags.*
-import jakarta.servlet.http.*
-import jakarta.validation.*
-import kotlinx.coroutines.*
-import org.slf4j.*
-import org.springframework.http.*
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.Valid
+import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatusCode
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.*
-import server.web.casa.app.address.application.service.*
-import server.web.casa.app.ecosystem.application.service.*
-import server.web.casa.app.ecosystem.domain.model.*
-import server.web.casa.app.ecosystem.domain.request.*
-import server.web.casa.app.payment.application.service.*
-import server.web.casa.app.user.application.service.*
-import server.web.casa.route.ecosystem.*
-import server.web.casa.security.*
-import server.web.casa.utils.*
-import server.web.casa.security.monitoring.*
+import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.address.application.service.CityService
+import server.web.casa.app.address.application.service.CommuneService
+import server.web.casa.app.address.application.service.QuartierService
+import server.web.casa.app.ecosystem.application.service.PrestationImageService
+import server.web.casa.app.ecosystem.application.service.PrestationService
+import server.web.casa.app.ecosystem.domain.model.PrestationImage
+import server.web.casa.app.ecosystem.domain.model.PrestationRequestUpdate
+import server.web.casa.app.ecosystem.domain.model.toDomain
+import server.web.casa.app.ecosystem.domain.request.PrestationRequest
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.PrestationEntity
+import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.user.application.service.UserService
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import server.web.casa.route.ecosystem.PrestationScope
+import server.web.casa.security.Auth
+import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.security.monitoring.SentryService
+import server.web.casa.utils.ApiResponse
+import server.web.casa.utils.MessageResponse
 
 @Tag(name = "Prestation Service", description = "Gestion des prestations services")
 @RestController
@@ -162,6 +173,42 @@ class PrestationController(
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.prestation.getallprestaionbyuser.count",
                     distributionName = "api.prestation.getallprestaionbyuser.latency"
+                )
+            )
+        }
+    }
+    @Operation(summary = "Update Prestation all column")
+    @PutMapping("/{version}/${PrestationScope.PRIVATE}/update/{id}")
+    suspend fun updatePrestation(
+        httpRequest: HttpServletRequest,
+        @PathVariable id: Long,
+        @RequestBody request: PrestationRequestUpdate
+    ): ResponseEntity<Map<String, Any?>> = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val prestation: PrestationEntity = (prestationService.getById(id) ?: return@coroutineScope ResponseEntity.ok().body(mapOf("errorr" to "Prestation not found"))) as PrestationEntity
+            if ( prestation.id != request.id) return@coroutineScope ResponseEntity.ok().body(mapOf("error" to "Les id prestation ne correspondent pas")) else null
+
+            val checkAdmin = userService.isAdmin()
+            val userRequest: UserEntity = (userService.findId(request.userId) ?: return@coroutineScope  ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
+            val userId = prestation.userId
+
+            val proprioCheck = userRequest.userId == userId
+
+            if( !proprioCheck && !checkAdmin.first){
+               return@coroutineScope ResponseEntity.ok(mapOf("error" to "Authorization denied"))
+            }
+            val updated = prestationService.updatePrestation(request, id)
+            ResponseEntity.ok(mapOf("data" to updated))
+
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.prestation.updateprestation.count",
+                    distributionName = "api.prestation.updateprestation.latency"
                 )
             )
         }

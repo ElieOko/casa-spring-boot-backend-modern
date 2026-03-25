@@ -23,6 +23,7 @@ import server.web.casa.route.sollicitation.SollicitationScope
 import server.web.casa.utils.Mode
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.app.prestation.domain.model.SollicitationRequestUpdate
 import server.web.casa.security.monitoring.MetricModel
 
 
@@ -156,6 +157,7 @@ class SollicitatonController(
             )
         }
     }
+
     @PutMapping("/{version}/${SollicitationScope.PROTECTED}/update/status/{id}")
     suspend fun updateSollicitationStatus(
         httpRequest: HttpServletRequest,
@@ -164,6 +166,7 @@ class SollicitatonController(
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
+            val checkAdmin = userS.isAdmin()
             val userRequest = userS.findIdUser(request.userId)
             val sollicitation: SollicitationDTO? = (service.findById(id) ?: ResponseEntity.ok(mapOf("error" to "sollicitation not found"))) as SollicitationDTO?
 
@@ -173,7 +176,7 @@ class SollicitatonController(
             val prestateurCheck = userRequest.userId == prestateurId
             val sollicitateur = userRequest.userId == userId
 
-            if(prestateurCheck || sollicitateur){
+            if(prestateurCheck || sollicitateur || checkAdmin.first){
                 if (prestateurCheck){
                     val updated = service.updateStatus(sollicitation.sollicitation,  request.status)
                     ResponseEntity.ok(mapOf("sollicitation" to updated))}
@@ -191,6 +194,41 @@ class SollicitatonController(
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sollicitaton.updatesollicitationstatus.count",
                     distributionName = "api.sollicitaton.updatesollicitationstatus.latency"
+                )
+            )
+        }
+    }
+    @PutMapping("/{version}/${SollicitationScope.PROTECTED}/update/{id}")
+    suspend fun updateAllColumn(
+        httpRequest: HttpServletRequest,
+        @PathVariable id: Long,
+        @RequestBody request: SollicitationRequestUpdate
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val checkAdmin = userS.isAdmin()
+            val userRequest = userS.findIdUser(request.userId)
+            val sollicitation: SollicitationDTO? = (service.findById(id) ?: ResponseEntity.ok(mapOf("error" to "sollicitation not found"))) as SollicitationDTO?
+
+            val userId = sollicitation?.user!!.userId
+            val prestateurId = prestS.getById ( sollicitation.prestation.id!!)?.userId
+
+            val prestateurCheck = userRequest.userId == prestateurId
+            val sollicitateur = userRequest.userId == userId
+
+            if(prestateurCheck || sollicitateur || checkAdmin.first){
+                val updated = service.updateAllColumn(sollicitation.sollicitation, request)
+                return@coroutineScope ResponseEntity.ok(mapOf("sollicitation" to updated))
+            }
+            ResponseEntity.ok(mapOf("error" to "Authorization denied"))
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.sollicitaton.updatesollicitationscolumn.count",
+                    distributionName = "api.sollicitaton.updatesollicitationscolumn.latency"
                 )
             )
         }

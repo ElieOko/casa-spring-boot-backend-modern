@@ -27,3 +27,16 @@ class SollicitationDTO(
     val prestation: Prestation,
     val userImage: String?
 )
+
+
+class SollicitationRequestUpdate(
+    val id          : Long,
+    val userId      : Long,
+    val prestationId: Long,
+    val deviseId    : Long?,
+    val budget      : Double?,
+    val description : String,
+    val startDate   : LocalDate,
+    val endDate     : LocalDate,
+    val isActive    : Boolean = false
+)

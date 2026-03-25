@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.BureauService
 import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.favorite.FavoriteBureauDTO
+import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteBureauEntity
 import server.web.casa.app.property.infrastructure.persistence.repository.BureauRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteBureauRepository
@@ -64,13 +65,16 @@ class FavoriteBureauService (
     suspend fun toFavoriteDTO(it: FavoriteBureauEntity): FavoriteBureauDTO {
         val checkProperty = brxR.findById(it.bureauId)
         var dto: Bureau? = null
+        var img: List<BureauImageEntity>?= null
         if(checkProperty != null){
             dto = brxS.findById(it.bureauId)
+            img = brxS.getImageByBureauID(it.bureauId)
         }
        return FavoriteBureauDTO(
-            favorite = it,
-            user = userS.findIdUser(it.userId),
-            bureau = dto
-        )
+           favorite = it,
+           user = userS.findIdUser(it.userId),
+           bureau = dto,
+           bureauImage = img
+       )
     }
 }

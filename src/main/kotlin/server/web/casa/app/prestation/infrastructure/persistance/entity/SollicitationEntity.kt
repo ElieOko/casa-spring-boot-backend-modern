@@ -19,25 +19,25 @@ data class SollicitationEntity(
     val prestationId: Long?,
 
     @Column("devise_id")
-    val deviseId: Long?,
+    var deviseId: Long?,
 
     @Column("budget")
-    val budget: Double?,
+    var budget: Double?,
 
     @Column("description")
-    val description: String?,
+    var description: String?,
 
     @Column("status")
     var status: String = ReservationStatus.PENDING.name,
 
     @Column("start_date")
-    val startDate: LocalDate,
+    var startDate: LocalDate,
 
     @Column("end_date")
-    val endDate: LocalDate,
+    var endDate: LocalDate,
 
     @Column("created_at")
     val createdAt: LocalDate = LocalDate.now(),
     @Column("is_active")
-    val isActive: Boolean = true
+    var isActive: Boolean = true
 )
