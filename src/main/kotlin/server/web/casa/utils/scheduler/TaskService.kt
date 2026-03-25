@@ -11,8 +11,16 @@ import server.web.casa.app.notification.infrastructure.persistence.entity.toDoma
 import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.payment.domain.model.StatusPayment
 import server.web.casa.app.payment.infrastructure.persistence.repository.PaiementRepository
+import server.web.casa.app.property.application.service.BureauService
+import server.web.casa.app.property.application.service.SalleFestiveService
+import server.web.casa.app.property.application.service.SalleFuneraireService
+import server.web.casa.app.property.application.service.TerrainService
 import server.web.casa.app.property.infrastructure.persistence.repository.PropertyRepository
+import server.web.casa.app.reservation.application.service.ReservationBureauService
+import server.web.casa.app.reservation.application.service.ReservationFestiveService
+import server.web.casa.app.reservation.application.service.ReservationFuneraireService
 import server.web.casa.app.reservation.application.service.ReservationService
+import server.web.casa.app.reservation.application.service.ReservationTerrainService
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.repository.*
 
@@ -32,7 +40,15 @@ class ReservationTaskService(
    private val notification2 : NotificationCasaRepository,
    private val propertyR: PropertyRepository,
    private val service: ReservationService,
-   private val paymentRepository: PaiementRepository
+   private val paymentRepository: PaiementRepository,
+   private val serviceBureau : ReservationBureauService,
+   private val bureau : BureauService,
+   private val festive : SalleFestiveService,
+   private val festiveReservationService : ReservationFestiveService,
+   private val funeraire : SalleFuneraireService,
+   private val funeraireReservation : ReservationFuneraireService,
+   private val terrain : TerrainService,
+   private val terrainReservation : ReservationTerrainService
 
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -53,7 +69,6 @@ class ReservationTaskService(
                     val propertyEntity = propertyR.findById(reservation?.propertyId!!)
                     val note = notification2.save(NotificationCasaEntity(id = null, userId = propertyEntity?.user, title = "Annulation de visite", message = "Le client a annulé sa demande de visite. Aucune action n’est requise.", tag = TagType.DEMANDES.toString(),))
                     notificationService.sendNotificationToUser(propertyEntity?.user.toString(),note.toDomain())
-//                    val response = mapOf("DealCancel" to notification, "message" to "Deal cancel successfully")
                 }
             }
             "bureau" -> {
@@ -61,6 +76,10 @@ class ReservationTaskService(
                 if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationBureau.save(data)
+                    val reservation = serviceBureau.findById(reservationId)?.reservation
+                    val property = bureau.findById(reservation?.bureauId!!)
+                    val note = notification2.save(NotificationCasaEntity(id = null, userId = property.userId, title = "Annulation de visite", message = "Le client a annulé sa demande de visite. Aucune action n’est requise.", tag = TagType.DEMANDES.toString(),))
+                    notificationService.sendNotificationToUser(property.userId.toString(),note.toDomain())
                 }
             }
             "festive" ->{
@@ -68,6 +87,10 @@ class ReservationTaskService(
                 if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationFestive.save(data)
+                    val reservation = festiveReservationService.findById(reservationId)?.reservation
+                    val property = festive.findById(reservation?.festiveId!!)
+                    val note = notification2.save(NotificationCasaEntity(id = null, userId = property.userId, title = "Annulation de visite", message = "Le client a annulé sa demande de visite. Aucune action n’est requise.", tag = TagType.DEMANDES.toString(),))
+                    notificationService.sendNotificationToUser(property.userId.toString(),note.toDomain())
                 }
             }
             "funeraire" ->{
@@ -75,6 +98,10 @@ class ReservationTaskService(
                 if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationFuneraire.save(data)
+                    val reservation = funeraireReservation.findById(reservationId)?.reservation
+                    val property = funeraire.findById(reservation?.funeraireId!!)
+                    val note = notification2.save(NotificationCasaEntity(id = null, userId = property.userId, title = "Annulation de visite", message = "Le client a annulé sa demande de visite. Aucune action n’est requise.", tag = TagType.DEMANDES.toString(),))
+                    notificationService.sendNotificationToUser(property.userId.toString(),note.toDomain())
                 }
             }
             "hotel" ->{
@@ -89,6 +116,10 @@ class ReservationTaskService(
                 if (data != null && data.status == ReservationStatus.PENDING.name) {
                     data.status = ReservationStatus.CANCELLED.name
                     reservationTerrain.save(data)
+                    val reservation = terrainReservation.findById(reservationId)?.reservation
+                    val property = terrain.findById(reservation?.terrainId!!)
+                    val note = notification2.save(NotificationCasaEntity(id = null, userId = property.userId, title = "Annulation de visite", message = "Le client a annulé sa demande de visite. Aucune action n’est requise.", tag = TagType.DEMANDES.toString(),))
+                    notificationService.sendNotificationToUser(property.userId.toString(),note.toDomain())
                 }
             }
             "vacance" ->{
