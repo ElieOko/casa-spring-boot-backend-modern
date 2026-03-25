@@ -39,8 +39,8 @@ class FavoriteBureauService (
         }?.toList() ?: emptyList()
     }
 
-    suspend fun getFavoriteByFestId( festId: Long ) : List<FavoriteBureauDTO>{
-        return repository.findFavoriteByFestId(festId).let {list-> list?.map{
+    suspend fun getFavoriteByBureauId( bureauId: Long ) : List<FavoriteBureauDTO>{
+        return repository.findFavoriteByBureauId(bureauId).let {list-> list?.map{
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }
     }
