@@ -33,8 +33,8 @@ class PersonController(
     private val sentry: SentryService,
 ) {
 //    private val log = LoggerFactory.getLogger(this::class.java)
-    @Operation(summary = "Parrainage")
-    @PostMapping("/{version}/${MemberScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Creation membre")
+    @PostMapping("/{version}/${MemberScope.PUBLIC}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createPersonActor(
         httpRequest: HttpServletRequest,
         @Valid @RequestBody request: PersonUserRequest
