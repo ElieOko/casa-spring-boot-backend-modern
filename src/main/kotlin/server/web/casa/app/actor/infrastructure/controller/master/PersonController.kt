@@ -44,7 +44,7 @@ class PersonController(
             val accountItems = request.account
             if (accountItems.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisissez au moins un type de comptes.")
             val account = accountItems.map { accountService.findByIdAccount(it.typeAccount)}.first()
-            if (request.actor.parrainId != null || request.actor.parrainId?.toInt() != 0) {
+            if (request.actor.parrainId != null && request.actor.parrainId?.toLong() != 0L) {
               userService.findIdUser(request.actor.parrainId!!)
             }
             val userSystem = request.toUser(request.user.phone)
