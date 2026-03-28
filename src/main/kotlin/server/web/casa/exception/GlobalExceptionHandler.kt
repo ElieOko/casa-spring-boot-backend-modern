@@ -1,5 +1,6 @@
 package server.web.casa.exception
 
+import com.fasterxml.jackson.module.kotlin.KotlinInvalidNullException
 import com.google.api.gax.rpc.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -8,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import server.web.casa.utils.Mode
+import tools.jackson.databind.exc.MismatchedInputException
 import java.time.LocalDateTime
 
 @ControllerAdvice
@@ -70,4 +72,10 @@ class GlobalExceptionHandler {
             .body(mapList)
     }
 
+    @ExceptionHandler(value = [MismatchedInputException::class, KotlinInvalidNullException::class])
+    fun handleBadRequest2(e: KotlinInvalidNullException): ResponseEntity<ErrorResponseMessageDto> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponseMessageDto("Ce champs ne peut pas être ${e.propertyName} null"))
+    }
 }
