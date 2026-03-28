@@ -117,6 +117,7 @@ class PropertyService(
         val roomImagesByProperty = roomImages.groupBy { it.propertyId }
         val livingRoomImagesByProperty = livingRoomImages.groupBy { it.propertyId }
         val kitchenImagesByProperty = kitchenImages.groupBy { it.propertyId }
+        val postBy = userService.findIdUser(property.user!!)
         // Assemblage final
         PropertyMasterDTO(
             property = property.toPropertyDTO(),
@@ -134,7 +135,8 @@ class PropertyService(
                 quartier = quartierService.findByIdQuartier(property.quartierId)
             ),
             geoZone = property.toGeo(),
-            postBy = userService.findIdUser(property.user!!).username,
+            postBy = postBy.username,
+            postByTel = postBy.phone,
             image = person.findByUser(property.user)?.images?:"",
             typeProperty = propertyTypeService.findByIdPropertyType(property.propertyTypeId),
             features = featureByProperty[property.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList()?:emptyList()
