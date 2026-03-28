@@ -7,3 +7,7 @@ data class ErrorResponseDto(
     val detailMessage : String,
     val errorTime : LocalDateTime
 )
+
+data class ErrorResponseMessageDto(
+    val message : String
+)
