@@ -9,11 +9,13 @@ import server.web.casa.app.property.domain.model.Feature
 import server.web.casa.app.property.domain.model.Property
 import server.web.casa.app.property.domain.model.PropertyType
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
+import kotlin.String
 
 class PropertyMasterDTO(
     val property: PropertyDTO,
     val images: Images? = null,
     val postBy: String,
+    val postByTel: String? = null,
     val address: AddressDTO,
     val devise: Devise?,
     val localAddress: LocalAddressDTO,
@@ -23,7 +25,29 @@ class PropertyMasterDTO(
     val image: String,
 )
 
+class PropertyMasterDTO1(
+    val property: PropertyDTO,
+    val images: Images? = null,
+    val postBy: String,
+    val postByTel: String?,
+    val address: AddressDTO,
+    val devise: Devise?,
+    val typeProperty: PropertyType,
+    val features: List<Feature> = emptyList(),
+    val image: String,
+)
 
+fun PropertyMasterDTO.withoutAdress() = PropertyMasterDTO1(
+    property = this.property,
+    images = this.images,
+    postBy = this.postBy,
+    postByTel = this.postByTel,
+    address = this.address,
+    devise = this.devise,
+    typeProperty = this.typeProperty,
+    features = this.features,
+    image = this.image
+)
 
 fun Property.toDto() = PropertyMasterDTO(
     property = PropertyDTO(
