@@ -131,7 +131,8 @@ class ReservationTerrainService(
         ReservationTerrainDTO(
             reservation = it,
             terrain = terS.findById(it.terrainId),
-            user = userS.findIdUser(it.userId)
+            user = userS.findIdUser(it.userId),
+            imageTerrain = terS.getImageByTerrainID(it.terrainId)
         )
 
 }

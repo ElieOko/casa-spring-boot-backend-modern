@@ -15,6 +15,8 @@ data class FavoriteEntity(
     val userId: Long? = null,
     @Column("property_id")
     val propertyId: Long? = null,
+    @Column("status")
+    var status: Boolean = true,
     @Column("created_at")
     val createdAt: LocalDate = LocalDate.now()
 )

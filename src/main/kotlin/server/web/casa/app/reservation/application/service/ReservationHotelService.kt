@@ -130,9 +130,9 @@ class ReservationHotelService(
     suspend fun toEntityDTO(it: ReservationChambreHotelEntity): ReservationChambreHotelDTO =
         ReservationChambreHotelDTO(
             reservation = it,
-            chambre = null,
-           // chambre = hotelS.findById(it.hotelID),
-            user = userS.findIdUser(it.userId)
+            chambre = hotelS.findById(it.chambreId),
+            user = userS.findIdUser(it.userId),
+            imageChambre = hotelS.getImageByChambreID(it.chambreId)
         )
 
 }

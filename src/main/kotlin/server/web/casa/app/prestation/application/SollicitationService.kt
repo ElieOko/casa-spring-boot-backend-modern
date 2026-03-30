@@ -3,10 +3,12 @@ package server.web.casa.app.prestation.application
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
+import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.ecosystem.application.service.PrestationService
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.prestation.domain.model.SollicitationDTO
+import server.web.casa.app.prestation.domain.model.SollicitationRequestUpdate
 import server.web.casa.app.prestation.infrastructure.persistance.entity.SollicitationEntity
 import server.web.casa.app.prestation.infrastructure.persistance.repository.SollicitationRepository
 import server.web.casa.app.reservation.domain.model.ReservationBureauDTO
@@ -18,7 +20,8 @@ class SollicitationService(
     private val p: SollicitationRepository,
     private val userS: UserService,
     private  val devs: DeviseService,
-    private val prestS: PrestationService
+    private val prestS: PrestationService,
+    private val person: PersonService
 ) {
 
     suspend fun create(s: SollicitationEntity): SollicitationDTO{
@@ -33,7 +36,15 @@ class SollicitationService(
     }
     suspend fun findByUserId(id: Long): List<SollicitationDTO>?{
         val entity = p.findByUserId(id)
-        return entity?.map{toDto(it)}?.toList()
+        return entity.map{toDto(it)}.toList()
+    }
+    suspend fun findByPrestationId(prestationId: Long): List<SollicitationDTO>?{
+        val entity = p.findByPrestationId(prestationId)
+        return entity.map{toDto(it)}.toList()
+    }
+    suspend fun findByUserIdPrestationId(userId: Long, prestationId: Long): List<SollicitationDTO>?{
+        val entity = p.findByUserIdPrestationId(userId, prestationId)
+        return entity.map{toDto(it)}.toList()
     }
     suspend fun findByHostUser(userId: Long):List<SollicitationDTO>?{
         return p.findByHostUserId(userId).map{
@@ -48,6 +59,17 @@ class SollicitationService(
         return toDto( p.findById(entity.id!!)!!)
     }
 
+    suspend fun updateAllColumn(entity: SollicitationEntity, req: SollicitationRequestUpdate): SollicitationDTO?{
+        entity.deviseId = req.deviseId
+        entity.budget = req.budget
+        entity.description = req.description
+        entity.startDate = req.startDate
+        entity.endDate = req.endDate
+        entity.isActive = req.isActive
+        p.save(entity)
+        return toDto( p.findById(entity.id!!)!!)
+    }
+
     suspend fun deleteById(id: Long): Boolean {
         val entity = p.deleteById(id)
         return true
@@ -56,6 +78,7 @@ class SollicitationService(
         sollicitation = it,
         user = userS.findIdUser(it.userId!!),
         devise = devs.getById(it.deviseId)!!,
-        prestation = prestS.getById(it.prestationId!!)!!.toDomain()
+        prestation = prestS.getById(it.prestationId!!)!!.toDomain(),
+        userImage = person.findByIdUser(it.userId)?.images,
     )
 }

@@ -75,4 +75,28 @@ class HotelChambreController(
         }
     }
 
+    @Operation(summary = "Get Hotel Chambre by ID")
+    @GetMapping("/${PropertyHotelChambreScope.PUBLIC}/{chambreId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getHotelChambreByID(
+        request: HttpServletRequest,
+        @PathVariable("chambreId") chambreId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(chambreId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getHotelChambreById.count",
+                    distributionName = "api.property.getHotelChambreById.latency"
+                )
+            )
+        }
+    }
+
 }

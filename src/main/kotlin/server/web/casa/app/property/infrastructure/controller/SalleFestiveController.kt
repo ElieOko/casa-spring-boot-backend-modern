@@ -18,6 +18,8 @@ import server.web.casa.route.property.PropertyFestiveScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyFuneraireScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Festive", description = "")
@@ -33,6 +35,7 @@ class SalleFestiveController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création salle festive")
     @PostMapping("/${PropertyFestiveScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -41,7 +44,11 @@ class SalleFestiveController(
         @Valid @RequestBody request: SalleFestiveRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
             if (request.festive.propertyTypeId != 8L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au salle de fête")
             propertyTypeService.findByIdPropertyType(request.festive.propertyTypeId)
             val city = if (request.festive.cityId != null) cityService.findByIdCity(request.festive.cityId) else null
@@ -213,7 +220,7 @@ class SalleFestiveController(
         httpRequest: HttpServletRequest,
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState
-    )= coroutineScope{
+    ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
@@ -241,7 +248,7 @@ class SalleFestiveController(
         httpRequest: HttpServletRequest,
         @PathVariable("propertyId") propertyId : Long,
         @RequestBody request : StatusState
-    )= coroutineScope{
+    )= coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
@@ -257,6 +264,30 @@ class SalleFestiveController(
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.sallefestive.toenableordisablefestive.count",
                     distributionName = "api.sallefestive.toenableordisablefestive.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "Get Salle Festive by ID")
+    @GetMapping("/${PropertyFestiveScope.PUBLIC}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getFestiveByID(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(propertyId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getFestiveById.count",
+                    distributionName = "api.property.getFestiveById.latency"
                 )
             )
         }

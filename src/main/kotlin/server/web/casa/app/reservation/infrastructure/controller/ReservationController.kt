@@ -33,9 +33,13 @@ import server.web.casa.route.reservation.ReservationScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.app.user.infrastructure.persistence.mapper.toEntityToDto
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
+import server.web.casa.utils.scheduler.ReservationScheduler
+import java.time.LocalDate
 
-@Tag(name = "Reservation", description = "Reservation's Management")
+@Tag(name = "Reservation Property", description = "Reservation's Management")
 @RestController
 @RequestMapping("api")
 @Profile(Mode.DEV)
@@ -51,6 +55,7 @@ class ReservationController(
     private val notification2 : NotificationCasaRepository,
     private val auth: Auth,
     private val sentry: SentryService,
+    private val task : ReservationScheduler,
 ){
     private val log = LoggerFactory.getLogger(this::class.java)
     @PostMapping("/{version}/${ReservationScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -59,35 +64,36 @@ class ReservationController(
         @Valid @RequestBody request: ReservationRequest
     ): ResponseEntity<Map<String, Any?>> = coroutineScope {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
-             val property = propertyService.findByIdProperty(request.propertyId)
-
-             if(property.first.property.userId == user.userId){
+             val property = propertyService.findByIdProperty(request.propertyId).first.property
+             if(property.userId == user.userId){
                  val responseOwnProperty = mapOf("error" to "You can't reserve your own property")
-                 ResponseEntity.ok().body(responseOwnProperty )}
-             if (request.endDate < request.startDate){
-                 val responseNotFound = mapOf("error" to "End date must be after or equal to start date")
-                 ResponseEntity.ok().body(responseNotFound )}
+                return@coroutineScope ResponseEntity.ok().body(responseOwnProperty )}
+             if (request.endDate < request.startDate || request.startDate < LocalDate.now()){
+                 val responseNotFound = mapOf("error" to "End date must be after or equal to start date and today")
+                 return@coroutineScope ResponseEntity.ok().body(responseNotFound )}
              val dataReservation = ReservationEntity(
                  status = request.status.toString(),
                  type = request.type.toString(),
                  isActive = true,
                  reservationHeure = request.reservationHeure,
                  userId = request.userId,
-                 propertyId = property.first.property.propertyId!!,
+                 propertyId = property.propertyId!!,
                  message = request.message,
                  startDate = request.startDate,
                  endDate = request.endDate,
              )
              //!= verify
-             val propertyEntity = propertyR.findById(request.propertyId)
+             //val propertyEntity = propertyR.findById(request.propertyId)
                  //.orElseThrow { RuntimeException("Property not found") }
 
-             val userEntity = userR.findById(request.userId)
+             //val userEntity = userR.findById(request.userId)
                  //.orElseThrow { RuntimeException("User not found") }
 
-            val lastStatusReservationUserProperty = service.findByUserProperty(propertyEntity?.id!!, userEntity?.userId!!)
+            val lastStatusReservationUserProperty = service.findByUserProperty(property.propertyId!!, user.userId!!)
                                                      ?.lastOrNull()?.reservation
              val format = DateTimeFormatter.ofPattern("HH:mm:ss")
 
@@ -107,7 +113,7 @@ class ReservationController(
                  }
              }
 
-             val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, propertyEntity.id)
+             val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, property.propertyId)
 
              val propertyBooked = lastReservationProperty
                  ?.takeIf { it.isNotEmpty() }
@@ -120,45 +126,59 @@ class ReservationController(
                  }
                  ?.sortedBy { it.reservation?.reservationHeure }
              //if propertyBooked = null || empty we can add
-             if(propertyBooked?.isNotEmpty() == true) {
+             //if(propertyBooked?.isNotEmpty() == true) {
+                 if(!propertyBooked.isNullOrEmpty()){
                  val responseHour = mapOf(
                      "error" to "Unfortunately, this time slot is already booked.",
                      "data" to propertyBooked
                  )
-                 ResponseEntity.ok().body(responseHour )}
-
-             // check if property is available before adding
-             if(!property.first.property.isAvailable){
+                     return@coroutineScope ResponseEntity.ok().body(responseHour )
+                 }
+            val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            val hostUser = userR.findById( property.userId!!) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            // check if property is available before adding
+             if(!property.isAvailable){
                  val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-                 ResponseEntity.ok().body(responseAvailable)}
-             val reservationCreate = service.createReservation(dataReservation)
+                 return@coroutineScope ResponseEntity.ok().body(responseAvailable)
+             }
+
+            val reservationCreate = service.createReservation(dataReservation)
+            val startTaskAt = expiredAt(
+                date = reservationCreate.reservation?.startDate.toString(),
+                heure = reservationCreate.reservation?.reservationHeure.toString()
+            )
+            task.scheduleOneShot(
+                reservationId = reservationCreate.reservation?.id?:0L,
+                taskType ="ONESHOT reservation property",
+                type = "property",
+                minute = startTaskAt
+            )
              val notification = notif.create(
                  NotificationReservation(
                      reservation = reservationCreate.reservation!!,
-                     guestUser = userEntity,
-                     hostUser = userR.findById( propertyEntity.user!!)!!
+                     guestUser = guestUser as UserEntity,
+                     hostUser = hostUser as UserEntity
                  )
              )
              val note = notification2.save(
                  NotificationCasaEntity(
                      id = null,
-                     userId = userR.findById( propertyEntity.user)!!.userId,
+                     userId = userR.findById( property.userId)!!.userId,
                      title = "Demande de visite reçue",
                      message = "Un client est intéressé par un bien et souhaite le visiter. Ne tardez pas à répondre \uD83D\uDE09",
                      tag = TagType.DEMANDES.toString(),
                  )
              )
-             notificationService.sendNotificationToUser(userR.findById( propertyEntity.user)!!.userId.toString(),note.toDomain())
+             notificationService.sendNotificationToUser(hostUser.userId.toString(),note.toDomain())
 
              val response = mapOf(
                  "message" to "Votre reservation à la date du ${reservationCreate.reservation.startDate} au ${reservationCreate.reservation.endDate} a été créée avec succès",
                  "reservation" to reservationCreate,
-                 "user" to userEntity,
-                 "proprietaire" to  userR.findById( propertyEntity.user),
-                 //"property" to property,
-                 "notificationSendState" to notification
+                 "proprietaire" to  hostUser,
+                 "notificationSendState" to notification,
+                 "onshotAt" to startTaskAt
              )
-              ResponseEntity.status(201).body(response)
+            return@coroutineScope ResponseEntity.status(201).body(response)
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -171,15 +191,13 @@ class ReservationController(
             )
         }
     }
+
     @GetMapping("/{version}/${ReservationScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllReservation(request: HttpServletRequest): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope{
         val startNanos = System.nanoTime()
         try {
              val checkAdmin = userS.isAdmin()
-             if (!checkAdmin.first) throw ResponseStatusException(
-                 HttpStatusCode.valueOf(404),
-                 "Authorization denied."
-             )
+             if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
              val data = service.findAllReservation()
              val response = mapOf("reservation" to data)
             ResponseEntity.ok().body(response)
@@ -197,15 +215,12 @@ class ReservationController(
     }
 
     @GetMapping("/{version}/${ReservationScope.PRIVATE}/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-     suspend fun getReservationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
+    suspend fun getReservationById(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, ReservationDTO?>> = coroutineScope {
          val startNanos = System.nanoTime()
          try {
              val checkAdmin = userS.isAdmin()
               val reservation = service.findById(id)
-             if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) throw ResponseStatusException(
-                 HttpStatusCode.valueOf(404),
-                 "Authorization denied."
-             )
+             if (!checkAdmin.first && reservation?.user?.userId != checkAdmin.second) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
              val response = mapOf("reservation" to reservation)
              ResponseEntity.ok(response)
         } finally {
@@ -220,15 +235,13 @@ class ReservationController(
              )
          }
      }
+
     @GetMapping("/{version}/${ReservationScope.PROTECTED}/status/{status}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByStaus(request: HttpServletRequest, @PathVariable status: ReservationStatus): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByStatus(status)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -244,15 +257,13 @@ class ReservationController(
             )
         }
     }
+
     @GetMapping("/{version}/${ReservationScope.PROTECTED}/date/{inputDate}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByDate(request: HttpServletRequest, @PathVariable inputDate: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByDate(inputDate)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -269,7 +280,7 @@ class ReservationController(
         }
     }
 
-    @GetMapping("/{version}/${ReservationScope.PROTECTED}/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
+   /* @GetMapping("/{version}/${ReservationScope.PROTECTED}/month/{month}/{year}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationByMonthYear(request: HttpServletRequest, @PathVariable month: Int, @PathVariable year: Int): ResponseEntity<Map<String, List<ReservationDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -318,16 +329,13 @@ class ReservationController(
             )
         }
     }
-
+*/
     @GetMapping("/{version}/${ReservationScope.PROTECTED}/interval/{startDateInput}/{endDateInput}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getReservationInInterval(request: HttpServletRequest, @PathVariable startDateInput: LocalDate, @PathVariable endDateInput: LocalDate): ResponseEntity<Map<String, List<ReservationDTO>?>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByInterval(startDateInput, endDateInput)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -350,10 +358,7 @@ class ReservationController(
         try {
             val checkAdmin = userS.isAdmin()
             val user : UserEntity = (userR.findById(userId) ?: ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
-            if (!checkAdmin.first && checkAdmin.second != user.userId) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first && checkAdmin.second != user.userId) ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
             val reservation = service.findByUser(user.userId!!)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
@@ -375,12 +380,9 @@ class ReservationController(
         val startNanos = System.nanoTime()
         try {
             val checkAdmin = userS.isAdmin()
-            val property : PropertyEntity? = (propertyR.findById(propertyId) ?: ResponseEntity.ok(mapOf("error" to "property not found"))) as PropertyEntity?
-            if (!checkAdmin.first && checkAdmin.second != property?.user) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
-            val reservation = service.findByProperty(property?.id!!)
+            val property = propertyService.findById(propertyId)
+            if (!checkAdmin.first && checkAdmin.second != property?.user) ResponseEntity.status(403).body(mapOf("error" to "Authorization denied, no access to resources"))
+            val reservation = service.findByProperty(property?.propertyId!!)
             val response = mapOf("reservation" to reservation)
             ResponseEntity.ok(response)
         } finally {
@@ -402,14 +404,12 @@ class ReservationController(
         try {
                     val userAuth = auth.user()
                     val isAdmin: Boolean? = userAuth?.second?.find{ true }
-                    val user = userR.findById(userId) ?: throw ResponseStatusException(HttpStatusCode.valueOf(404), "user Not Found.")
+                    val user = userR.findById(userId) ?: ResponseEntity.status(404).body(mapOf("error" to "User not found"))
+                    user as UserEntity
                     log.info("***session:${userAuth?.first?.userId}")
                     log.info("***id-params:${user.userId}")
                     if (userId != userAuth?.first?.userId && isAdmin == false){
-                        throw ResponseStatusException(
-                            HttpStatusCode.valueOf(404),
-                            "Authorization denied."
-                        )
+                        ResponseEntity.status(403).body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
                     }
             //        val checkAdmin = userS.isAdmin()
             //        if (!checkAdmin.first || checkAdmin.second != user.userId) throw ResponseStatusException(
@@ -443,7 +443,7 @@ class ReservationController(
             val userRequest: UserEntity = (userR.findById(request.userId) ?:  ResponseEntity.ok(mapOf("error" to "user not found"))) as UserEntity
             val reservation: ReservationDTO = (service.findById(id) ?: ResponseEntity.ok(mapOf("error" to "reservation not found"))) as ReservationDTO
             val userId = reservation.reservation?.userId
-            val proprioId = propertyR.findById( reservation.reservation?.propertyId!!)
+            val proprioId = propertyService.findById( reservation.reservation?.propertyId!!)
 
             val proprioCheck = userRequest.userId == proprioId?.user
             val emetCheck = userRequest.userId == userId
@@ -491,7 +491,7 @@ class ReservationController(
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
-    }*/
+    }
 
     @DeleteMapping("/{version}/${ReservationScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>>  = coroutineScope {
@@ -547,7 +547,7 @@ class ReservationController(
             )
         }
     }
-
+*/
     @PutMapping("/{version}/${ReservationScope.PROTECTED}/notification/partners/{reservationId}")
     suspend fun dealConcludePartners(request: HttpServletRequest, @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> = coroutineScope{
         val startNanos = System.nanoTime()
@@ -555,13 +555,14 @@ class ReservationController(
             val reservation = service.findById(reservationId)?.reservation
             if (reservation == null){
                 val response = mapOf("error" to "reservation not found")
-                ResponseEntity.ok(response)}
+                ResponseEntity.ok(response)
+            }
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
             val checkAdmin = userS.isAdmin()
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) {
+                ResponseEntity.status(403)
+                    .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+            }
             val notification = notif.dealConcludedHost(reservation.id!!, true)
             val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
             notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
@@ -569,7 +570,7 @@ class ReservationController(
             val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Bonne nouvelle ", message = "Félicitations, votre demande a été validée et le bien vous a été accordé.", tag = TagType.DEMANDES.toString(),))
             notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
             val notificationState = notif.stateReservationHost(reservation.id, true)
-            val propertyEntity = propertyR.findById(reservation.propertyId!!)
+            val propertyEntity = propertyR.findById(reservation.propertyId)
                  propertyEntity!!.isAvailable = false
             propertyR.save(propertyEntity)
             val response = mapOf(
@@ -613,16 +614,17 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "Authorization denied."
-            )
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user )
+            {
+                ResponseEntity.status(403)
+                    .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+            }
              val notification = notif.stateReservationHost(reservation.id!!, state)
              val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
              if (state){
                  val note2 = notification2.save(NotificationCasaEntity(id = null, userId = reservation.userId.toString().toLong(), title = "Visite confirmée", message = "Votre demande de visite a été approuvée. Préparez-vous pour le rendez-vous.", tag = TagType.DEMANDES.toString()))
                  notificationService.sendNotificationToUser(reservation.userId.toString(),note2.toDomain())
-                 val hostId = propertyR.findById(reservation.propertyId)?.user
+                 val hostId = propertyService.findById(reservation.propertyId)?.user
                  val note = notification2.save(NotificationCasaEntity(id = null, userId = hostId.toString().toLong(), title = "Rendez-vous validé", message = "La visite est confirmée. Tout est prêt pour accueillir le client.", tag = TagType.DEMANDES.toString()))
                  notificationService.sendNotificationToUser(hostId.toString(),note.toDomain())
              }
@@ -650,7 +652,7 @@ class ReservationController(
                 val response = mapOf("error" to "reservation not found")
                 ResponseEntity.ok(response)}
             val propertyOwner = propertyService.findById(reservation?.propertyId!!)
-            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.user ) throw ResponseStatusException(
+            if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner?.user ) throw ResponseStatusException(
                 HttpStatusCode.valueOf(404),
                 "Authorization denied."
             )
@@ -675,6 +677,13 @@ class ReservationController(
                 )
             )
         }
+    }
+
+    fun expiredAt (date:String, heure: String): Long {
+        val date = LocalDate.parse(date)
+        val time = LocalTime.parse(heure)
+        val end = LocalDateTime.of(date, time).plusHours(1)
+       return  Duration.between(LocalDateTime.now(), end).toMinutes()
     }
 }
 class RequestUpdate(

@@ -13,11 +13,9 @@ class Person(
     var cardFront : String? = null,
     var cardBack : String? = null,
     val numberCard : String? = null,
-    @JsonIgnore
-    val userId : Long?,
+    val userId : Long? = null,
     @JsonIgnore
     val parrainId : Long? = null,
-    @JsonIgnore
     val typeCardId : Long? = null,
 )
 

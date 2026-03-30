@@ -10,12 +10,20 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
+import server.web.casa.app.notification.application.service.NotificationReservationService
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
 import server.web.casa.app.user.application.service.*
 import server.web.casa.app.user.domain.model.*
 import server.web.casa.app.user.domain.model.request.*
 import server.web.casa.route.auth.AuthRoute
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.*
+import server.web.casa.utils.MessageResponse.ACCOUNT_CERTIFIED
+import server.web.casa.utils.MessageResponse.ACCOUNT_CERTIFIED_CANCEL
 
 const val ROUTE_REGISTER = AuthRoute.REGISTER
 const val ROUTE_LOGIN = AuthRoute.LOGIN
@@ -27,8 +35,11 @@ const val ROUTE_LOGIN = AuthRoute.LOGIN
 class AuthController(
     private val authService: AuthService,
     private val accountService: TypeAccountService,
+    private val userService: UserService,
     private val auth: Auth,
-    private val sentry : SentryService
+    private val sentry : SentryService,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     @Operation(summary = "Création utilisateur")
@@ -92,6 +103,7 @@ class AuthController(
         }
     }
 
+
     @PostMapping("/api/{version}/protected/token/refresh")
     suspend fun refresh(request: HttpServletRequest, @RequestBody body: RefreshRequest): AuthService.TokenPair = coroutineScope {
         val startNanos = System.nanoTime()
@@ -109,6 +121,7 @@ class AuthController(
             )
         }
     }
+
     @Operation(summary = "OTP activation send code")
     @PostMapping("/api/{version}/public/otp/generate")
     suspend fun generateKeyOTP(request: HttpServletRequest,
@@ -154,6 +167,74 @@ class AuthController(
                 )
             )
         }
+    }
+
+    @Operation(summary = "certification user")
+    @PutMapping("/api/{version}/protected/certification/{userId}")
+    suspend fun goCertification(
+        request: HttpServletRequest,
+        @PathVariable("userId") userId : Long,
+        @RequestBody @Valid certification : CertificationState
+    )  = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = authService.goCertification(userId,certification.state)
+                    if (!certification.state){
+                        authService.lockedOrUnlocked(userId)
+                        val note = notification2.save(
+                            NotificationCasaEntity(
+                                id = null,
+                                userId = userId,
+                                title = "CasaNayo Certification",
+                                message = ACCOUNT_CERTIFIED_CANCEL,
+                                tag = TagType.CERTIFICATION.toString(),
+                            )
+                        )
+                        val notify = note.toDomain()
+                        notify.user = userService.findIdUser(userId)
+                        notificationService.sendNotificationToUser(userId.toString(),notify)
+                    } else {
+                        val note = notification2.save(
+                            NotificationCasaEntity(
+                                id = null,
+                                userId = userId,
+                                title = "CasaNayo Certification",
+                                message = ACCOUNT_CERTIFIED,
+                                tag = TagType.CERTIFICATION.toString(),
+                            )
+                        )
+                        val notify = note.toDomain()
+                        notify.user = userService.findIdUser(userId)
+                        notificationService.sendNotificationToUser(userId.toString(),notify)
+                       authService.lockedOrUnlocked(userId,false)
+                    }
+                    ResponseEntity.ok(
+                        mapOf(
+                            "message" to if (certification.state) "Certification successful" else "Certification failed",
+                            "user" to data,
+                            "reason" to "${certification.message}"
+                        )
+                    )
+                }
+                false,null -> {
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.certifcation.user.count",
+                    distributionName = "api.certifcation.user.latency"
+                )
+            )
+        }
+
     }
 
     @Operation(summary = "Reset password ")
@@ -208,7 +289,7 @@ class AuthController(
 
     @Operation(summary = "Delete Account User")
     @DeleteMapping("/api/{version}/protected/users/delete/user")
-    suspend fun lockAccount(request: HttpServletRequest,): ResponseEntity<Map<String, String>> = coroutineScope {
+    suspend fun lockAccount(request: HttpServletRequest): ResponseEntity<Map<String, String>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val userId = auth.user()?.first?.userId
@@ -227,6 +308,7 @@ class AuthController(
             )
         }
     }
+
     @Operation(summary = "Recovery Account User")
     @PutMapping("/api/{version}/protected/recovery/user/{id}")
     suspend fun unlockAccount(request: HttpServletRequest,@PathVariable("id") id : Long): ResponseEntity<Map<String, String>> = coroutineScope {

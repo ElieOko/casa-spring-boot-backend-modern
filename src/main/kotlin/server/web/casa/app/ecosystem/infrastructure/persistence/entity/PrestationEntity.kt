@@ -23,6 +23,8 @@ class PrestationEntity(
     val description : String?="",
     @Column("profile")
     val profile : String?="",
+    @Column("cv_file")
+    val cvFile : String?="",
     @Column("experience")
     val experience : String = "",
     @Column("plage_jour_prestation")
@@ -63,6 +65,7 @@ fun PrestationEntity.toDomain() = Prestation(
     serviceId = this.serviceId,
     deviseId = this.deviseId,
     profile = this.profile,
+    cvFile = this.cvFile,
     title = this.title,
     description = this.description,
     experience = this.experience,

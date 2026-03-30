@@ -42,9 +42,11 @@ class FavoriteTerrainController(
                 createdAt = LocalDate.now(),
                 terrainId = terrain.id!!
             )
-            val existingFavorite = service.getFavoriteIfExist(terrain.id!!, user.userId)
-            val savedFavorite = existingFavorite.ifEmpty { service.create(favorite) }
-
+            val existingFavorite = service.getFavoriteIfExist(terrain.id!!, user.userId)?.favorite
+            val savedFavorite = if (existingFavorite != null) {
+                existingFavorite.status = !existingFavorite.status
+                service.create(existingFavorite)
+            }else service.create(favorite)
             val response = mapOf(
                 "data" to savedFavorite
             )
@@ -188,7 +190,7 @@ class FavoriteTerrainController(
     suspend fun deleteFavorite(request: HttpServletRequest, @PathVariable userId: Long, @PathVariable id:Long): ResponseEntity<Map<String, String>> {
         val startNanos = System.nanoTime()
         try {
-            val existingFavorite = service.getFavoriteIfExist(id, userId).firstOrNull()
+            val existingFavorite = service.getFavoriteIfExist(id, userId)
 
             val deleteFavorite = existingFavorite?.favorite?.id?.let {
                 service.deleteById(it)

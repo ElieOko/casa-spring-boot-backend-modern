@@ -2,9 +2,8 @@ package server.web.casa.app.reservation.domain.model
 
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
-import server.web.casa.app.property.domain.model.Terrain
 import server.web.casa.app.property.domain.model.Vacance
-import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationTerrainEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.VacanceImageEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationVacanceEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
@@ -27,8 +26,9 @@ data class ReservationVacance(
 
 data class ReservationVacanceDTO(
     val reservation: ReservationVacanceEntity,
-   //val vacance: Vacance,
-    val user: UserDto
+    val vacance: Vacance?,
+    val user: UserDto,
+    val imageVacance: List<VacanceImageEntity>
 )
 
 data class ReservationVacanceRequest(

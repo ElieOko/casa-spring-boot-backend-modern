@@ -5,6 +5,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import server.web.casa.app.notification.domain.model.NotificationDTO
 import server.web.casa.app.notification.domain.model.TagType
+import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
 
 @Table("notifications")
@@ -23,7 +24,8 @@ class NotificationCasaEntity(
     @Column("tag")
     val tag : String = TagType.RESERVATION.toString(),
     @Column("created")
-    val created: LocalDateTime = LocalDateTime.now()
+    val created: LocalDateTime = LocalDateTime.now(),
+    val user : UserDto? = null
 )
 
 fun NotificationCasaEntity.toDomain() = NotificationDTO(
@@ -33,5 +35,6 @@ fun NotificationCasaEntity.toDomain() = NotificationDTO(
     message = this.message,
     tag = this.tag,
     isActive = this.isActive,
-    timestamp = this.created
+    timestamp = this.created,
+    user = this.user
 )

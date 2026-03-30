@@ -16,7 +16,7 @@ import java.time.LocalDateTime
  class FavoriteTerrainDTO(
     val favorite    : FavoriteTerrainEntity,
     val user        : UserDto,
-    val terrain     : Terrain
+    val terrain     : Terrain?
 )
 
 class FavoriteTerrainRequest(

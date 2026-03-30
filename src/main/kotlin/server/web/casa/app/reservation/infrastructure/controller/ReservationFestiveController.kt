@@ -17,9 +17,22 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.NotificationReservation
+import server.web.casa.app.notification.domain.model.request.NotificationReservationFestive
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
+import server.web.casa.utils.scheduler.ReservationScheduler
 
-@Tag(name = "Reservation", description = "Reservation's Management")
+@Tag(name = "Reservation Festive", description = "Reservation's Management")
 @RestController
 @RequestMapping("api")
 @Profile(Mode.DEV)
@@ -27,9 +40,14 @@ import server.web.casa.security.monitoring.MetricModel
 class ReservationFestiveController(
     private val service: ReservationFestiveService,
     private val userS: UserService,
+    private val userR: UserRepository,
     private val festS: SalleFestiveService,
-    private val notif: NotificationReservationService,
     private val sentry: SentryService,
+    private val task : ReservationScheduler,
+    private val notif: NotificationReservationService,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
+    private val auth : Auth
 ){
     @PostMapping("/{version}/${ReservationFestiveScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -37,10 +55,11 @@ class ReservationFestiveController(
         @Valid @RequestBody request: ReservationFestiveRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val bureau = festS.findById(request.festiveId)
-
              if(bureau.userId == user.userId){
                  val responseOwnProperty = mapOf("error" to "You can't reserve your own property")
                  return ResponseEntity.ok().body(responseOwnProperty )}
@@ -86,7 +105,8 @@ class ReservationFestiveController(
              }
 
              val lastReservationProperty = service.findByStartDateAndEndDateProperty(request.startDate, request.endDate, bureau.id!!)
-
+            val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            val hostUser = userR.findById( bureau.userId!!) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
              val propertyBooked = lastReservationProperty
                  ?.takeIf { it.isNotEmpty() }
                  ?.filter {
@@ -108,19 +128,40 @@ class ReservationFestiveController(
              // check if property is available before adding
              if(!bureau.isAvailable){
                  val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-                 return ResponseEntity.ok().body(responseAvailable)}
-                 val reservationCreate = service.createReservation(dataReservation)
-             /* val notification = notif.create(
-                  NotificationReservation(
-                      reservation = reservationCreate.reservation!!,
-                      guestUser = userEntity,
-                      hostUser = userR.findById( propertyEntity.user!!)!!
-                  )
-              )*/
-             val response = mapOf(
-                 "message" to "Votre reservation à la date du ${reservationCreate.reservation?.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
-                 "reservation" to reservationCreate,
-                 "proprietaire" to  userS.findIdUser( bureau.userId!!),
+                 return ResponseEntity.ok().body(responseAvailable)
+             }
+            val reservationCreate = service.createReservation(dataReservation)
+            val startTaskAt = expiredAt(
+                date = reservationCreate.reservation?.startDate.toString(),
+                heure = reservationCreate.reservation?.reservationHeure.toString()
+            )
+            task.scheduleOneShot(
+                reservationId = reservationCreate.reservation.id?:0L,
+                taskType ="ONESHOT reservation festive",
+                type = "festive",
+                minute = startTaskAt
+            )
+            val notification = notif.createFestive(
+                NotificationReservationFestive(
+                    reservation = reservationCreate.reservation,
+                    guestUser = guestUser as UserEntity,
+                    hostUser = hostUser as UserEntity
+                )
+            )
+            val note = notification2.save(
+                NotificationCasaEntity(
+                    id = null,
+                    userId = userR.findById(bureau.userId)!!.userId,
+                    title = "Demande de visite reçue",
+                    message = "Un client est intéressé par un bien et souhaite le visiter. Ne tardez pas à répondre \uD83D\uDE09",
+                    tag = TagType.DEMANDES.toString(),
+                )
+            )
+            notificationService.sendNotificationToUser(hostUser.userId.toString(),note.toDomain())
+            val response = mapOf(
+                "message" to "Votre reservation à la date du ${reservationCreate.reservation?.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
+                "reservation" to reservationCreate,
+                "proprietaire" to  userS.findIdUser( bureau.userId!!),
                  //"property" to property,
                 // "notificationSendState" to notification
              )
@@ -380,84 +421,90 @@ class ReservationFestiveController(
         }
     }
 
-  /*  @PutMapping("/cancel/{id}")
-    suspend fun cancelReservation(
-        @PathVariable id: Long,
-        @RequestBody reason: String?
-    ): ResponseEntity<Map<String, ReservationBureauEntity?>> {
-        val cancel = service.cancelOrKeepReservation(id, false,reason, ReservationStatus.CANCELLED)
-        val reservation = service.findId(id)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-    }
+//    @PutMapping("/cancel/{id}")
+//    suspend fun cancelReservation(
+//        @PathVariable id: Long,
+//        @RequestBody reason: String?
+//    ): ResponseEntity<Map<String, ReservationBureauEntity?>> {
+//        val cancel = service.cancelOrKeepReservation(id, false,reason, ReservationStatus.CANCELLED)
+//        val reservation = service.findId(id)
+//        val response = mapOf("reservation" to reservation)
+//        return ResponseEntity.ok(response)
+//    }
 
-    @PutMapping("/keep/{id}/")
-    suspend fun keepReservation(
-        @PathVariable id: Long,
-        @RequestBody reason: String ?
-    ): ResponseEntity<Map<String, ReservationBureauEntity?>> {
-        val keep = service.cancelOrKeepReservation(id, true, reason, ReservationStatus.PENDING)
-        val reservation = service.findId(id)
-        val response = mapOf("reservation" to reservation)
-        return ResponseEntity.ok(response)
-    }*/
+//    @PutMapping("/keep/{id}/")
+//    suspend fun keepReservation(
+//        @PathVariable id: Long,
+//        @RequestBody reason: String ?
+//    ): ResponseEntity<Map<String, ReservationBureauEntity?>> {
+//        val keep = service.cancelOrKeepReservation(id, true, reason, ReservationStatus.PENDING)
+//        val reservation = service.findId(id)
+//        val response = mapOf("reservation" to reservation)
+//        return ResponseEntity.ok(response)
+//    }
+//
+//    @DeleteMapping("/{version}/${ReservationFestiveScope.PROTECTED}/delete/{id}")
+//    suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
+//        val startNanos = System.nanoTime()
+//        try {
+//            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
+//            val notificationDelete = notif.deleteByReservation(id)
+//            return if (notificationDelete) {
+//                service.deleteReservationById(id)
+//                ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))}else{
+//                return ResponseEntity.ok(mapOf("message" to "Something was wrong"))}
+//        } finally {
+//            sentry.callToMetric(
+//                MetricModel(
+//                    startNanos = startNanos,
+//                    status = "200",
+//                    route = "${request.method} /${request.requestURI}",
+//                    countName = "api.reservationfestive.deletereservation.count",
+//                    distributionName = "api.reservationfestive.deletereservation.latency"
+//                )
+//            )
+//        }
+//    }
+//    @DeleteMapping("/{version}/${ReservationFestiveScope.PROTECTED}/delete/all")
+//    suspend fun deleteReservationAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
+//        val startNanos = System.nanoTime()
+//        try {
+//             val reservation = service.deleteAll()
+//            return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
+//        } finally {
+//            sentry.callToMetric(
+//                MetricModel(
+//                    startNanos = startNanos,
+//                    status = "200",
+//                    route = "${request.method} /${request.requestURI}",
+//                    countName = "api.reservationfestive.deletereservationall.count",
+//                    distributionName = "api.reservationfestive.deletereservationall.latency"
+//                )
+//            )
+//        }
+//    }
 
-    @DeleteMapping("/{version}/${ReservationFestiveScope.PROTECTED}/delete/{id}")
-    suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
-        val startNanos = System.nanoTime()
-        try {
-            val reservation = service.findById(id)?.reservation ?: return ResponseEntity.ok(mapOf("message" to "Reservation not found"))
-            val notificationDelete = notif.deleteByReservation(id)
-            return if (notificationDelete) {
-                service.deleteReservationById(id)
-                ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))}else{
-                return ResponseEntity.ok(mapOf("message" to "Something was wrong"))}
-        } finally {
-            sentry.callToMetric(
-                MetricModel(
-                    startNanos = startNanos,
-                    status = "200",
-                    route = "${request.method} /${request.requestURI}",
-                    countName = "api.reservationfestive.deletereservation.count",
-                    distributionName = "api.reservationfestive.deletereservation.latency"
-                )
-            )
-        }
-    }
-    @DeleteMapping("/{version}/${ReservationFestiveScope.PROTECTED}/delete/all")
-    suspend fun deleteReservationAll(request: HttpServletRequest): ResponseEntity<Map<String, String>> {
-        val startNanos = System.nanoTime()
-        try {
-             val reservation = service.deleteAll()
-            return ResponseEntity.ok(mapOf("message" to "Reservation deleted successfully"))
-        } finally {
-            sentry.callToMetric(
-                MetricModel(
-                    startNanos = startNanos,
-                    status = "200",
-                    route = "${request.method} /${request.requestURI}",
-                    countName = "api.reservationfestive.deletereservationall.count",
-                    distributionName = "api.reservationfestive.deletereservationall.latency"
-                )
-            )
-        }
-    }
-/*
-    @PutMapping("/notification/partners/{reservationId}")
+    @PutMapping("/{version}/${ReservationFestiveScope.PROTECTED}/notification/partners//{reservationId}")
     suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findById(reservationId)?.reservation
         if (reservation == null){
             val response = mapOf("error" to "reservation not found")
             return ResponseEntity.ok(response)
         }
-        /*
-        val notification = notif.dealConcludedHost(reservation.id!!, true)
-        val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
-        val notificationState = notif.stateReservationHost(reservation.id, true)
+        val propertyOwner = festS.findById(reservation.festiveId!!)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.userId ) {
+            ResponseEntity.status(403)
+                .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+        }
 
-        val propertyEntity = festS.findById(reservation.festiveId!!)
-             propertyEntity!!.isAvailable = false
-        festS.save(propertyEntity)*/
+        val notification = notif.dealConcludedHostFestive(reservation.id!!, true)
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
+        val notificationGuest = notif.dealConcludedGuestFestive(reservation.id , true)
+        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Bonne nouvelle ", message = "Félicitations, votre demande a été validée et le bien vous a été accordé.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
+        val notificationState = notif.stateReservationHostFestive(reservation.id, true)
         val response = mapOf(
             "DealConcludeHost" to true,
             "DealConcludeGuest" to true,
@@ -466,37 +513,43 @@ class ReservationFestiveController(
 
         return ResponseEntity.ok(response)
     }
-   /* @PutMapping("/notification/guest/{reservationId}")
-    fun dealconcluguest( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
-        val reservation = service.findId(reservationId)
-        val notification = if(reservation != null) notif.dealConcludedGuest(reservation.reservationId, true) else null
-        val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
-        return ResponseEntity.ok(response)
-    }*/
-    @PutMapping("/notification/state/{reservationId}/{state}")
-    suspend fun stateReservationHost(
-       @PathVariable reservationId: Long,
-       @PathVariable state: Boolean
-    ): ResponseEntity<Map<String, Any?>> {
-        val reservation = service.findById(reservationId)!!.reservation
-        val notification = if(reservation != null) notif.stateReservationHost(reservation.id!!, state) else null
-        val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
-        return ResponseEntity.ok(response)
+    fun expiredAt (date:String, heure: String): Long {
+        val date = LocalDate.parse(date)
+        val time = LocalTime.parse(heure)
+        val end = LocalDateTime.of(date, time).plusHours(1)
+        return  Duration.between(LocalDateTime.now(), end).toMinutes()
     }
-    @PutMapping("/notification/cancel/{reservationId}")
-    suspend fun dealCancel(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
-        val reservation = service.findById(reservationId)!!.reservation
-        if (reservation ==null){
-            val response = mapOf("error" to "reservation not found")
-            return ResponseEntity.ok(response)
-        }/*
-        val notification = notif.stateReservationGuestCancel(reservation.id!!)
-        val propertyEntity = festS.findById(reservation.festiveId!!)
-           // .takeIf{ it.isNotEmpty() }!!
-           // .filter { entity -> entity!!.festiveId==reservation.property.festiveId }[0] //.filter { }//findById(reservation.property.festiveId)
-        propertyEntity!!.isAvailable = true
-        festS.save(propertyEntity)*/
-        val response = mapOf("DealCancel" to true, "message" to "Deal cancel successfully")
-        return ResponseEntity.ok(response)
-    }*/
+//   @PutMapping("/notification/guest/{reservationId}")
+//    fun dealconcluguest( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+//        val reservation = service.findId(reservationId)
+//        val notification = if(reservation != null) notif.dealConcludedGuest(reservation.reservationId, true) else null
+//        val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
+//        return ResponseEntity.ok(response)
+//    }
+//    @PutMapping("/notification/state/{reservationId}/{state}")
+//    suspend fun stateReservationHost(
+//       @PathVariable reservationId: Long,
+//       @PathVariable state: Boolean
+//    ): ResponseEntity<Map<String, Any?>> {
+//        val reservation = service.findById(reservationId)!!.reservation
+//        val notification = if(reservation != null) notif.stateReservationHost(reservation.id!!, state) else null
+//        val response = mapOf("DealConcludeHost" to notification, "message" to "True if it's successfully and null or false when unfulfilled")
+//        return ResponseEntity.ok(response)
+//    }
+//    @PutMapping("/notification/cancel/{reservationId}")
+//    suspend fun dealCancel(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+//        val reservation = service.findById(reservationId)!!.reservation
+//        if (reservation ==null){
+//            val response = mapOf("error" to "reservation not found")
+//            return ResponseEntity.ok(response)
+//        }/*
+//        val notification = notif.stateReservationGuestCancel(reservation.id!!)
+//        val propertyEntity = festS.findById(reservation.festiveId!!)
+//           // .takeIf{ it.isNotEmpty() }!!
+//           // .filter { entity -> entity!!.festiveId==reservation.property.festiveId }[0] //.filter { }//findById(reservation.property.festiveId)
+//        propertyEntity!!.isAvailable = true
+//        festS.save(propertyEntity)*/
+//        val response = mapOf("DealCancel" to true, "message" to "Deal cancel successfully")
+//        return ResponseEntity.ok(response)
+//    }
 }

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import server.web.casa.app.property.application.service.BureauService
+import server.web.casa.app.property.infrastructure.persistence.repository.BureauImageRepository
 import server.web.casa.app.reservation.domain.model.ReservationBureauDTO
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationBureauEntity
@@ -132,6 +133,7 @@ class ReservationBureauService(
             reservation = it,
             bureau = brxS.findById(it.bureauId!!),
             user = userS.findIdUser(it.userId!!),
+            bureauImage = brxS.getImageByBureauID(it.bureauId).toList()
            // propietaire = userS.findIdUser(brxS.findById(it.bureauId).userId!!)
         )
 

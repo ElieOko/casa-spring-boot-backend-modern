@@ -2,6 +2,7 @@ package server.web.casa.app.property.domain.model.favorite
 
 import org.jetbrains.annotations.NotNull
 import server.web.casa.app.property.domain.model.Hotel
+import server.web.casa.app.property.infrastructure.persistence.entity.HotelEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteHotelEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDateTime
@@ -18,7 +19,7 @@ import java.time.LocalDateTime
  class FavoriteHotelDTO(
     val favorite    : FavoriteHotelEntity,
     val user        : UserDto,
-    //val hotel       : Hotel
+    val hotel       : HotelEntity?
 )
 
 class FavoriteHotelRequest(

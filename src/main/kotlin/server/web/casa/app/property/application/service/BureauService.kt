@@ -16,6 +16,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.*
+import kotlin.collections.get
 
 @Service
 class BureauService(
@@ -61,7 +62,7 @@ class BureauService(
         bureauList
     }
     suspend fun getAllBureau() = coroutineScope{ findAll(repository.findAll().toList()) }
-
+    suspend fun getImageByBureauID( bureauId: Long)= coroutineScope { bureauImageRepository.findAllByBureauId(bureauId).toList() }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{ findAll(repository.findAllByUser(userId).toList()) }
 
     suspend fun create(data : Bureau,features: List<FeatureRequest>) = coroutineScope {
@@ -122,6 +123,35 @@ class BureauService(
                 )
             )
         }
+        bureauList
+    }
+
+    suspend fun showDetail(id : Long) = coroutineScope{
+        val data = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette chambre n'existe.")
+        val bureauList = mutableListOf<BureauDTOMaster>()
+        val bureauIds: List<Long> = listOf(data.id!!)
+        val images = bureauImageRepository.findByBureauIdIn(bureauIds).toList()
+        val features = repositoryFeature.findByBureauIdIn(bureauIds).toList()
+        val imageByBureau: Map<Long, List<BureauImageEntity>> = images.groupBy { it.bureauId }
+        val featureByModel = features.groupBy { it.bureauId }
+        bureauList.add(
+            BureauDTOMaster(
+                bureau = data.toDomain().toDT0(),
+                images = imageByBureau[data.id]?.map { it.toDomain() } ?: emptyList(),
+                devise = devise.getById(data.deviseId!!),
+                image = person.findByUser(data.userId!!)?.images?:"",
+                feature = featureByModel[data.id]?.map { featureService.findByIdFeature(it.featureId) }?.toList() ?: emptyList(),
+                address = data.toAddressDTO(),
+                localAddress = LocalAddressDTO(
+                    city = cityService.findByIdCity(data.cityId),
+                    commune = communeService.findByIdCommune(data.communeId),
+                    quartier = quartierService.findByIdQuartier(data.quartierId)),
+                geoZone = data.toGeo(),
+                postBy = userService.findIdUser(data.userId).username,
+                typeProperty = propertyTypeService.findByIdPropertyType(data.propertyTypeId?:0)
+            )
+        )
+
         bureauList
     }
 }

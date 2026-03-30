@@ -3,6 +3,7 @@ package server.web.casa.app.reservation.domain.model
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import server.web.casa.app.property.domain.model.SalleFestive
+import server.web.casa.app.property.infrastructure.persistence.entity.SalleFestiveImageEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationFestiveEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
@@ -26,7 +27,8 @@ data class ReservationFestive(
 data class ReservationFestiveDTO(
     val reservation: ReservationFestiveEntity,
     val salle: SalleFestive,
-    val user: UserDto
+    val user: UserDto,
+    val imagSalle: List<SalleFestiveImageEntity>
 )
 
 data class ReservationFestiveRequest(

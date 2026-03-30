@@ -18,6 +18,8 @@ import server.web.casa.route.property.PropertyFuneraireScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.route.property.PropertyTerrainScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Funeraire", description = "")
@@ -33,6 +35,7 @@ class SalleFuneraireController(
     private val quartierService: QuartierService,
     private val propertyTypeService: PropertyTypeService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création bureau")
     @PostMapping("/${PropertyFuneraireScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -41,7 +44,11 @@ class SalleFuneraireController(
         @Valid @RequestBody request: SalleFuneraireRequest,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
             if (request.funeraire.propertyTypeId != 7L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au salle funeraire")
             propertyTypeService.findByIdPropertyType(request.funeraire.propertyTypeId)
             val city = if (request.funeraire.cityId != null) cityService.findByIdCity(request.funeraire.cityId) else null
@@ -140,7 +147,29 @@ class SalleFuneraireController(
             )
         }
     }
-
+    @Operation(summary = "Get Salle Funeraire by ID")
+    @GetMapping("/${PropertyFuneraireScope.PUBLIC}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getFuneraireByID(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(propertyId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getFuneraireById.count",
+                    distributionName = "api.property.getFuneraireById.latency"
+                )
+            )
+        }
+    }
     @Operation(summary = "Suppression Salle festive")
     @DeleteMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
     suspend fun deleteFile(

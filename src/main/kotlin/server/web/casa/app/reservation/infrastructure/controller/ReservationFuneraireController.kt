@@ -17,9 +17,22 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.server.ResponseStatusException
+import server.web.casa.app.notification.application.service.NotificationService
+import server.web.casa.app.notification.domain.model.request.NotificationReservationFestive
+import server.web.casa.app.notification.domain.model.request.NotificationReservationFuneraire
+import server.web.casa.app.notification.domain.model.request.TagType
+import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
+import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
+import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
+import server.web.casa.app.user.infrastructure.persistence.repository.UserRepository
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
+import server.web.casa.utils.MessageResponse
+import server.web.casa.utils.scheduler.ReservationScheduler
 
-@Tag(name = "Reservation", description = "Reservation's Management")
+@Tag(name = "Reservation Funeraire", description = "Reservation's Management")
 @RestController
 @RequestMapping("api")
 @Profile(Mode.DEV)
@@ -27,9 +40,14 @@ import server.web.casa.security.monitoring.MetricModel
 class ReservationFuneraireController(
     private val service: ReservationFuneraireService,
     private val userS: UserService,
+    private val userR: UserRepository,
     private val funerS: SalleFuneraireService,
     private val notif: NotificationReservationService,
     private val sentry: SentryService,
+    private val task : ReservationScheduler,
+    private val notificationService: NotificationService,
+    private val notification2 : NotificationCasaRepository,
+    private val auth : Auth
 ){
     @PostMapping("/{version}/${ReservationFuneraireScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun create(
@@ -37,10 +55,11 @@ class ReservationFuneraireController(
         @Valid @RequestBody request: ReservationFuneraireRequest
     ): ResponseEntity<Map<String, Any?>> {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
              val user = userS.findIdUser(request.userId)
              val bureau = funerS.findById(request.funeraireId)
-
              if(bureau.userId == user.userId){
                  val responseOwnProperty = mapOf("error" to "You can't reserve your own property")
                  return ResponseEntity.ok().body(responseOwnProperty )}
@@ -107,15 +126,38 @@ class ReservationFuneraireController(
              // check if property is available before adding
              if(!bureau.isAvailable){
                  val responseAvailable = mapOf("error" to "Unfortunately, this property is already taken.")
-                 return ResponseEntity.ok().body(responseAvailable)}
-                 val reservationCreate = service.createReservation(dataReservation)
-             /* val notification = notif.create(
-                  NotificationReservation(
-                      reservation = reservationCreate.reservation!!,
-                      guestUser = userEntity,
-                      hostUser = userR.findById( propertyEntity.user!!)!!
-                  )
-              )*/
+                 return ResponseEntity.ok().body(responseAvailable)
+             }
+            val guestUser = userR.findById( request.userId) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            val hostUser = userR.findById( bureau.userId!!) ?: ResponseEntity.status(404).body(mapOf("error" to "user not found"))
+            val reservationCreate = service.createReservation(dataReservation)
+            val startTaskAt = expiredAt(
+                date = reservationCreate.reservation?.startDate.toString(),
+                heure = reservationCreate.reservation?.reservationHeure.toString()
+            )
+            task.scheduleOneShot(
+                reservationId = reservationCreate.reservation.id?:0L,
+                taskType ="ONESHOT reservation funeraire",
+                type = "funeraire",
+                minute = startTaskAt
+            )
+            val notification = notif.createFuneraire(
+                NotificationReservationFuneraire(
+                    reservation = reservationCreate.reservation,
+                    guestUser = guestUser as UserEntity,
+                    hostUser = hostUser as UserEntity
+                )
+            )
+            val note = notification2.save(
+                NotificationCasaEntity(
+                    id = null,
+                    userId = userR.findById(bureau.userId)!!.userId,
+                    title = "Demande de visite reçue",
+                    message = "Un client est intéressé par un bien et souhaite le visiter. Ne tardez pas à répondre \uD83D\uDE09",
+                    tag = TagType.DEMANDES.toString(),
+                )
+            )
+            notificationService.sendNotificationToUser(hostUser.userId.toString(),note.toDomain())
              val response = mapOf(
                  "message" to "Votre reservation à la date du ${reservationCreate.reservation?.startDate} au ${reservationCreate.reservation?.endDate} a été créée avec succès",
                  "reservation" to reservationCreate,
@@ -379,6 +421,43 @@ class ReservationFuneraireController(
         }
     }
 
+
+    @PutMapping("/{version}/${ReservationFuneraireScope.PROTECTED}/notification/partners/{reservationId}")
+    suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
+        val reservation = service.findById(reservationId)?.reservation
+        if (reservation == null){
+            val response = mapOf("error" to "reservation not found")
+            return ResponseEntity.ok(response)
+        }
+        val propertyOwner = funerS.findById(reservation.funeraireId)
+        val checkAdmin = userS.isAdmin()
+        if (!checkAdmin.first && checkAdmin.second != reservation.userId && checkAdmin.second != propertyOwner.userId ) {
+            ResponseEntity.status(403)
+                .body(mapOf("error" to "Autorizatoin denied, you don't have access to this resource"))
+        }
+
+        val notification = notif.dealConcludedHostFuneraire(reservation.id!!, true)
+        val note = notification2.save(NotificationCasaEntity(id = null, userId = notification["host"].toString().toLong(), title = "Attribution confirmée", message = "Votre confirmation a bien été enregistrée. Le bien est attribué au client.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notification["host"].toString(),note.toDomain())
+        val notificationGuest = notif.dealConcludedGuestFuneraire(reservation.id , true)
+        val note2 = notification2.save(NotificationCasaEntity(id = null, userId = notificationGuest["guest"].toString().toLong(), title = "Bonne nouvelle ", message = "Félicitations, votre demande a été validée et le bien vous a été accordé.", tag = TagType.DEMANDES.toString(),))
+        notificationService.sendNotificationToUser(notificationGuest["guest"].toString(),note2.toDomain())
+        val notificationState = notif.stateReservationHostFuneraire(reservation.id, true)
+        val response = mapOf(
+            "DealConcludeHost" to true,
+            "DealConcludeGuest" to true,
+            "DealConcludeState" to true,
+            "message" to "True if it's successfully and null or false when unfulfilled")
+
+        return ResponseEntity.ok(response)
+    }
+    fun expiredAt (date:String, heure: String): Long {
+        val date = LocalDate.parse(date)
+        val time = LocalTime.parse(heure)
+        val end = LocalDateTime.of(date, time).plusHours(1)
+        return  Duration.between(LocalDateTime.now(), end).toMinutes()
+    }
+
   /*  @PutMapping("/cancel/{id}")
     suspend fun cancelReservation(
         @PathVariable id: Long,
@@ -399,7 +478,7 @@ class ReservationFuneraireController(
         val reservation = service.findId(id)
         val response = mapOf("reservation" to reservation)
         return ResponseEntity.ok(response)
-    }*/
+    }
 
     @DeleteMapping("/{version}/${ReservationFuneraireScope.PROTECTED}/delete/{id}")
     suspend fun deleteReservation(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Map<String, String>> {
@@ -441,30 +520,7 @@ class ReservationFuneraireController(
             )
         }
     }
-/*
-    @PutMapping("/notification/partners/{reservationId}")
-    suspend fun dealConcludePartners(@PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
-        val reservation = service.findById(reservationId)?.reservation
-        if (reservation == null){
-            val response = mapOf("error" to "reservation not found")
-            return ResponseEntity.ok(response)
-        }
-        /*
-        val notification = notif.dealConcludedHost(reservation.id!!, true)
-        val notificationGuest = notif.dealConcludedGuest(reservation.id , true)
-        val notificationState = notif.stateReservationHost(reservation.id, true)
 
-        val propertyEntity = funerS.findById(reservation.funeraireId!!)
-             propertyEntity!!.isAvailable = false
-        funerS.save(propertyEntity)*/
-        val response = mapOf(
-            "DealConcludeHost" to true,
-            "DealConcludeGuest" to true,
-            "DealConcludeState" to true,
-            "message" to "True if it's successfully and null or false when unfulfilled")
-
-        return ResponseEntity.ok(response)
-    }
    /* @PutMapping("/notification/guest/{reservationId}")
     fun dealconcluguest( @PathVariable reservationId: Long): ResponseEntity<Map<String, Any?>> {
         val reservation = service.findId(reservationId)

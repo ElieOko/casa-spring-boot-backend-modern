@@ -3,6 +3,7 @@ package server.web.casa.app.reservation.domain.model
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import server.web.casa.app.property.domain.model.Terrain
+import server.web.casa.app.property.infrastructure.persistence.entity.TerrainImageEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationTerrainEntity
 import server.web.casa.app.user.domain.model.UserDto
 import java.time.LocalDate
@@ -25,8 +26,9 @@ data class ReservationTerrain(
 
 data class ReservationTerrainDTO(
     val reservation: ReservationTerrainEntity,
-   val terrain: Terrain,
-    val user: UserDto
+    val terrain: Terrain,
+    val user: UserDto,
+    val imageTerrain: List<TerrainImageEntity>
 )
 
 data class ReservationTerrainRequest(

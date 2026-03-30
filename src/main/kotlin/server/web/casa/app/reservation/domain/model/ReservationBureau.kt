@@ -6,6 +6,7 @@ import server.web.casa.app.property.domain.model.Bureau
 import server.web.casa.app.property.domain.model.BureauDTO
 import server.web.casa.app.property.domain.model.dto.PropertyDTO
 import server.web.casa.app.property.domain.model.dto.PropertyMasterDTO
+import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationBureauEntity
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
 import server.web.casa.app.user.domain.model.UserDto
@@ -31,6 +32,7 @@ data class ReservationBureauDTO(
     val reservation: ReservationBureauEntity,
     val bureau: Bureau,
     val user: UserDto,
+    val bureauImage: List<BureauImageEntity>?
    // val propietaire:UserDto
 )
 

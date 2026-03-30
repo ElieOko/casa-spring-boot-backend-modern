@@ -14,6 +14,8 @@ class FavoriteVacanceEntity(
     val userId      : Long,
     @Column("vacance_id")
     val vacanceId   : Long,
+    @Column("status")
+    var status: Boolean = true,
     @Column("created_at")
     val createdAt   : LocalDate = LocalDate.now()
 )

@@ -14,6 +14,8 @@ class FavoriteTerrainEntity(
     val userId      : Long,
     @Column("terrain_id")
     val terrainId   : Long,
+    @Column("status")
+    var status: Boolean = true,
     @Column("created_at")
     val createdAt   : LocalDate = LocalDate.now()
 )

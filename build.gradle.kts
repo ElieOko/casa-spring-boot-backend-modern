@@ -1,7 +1,7 @@
 plugins {
 	kotlin("jvm") version "2.2.10"
 	kotlin("plugin.spring") version "2.2.10"
-	id("org.springframework.boot") version "4.0.2"
+	id("org.springframework.boot") version "4.0.3"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("io.sentry.jvm.gradle") version "6.0.0"
 	id("org.owasp.dependencycheck") version "12.2.0"
@@ -90,12 +90,7 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	// @sentry
 	implementation("io.sentry:sentry:8.31.0")
-//	implementation("io.sentry:sentry-opentelemetry-agent:8.22.0")
-//	implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.31.0")
-//	implementation(platform("io.sentry:sentry-bom:8.31.0"))
-	//implementation("io.r2dbc:r2dbc-postgresql")
 	implementation("io.r2dbc:r2dbc-pool:1.0.2.RELEASE")
-	//implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
 	implementation("org.postgresql:r2dbc-postgresql:1.1.1.RELEASE")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
     runtimeOnly("org.postgresql:postgresql")

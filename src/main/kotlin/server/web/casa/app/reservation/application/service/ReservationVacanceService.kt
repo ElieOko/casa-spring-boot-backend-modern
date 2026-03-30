@@ -18,7 +18,7 @@ import java.time.LocalDate
 @Profile(Mode.DEV)
 class ReservationVacanceService(
     private val repoR: ReservationVacanceRepository,
-    //private val vacS: VacanceService,
+    private val vacS: VacanceService,
     private val userS: UserService
 ) {
      suspend fun createReservation(reservation: ReservationVacanceEntity): ReservationVacanceDTO {
@@ -130,8 +130,9 @@ class ReservationVacanceService(
     suspend fun toEntityDTO(it: ReservationVacanceEntity): ReservationVacanceDTO =
         ReservationVacanceDTO(
             reservation = it,
-            //vacance = vacS.findById(it.vacanceId),
-            user = userS.findIdUser(it.userId)
+            vacance = vacS.findById(it.vacanceId),
+            user = userS.findIdUser(it.userId),
+            imageVacance = vacS.getImageByVacanceID(it.vacanceId)
         )
 
 }

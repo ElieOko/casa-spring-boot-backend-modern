@@ -12,7 +12,7 @@ interface FavoriteBureauRepository: CoroutineCrudRepository<FavoriteBureauEntity
     fun findFavoriteByUserId(@Param("user") user: Long): Flow<FavoriteBureauEntity>?
 
     @Query("SELECT * FROM bureau_favorites WHERE bureau_id = :bureauId")
-    fun findFavoriteByFestId(@Param("bureauId") bureauId: Long): Flow<FavoriteBureauEntity>?
+    fun findFavoriteByBureauId(@Param("bureauId") bureauId: Long): Flow<FavoriteBureauEntity>?
 
     @Query("SELECT * FROM bureau_favorites WHERE bureau_id = :bureauId AND user_id = :user")
     fun findFavoriteExist(@Param("bureauId") bureauId: Long, @Param("user") user: Long): Flow<FavoriteBureauEntity>?

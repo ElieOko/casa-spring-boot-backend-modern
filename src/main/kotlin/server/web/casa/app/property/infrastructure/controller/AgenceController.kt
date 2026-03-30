@@ -12,6 +12,10 @@ import server.web.casa.route.utils.AgenceScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.http.HttpStatusCode
+import org.springframework.web.server.ResponseStatusException
+import server.web.casa.route.property.PropertyVacanceScope
+import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
 @Tag(name = "Agence", description = "")
@@ -20,6 +24,7 @@ import server.web.casa.security.monitoring.MetricModel
 class AgenceController(
     private val service: AgenceService,
     private val sentry: SentryService,
+    private val auth : Auth
 ) {
     @Operation(summary = "Création agence")
     @PostMapping("/{version}/${AgenceScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -28,7 +33,11 @@ class AgenceController(
         @Valid @RequestBody request: AgenceDTO,
     ): ApiResponseWithMessage<Agence> = coroutineScope {
         val startNanos = System.nanoTime()
+        val userConnect = auth.user()
         try {
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
+                MessageResponse.ACCOUNT_NOT_CERTIFIED
+            )
             val result = service.create(request.toDomain())
             ApiResponseWithMessage(message = "Enregistrement réussie pour votre agence ${result.name}", data = result)
         } finally {
@@ -83,6 +92,30 @@ class AgenceController(
                     route = "${request.method} /${request.requestURI}",
                     countName = "api.agence.getallagencebyuser.count",
                     distributionName = "api.agence.getallagencebyuser.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "Get Agence by ID")
+    @GetMapping("/${AgenceScope.PUBLIC}/{agenceId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAgenceByID(
+        request: HttpServletRequest,
+        @PathVariable("agenceId") agenceId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val data = service.showDetail(agenceId)
+            ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getAgenceById.count",
+                    distributionName = "api.property.getAgenceById.latency"
                 )
             )
         }

@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import server.web.casa.exception.*
@@ -44,7 +45,10 @@ class ServerConfig(
           .formLogin { it.disable() }
             .build()
     }
-
+    @Bean
+    fun webClientBuilder(): WebClient.Builder {
+        return WebClient.builder()
+    }
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         registry.addResourceHandler("/property/**")
             .addResourceLocations(

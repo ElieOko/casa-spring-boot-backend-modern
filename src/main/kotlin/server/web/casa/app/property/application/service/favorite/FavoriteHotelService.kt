@@ -1,12 +1,14 @@
 package server.web.casa.app.property.application.service.favorite
 
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import server.web.casa.app.property.application.service.HotelService
 import server.web.casa.app.property.domain.model.favorite.FavoriteHotelDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.favorite.FavoriteHotelEntity
+import server.web.casa.app.property.infrastructure.persistence.repository.HotelRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.favorite.FavoriteHotelRepository
 import server.web.casa.app.user.application.service.UserService
 
@@ -14,7 +16,8 @@ import server.web.casa.app.user.application.service.UserService
 class FavoriteHotelService(
     private val repository: FavoriteHotelRepository,
     private val userS: UserService,
-    private val hotS: HotelService
+    private val hotS: HotelService,
+    private val hotR: HotelRepository
 ) {
     suspend fun create(f : FavoriteHotelEntity): FavoriteHotelDTO {
         val result = repository.save(f)
@@ -39,8 +42,9 @@ class FavoriteHotelService(
             toFavoriteDTO(it)
         }?.toList() ?: emptyList() }
     }
-    suspend fun getFavoriteIfExist( hotelId: Long , user: Long) : List<FavoriteHotelDTO>{
-        return repository.findFavoriteExist(hotelId, user).let{list-> list?.map{toFavoriteDTO(it)}?.toList() ?: emptyList() }
+    suspend fun getFavoriteIfExist(hotelId: Long, user: Long): FavoriteHotelDTO? {
+        val fav:  FavoriteHotelEntity? = repository.findFavoriteExist(hotelId, user)?.firstOrNull()
+        return fav?.let { toFavoriteDTO(it) }
     }
     suspend fun deleteById(favoriteId: Long) {
         return repository.deleteById(favoriteId)
@@ -60,7 +64,7 @@ class FavoriteHotelService(
         FavoriteHotelDTO(
             favorite = it,
             user = userS.findIdUser(it.userId),
-            //hotel = hotS.findById(it.hotelId)
+            hotel = hotR.findById(it.hotelId)
         )
 
 }

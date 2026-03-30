@@ -12,7 +12,11 @@ object AccountTypeScope{
     const val PROTECTED = "${GlobalRoute.PROTECT}/${AccountFeatures.ACCOUNT_TYPE_PATH}"
     const val PRIVATE ="${GlobalRoute.PRIVATE}/${AccountFeatures.ACCOUNT_TYPE_PATH}"
 }
+object SchedulerScope{
+    const val PUBLIC = "${GlobalRoute.PUBLIC}/${AccountFeatures.SCHEDULER}"
+}
 object AccountFeatures {
     const val ACCOUNT_PATH = "accounts"
     const val ACCOUNT_TYPE_PATH = "accounts/type"
+    const val SCHEDULER = "scheduler/task"
 }

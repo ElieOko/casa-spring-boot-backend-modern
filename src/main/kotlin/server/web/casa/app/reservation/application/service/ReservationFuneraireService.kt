@@ -131,7 +131,8 @@ class ReservationFuneraireService(
         ReservationFuneraireDTO(
             reservation = it,
             salle = funrS.findById(it.funeraireId),
-            user = userS.findIdUser(it.userId)
+            user = userS.findIdUser(it.userId),
+            imagSalle = funrS.getImageBySalleID(it.funeraireId)
         )
 
 }

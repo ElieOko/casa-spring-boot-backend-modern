@@ -11,3 +11,8 @@ data class UserPassword(
     val userId : Long
 
 )
+data class CertificationState(
+    @NotNull
+    val state : Boolean = true,
+    val message : String?= null,
+)
