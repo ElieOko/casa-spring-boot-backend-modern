@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import server.web.casa.app.actor.application.service.PersonService
 import server.web.casa.app.property.application.service.PropertyService
+import server.web.casa.app.property.domain.model.dto.withoutAdress
 import server.web.casa.app.reservation.domain.model.ReservationDTO
 import server.web.casa.app.reservation.domain.model.ReservationStatus
 import server.web.casa.app.reservation.infrastructure.persistence.entity.ReservationEntity
@@ -132,7 +133,7 @@ class ReservationService(
     suspend fun toEntityDTO(it: ReservationEntity): ReservationDTO =
         ReservationDTO(
             reservation = it,
-            property = propS.findByIdProperty(it.propertyId!!).first,
+            property = propS.findByIdProperty(it.propertyId!!).first.withoutAdress(),
             user = userS.findIdUser(it.userId!!),
             userImage = person.findByIdUser(it.userId)?.images
         )
