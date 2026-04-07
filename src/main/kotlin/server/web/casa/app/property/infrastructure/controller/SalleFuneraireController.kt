@@ -165,7 +165,7 @@ class SalleFuneraireController(
     }
     @Operation(summary = "Modification Salle festive")
     @PutMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
-    suspend fun updateFileFuneraire(
+    suspend fun updateFile(
         httpRequest: HttpServletRequest,
         @PathVariable("funeraireId") funeraireId : Long,
         @Valid @RequestBody request: ImageChange
@@ -215,7 +215,7 @@ class SalleFuneraireController(
     }
 
     @Operation(summary = "Get Salle Funeraire by ID")
-    @GetMapping("/${PropertyFuneraireScope.PUBLIC}/{propertyId}",
+    @GetMapping("/${PropertyFuneraireScope.PROTECTED}/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getFuneraireByIDProtected(
         request: HttpServletRequest,
