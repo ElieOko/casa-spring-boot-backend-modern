@@ -40,6 +40,9 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
     """)
     override fun findAll(): Flow<PropertyEntity>
 
+    @Query("""SELECT * FROM properties""")
+    fun findAllData() : Flow<PropertyEntity>
+
     @Query("""
         SELECT * FROM properties
         WHERE user_id = :userId

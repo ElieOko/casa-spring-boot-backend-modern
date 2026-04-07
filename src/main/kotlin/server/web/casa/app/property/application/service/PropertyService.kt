@@ -50,12 +50,12 @@ class PropertyService(
         val result = repository.save(data)
         toDomain(result.id!!)
     }
-    suspend fun getAll(page: Int, size: Int, sortBy: String, sortOrder: String): List<PropertyMasterDTO> {
+    suspend fun getAll(page: Int, size: Int, sortBy: String, sortOrder: String, state : Boolean = false): List<PropertyMasterDTO> {
 //        val sort = if (sortOrder.equals("desc",true)) Sort.by(sortBy).descending()  else Sort.by(sortBy).ascending()
 //        val pageable = PageRequest.of(page,repository.findAll().count(),sort)
 //        val page = repository.findAll()
 //        val data = page.map { it.toDomain() }
-        val properties = repository.findAll().toList()
+        val properties = if (!state) repository.findAll().toList() else repository.findAllData().toList()
         return findAllRelation(properties)
     }
 

@@ -197,6 +197,52 @@ class PropertyController(
         }
     }
 
+    @Operation(summary = "Voir les Property")
+    @GetMapping("/${PropertyScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPropertyProtected(
+        request: HttpServletRequest
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val page = 0
+                    val size = 15
+                    val sortBy = "title"
+                    val sortOrder = "asc"
+                    val data = service.getAll(
+                        page = page,
+                        size = size,
+                        sortBy = sortBy,
+                        sortOrder = sortOrder,
+                        state = true
+                    ).toList()
+                    val userAgent = request.getHeader("User-Agent")
+                    val deviceBrand = request.getHeader("X-Device-Brand")
+                    val deviceModel = request.getHeader("X-Device-Model")
+                    val os = request.getHeader("X-OS")
+                    val osVersion = request.getHeader("X-OS-Version")
+                    log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+                    val response = mapOf("properties" to data)
+                    ResponseEntity.ok().body(response)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getallproperty.count",
+                    distributionName = "api.property.getallproperty.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Get Property by User")
     @GetMapping("/${PropertyScope.PRIVATE}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
