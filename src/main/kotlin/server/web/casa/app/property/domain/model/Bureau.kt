@@ -161,6 +161,7 @@ fun BureauRequest.toDomain() = Bureau(
      val transactionType: String = "",
      val propertyTypeId: Long? = 0,
      val roomMeet: Int? = 0,
+     val sold: Boolean,
      var isAvailable: Boolean = true,
      val numberPiece: Int? = 0,
      val isEquip: Boolean = false,
@@ -180,5 +181,6 @@ fun Bureau.toDT0() = BureauDTO(
     roomMeet = this.roomMeet,
     numberPiece = this.numberPiece,
     isEquip = this.isEquip,
-    createdAt = this.createdAt,
+    sold = this.sold,
+    createdAt = this.createdAt
 )
