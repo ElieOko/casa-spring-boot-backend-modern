@@ -24,8 +24,6 @@ class PropertyImageKitchenService(
         val imageUri = gcsService.uploadFile(file,subdirectory)
         p.path = imageUri!!
         p.name = file.originalFilename!!
-//        val filename = storageService.store(file, subfolder = "/property/kitchen/")
-//        val fileUrl = "$server/property/kitchen/$filename"
         val data = PropertyImageKitchenEntity(
             propertyId = p.propertyId,
             name = p.name,
