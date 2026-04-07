@@ -10,6 +10,8 @@ import server.web.casa.app.ecosystem.domain.model.*
 import server.web.casa.app.ecosystem.domain.model.toEntity
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.*
 import server.web.casa.app.ecosystem.infrastructure.persistence.repository.*
+import server.web.casa.app.property.domain.model.Property
+import server.web.casa.app.property.infrastructure.persistence.mapper.toEntity
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.AccountUserRepository
 import server.web.casa.utils.base64ToMultipartFile
@@ -27,12 +29,18 @@ class PrestationService(
     private val model = "profile"
    suspend fun create(data : Prestation) =  coroutineScope{
        val file = base64ToMultipartFile(data.profile?:"", "${model}_prestation")
+       if (data.cvFile != null){
+           val file2 = base64ToMultipartFile(data.cvFile?:"", "cv_")
+           val imageUri2 = gcsService.uploadFile(file2,"cv/")
+           data.cvFile = imageUri2!!
+       }
        if (repository.countByUserId(data.userId) == 2L) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous ne pouvez pas créer plus de 2 prestations")
        account.findByUserAndAccount(data.userId, data.serviceId) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Ce service n'existe pas dans votre compte")
        val result = repository.findByUserAndService(data.userId,data.serviceId)
        val imageUri = gcsService.uploadFile(file,"prestation/$model/")
        data.profile = imageUri!!
-       if (result != null) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous avez récemment créer une prestation") else repository.save(data.toEntity()).toDomain()
+       if (result != null) throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Vous avez récemment créer une prestation")
+       else repository.save(data.toEntity()).toDomain()
    }
    suspend fun canCertified(id : Long): Pair<String, Prestation> {
         val certification = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce service n'existe pas")
@@ -125,5 +133,9 @@ class PrestationService(
             id = id
         )
         return repository.findById(id)
+    }
+
+    suspend fun createOrUpdate(model : Prestation) =  coroutineScope{
+        repository.save(model.toEntity())
     }
 }
