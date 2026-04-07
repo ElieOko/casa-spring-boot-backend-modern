@@ -54,7 +54,7 @@ class PrestationEntity(
     @Column("is_certified")
     var isCertified: Boolean = true,
     @Column("is_active")
-    val isActive: Boolean = true,
+    var isActive: Boolean = true,
     @Column("date_created")
     val dateCreated: LocalDateTime = LocalDateTime.now(),
     )
