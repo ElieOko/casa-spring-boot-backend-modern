@@ -20,6 +20,8 @@ import server.web.casa.route.property.PropertyTerrainScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
+import server.web.casa.app.property.domain.model.request.ImageChange
+import server.web.casa.route.property.PropertyFestiveScope
 import server.web.casa.route.property.PropertyScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
@@ -185,7 +187,7 @@ class TerrainController(
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message)
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -312,6 +314,34 @@ class TerrainController(
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.terrain.updateterrain.count",
                     distributionName = "api.terrain.updateterrain.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "Modification Terrain image")
+    @PutMapping("/${PropertyTerrainScope.PROTECTED}/image/{terrainId}")
+    suspend fun updateFileTerrain(
+        httpRequest: HttpServletRequest,
+        @PathVariable("terrainId") terrainId : Long,
+        @Valid @RequestBody request: ImageChange
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            service.findById(terrainId)
+            val result = if (request.images.isNotEmpty()) imageTerrain.updateFile(terrainId,request.images) else false
+            val message = mutableMapOf("message" to "Modification effectuée avec succès")
+            if (result)  ResponseEntity.ok(message)else {
+                message["message"] = "Aucune modification n'a été effectuée"
+                ResponseEntity.badRequest().body(message)}
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.sallefestive.updatefilefestive.count",
+                    distributionName = "api.sallefestive.updatefilefestive.latency"
                 )
             )
         }

@@ -111,9 +111,8 @@ class AgenceController(
     )= coroutineScope {
         val startNanos = System.nanoTime()
         try {
-            //        val ownerId = SecurityContextHolder.getContext().authentication!!.principal as String
-                    val data = service.getAllByUser(userId)
-                    ApiResponse(data)
+            val data = service.getAllByUser(userId)
+            ApiResponse(data)
         } finally {
             sentry.callToMetric(
                 MetricModel(

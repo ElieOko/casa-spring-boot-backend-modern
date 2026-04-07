@@ -16,7 +16,6 @@ import server.web.casa.route.property.PropertyHotelScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
-import server.web.casa.route.property.PropertyFestiveScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
@@ -42,9 +41,8 @@ class HotelController(
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
         try {
-            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403),
-                MessageResponse.ACCOUNT_NOT_CERTIFIED
-            )
+            if (userConnect?.first?.isCertified != true) throw ResponseStatusException(HttpStatusCode.valueOf(403), MessageResponse.ACCOUNT_NOT_CERTIFIED)
+
             if (request.propertyTypeId != 5L) throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ce type n'appartient pas au hotel")
             val city = if (request.cityId != null) cityService.findByIdCity(request.cityId) else null
             val commune = communeService.findByIdCommune(request.communeId)
@@ -54,6 +52,7 @@ class HotelController(
             request.communeId = commune?.communeId
             request.quartierId = quartier?.quartierId
             val result = service.save(request.toDomain())
+            request.images.forEach { service.createFile(ImageRequestStandard(result.id!!,it.image)) }
             ApiResponseWithMessage(message = "Enregistrement réussie pour votre hotel ${result.title}", data = result)
         } finally {
             sentry.callToMetric(

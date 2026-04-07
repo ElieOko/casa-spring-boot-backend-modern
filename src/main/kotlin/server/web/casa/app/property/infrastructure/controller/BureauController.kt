@@ -341,7 +341,7 @@ class BureauController(
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message)
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(

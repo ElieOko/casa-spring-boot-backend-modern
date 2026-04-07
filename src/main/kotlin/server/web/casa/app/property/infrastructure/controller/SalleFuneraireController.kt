@@ -165,7 +165,7 @@ class SalleFuneraireController(
     }
     @Operation(summary = "Modification Salle festive")
     @PutMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
-    suspend fun updateFile(
+    suspend fun updateFileFuneraire(
         httpRequest: HttpServletRequest,
         @PathVariable("funeraireId") funeraireId : Long,
         @Valid @RequestBody request: ImageChange
@@ -354,7 +354,7 @@ class SalleFuneraireController(
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message)
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(

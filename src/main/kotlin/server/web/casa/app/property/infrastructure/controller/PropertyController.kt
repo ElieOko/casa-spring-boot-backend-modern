@@ -385,7 +385,7 @@ class PropertyController(
         httpRequest: HttpServletRequest,
         @PathVariable("userId") userId : Long,
         @PathVariable("propertyId") propertyId : Long,
-        @Valid @RequestBody request: PropertyRequest
+        @Valid @RequestBody request: PropertyRequest2
     ): ResponseEntity<PropertyMasterDTO> {
         val startNanos = System.nanoTime()
         try {
@@ -397,9 +397,9 @@ class PropertyController(
             val property = service.findByIdProperty(propertyId)
             if (property.first.property.userId != userId) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet utilisateur n'appartient pas à la proprièté.")
             property.first.typeProperty.propertyTypeId = propertyType.propertyTypeId
-            property.first.property.title = request.title
-            property.first.property.description = request.description
-            property.first.address.address = request.address
+            property.first.property.title = request.title.ifEmpty { property.first.property.title  }
+            property.first.property.description = request.description?.ifEmpty { property.first.property.description }
+            property.first.address.address = request.address.ifEmpty { property.first.address.address }
             property.first.property.bathroom = request.bathroom
             property.first.property.rooms = request.rooms
             property.first.address.countryValue = request.countryValue
@@ -413,7 +413,7 @@ class PropertyController(
             property.first.localAddress.city?.cityId = city?.cityId
             property.first.localAddress.quartier?.quartierId = quartier?.quartierId
             property.first.localAddress.commune?.communeId = commune?.communeId
-            property.first.property.price = request.price
+            property.first.property.price = if (request.price < 1) property.first.property.price else request.price
             property.first.property.floor = request.floor
             property.first.address.quartierValue = request.quartierValue
             property.first.property.transactionType = request.transactionType
@@ -540,7 +540,7 @@ class PropertyController(
             val data= service.findById(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
-            ResponseEntity.badRequest().body(message)
+            ResponseEntity.ok(message)
         } finally {
             sentry.callToMetric(
                 MetricModel(
