@@ -34,6 +34,9 @@ interface BureauRepository : CoroutineCrudRepository<BureauEntity, Long>{
     """)
     override fun findAll():Flow<BureauEntity>
 
+    @Query("""SELECT * FROM bureau""")
+    fun findAllData(): Flow<BureauEntity>
+
     @Query("""
         SELECT * FROM bureau
         WHERE user_id = :userId

@@ -61,7 +61,10 @@ class BureauService(
         }
         bureauList
     }
-    suspend fun getAllBureau() = coroutineScope{ findAll(repository.findAll().toList()) }
+    suspend fun getAllBureau(state: Boolean = false) = coroutineScope {
+        val data = if (!state) repository.findAll().toList() else repository.findAllData().toList()
+        findAll(data)
+    }
     suspend fun getImageByBureauID( bureauId: Long)= coroutineScope { bureauImageRepository.findAllByBureauId(bureauId).toList() }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{ findAll(repository.findAllByUser(userId).toList()) }
 

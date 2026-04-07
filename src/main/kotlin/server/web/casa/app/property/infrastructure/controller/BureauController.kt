@@ -101,6 +101,35 @@ class BureauController(
         }
     }
 
+    @Operation(summary = "List des bureaux protected")
+    @GetMapping("/${PropertyBureauScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllBureauProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAllBureau(true)
+                    val response = mapOf("bureaux" to data)
+                    ResponseEntity.ok().body(response)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.bureau.getallbureau.count",
+                    distributionName = "api.bureau.getallbureau.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Modification Bureau")
     @PutMapping("/${PropertyBureauScope.PROTECTED}/image/{bureauId}")
     suspend fun updateFileBureau(
