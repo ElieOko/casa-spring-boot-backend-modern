@@ -36,6 +36,9 @@ interface SalleFuneraireRepository : CoroutineCrudRepository<SalleFuneraireEntit
     """)
     override fun findAll():Flow<SalleFuneraireEntity>
 
+    @Query("""SELECT * FROM salle_funeraires""")
+    fun findAllData(): Flow<SalleFuneraireEntity>
+
     @Query("""
         SELECT * FROM salle_funeraires
         WHERE user_id = :userId

@@ -97,6 +97,35 @@ class SalleFuneraireController(
         }
     }
 
+    @Operation(summary = "List des bureaux protected")
+    @GetMapping("/${PropertyFuneraireScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllFuneraireProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAll(true)
+                    val response = mapOf("funeraires" to data)
+                    ResponseEntity.ok().body(response)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.sallefuneraire.getallfuneraire.count",
+                    distributionName = "api.sallefuneraire.getallfuneraire.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Get Salle Funeraire by User")
     @GetMapping("/${PropertyFuneraireScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])

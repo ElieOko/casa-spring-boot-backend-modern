@@ -66,7 +66,10 @@ class SalleFuneraireService(
         }
         dataList
     }
-    suspend fun getAll() = coroutineScope{ findAll(repository.findAll().toList()) }
+    suspend fun getAll(state: Boolean = false) = coroutineScope {
+        val data = if (!state) repository.findAll().toList() else repository.findAllData().toList()
+        findAll(data)
+    }
 
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{findAll(repository.findAllByUser(userId).toList()) }
 
