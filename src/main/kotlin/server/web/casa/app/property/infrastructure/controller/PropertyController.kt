@@ -236,8 +236,8 @@ class PropertyController(
                     startNanos = startNanos,
                     status = "200",
                     route = "${request.method} /${request.requestURI}",
-                    countName = "api.property.getallproperty.count",
-                    distributionName = "api.property.getallproperty.latency"
+                    countName = "api.property.getAllPropertyProtected.count",
+                    distributionName = "api.property.getAllPropertyProtected.latency"
                 )
             )
         }
