@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -38,6 +39,8 @@ class TerrainController(
     private val sentry: SentryService,
     private val auth : Auth
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     @Operation(summary = "Création Terrain")
     @PostMapping("/${PropertyTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createTerrain(
@@ -85,6 +88,12 @@ class TerrainController(
         val startNanos = System.nanoTime()
         try {
             val data = service.getAll()
+            val userAgent = request.getHeader("User-Agent")
+            val deviceBrand = request.getHeader("X-Device-Brand")
+            val deviceModel = request.getHeader("X-Device-Model")
+            val os = request.getHeader("X-OS")
+            val osVersion = request.getHeader("X-OS-Version")
+            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
             val response = mapOf("terrain" to data)
             ResponseEntity.ok().body(response)
         } finally {
@@ -104,19 +113,22 @@ class TerrainController(
     @GetMapping("/${PropertyTerrainScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTerrainProtect(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
-        val userConnect = auth.user()
         try {
-
             val session = auth.user()
             val state: Boolean? = session?.second?.find{ true }
             when (state) {
                 true -> {
                     val data = service.getAll(true)
+                    val userAgent = request.getHeader("User-Agent")
+                    val deviceBrand = request.getHeader("X-Device-Brand")
+                    val deviceModel = request.getHeader("X-Device-Model")
+                    val os = request.getHeader("X-OS")
+                    val osVersion = request.getHeader("X-OS-Version")
+                    log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
                     val response = mapOf("terrain" to data)
                     ResponseEntity.ok().body(response)
-                    ResponseEntity.ok().body(data)}
-                false,null ->{
-                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
             }
         } finally {
             sentry.callToMetric(
@@ -124,8 +136,8 @@ class TerrainController(
                     startNanos = startNanos,
                     status = "200",
                     route = "${request.method} /${request.requestURI}",
-                    countName = "api.terrain.getallterrain.count",
-                    distributionName = "api.terrain.getallterrain.latency"
+                    countName = "api.terrain.getAllTerrainProtect.count",
+                    distributionName = "api.terrain.getAllTerrainProtect.latency"
                 )
             )
         }
@@ -210,6 +222,38 @@ class TerrainController(
             )
         }
     }
+
+    @Operation(summary = "Get Terrain by ID")
+    @GetMapping("/${PropertyTerrainScope.PROTECTED}/{terrainId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getTerrainByIDProtected(
+        request: HttpServletRequest,
+        @PathVariable("terrainId") terrainId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when(state) {
+                true -> {
+                    val data = service.showDetail(terrainId,false)
+                    ApiResponse(data)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getTerrainById.count",
+                    distributionName = "api.property.getTerrainById.latency"
+                )
+            )
+        }
+    }
+
 
     @Operation(summary = "Get Terrain by User")
     @GetMapping("/${PropertyTerrainScope.PROTECTED}/owner/{userId}",

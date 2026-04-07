@@ -378,4 +378,35 @@ class BureauController(
             )
         }
     }
+
+    @Operation(summary = "Get Bureau by ID")
+    @GetMapping("/${PropertyBureauScope.PROTECTED}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getBureauByIDProtect(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when(state){
+                true->{
+                    val data = service.showDetail(propertyId,false)
+                    ApiResponse(data)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getBureauById.count",
+                    distributionName = "api.property.getBureauById.latency"
+                )
+            )
+        }
+    }
 }

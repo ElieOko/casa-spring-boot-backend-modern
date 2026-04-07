@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.*
@@ -37,6 +38,8 @@ class SalleFuneraireController(
     private val sentry: SentryService,
     private val auth : Auth
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     @Operation(summary = "Création bureau")
     @PostMapping("/${PropertyFuneraireScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFuneraire(
@@ -82,6 +85,12 @@ class SalleFuneraireController(
         val startNanos = System.nanoTime()
         try {
             val data = service.getAll()
+            val userAgent = request.getHeader("User-Agent")
+            val deviceBrand = request.getHeader("X-Device-Brand")
+            val deviceModel = request.getHeader("X-Device-Model")
+            val os = request.getHeader("X-OS")
+            val osVersion = request.getHeader("X-OS-Version")
+            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
             val response = mapOf("funeraires" to data)
             ResponseEntity.ok().body(response)
         } finally {
@@ -107,11 +116,16 @@ class SalleFuneraireController(
             when (state) {
                 true -> {
                     val data = service.getAll(true)
+                    val userAgent = request.getHeader("User-Agent")
+                    val deviceBrand = request.getHeader("X-Device-Brand")
+                    val deviceModel = request.getHeader("X-Device-Model")
+                    val os = request.getHeader("X-OS")
+                    val osVersion = request.getHeader("X-OS-Version")
+                    log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
                     val response = mapOf("funeraires" to data)
                     ResponseEntity.ok().body(response)
-                    ResponseEntity.ok().body(data)}
-                false,null ->{
-                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
             }
         } finally {
             sentry.callToMetric(
@@ -119,8 +133,8 @@ class SalleFuneraireController(
                     startNanos = startNanos,
                     status = "200",
                     route = "${request.method} /${request.requestURI}",
-                    countName = "api.sallefuneraire.getallfuneraire.count",
-                    distributionName = "api.sallefuneraire.getallfuneraire.latency"
+                    countName = "api.sallefuneraire.getAllFuneraireProtect.count",
+                    distributionName = "api.sallefuneraire.getAllFuneraireProtect.latency"
                 )
             )
         }
@@ -199,6 +213,39 @@ class SalleFuneraireController(
             )
         }
     }
+
+    @Operation(summary = "Get Salle Funeraire by ID")
+    @GetMapping("/${PropertyFuneraireScope.PUBLIC}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getFuneraireByIDProtected(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when(state){
+                true ->{
+                    val data = service.showDetail(propertyId,false)
+                    ApiResponse(data)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
+            }
+
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getFuneraireById.count",
+                    distributionName = "api.property.getFuneraireById.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Suppression Salle festive")
     @DeleteMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
     suspend fun deleteFile(

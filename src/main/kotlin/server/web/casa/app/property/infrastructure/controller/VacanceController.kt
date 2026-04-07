@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import server.web.casa.app.property.application.service.*
@@ -29,6 +30,8 @@ class VacanceController(
     private val sentry: SentryService,
     private val auth : Auth
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     @Operation(summary = "Création vacance")
     @PostMapping("/${PropertyVacanceScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createVacance(
@@ -67,7 +70,14 @@ class VacanceController(
     suspend fun getAllVacance(request: HttpServletRequest) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
-            ApiResponse(service.getAllVacance())
+            val data = service.getAllVacance()
+            val userAgent = request.getHeader("User-Agent")
+            val deviceBrand = request.getHeader("X-Device-Brand")
+            val deviceModel = request.getHeader("X-Device-Model")
+            val os = request.getHeader("X-OS")
+            val osVersion = request.getHeader("X-OS-Version")
+            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+            ApiResponse(data)
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -91,9 +101,16 @@ class VacanceController(
             when (state) {
                 true -> {
                     val data = service.getAllVacance(true)
-                    ResponseEntity.ok().body(data)}
-                false,null ->{
-                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+                    val userAgent = request.getHeader("User-Agent")
+                    val deviceBrand = request.getHeader("X-Device-Brand")
+                    val deviceModel = request.getHeader("X-Device-Model")
+                    val os = request.getHeader("X-OS")
+                    val osVersion = request.getHeader("X-OS-Version")
+                    log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+                    val response = mapOf("vacances" to data)
+                    ResponseEntity.ok().body(response)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
             }
         } finally {
             sentry.callToMetric(
@@ -101,8 +118,8 @@ class VacanceController(
                     startNanos = startNanos,
                     status = "200",
                     route = "${request.method} /${request.requestURI}",
-                    countName = "api.vacance.getallvacance.count",
-                    distributionName = "api.vacance.getallvacance.latency"
+                    countName = "api.vacance.getAllVacanceProtect.count",
+                    distributionName = "api.vacance.getAllVacanceProtect.latency"
                 )
             )
         }
@@ -119,6 +136,37 @@ class VacanceController(
         try {
             val data = service.showDetail(vacanceId)
             ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getTerrainById.count",
+                    distributionName = "api.property.getTerrainById.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "Get Vacance by ID")
+    @GetMapping("/${PropertyVacanceScope.PROTECTED}/{vacanceId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getVacanceByIDProtected(
+        request: HttpServletRequest,
+        @PathVariable("vacanceId") vacanceId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when(state) {
+                true -> {
+                    val data = service.showDetail(vacanceId,false)
+                    ApiResponse(data)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
+            }
         } finally {
             sentry.callToMetric(
                 MetricModel(

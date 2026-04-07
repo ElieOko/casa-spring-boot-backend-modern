@@ -295,6 +295,38 @@ class PropertyController(
         }
     }
 
+    @Operation(summary = "Get Property by ID")
+    @GetMapping("/${PropertyScope.PROTECTED}/{propertyId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllPropertyByIDProtected(
+        request: HttpServletRequest,
+        @PathVariable("propertyId") propertyId : Long,
+    ) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when(state) {
+                true -> {
+                    val data = service.findByIdProperty(propertyId, false)
+                    val response = mapOf("properties" to data.first, "similaires" to data.second)
+                    ResponseEntity.ok().body(response)
+                }
+                else -> ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.property.getallpropertybyid.count",
+                    distributionName = "api.property.getallpropertybyid.latency"
+                )
+            )
+        }
+    }
+
     @GetMapping( "/${PropertyScope.PUBLIC}/filter",produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Get property by sold into price, room, city, commune with pagination and sorting")
     suspend fun getAllPropertyFilter(
