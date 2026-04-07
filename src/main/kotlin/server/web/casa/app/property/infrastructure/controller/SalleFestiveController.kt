@@ -97,6 +97,35 @@ class SalleFestiveController(
         }
     }
 
+    @Operation(summary = "Listes des salles festives protected")
+    @GetMapping("/${PropertyFestiveScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllFestiveProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAll(true)
+                    val response = mapOf("festives" to data)
+                    ResponseEntity.ok().body(response)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.sallefestive.getallfestive.count",
+                    distributionName = "api.sallefestive.getallfestive.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Get Salle Festive by User")
     @GetMapping("/${PropertyFestiveScope.PROTECTED}/owner/{userId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])

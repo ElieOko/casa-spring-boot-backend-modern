@@ -33,6 +33,9 @@ interface SalleFestiveRepository : CoroutineCrudRepository<SalleFestiveEntity, L
     """)
     override fun findAll(): Flow<SalleFestiveEntity>
 
+    @Query("""SELECT * FROM salle_festives""")
+    fun findAllData(): Flow<SalleFestiveEntity>
+
     @Query("""
         SELECT * FROM salle_festives
         WHERE user_id = :userId
