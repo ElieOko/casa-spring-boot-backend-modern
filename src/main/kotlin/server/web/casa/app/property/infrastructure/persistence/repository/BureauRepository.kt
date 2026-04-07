@@ -37,6 +37,11 @@ interface BureauRepository : CoroutineCrudRepository<BureauEntity, Long>{
     @Query("""SELECT * FROM bureau""")
     fun findAllData(): Flow<BureauEntity>
 
+    @Query("""SELECT * FROM bureau WHERE id = :id AND is_available =true""")
+    override suspend fun findById(id : Long): BureauEntity?
+    @Query("""SELECT * FROM bureau WHERE id = :id""")
+    suspend fun findByIdNoRestrict(id : Long): BureauEntity?
+
     @Query("""
         SELECT * FROM bureau
         WHERE user_id = :userId

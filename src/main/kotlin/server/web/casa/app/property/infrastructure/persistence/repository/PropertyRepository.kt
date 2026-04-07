@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import server.web.casa.app.property.infrastructure.persistence.entity.BureauEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 
 interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
@@ -48,6 +49,11 @@ interface PropertyRepository : CoroutineCrudRepository<PropertyEntity, Long> {
         WHERE user_id = :userId
     """)
     fun findAllByUser(userId: Long):Flow<PropertyEntity>
+
+    @Query("""SELECT * FROM properties WHERE id = :id AND is_available =true""")
+    override suspend fun findById(id : Long): PropertyEntity?
+    @Query("""SELECT * FROM properties WHERE id = :id""")
+    suspend fun findByIdNoRestrict(id : Long): PropertyEntity?
 
     @Modifying
     @Query(

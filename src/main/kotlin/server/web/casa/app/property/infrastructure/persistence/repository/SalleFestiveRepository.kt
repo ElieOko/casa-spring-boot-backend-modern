@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import server.web.casa.app.property.infrastructure.persistence.entity.BureauEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.SalleFestiveEntity
 
 interface SalleFestiveRepository : CoroutineCrudRepository<SalleFestiveEntity, Long>{
@@ -49,4 +50,9 @@ interface SalleFestiveRepository : CoroutineCrudRepository<SalleFestiveEntity, L
     WHERE user_id = :userId"""
     )
     suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
+
+    @Query("""SELECT * FROM salle_festives WHERE id = :id AND is_available =true""")
+    override suspend fun findById(id : Long): SalleFestiveEntity?
+    @Query("""SELECT * FROM salle_festives WHERE id = :id""")
+    suspend fun findByIdNoRestrict(id : Long): SalleFestiveEntity?
 }

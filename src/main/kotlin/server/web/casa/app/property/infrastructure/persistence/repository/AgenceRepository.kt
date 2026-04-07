@@ -5,6 +5,7 @@ import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import server.web.casa.app.property.infrastructure.persistence.entity.AgenceEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.PropertyEntity
 
 interface AgenceRepository : CoroutineCrudRepository<AgenceEntity, Long>{
     @Query("""SELECT * FROM agencies""")
@@ -21,9 +22,13 @@ interface AgenceRepository : CoroutineCrudRepository<AgenceEntity, Long>{
 
     @Modifying
     @Query(
-        """ UPDATE salle_festives
+        """ UPDATE agencies
     SET is_available = :state
     WHERE user_id = :userId"""
     )
     suspend fun setUpdateIsAvailable(userId: Long, state: Boolean = false): Int
+    @Query("""SELECT * FROM agencies WHERE id = :id AND is_available =true""")
+    override suspend fun findById(id : Long): AgenceEntity?
+    @Query("""SELECT * FROM agencies WHERE id = :id""")
+    suspend fun findByIdNoRestrict(id : Long): AgenceEntity?
 }
