@@ -19,9 +19,10 @@ class AgenceService(
     private val gcsService: GcsService,
     private val vacance: VacanceService
     ) {
-    suspend fun getAllAgence() = coroutineScope{
+    suspend fun getAllAgence(state: Boolean = false) = coroutineScope{
         val agenceByVacance = mutableListOf<VacanceAgence>()
-        repository.findAll().collect {
+        val flow = if (!state) repository.findAll() else repository.findAllData()
+        flow.collect {
            agenceByVacance.add(
                VacanceAgence(
                    agence = it.toDomain(),

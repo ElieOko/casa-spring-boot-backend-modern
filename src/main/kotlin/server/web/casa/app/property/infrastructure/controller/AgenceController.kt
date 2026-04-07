@@ -6,6 +6,7 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import org.springframework.http.ResponseEntity
 import server.web.casa.app.property.application.service.AgenceService
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.route.utils.AgenceScope
@@ -60,6 +61,35 @@ class AgenceController(
         try {
             val data = service.getAllAgence()
             ApiResponse(data)
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.agence.getallagence.count",
+                    distributionName = "api.agence.getallagence.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "List des agences protected")
+    @GetMapping("/{version}/${AgenceScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllAgenceProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAllAgence(true)
+                    val response = mapOf("agences" to data)
+                    ResponseEntity.ok().body(response)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
         } finally {
             sentry.callToMetric(
                 MetricModel(
