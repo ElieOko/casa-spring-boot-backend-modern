@@ -88,6 +88,33 @@ class HotelController(
         }
     }
 
+    @Operation(summary = "List des hotels protected")
+    @GetMapping("/${PropertyHotelScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllHotelProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAllHotel(true)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.hotel.getallhotel.count",
+                    distributionName = "api.hotel.getallhotel.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "List des hotels")
     @GetMapping("/${PropertyHotelScope.PRIVATE}/owner/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllHotelByUser(

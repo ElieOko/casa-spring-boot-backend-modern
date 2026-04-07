@@ -32,9 +32,10 @@ class HotelService(
         }
     }
 //    suspend fun getAll() = coroutineScope { hotelRepository.findAll().map { it.toDomain() }.toList() }
-    suspend fun getAllHotel() = coroutineScope{
+    suspend fun getAllHotel(state: Boolean = false) = coroutineScope{
         val hotel = mutableListOf<HotelGlobal>()
-        hotelRepository.findAll().collect {
+        val flow = if (!state) hotelRepository.findAll() else hotelRepository.findAllData()
+        flow.collect {
             hotel.add(
                 HotelGlobal(
                     hotel = it.toDomain(),
