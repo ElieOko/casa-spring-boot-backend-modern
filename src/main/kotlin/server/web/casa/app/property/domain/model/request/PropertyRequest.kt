@@ -49,6 +49,45 @@ data class PropertyRequest(
     val propertyImageKitchen : List<PropertyImageRequest?> = emptyList()
 )
 
+data class PropertyRequest2(
+    @NotNull
+    val title : String,
+    val description : String? = "",
+    @NotNull
+    val price : Double,
+    @NotNull
+    val deviseId : Long,
+    val surface : Double? = null,
+    val rooms : Int? = 0,
+    val bedrooms : Int? = 0,
+    val kitchen : Int? = 0,
+    val livingRoom : Int? = 0,
+    val bathroom : Int? = 0,
+    val floor : Int? = 0,
+    val address : String,
+    val guarantee : String = "",
+    val communeValue: String? = "",
+    val quartierValue: String? = "",
+    val cityValue: String? = "",
+    val countryValue: String? = "",
+    val cityId : Long? = null,
+    val communeId : Long? = null,
+    val quartierId : Long? = null,
+    val electric : Int? = 0,
+    @NotNull
+    val water : Int?=0,
+    val postalCode : String?,
+    val quartier : String ="",
+    val sold : Boolean = false,
+    @NotNull
+    val transactionType : String,
+    @NotNull
+    val propertyTypeId : Long,
+    @NotNull
+    val userId : Long,
+    val latitude : Double? = null,
+    val longitude : Double? = null
+)
 data class PropertyImagesRequest(
     val propertyImage : List<ImageRequest?> = emptyList(),
     val propertyImageRoom : List<ImageRequest?> = emptyList(),

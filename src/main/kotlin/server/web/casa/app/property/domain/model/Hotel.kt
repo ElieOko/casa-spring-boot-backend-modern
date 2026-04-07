@@ -1,10 +1,15 @@
 package server.web.casa.app.property.domain.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Null
 import org.springframework.data.relational.core.mapping.Column
+import server.web.casa.app.ecosystem.domain.request.ImageRequest
+import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.HotelEntity
+import server.web.casa.app.property.infrastructure.persistence.entity.HotelImageEntity
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class Hotel(
     val id: Long? = null,
@@ -38,6 +43,8 @@ class HotelRequest(
     val address: String,
     @NotNull
     var image: String,
+    @NotNull
+    val images : List<ImageRequest>,
     @NotNull
     val propertyTypeId: Long? = null,
     val communeValue: String? = "",
@@ -87,4 +94,18 @@ fun Hotel.toEntity() = HotelEntity(
     quartierValue = this.quartierValue,
     postalCode = this.postalCode,
     isAvailable = this.isAvailable,
+)
+data class HotelImage(
+    @JsonIgnore
+    val hotelImageId : Long? = 0,
+    @JsonIgnore
+    var hotelId : Long?=null,
+    var name : String = "",
+    var path : String? = ""
+)
+fun HotelImageEntity.toDomain() = HotelImage(
+    hotelImageId = this.id,
+    hotelId = this.hotelId,
+    name = this.name,
+    path = this.path,
 )
