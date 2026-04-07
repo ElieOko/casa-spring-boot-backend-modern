@@ -16,8 +16,9 @@ class VacanceService(
     private val repository: VacanceRepository,
     private val imageVacance : VacanceImageRepository,
 ) {
-    suspend fun getAllVacance() = coroutineScope{
-        repository.findAll().map { it.toDomain() }.toList()
+    suspend fun getAllVacance(state: Boolean = false) = coroutineScope {
+        val flow = if (!state) repository.findAll() else repository.findAllData()
+        flow.map { it.toDomain() }.toList()
     }
 
     suspend fun getAllVacanceByAgence(agence : Long) = coroutineScope{

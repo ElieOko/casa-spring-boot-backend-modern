@@ -81,6 +81,33 @@ class VacanceController(
         }
     }
 
+    @Operation(summary = "List des vacance protected")
+    @GetMapping("/${PropertyVacanceScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllVacanceProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAllVacance(true)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.vacance.getallvacance.count",
+                    distributionName = "api.vacance.getallvacance.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Get Vacance by ID")
     @GetMapping("/${PropertyVacanceScope.PUBLIC}/{vacanceId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
