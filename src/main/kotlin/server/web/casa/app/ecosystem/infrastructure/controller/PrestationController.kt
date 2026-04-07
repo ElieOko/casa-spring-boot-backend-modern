@@ -234,7 +234,7 @@ class PrestationController(
                 val message = mutableMapOf("message" to if(request.status) "Prestation activé avec succès" else "Prestation desactivé avec succès")
                 data.isActive = request.status
                 prestationService.createOrUpdate(data.toDomain())
-                ResponseEntity.badRequest().body(message)
+                ResponseEntity.ok(message)
             }
 
         } finally {
