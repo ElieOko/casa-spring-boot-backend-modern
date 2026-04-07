@@ -21,10 +21,13 @@ import server.web.casa.app.ecosystem.domain.model.PrestationRequestUpdate
 import server.web.casa.app.ecosystem.domain.model.toDomain
 import server.web.casa.app.ecosystem.domain.request.PrestationRequest
 import server.web.casa.app.ecosystem.infrastructure.persistence.entity.PrestationEntity
+import server.web.casa.app.ecosystem.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.payment.application.service.DeviseService
+import server.web.casa.app.property.domain.model.StatusState
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.entity.UserEntity
 import server.web.casa.route.ecosystem.PrestationScope
+import server.web.casa.route.property.PropertyScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 import server.web.casa.security.monitoring.SentryService
@@ -209,6 +212,39 @@ class PrestationController(
                     route = "${httpRequest.method} /${httpRequest.requestURI}",
                     countName = "api.prestation.updateprestation.count",
                     distributionName = "api.prestation.updateprestation.latency"
+                )
+            )
+        }
+    }
+
+    @Operation(summary = "Enable or disable")
+    @PutMapping("/{version}/${PrestationScope.PRIVATE}/enable/{prestationId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun toEnableOrDisablePrestation(
+        httpRequest: HttpServletRequest,
+        @PathVariable("prestationId") prestationId : Long,
+        @RequestBody request : StatusState
+    ) = coroutineScope{
+        val startNanos = System.nanoTime()
+        try {
+            val session = auth.user()
+            val data = prestationService.getById(prestationId)?:throw ResponseStatusException(HttpStatusCode.valueOf(404), "Ressource not found")
+            val state: Boolean? = session?.second?.find{ true }
+            if (session?.first?.userId == data.userId || state == true ) {
+                val message = mutableMapOf("message" to if(request.status) "Prestation activé avec succès" else "Prestation desactivé avec succès")
+                data.isActive = request.status
+                prestationService.createOrUpdate(data.toDomain())
+                ResponseEntity.badRequest().body(message)
+            }
+
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${httpRequest.method} /${httpRequest.requestURI}",
+                    countName = "api.prestation.toEnableOrDisablePrestation.count",
+                    distributionName = "api.prestation.toEnableOrDisablePrestation.latency"
                 )
             )
         }
