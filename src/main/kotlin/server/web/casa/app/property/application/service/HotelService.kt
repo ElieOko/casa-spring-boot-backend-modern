@@ -60,8 +60,8 @@ class HotelService(
         hotel.toList()
     }
 
-    suspend fun showDetail(id : Long) = coroutineScope{
-        val data = hotelRepository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette hotel n'existe.")
+    suspend fun showDetail(id : Long, state: Boolean = true) = coroutineScope{
+        val data = (if (state) hotelRepository.findById(id) else hotelRepository.findByIdNoRestrict(id) )?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette hotel n'existe.")
         val hotel = mutableListOf<HotelGlobal>()
         hotel.add(
             HotelGlobal(

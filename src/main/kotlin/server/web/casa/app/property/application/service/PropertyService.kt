@@ -102,8 +102,8 @@ class PropertyService(
         propertyList
     }
 
-    private suspend fun toDomain(id : Long): PropertyMasterDTO = coroutineScope {
-        val property = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
+    private suspend fun toDomain(id : Long, state : Boolean = true): PropertyMasterDTO = coroutineScope {
+        val property = (if (state) repository.findById(id) else repository.findByIdNoRestrict(id)) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Cette proprièté n'existe pas")
         val propertyIds = listOf(id)
         // Récupération groupée
         val features = repositoryFeature.findByPropertyIdIn(propertyIds).toList()
@@ -144,8 +144,8 @@ class PropertyService(
     }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope { findAllRelation(repository.findAllByUser(userId).toList()) }
 
-    suspend fun findByIdProperty(id: Long): Pair<PropertyMasterDTO, Flow<Property>> {
-        val data = toDomain(id)
+    suspend fun findByIdProperty(id: Long, state : Boolean = true): Pair<PropertyMasterDTO, Flow<Property>> {
+        val data = toDomain(id,state)
 
         //|| (it.propertyType == data.propertyType)
         var similary = repository.findAll()

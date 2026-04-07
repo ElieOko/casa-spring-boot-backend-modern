@@ -53,8 +53,8 @@ class VacanceService(
         result.toDomain()
     }
 
-    suspend fun showDetail(id : Long) = coroutineScope {
-        val ag = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce le lieu de vacance n'existe.")
+    suspend fun showDetail(id : Long, state: Boolean = true) = coroutineScope {
+        val ag = (if (state) repository.findById(id) else repository.findByIdNoRestrict(id))?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce le lieu de vacance n'existe.")
         val vacance = mutableListOf<VacanceDTO>()
         val agenceIds: List<Long> = listOf(ag.agenceId!!)
         val images = imageVacance.findByVacanceIdIn(agenceIds).toList()

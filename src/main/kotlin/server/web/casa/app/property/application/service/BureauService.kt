@@ -129,8 +129,8 @@ class BureauService(
         bureauList
     }
 
-    suspend fun showDetail(id : Long) = coroutineScope{
-        val data = repository.findById(id)?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette chambre n'existe.")
+    suspend fun showDetail(id : Long, state: Boolean = true) = coroutineScope{
+        val data = (if (state) repository.findById(id) else repository.findByIdNoRestrict(id))?:throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette chambre n'existe.")
         val bureauList = mutableListOf<BureauDTOMaster>()
         val bureauIds: List<Long> = listOf(data.id!!)
         val images = bureauImageRepository.findByBureauIdIn(bureauIds).toList()

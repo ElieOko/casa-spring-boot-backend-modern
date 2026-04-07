@@ -120,9 +120,9 @@ class TerrainService(
         terrain
     }
 
-    suspend fun showDetail(id : Long) = coroutineScope {
+    suspend fun showDetail(id : Long, state : Boolean = true) = coroutineScope {
         val terrain = mutableListOf<TerrainMasterDTO>()
-        val m = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas le terrain.")
+        val m = (if (state) repository.findById(id) else repository.findByIdNoRestrict(id))?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas le terrain.")
         val bureauIds: List<Long> = listOf(m.id!!)
         val images = terrainImage.findByTerrainIdIn(bureauIds).toList()
         val imageByTerrain: Map<Long, List<TerrainImageEntity>> = images.groupBy { it.terrainId }

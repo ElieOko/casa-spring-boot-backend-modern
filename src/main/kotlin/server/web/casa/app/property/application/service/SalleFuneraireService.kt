@@ -99,9 +99,9 @@ class SalleFuneraireService(
         result.toDomain()
     }
 
-    suspend fun showDetail(id : Long) = coroutineScope{
+    suspend fun showDetail(id : Long, state : Boolean = true) = coroutineScope{
         val dataList = mutableListOf<SalleFuneraireDTOMaster>()
-        val m = repository.findById(id)?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+        val m = (if (state) repository.findById(id) else repository.findByIdNoRestrict(id))?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
         val ids: List<Long> = listOf(m.id!!)
         val images = imageRepository.findBySalleFuneraireIdIn(ids).toList()
         val features = repositoryFeature.findByFuneraireIdIn(ids).toList()
