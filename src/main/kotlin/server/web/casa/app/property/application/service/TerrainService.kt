@@ -58,8 +58,8 @@ class TerrainService(
         }
         terrain
     }
-    suspend fun getAll() = coroutineScope{
-        val data =  repository.findAll().toList()
+    suspend fun getAll(state : Boolean = false) = coroutineScope{
+        val data = if (!state) repository.findAll().toList() else repository.findAllData().toList()
         findAll(data)
     }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{

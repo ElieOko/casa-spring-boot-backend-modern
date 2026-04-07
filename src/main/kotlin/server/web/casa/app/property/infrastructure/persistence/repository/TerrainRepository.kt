@@ -34,6 +34,9 @@ interface TerrainRepository  : CoroutineCrudRepository<TerrainEntity, Long> {
     """)
     override fun findAll():Flow<TerrainEntity>
 
+
+    @Query("""SELECT * FROM terrains""")
+    fun findAllData(): Flow<TerrainEntity>
     @Query("""
         SELECT * FROM terrains
         WHERE user_id = :userId

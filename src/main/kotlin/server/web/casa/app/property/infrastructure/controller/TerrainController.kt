@@ -99,6 +99,38 @@ class TerrainController(
             )
         }
     }
+
+    @Operation(summary = "List des terrains protected")
+    @GetMapping("/${PropertyTerrainScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getAllTerrainProtect(request: HttpServletRequest) = coroutineScope {
+        val startNanos = System.nanoTime()
+        val userConnect = auth.user()
+        try {
+
+            val session = auth.user()
+            val state: Boolean? = session?.second?.find{ true }
+            when (state) {
+                true -> {
+                    val data = service.getAll(true)
+                    val response = mapOf("terrain" to data)
+                    ResponseEntity.ok().body(response)
+                    ResponseEntity.ok().body(data)}
+                false,null ->{
+                    ResponseEntity.status(403).body(mapOf("message" to "Accès non autorisé"))}
+            }
+        } finally {
+            sentry.callToMetric(
+                MetricModel(
+                    startNanos = startNanos,
+                    status = "200",
+                    route = "${request.method} /${request.requestURI}",
+                    countName = "api.terrain.getallterrain.count",
+                    distributionName = "api.terrain.getallterrain.latency"
+                )
+            )
+        }
+    }
+
     @Operation(summary = "Sold")
     @PutMapping("/${PropertyTerrainScope.PROTECTED}/sold/{propertyId}",
         produces = [MediaType.APPLICATION_JSON_VALUE])
