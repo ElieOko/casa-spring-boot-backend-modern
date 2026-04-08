@@ -26,7 +26,7 @@ import server.web.casa.utils.MessageResponse.PAYMENT_SUCCESS
 import server.web.casa.utils.scheduler.ReservationScheduler
 import kotlin.random.Random
 
-const val AMOUNT_SUBSCRIPTION = 5
+const val AMOUNT_SUBSCRIPTION = 2
 @RestController
 @RequestMapping("api")
 @Profile("dev")
@@ -149,11 +149,13 @@ class PaiementController(
                             val notify = note.toDomain()
                             user.isPremium = true
                             userRepository.save(user)
+                            log.info("**********Abonnement Casa: paiement reussie")
                             notify.user = userService.findIdUser(user.userId!!)
                             notificationService.sendNotificationToUser(user.userId.toString(),notify)
                         }
                     }
                     else-> {
+                        log.info("***********callback error ${request.code}")
                         payment.update(request.reference,request.code)
                     }
                 }

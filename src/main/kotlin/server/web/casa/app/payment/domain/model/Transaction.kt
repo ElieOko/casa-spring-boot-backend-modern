@@ -18,9 +18,9 @@ data class Transaction(
     val type : String = "1",
     val reference : String,
     val phone : String,
-    val amount : String = "5" ,
+    val amount : String = "2" ,
     val currency : String = "USD",
-    val callbackUrl : String = "migration.casanayo.com/api/v1/public/payment/mobile/callback"
+    val callbackUrl : String = "https://migration.casanayo.com/api/v1/public/payment/mobile/callback"
 )
 data class TransactionRequest(
     @NotNull
