@@ -155,8 +155,8 @@ class PaiementController(
                         }
                     }
                     else-> {
-                        log.info("***********callback error ${request.code}")
-                        payment.update(request.reference,request.code)
+                        log.info("***********callback ${request.code}")
+//                        payment.update(request.reference,request.code)
                     }
                 }
             }
