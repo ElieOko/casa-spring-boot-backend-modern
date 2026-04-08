@@ -9,6 +9,7 @@ import server.web.casa.app.property.domain.model.Vacance
 import server.web.casa.app.property.domain.model.dto.VacanceDTO
 import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 
 @Service
@@ -20,7 +21,9 @@ class VacanceService(
         val flow = if (!state) repository.findAll() else repository.findAllData()
         flow.map { it.toDomain() }.toList()
     }
-
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+    }
     suspend fun getAllVacanceByAgence(agence : Long) = coroutineScope{
        val data = repository.getAllByAgence(agence).toList()
        val vacance = mutableListOf<VacanceDTO>()

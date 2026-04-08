@@ -19,7 +19,6 @@ import server.web.casa.route.property.PropertyFestiveScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
-import server.web.casa.route.property.PropertyFuneraireScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
@@ -44,7 +43,7 @@ class SalleFestiveController(
     @PostMapping("/${PropertyFestiveScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFestive(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: SalleFestiveRequest,
+        @Valid @RequestBody request: SalleFestiveRequest, @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -81,16 +80,16 @@ class SalleFestiveController(
 
     @Operation(summary = "Listes des salles festives")
     @GetMapping("/${PropertyFestiveScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFestive(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllFestive(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val data = service.getAll()
-            val userAgent = request.getHeader("User-Agent")
-            val deviceBrand = request.getHeader("X-Device-Brand")
-            val deviceModel = request.getHeader("X-Device-Model")
-            val os = request.getHeader("X-OS")
-            val osVersion = request.getHeader("X-OS-Version")
-            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+//            val userAgent = request.getHeader("User-Agent")
+//            val deviceBrand = request.getHeader("X-Device-Brand")
+//            val deviceModel = request.getHeader("X-Device-Model")
+//            val os = request.getHeader("X-OS")
+//            val osVersion = request.getHeader("X-OS-Version")
+//            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
             val response = mapOf("festives" to data)
             ResponseEntity.ok().body(response)
         } finally {
@@ -108,7 +107,7 @@ class SalleFestiveController(
 
     @Operation(summary = "Listes des salles festives protected")
     @GetMapping("/${PropertyFestiveScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFestiveProtect(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllFestiveProtect(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val session = auth.user()
@@ -118,9 +117,9 @@ class SalleFestiveController(
                     val data = service.getAll(true)
                     val userAgent = request.getHeader("User-Agent")
                     val deviceBrand = request.getHeader("X-Device-Brand")
-                    val deviceModel = request.getHeader("X-Device-Model")
+//                    val deviceModel = request.getHeader("X-Device-Model")
                     val os = request.getHeader("X-OS")
-                    val osVersion = request.getHeader("X-OS-Version")
+//                    val osVersion = request.getHeader("X-OS-Version")
                     log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
                     val response = mapOf("festives" to data)
                     ResponseEntity.ok().body(response)
@@ -145,7 +144,8 @@ class SalleFestiveController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFestiveByUser(
         request: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
+        @PathVariable userId : Long,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -167,8 +167,9 @@ class SalleFestiveController(
     @PutMapping("/${PropertyFestiveScope.PROTECTED}/image/{festiveId}")
     suspend fun updateFileFestive(
         httpRequest: HttpServletRequest,
-        @PathVariable("festiveId") festiveId : Long,
-        @Valid @RequestBody request: ImageChange
+        @PathVariable festiveId : Long,
+        @Valid @RequestBody request: ImageChange,
+        @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -194,8 +195,9 @@ class SalleFestiveController(
     @DeleteMapping("/${PropertyFestiveScope.PROTECTED}/image/{festiveId}")
     suspend fun deleteFile(
         httpRequest: HttpServletRequest,
-        @PathVariable("festiveId") festiveId : Long,
-        @Valid @RequestBody request: PropertyImagesRequest
+        @PathVariable festiveId : Long,
+        @Valid @RequestBody request: PropertyImagesRequest,
+        @PathVariable version: String
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
@@ -222,8 +224,8 @@ class SalleFestiveController(
     @PutMapping("/${PropertyFestiveScope.PROTECTED}/owner/{festiveId}")
     suspend fun updateBureau(
         httpRequest: HttpServletRequest,
-        @PathVariable("festiveId") festiveId : Long,
-        @Valid @RequestBody request: SalleFestiveDTO
+        @PathVariable festiveId : Long,
+        @Valid @RequestBody request: SalleFestiveDTO, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -261,13 +263,13 @@ class SalleFestiveController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInFestive(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
-            val data = service.findById(propertyId)
+            val data = service.findByNoRestrict(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
             ResponseEntity.badRequest().body(message)
@@ -289,13 +291,13 @@ class SalleFestiveController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableFestive(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState, @PathVariable version: String
     )= coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
-            val data= service.findById(propertyId)
+            val data= service.findByNoRestrict(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
             ResponseEntity.ok(message)
@@ -317,7 +319,7 @@ class SalleFestiveController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getFestiveByID(
         request: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
+        @PathVariable propertyId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -341,7 +343,8 @@ class SalleFestiveController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getFestiveByIDProtected(
         request: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
+        @PathVariable propertyId : Long,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {

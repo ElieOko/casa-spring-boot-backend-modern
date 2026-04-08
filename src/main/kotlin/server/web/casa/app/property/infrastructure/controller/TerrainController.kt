@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kotlinx.coroutines.coroutineScope
-import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -21,8 +20,6 @@ import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
 import server.web.casa.app.property.domain.model.request.ImageChange
-import server.web.casa.route.property.PropertyFestiveScope
-import server.web.casa.route.property.PropertyScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
@@ -41,13 +38,13 @@ class TerrainController(
     private val sentry: SentryService,
     private val auth : Auth
 ) {
-    private val log = LoggerFactory.getLogger(this::class.java)
+//    private val log = LoggerFactory.getLogger(this::class.java)
 
     @Operation(summary = "Création Terrain")
     @PostMapping("/${PropertyTerrainScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createTerrain(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TerrainRequest,
+        @Valid @RequestBody request: TerrainRequest, @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -86,16 +83,16 @@ class TerrainController(
 
     @Operation(summary = "List des terrain")
     @GetMapping("/${PropertyTerrainScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllTerrain(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllTerrain(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val data = service.getAll()
-            val userAgent = request.getHeader("User-Agent")
-            val deviceBrand = request.getHeader("X-Device-Brand")
-            val deviceModel = request.getHeader("X-Device-Model")
-            val os = request.getHeader("X-OS")
-            val osVersion = request.getHeader("X-OS-Version")
-            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+//            val userAgent = request.getHeader("User-Agent")
+//            val deviceBrand = request.getHeader("X-Device-Brand")
+//            val deviceModel = request.getHeader("X-Device-Model")
+//            val os = request.getHeader("X-OS")
+//            val osVersion = request.getHeader("X-OS-Version")
+//            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
             val response = mapOf("terrain" to data)
             ResponseEntity.ok().body(response)
         } finally {
@@ -113,7 +110,7 @@ class TerrainController(
 
     @Operation(summary = "List des terrains protected")
     @GetMapping("/${PropertyTerrainScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllTerrainProtect(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllTerrainProtect(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val session = auth.user()
@@ -121,12 +118,12 @@ class TerrainController(
             when (state) {
                 true -> {
                     val data = service.getAll(true)
-                    val userAgent = request.getHeader("User-Agent")
-                    val deviceBrand = request.getHeader("X-Device-Brand")
-                    val deviceModel = request.getHeader("X-Device-Model")
-                    val os = request.getHeader("X-OS")
-                    val osVersion = request.getHeader("X-OS-Version")
-                    log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+//                    val userAgent = request.getHeader("User-Agent")
+//                    val deviceBrand = request.getHeader("X-Device-Brand")
+//                    val deviceModel = request.getHeader("X-Device-Model")
+//                    val os = request.getHeader("X-OS")
+//                    val osVersion = request.getHeader("X-OS-Version")
+//                    log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
                     val response = mapOf("terrain" to data)
                     ResponseEntity.ok().body(response)
                 }
@@ -150,13 +147,13 @@ class TerrainController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInTerrain(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState, @PathVariable version: String
     )= coroutineScope{
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
-            val data = service.findById(propertyId)
+            val data = service.findByNoRestrict(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
             ResponseEntity.badRequest().body(message)
@@ -178,13 +175,14 @@ class TerrainController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableTerrain(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState,
+        @PathVariable version: String
     )= coroutineScope{
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
-            val data= service.findById(propertyId)
+            val data= service.findByNoRestrict(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
             ResponseEntity.ok(message)
@@ -206,7 +204,7 @@ class TerrainController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getTerrainByID(
         request: HttpServletRequest,
-        @PathVariable("terrainId") terrainId : Long,
+        @PathVariable terrainId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -230,7 +228,7 @@ class TerrainController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getTerrainByIDProtected(
         request: HttpServletRequest,
-        @PathVariable("terrainId") terrainId : Long,
+        @PathVariable terrainId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -262,7 +260,7 @@ class TerrainController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllTerrainByUser(
         request: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
+        @PathVariable userId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -285,8 +283,8 @@ class TerrainController(
     @PutMapping("/${PropertyTerrainScope.PROTECTED}/owner/{terrainId}")
     suspend fun updateTerrain(
         httpRequest: HttpServletRequest,
-        @PathVariable("terrainId") terrainId : Long,
-        @Valid @RequestBody request: TerrainRequest
+        @PathVariable terrainId : Long,
+        @Valid @RequestBody request: TerrainRequest, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -323,8 +321,9 @@ class TerrainController(
     @PutMapping("/${PropertyTerrainScope.PROTECTED}/image/{terrainId}")
     suspend fun updateFileTerrain(
         httpRequest: HttpServletRequest,
-        @PathVariable("terrainId") terrainId : Long,
-        @Valid @RequestBody request: ImageChange
+        @PathVariable terrainId : Long,
+        @Valid @RequestBody request: ImageChange,
+        @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {

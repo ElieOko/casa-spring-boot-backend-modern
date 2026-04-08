@@ -50,7 +50,7 @@ class PropertyController(
     @PostMapping("/${PropertyScope.PRIVATE}", consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createProperty(
         @Valid @RequestBody request: PropertyRequest,
-        requestHttp: HttpServletRequest
+        requestHttp: HttpServletRequest, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -162,7 +162,7 @@ class PropertyController(
     @Operation(summary = "Voir les Property")
     @GetMapping("/${PropertyScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllProperty(
-        request: HttpServletRequest
+        request: HttpServletRequest, @PathVariable version: String
     ): ResponseEntity<Map<String, List<PropertyMasterDTO>>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -200,7 +200,7 @@ class PropertyController(
     @Operation(summary = "Voir les Property")
     @GetMapping("/${PropertyScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyProtected(
-        request: HttpServletRequest
+        request: HttpServletRequest, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -248,7 +248,7 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByUser(
         request: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
+        @PathVariable userId : Long, @PathVariable version: String,
     ): ApiResponse<List<PropertyMasterDTO>> = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -272,7 +272,7 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByID(
         request: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
+        @PathVariable propertyId : Long, @PathVariable version: String,
     ): ResponseEntity<Map<String, Any>> {
         val startNanos = System.nanoTime()
         try {
@@ -300,7 +300,7 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPropertyByIDProtected(
         request: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
+        @PathVariable propertyId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -343,7 +343,8 @@ class PropertyController(
         @Parameter(description = "Page number(0-based)") @RequestParam(defaultValue = "0") page : Int,
         @Parameter(description = "Page size") @RequestParam(defaultValue = "20") size : Int,
         @Parameter(description = "Sort by field") @RequestParam(defaultValue = "name") sortBy : String,
-        @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String
+        @Parameter(description = "Sort order (asc/desc)") @RequestParam(defaultValue = "asc") sortOrder : String,
+        @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -383,9 +384,9 @@ class PropertyController(
     @PutMapping("/${PropertyScope.PROTECTED}/owner/{userId}/{propertyId}")
     suspend fun updateProperty(
         httpRequest: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
-        @PathVariable("propertyId") propertyId : Long,
-        @Valid @RequestBody request: PropertyRequest2
+        @PathVariable userId : Long,
+        @PathVariable propertyId : Long,
+        @Valid @RequestBody request: PropertyRequest2, @PathVariable version: String
     ): ResponseEntity<PropertyMasterDTO> {
         val startNanos = System.nanoTime()
         try {
@@ -440,8 +441,9 @@ class PropertyController(
     @PutMapping("/${PropertyScope.PROTECTED}/image/{propertyId}")
     suspend fun updateFile(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @Valid @RequestBody request: PropertyImageChangeRequest
+        @PathVariable propertyId : Long,
+        @Valid @RequestBody request: PropertyImageChangeRequest,
+        @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -471,8 +473,9 @@ class PropertyController(
     @DeleteMapping("/${PropertyScope.PROTECTED}/image/{propertyId}")
     suspend fun deleteFile(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @Valid @RequestBody request: PropertyImagesRequest
+        @PathVariable propertyId : Long,
+        @Valid @RequestBody request: PropertyImagesRequest,
+        @PathVariable version: String
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
@@ -503,13 +506,13 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrIn(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState, @PathVariable version: String
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
-            val data = service.findById(propertyId)
+            val data = service.findByNoRestrict(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
             ResponseEntity.badRequest().body(message)
@@ -531,13 +534,13 @@ class PropertyController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisable(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState, @PathVariable version: String
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
-            val data= service.findById(propertyId)
+            val data= service.findByNoRestrict(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
             ResponseEntity.ok(message)

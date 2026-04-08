@@ -13,6 +13,7 @@ import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.infrastructure.persistence.entity.*
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.*
@@ -82,6 +83,9 @@ class BureauService(
     }
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe pas de Bureau.")
+    }
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
     }
 
     suspend fun update(p: Bureau) = coroutineScope {

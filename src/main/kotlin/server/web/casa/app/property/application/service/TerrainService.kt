@@ -14,6 +14,7 @@ import server.web.casa.app.property.domain.model.dto.toDTO
 import server.web.casa.app.property.domain.model.filter.PropertyFilter
 import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.*
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.*
@@ -61,6 +62,9 @@ class TerrainService(
     suspend fun getAll(state : Boolean = false) = coroutineScope{
         val data = if (!state) repository.findAll().toList() else repository.findAllData().toList()
         findAll(data)
+    }
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
     }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{
         val data = repository.findAllByUser(userId).toList()

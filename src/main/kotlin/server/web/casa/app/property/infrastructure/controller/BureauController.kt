@@ -311,7 +311,7 @@ class BureauController(
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
-            val data = service.findById(propertyId)
+            val data = service.findByNoRestrict(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
             ResponseEntity.badRequest().body(message)
@@ -338,7 +338,7 @@ class BureauController(
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
-            val data= service.findById(propertyId)
+            val data= service.findByNoRestrict(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
             ResponseEntity.ok(message)

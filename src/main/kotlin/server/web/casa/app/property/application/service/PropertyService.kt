@@ -183,4 +183,7 @@ class PropertyService(
     suspend fun findById(id : Long) = coroutineScope {
         repository.findById(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
     }
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+    }
 }

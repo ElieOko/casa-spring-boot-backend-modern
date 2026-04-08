@@ -14,6 +14,7 @@ import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.BureauImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.HotelImageEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.HotelImageRepository
 import server.web.casa.app.property.infrastructure.persistence.repository.HotelRepository
 import server.web.casa.utils.base64ToMultipartFile
@@ -37,6 +38,9 @@ class HotelService(
         } catch (e: Exception) {
             throw Exception(e.message, e)
         }
+    }
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        hotelRepository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette hotel n'existe.")
     }
 
     suspend fun createFile(images: ImageRequestStandard) = coroutineScope {

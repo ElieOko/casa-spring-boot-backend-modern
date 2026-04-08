@@ -11,6 +11,7 @@ import server.web.casa.app.payment.application.service.DeviseService
 import server.web.casa.app.property.domain.model.*
 import server.web.casa.app.property.domain.model.dto.LocalAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.*
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.map
@@ -63,7 +64,9 @@ class SalleFestiveService(
         val data = if (!state) repository.findAll().toList() else repository.findAllData().toList()
         findAll(data)
     }
-
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+    }
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{findAll(repository.findAllByUser(userId).toList()) }
 
     suspend fun create(data : SalleFestive,features: List<FeatureRequest>) = coroutineScope {

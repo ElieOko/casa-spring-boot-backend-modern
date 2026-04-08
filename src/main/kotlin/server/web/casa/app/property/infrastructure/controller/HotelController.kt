@@ -28,7 +28,6 @@ class HotelController(
     private val cityService: CityService,
     private val communeService: CommuneService,
     private val quartierService: QuartierService,
-    private val propertyTypeService: PropertyTypeService,
     private val auth : Auth,
     private val sentry: SentryService,
 ) {
@@ -37,6 +36,7 @@ class HotelController(
     suspend fun createHotel(
         httpRequest: HttpServletRequest,
         @Valid @RequestBody request: HotelRequest,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -69,7 +69,7 @@ class HotelController(
 
     @Operation(summary = "List des hotels")
     @GetMapping("/${PropertyHotelScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllHotel(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllHotel(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val data = service.getAllHotel()
@@ -89,7 +89,7 @@ class HotelController(
 
     @Operation(summary = "List des hotels protected")
     @GetMapping("/${PropertyHotelScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllHotelProtect(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllHotelProtect(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val session = auth.user()
@@ -118,7 +118,8 @@ class HotelController(
     @GetMapping("/${PropertyHotelScope.PRIVATE}/owner/{userId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllHotelByUser(
         request: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
+        @PathVariable userId : Long,
+        @PathVariable version: String,
     )= coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -142,7 +143,8 @@ class HotelController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getHotelByID(
         request: HttpServletRequest,
-        @PathVariable("hotelId") hotelId : Long,
+        @PathVariable hotelId : Long,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -166,7 +168,8 @@ class HotelController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getHotelByIDProtected(
         request: HttpServletRequest,
-        @PathVariable("hotelId") hotelId : Long,
+        @PathVariable hotelId : Long,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {

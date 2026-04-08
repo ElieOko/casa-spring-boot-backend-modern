@@ -18,6 +18,7 @@ import server.web.casa.app.property.infrastructure.persistence.entity.SalleFuner
 import server.web.casa.app.property.infrastructure.persistence.entity.toAddressDTO
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
 import server.web.casa.app.property.infrastructure.persistence.entity.toGeo
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.*
 import server.web.casa.app.user.application.service.UserService
 import kotlin.collections.get
@@ -72,7 +73,9 @@ class SalleFuneraireService(
     }
 
     suspend fun getAllPropertyByUser(userId : Long) = coroutineScope{findAll(repository.findAllByUser(userId).toList()) }
-
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+    }
     suspend fun create(data : SalleFuneraire,features: List<FeatureRequest>) = coroutineScope {
        val result = repository.save(data.toEntity()).toDomain()
         features.forEach {

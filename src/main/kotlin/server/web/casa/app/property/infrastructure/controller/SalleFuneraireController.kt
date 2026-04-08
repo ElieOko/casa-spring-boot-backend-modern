@@ -19,7 +19,6 @@ import server.web.casa.route.property.PropertyFuneraireScope
 import server.web.casa.utils.*
 import server.web.casa.security.monitoring.SentryService
 import jakarta.servlet.http.HttpServletRequest
-import server.web.casa.route.property.PropertyTerrainScope
 import server.web.casa.security.Auth
 import server.web.casa.security.monitoring.MetricModel
 
@@ -44,7 +43,7 @@ class SalleFuneraireController(
     @PostMapping("/${PropertyFuneraireScope.PRIVATE}",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun createFuneraire(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: SalleFuneraireRequest,
+        @Valid @RequestBody request: SalleFuneraireRequest, @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -81,16 +80,16 @@ class SalleFuneraireController(
 
     @Operation(summary = "List des bureaux")
     @GetMapping("/${PropertyFuneraireScope.PUBLIC}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFuneraire(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllFuneraire(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val data = service.getAll()
-            val userAgent = request.getHeader("User-Agent")
-            val deviceBrand = request.getHeader("X-Device-Brand")
-            val deviceModel = request.getHeader("X-Device-Model")
-            val os = request.getHeader("X-OS")
-            val osVersion = request.getHeader("X-OS-Version")
-            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
+//            val userAgent = request.getHeader("User-Agent")
+//            val deviceBrand = request.getHeader("X-Device-Brand")
+//            val deviceModel = request.getHeader("X-Device-Model")
+//            val os = request.getHeader("X-OS")
+//            val osVersion = request.getHeader("X-OS-Version")
+//            log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
             val response = mapOf("funeraires" to data)
             ResponseEntity.ok().body(response)
         } finally {
@@ -108,7 +107,7 @@ class SalleFuneraireController(
 
     @Operation(summary = "List des bureaux protected")
     @GetMapping("/${PropertyFuneraireScope.PROTECTED}",produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllFuneraireProtect(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllFuneraireProtect(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             val session = auth.user()
@@ -118,9 +117,9 @@ class SalleFuneraireController(
                     val data = service.getAll(true)
                     val userAgent = request.getHeader("User-Agent")
                     val deviceBrand = request.getHeader("X-Device-Brand")
-                    val deviceModel = request.getHeader("X-Device-Model")
+//                    val deviceModel = request.getHeader("X-Device-Model")
                     val os = request.getHeader("X-OS")
-                    val osVersion = request.getHeader("X-OS-Version")
+//                    val osVersion = request.getHeader("X-OS-Version")
                     log.info("Agent :$userAgent\ndevice:$deviceBrand\nos:$os")
                     val response = mapOf("funeraires" to data)
                     ResponseEntity.ok().body(response)
@@ -145,7 +144,7 @@ class SalleFuneraireController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllFuneraireByUser(
         request: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
+        @PathVariable userId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -167,8 +166,8 @@ class SalleFuneraireController(
     @PutMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
     suspend fun updateFile(
         httpRequest: HttpServletRequest,
-        @PathVariable("funeraireId") funeraireId : Long,
-        @Valid @RequestBody request: ImageChange
+        @PathVariable funeraireId : Long,
+        @Valid @RequestBody request: ImageChange, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -195,7 +194,7 @@ class SalleFuneraireController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getFuneraireByID(
         request: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
+        @PathVariable propertyId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -219,7 +218,8 @@ class SalleFuneraireController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getFuneraireByIDProtected(
         request: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
+        @PathVariable propertyId : Long,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -250,8 +250,9 @@ class SalleFuneraireController(
     @DeleteMapping("/${PropertyFuneraireScope.PROTECTED}/image/{funeraireId}")
     suspend fun deleteFile(
         httpRequest: HttpServletRequest,
-        @PathVariable("funeraireId") funeraireId : Long,
-        @Valid @RequestBody request: PropertyImagesRequest
+        @PathVariable funeraireId : Long,
+        @Valid @RequestBody request: PropertyImagesRequest,
+        @PathVariable version: String
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
@@ -278,8 +279,8 @@ class SalleFuneraireController(
     @PutMapping("/${PropertyFuneraireScope.PROTECTED}/owner/{funeraireId}")
     suspend fun updateFuneraire(
         httpRequest: HttpServletRequest,
-        @PathVariable("funeraireId") funeraireId : Long,
-        @Valid @RequestBody request: SalleFuneraireDTO
+        @PathVariable funeraireId : Long,
+        @Valid @RequestBody request: SalleFuneraireDTO, @PathVariable version: String
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -317,13 +318,14 @@ class SalleFuneraireController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun soldOutOrInFuneraire(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState,
+        @PathVariable version: String
     )= coroutineScope{
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté bouqué(soldout) avec succès" else "Proprièté non bouqué(soldin) avec succès")
-            val data = service.findById(propertyId)
+            val data = service.findByNoRestrict(propertyId)
             data.sold = request.status
             service.createOrUpdate(data)
             ResponseEntity.badRequest().body(message)
@@ -345,13 +347,13 @@ class SalleFuneraireController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun toEnableOrDisableFuneraire(
         httpRequest: HttpServletRequest,
-        @PathVariable("propertyId") propertyId : Long,
-        @RequestBody request : StatusState
+        @PathVariable propertyId : Long,
+        @RequestBody request : StatusState, @PathVariable version: String
     )= coroutineScope{
         val startNanos = System.nanoTime()
         try {
             val message = mutableMapOf("message" to if(request.status) "Proprièté activé avec succès" else "Proprièté desactivé avec succès")
-            val data= service.findById(propertyId)
+            val data= service.findByNoRestrict(propertyId)
             data.isAvailable = request.status
             service.createOrUpdate(data)
             ResponseEntity.ok(message)

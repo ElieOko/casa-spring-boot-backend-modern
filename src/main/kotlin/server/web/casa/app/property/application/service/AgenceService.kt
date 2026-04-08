@@ -9,6 +9,7 @@ import server.web.casa.app.property.domain.model.Agence
 import server.web.casa.app.property.domain.model.dto.VacanceAgence
 import server.web.casa.app.property.domain.model.toEntity
 import server.web.casa.app.property.infrastructure.persistence.entity.toDomain
+import server.web.casa.app.property.infrastructure.persistence.mapper.toDomain
 import server.web.casa.app.property.infrastructure.persistence.repository.AgenceRepository
 import server.web.casa.utils.base64ToMultipartFile
 import server.web.casa.utils.gcs.GcsService
@@ -32,7 +33,9 @@ class AgenceService(
         }
         agenceByVacance.toList()
     }
-
+    suspend fun findByNoRestrict(id : Long) = coroutineScope {
+        repository.findByIdNoRestrict(id)?.toDomain()?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette proprièté n'existe.")
+    }
     suspend fun getAllByUser(userId : Long) = coroutineScope{
         val agenceByVacance = mutableListOf<VacanceAgence>()
         val data = repository.getAllByUser(userId)
