@@ -146,7 +146,7 @@ class PaiementController(
                                     amount = "$amountCDF",
                                     devise = DeviseType.CDF.name,
                                     description = "Payment abonnement",
-                                    typePayment = TypePayment.MOBILE_MONEY.name,
+                                    typePayment = TypePayment.CARD.name,
                                     status = StatusPayment.PENDING.name))
                                 task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 15L)
                             }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.google.protobuf.Message
 
 data class ResponseTransaction(
-    @JsonIgnore
+//    @JsonIgnore
     val code : String?,
     val message: String?,
     @JsonIgnore
@@ -12,7 +12,7 @@ data class ResponseTransaction(
 )
 
 data class ResponseTransactionCard(
-    @JsonIgnore
+//    @JsonIgnore
     val code : String?,
     val message: String?,
     @JsonIgnore
