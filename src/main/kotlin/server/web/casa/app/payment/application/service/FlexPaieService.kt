@@ -19,22 +19,25 @@ class FlexPaieService(
     private val clientCard: WebClient = builder.baseUrl("https://cardpayment.flexpay.cd/v1.1/pay").build()
     private val clientCheck: WebClient = builder.baseUrl("https://apicheck.flexpaie.com/api/rest/v1/check").build()
     private val log = LoggerFactory.getLogger(this::class.java)
-    suspend fun paymentMobileMoney(transaction: Transaction): Mono<ResponseTransaction> = coroutineScope{
-        clientMobile
+    suspend fun paymentMobileMoney(transaction: Transaction): ResponseTransaction {
+       return clientMobile
             .post()
             .header(HttpHeaders.AUTHORIZATION, apiKeyFlex)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(transaction)
             .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError) {
-                it.bodyToMono<String>().map {
-                        msg -> RuntimeException("Client error: $msg")
-                }
-            }
-            .onStatus(HttpStatusCode::is5xxServerError) {
-                it.bodyToMono<String>().map { msg -> RuntimeException("Problem Server error: $msg") }
-            }
-            .bodyToMono<ResponseTransaction>()
+            .awaitBody<ResponseTransaction>()
+//            .onStatus(HttpStatusCode::is4xxClientError) {
+//                it.bodyToMono<String>().map {
+//                        msg -> RuntimeException("Client error: $msg")
+//                }
+//            }
+//            .onStatus(HttpStatusCode::is5xxServerError) {
+//                it.bodyToMono<String>().map { msg -> RuntimeException("Problem Server error: $msg") }
+//            }
+////            .bodyToMono<ResponseTransaction>()
+//           .awaitBody()
+
     }
 
     suspend fun checkStateTransaction(orderNumber: String): Mono<FlexCheck> = clientCheck
@@ -52,21 +55,15 @@ class FlexPaieService(
         .bodyToMono<FlexCheck>()
         .map { it }
 
-    suspend fun paymentCard(transaction : TransactionCard) : Mono<ResponseTransactionCard> = coroutineScope {
+    suspend fun paymentCard(transaction : TransactionCard) : ResponseTransactionCard {
         transaction.authorization = apiKeyFlex
-        clientCard
+       return clientCard
             .post()
             .header(HttpHeaders.AUTHORIZATION, apiKeyFlex)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(transaction)
             .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError) {
-                it.bodyToMono<String>().map { msg -> RuntimeException("Client error: $msg") }
-            }
-            .onStatus(HttpStatusCode::is5xxServerError) {
-                it.bodyToMono<String>().map { msg -> RuntimeException("Problem Server error: $msg") }
-            }
-            .bodyToMono<ResponseTransactionCard>()
+            .awaitBody<ResponseTransactionCard>()
     }
 
 }
