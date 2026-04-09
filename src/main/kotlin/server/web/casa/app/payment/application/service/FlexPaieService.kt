@@ -52,7 +52,8 @@ class FlexPaieService(
         .bodyToMono<FlexCheck>()
         .map { it }
 
-    suspend fun paymentCard(transaction : TransactionCard){
+    suspend fun paymentCard(transaction : TransactionCard) : Mono<ResponseTransactionCard> = coroutineScope {
+        transaction.authorization = apiKeyFlex
         clientCard
             .post()
             .header(HttpHeaders.AUTHORIZATION, apiKeyFlex)
@@ -65,7 +66,7 @@ class FlexPaieService(
             .onStatus(HttpStatusCode::is5xxServerError) {
                 it.bodyToMono<String>().map { msg -> RuntimeException("Problem Server error: $msg") }
             }
-            .bodyToMono<ResponseTransaction>()
+            .bodyToMono<ResponseTransactionCard>()
     }
 
 }
