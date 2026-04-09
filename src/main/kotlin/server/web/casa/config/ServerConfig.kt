@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import server.web.casa.exception.*
@@ -28,6 +29,9 @@ class ServerConfig(
     @PostConstruct
     fun init() {
         log.info("✅ ServerConfig is active")
+    }
+    override fun configureAsyncSupport(configurer: AsyncSupportConfigurer) {
+        configurer.setDefaultTimeout(30_000)
     }
     @Bean
     fun filterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
