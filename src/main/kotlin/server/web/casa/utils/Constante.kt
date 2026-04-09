@@ -13,4 +13,6 @@ object MessageResponse{
     const val ACCOUNT_CERTIFIED_CANCEL = "La certification de votre compte a été retirée. Consultez votre boîte de réception pour plus d'informations."
     const val PAYMENT_SUCCESS = "Merci ! Paiement confirmé, Profitez pleinement de votre abonnement sur CasaNayo \uD83C\uDF89"
     const val PAYMENT_CANCEL_TIMEOUT = "Délai de paiement expiré,Votre paiement n’a pas abouti."
+    const val PAYMENT_CANCEL = "Paiement annulé."
+    const val PAYMENT_DECLINE = "Paiement non approuvé."
 }
