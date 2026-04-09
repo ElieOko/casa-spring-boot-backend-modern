@@ -9,13 +9,11 @@ import server.web.casa.app.payment.application.service.*
 import server.web.casa.security.monitoring.*
 import jakarta.servlet.http.*
 import jakarta.validation.*
-import kotlinx.coroutines.reactive.collect
 import org.slf4j.*
-import server.web.casa.app.notification.application.service.NotificationService
-import server.web.casa.app.notification.domain.model.request.TagType
-import server.web.casa.app.notification.infrastructure.persistence.entity.NotificationCasaEntity
-import server.web.casa.app.notification.infrastructure.persistence.entity.toDomain
-import server.web.casa.app.notification.infrastructure.persistence.repository.NotificationCasaRepository
+import server.web.casa.app.notification.application.service.*
+import server.web.casa.app.notification.domain.model.request.*
+import server.web.casa.app.notification.infrastructure.persistence.entity.*
+import server.web.casa.app.notification.infrastructure.persistence.repository.*
 import server.web.casa.app.payment.domain.model.*
 import server.web.casa.app.user.application.service.UserService
 import server.web.casa.app.user.infrastructure.persistence.repository.*
@@ -25,8 +23,8 @@ import server.web.casa.utils.*
 import server.web.casa.utils.MessageResponse.PAYMENT_CANCEL
 import server.web.casa.utils.MessageResponse.PAYMENT_DECLINE
 import server.web.casa.utils.MessageResponse.PAYMENT_SUCCESS
-import server.web.casa.utils.scheduler.ReservationScheduler
-import kotlin.random.Random
+import server.web.casa.utils.scheduler.*
+import kotlin.random.*
 
 const val AMOUNT_SUBSCRIPTION = 2
 @RestController
@@ -50,7 +48,7 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PROTECTED}/subscription",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun mobileMoney(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionRequest,
+        @Valid @RequestBody request: TransactionRequest, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -67,45 +65,40 @@ class PaiementController(
                         amount = "$amountCDF"
                     )
                     val result = service.paymentMobileMoney(transaction)
-                    result.collect {
-                       if (it.code != null) {
-                           when(it.code){
-                               "0" -> {
-                                 payment.create(Paiement(
-                                     userId = userConnect?.first?.userId!!,
-                                     reference = reference,
-                                     amount = "$amountCDF",
-                                     devise = DeviseType.CDF.name,
-                                     description = "Paiement abonnement",
-                                     typePayment = TypePayment.MOBILE_MONEY.name,
-                                     status = StatusPayment.PENDING.name)
-                                 )
-                                   task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 2L)
+                    if (result.code != null) {
+                        when(result.code){
+                            "0" -> {
+                                payment.create(Paiement(
+                                    userId = userConnect?.first?.userId!!,
+                                    reference = reference,
+                                    amount = "$amountCDF",
+                                    devise = DeviseType.CDF.name,
+                                    description = "Paiement abonnement",
+                                    typePayment = TypePayment.MOBILE_MONEY.name,
+                                    status = StatusPayment.PENDING.name))
+                                task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 2L)
                                }
                            }
                        }
-                    }
                     result
                 }
                 2L->{
                     val reference = generateTransactionReference()
                     val transaction = Transaction(phone = request.phone, reference = reference)
                     val result = service.paymentMobileMoney(transaction)
-                    result.collect {
-                        if (it.code != null) {
-                            when(it.code){
-                                "0" -> {
-                                    payment.create(Paiement(
-                                        userId = userConnect?.first?.userId!!,
-                                        reference = reference,
-                                        amount = transaction.amount,
-                                        devise = DeviseType.USD.name,
-                                        description = "Paiement abonnement",
-                                        typePayment = TypePayment.MOBILE_MONEY.name,
-                                        status = StatusPayment.PENDING.name)
-                                    )
-                                    task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 2L)
-                                }
+                    if (result.code != null) {
+                        when(result.code){
+                            "0" -> {
+                                payment.create(Paiement(
+                                    userId = userConnect?.first?.userId!!,
+                                    reference = reference,
+                                    amount = transaction.amount,
+                                    devise = DeviseType.USD.name,
+                                    description = "Paiement abonnement",
+                                    typePayment = TypePayment.MOBILE_MONEY.name,
+                                    status = StatusPayment.PENDING.name)
+                                )
+                                task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 2L)
                             }
                         }
                     }
@@ -131,7 +124,7 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PROTECTED}/card",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPayment(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCardRequest,
+        @Valid @RequestBody request: TransactionCardRequest, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -144,21 +137,18 @@ class PaiementController(
                     val reference = generateTransactionReference()
                     val transaction = TransactionCard(reference = reference, amount = "$amountCDF", currency = "CDF")
                     val result = service.paymentCard(transaction)
-                    result.collect {
-                        if (it.code != null) {
-                            when(it.code){
-                                "0" -> {
-                                    payment.create(Paiement(
-                                        userId = userConnect?.first?.userId!!,
-                                        reference = reference,
-                                        amount = "$amountCDF",
-                                        devise = DeviseType.CDF.name,
-                                        description = "Paiement abonnement",
-                                        typePayment = TypePayment.MOBILE_MONEY.name,
-                                        status = StatusPayment.PENDING.name)
-                                    )
-                                    task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 15L)
-                                }
+                    if (result.code != null){
+                        when(result.code){
+                            "0" -> {
+                                payment.create(Paiement(
+                                    userId = userConnect?.first?.userId!!,
+                                    reference = reference,
+                                    amount = "$amountCDF",
+                                    devise = DeviseType.CDF.name,
+                                    description = "Payment abonnement",
+                                    typePayment = TypePayment.MOBILE_MONEY.name,
+                                    status = StatusPayment.PENDING.name))
+                                task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 15L)
                             }
                         }
                     }
@@ -168,22 +158,18 @@ class PaiementController(
                     val reference = generateTransactionReference()
                     val transaction = TransactionCard(reference = reference, amount = AMOUNT_SUBSCRIPTION.toString())
                     val result = service.paymentCard(transaction)
-                    result.collect {
-                        if (it.code != null) {
-                            when(it.code){
-                                "0" -> {
-                                    payment.create(
-                                        Paiement(
+                    if (result.code != null) {
+                        when(result.code){
+                            "0" -> {
+                                payment.create(Paiement(
                                         userId = userConnect?.first?.userId!!,
                                         reference = reference,
                                         amount = transaction.amount,
                                         devise = DeviseType.USD.name,
                                         description = "Paiement abonnement",
                                         typePayment = TypePayment.CARD.name,
-                                        status = StatusPayment.PENDING.name)
-                                    )
-                                    task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 15L)
-                                }
+                                        status = StatusPayment.PENDING.name))
+                                task.scheduleOneShot(index, taskType = reference, type = "payment", minute = 15L)
                             }
                         }
                     }
@@ -210,6 +196,7 @@ class PaiementController(
     suspend fun mobileMoneyCallback(
         httpRequest: HttpServletRequest,
         @Valid @RequestBody request: TransactionCallBack,
+        @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
@@ -260,7 +247,7 @@ class PaiementController(
         produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getAllPaiementByUser(
         request: HttpServletRequest,
-        @PathVariable("userId") userId : Long,
+        @PathVariable("userId") userId : Long, @PathVariable version: String,
     ) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
@@ -295,7 +282,7 @@ class PaiementController(
     @Operation(summary = "Get Payment All")
     @GetMapping("/{version}/${PaymentScope.PROTECTED}/users",
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllPaiementAll(request: HttpServletRequest) = coroutineScope {
+    suspend fun getAllPaiementAll(request: HttpServletRequest, @PathVariable version: String) = coroutineScope {
         val startNanos = System.nanoTime()
         val userConnect = auth.user()
         val isAdmin = userConnect?.second?.filter { true }
@@ -326,7 +313,7 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallback(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack, ) = coroutineScope {
+        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String, ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             if (!request.code.isNullOrEmpty() && !request.reference.isNullOrEmpty()){
@@ -376,7 +363,7 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/approve",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallbackApprove(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack, ) = coroutineScope {
+        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String, ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             if (!request.code.isNullOrEmpty() && !request.reference.isNullOrEmpty()){
@@ -425,7 +412,7 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/cancel",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallbackCancel(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack,
+        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
@@ -474,7 +461,7 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/decline",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallbackDecline(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack,
+        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
