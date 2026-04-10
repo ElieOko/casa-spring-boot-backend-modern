@@ -222,13 +222,13 @@ class PaiementController(
                         }
                     }
                     else-> {
-                        log.info("***********callback ${request.code}")
-//                        payment.update(request.reference,request.code)
+                        log.info("@@@ annulation paiement mobile callback ${request.code}")
+                        payment.update(request.reference,request.code)
                     }
                 }
             }
-            log.info("callback, ${request.reference}|${request.orderNumber}")
-            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
+            log.info("callback mobile, ${request.reference}|${request.orderNumber}")
+//            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -313,7 +313,8 @@ class PaiementController(
     @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback",consumes = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallback(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String, ) = coroutineScope {
+        @Valid @RequestBody request: TransactionCallBack,
+        @PathVariable version: String, ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
             if (!request.code.isNullOrEmpty() && !request.reference.isNullOrEmpty()){
@@ -321,31 +322,32 @@ class PaiementController(
                     "0" -> {
                         val state = payment.update(request.reference,request.code)
                         val user = userRepository.findById(state.userId)
-                        log.info("***********callback ${request.code} | ${request.reference}")
-//                        if (user != null){
-//                            val note = notification2.save(NotificationCasaEntity(
-//                                id = null,
-//                                userId = user.userId,
-//                                title = "CasaNayo Abonnement",
-//                                message = PAYMENT_SUCCESS,
-//                                tag = TagType.SUBSCRIPTION.toString(),
-//                            ))
-//                            val notify = note.toDomain()
-//                            user.isPremium = true
-//                            userRepository.save(user)
-//                            log.info("**********Abonnement Casa: paiement reussie")
-//                            notify.user = userService.findIdUser(user.userId!!)
-//                            notificationService.sendNotificationToUser(user.userId.toString(),notify)
-//                        }
+                        if (user != null) {
+                            val note = notification2.save(NotificationCasaEntity(
+                                id = null,
+                                userId = user.userId,
+                                title = "CasaNayo Abonnement",
+                                message = PAYMENT_SUCCESS,
+                                tag = TagType.SUBSCRIPTION.toString(),
+                            ))
+                            val notify = note.toDomain()
+                            user.isPremium = true
+                            userRepository.save(user)
+                            log.info("**********Abonnement Casa: paiement reussie par carte")
+                            notify.user = userService.findIdUser(user.userId!!)
+                            notificationService.sendNotificationToUser(user.userId.toString(),notify)
+                        }
+
                     }
                     else-> {
-                        log.info("***********callback ${request.code}")
-//                        payment.update(request.reference,request.code)
+                        log.info("Annulation ${request.code}")
+                        payment.update(request.reference,request.code)
                     }
                 }
             }
-            log.info("callback, ${request.reference}|${request.orderNumber}")
-            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
+            log.info("#####callback card payment ${request.code} | ${request.reference}")
+//            log.info("callback, ${request.reference}|${request.orderNumber}")
+//            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -360,41 +362,13 @@ class PaiementController(
     }
 
     @Operation(summary = "Abonnement CasaNayo Callback Card Payment approve")
-    @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/approve",consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/approve",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallbackApprove(
-        httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String, ) = coroutineScope {
+        httpRequest: HttpServletRequest, @PathVariable version: String, ) = coroutineScope {
         val startNanos = System.nanoTime()
         try {
-            if (!request.code.isNullOrEmpty() && !request.reference.isNullOrEmpty()){
-                when(request.code){
-                    "0" -> {
-                        val state = payment.update(request.reference,request.code)
-                        val user = userRepository.findById(state.userId)
-                        if (user != null){
-                            val note = notification2.save(NotificationCasaEntity(
-                                id = null,
-                                userId = user.userId,
-                                title = "CasaNayo Abonnement",
-                                message = PAYMENT_SUCCESS,
-                                tag = TagType.SUBSCRIPTION.toString(),
-                            ))
-                            val notify = note.toDomain()
-                            user.isPremium = true
-                            userRepository.save(user)
-                            log.info("**********Abonnement Casa: paiement reussie")
-                            notify.user = userService.findIdUser(user.userId!!)
-                            notificationService.sendNotificationToUser(user.userId.toString(),notify)
-                        }
-                    }
-                    else-> {
-                        log.info("***********callback ${request.code}")
-//                        payment.update(request.reference,request.code)
-                    }
-                }
-            }
-            log.info("callback, ${request.reference}|${request.orderNumber}")
-            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
+            log.info("Paiement approuvé")
+            ResponseEntity.status(201).body(mapOf("message" to "paiement approuvé"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -409,41 +383,15 @@ class PaiementController(
     }
 
     @Operation(summary = "Abonnement CasaNayo Callback Card Payment cancel")
-    @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/cancel",consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/cancel",produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallbackCancel(
         httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String,
+         @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
-            if (!request.code.isNullOrEmpty() && !request.reference.isNullOrEmpty()){
-                when(request.code){
-                    "1" -> {
-                        val state = payment.update(request.reference,request.code)
-                        val user = userRepository.findById(state.userId)
-                        if (user != null){
-                            val note = notification2.save(NotificationCasaEntity(
-                                id = null,
-                                userId = user.userId,
-                                title = "CasaNayo Abonnement",
-                                message = PAYMENT_CANCEL,
-                                tag = TagType.SUBSCRIPTION.toString(),
-                            ))
-                            val notify = note.toDomain()
-                            userRepository.save(user)
-                            log.info("**********Abonnement Casa: paiement annulé")
-                            notify.user = userService.findIdUser(user.userId!!)
-                            notificationService.sendNotificationToUser(user.userId.toString(),notify)
-                        }
-                    }
-                    else-> {
-                        log.info("***********callback ${request.code}")
-//                        payment.update(request.reference,request.code)
-                    }
-                }
-            }
-            log.info("callback, ${request.reference}|${request.orderNumber}")
-            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
+            log.info("operation annuler")
+            ResponseEntity.status(201).body(mapOf("message" to "operation annuler"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
@@ -458,42 +406,14 @@ class PaiementController(
     }
 
     @Operation(summary = "Abonnement CasaNayo Callback Card Payment decline")
-    @PostMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/decline",consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{version}/${PaymentScope.PUBLIC}/card/callback/decline", produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun cardPaymentCallbackDecline(
-        httpRequest: HttpServletRequest,
-        @Valid @RequestBody request: TransactionCallBack, @PathVariable version: String,
+        httpRequest: HttpServletRequest, @PathVariable version: String,
     ) = coroutineScope{
         val startNanos = System.nanoTime()
         try {
-            if (!request.code.isNullOrEmpty() && !request.reference.isNullOrEmpty()){
-                when(request.code){
-                    "1" -> {
-                        val state = payment.update(request.reference,request.code)
-                        val user = userRepository.findById(state.userId)
-                        if (user != null){
-                            val note = notification2.save(NotificationCasaEntity(
-                                id = null,
-                                userId = user.userId,
-                                title = "CasaNayo Abonnement",
-                                message = PAYMENT_DECLINE,
-                                tag = TagType.SUBSCRIPTION.toString(),
-                            ))
-                            val notify = note.toDomain()
-                            user.isPremium = true
-                            userRepository.save(user)
-                            log.info("**********Abonnement Casa: paiement non approuvé")
-                            notify.user = userService.findIdUser(user.userId!!)
-                            notificationService.sendNotificationToUser(user.userId.toString(),notify)
-                        }
-                    }
-                    else-> {
-                        log.info("***********callback ${request.code}")
-//                        payment.update(request.reference,request.code)
-                    }
-                }
-            }
-            log.info("callback, ${request.reference}|${request.orderNumber}")
-            ResponseEntity.status(201).body(mapOf("task" to "tache executer avec succes"))
+            log.info("paiement échoué")
+            ResponseEntity.status(201).body(mapOf("message" to "paiement échoué"))
         } finally {
             sentry.callToMetric(
                 MetricModel(
